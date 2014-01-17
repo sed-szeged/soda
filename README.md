@@ -14,7 +14,7 @@ The library is released under LGPL license.
 
 #### Dependencies
 
-* cmake
+* cmake 2.8.0 or higher
 * Boost 1.49 or higher
 * pthread
 * googletest (for unit tests)
