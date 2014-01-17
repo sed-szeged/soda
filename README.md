@@ -28,9 +28,12 @@ cmake ../soda/SoDA
 make
 ```
 
+##### Sample application
+
+You can find a sample prioritization algorithm in the SoDa/cl/SoDATools/sample directory. It demonstrates some of the features available in the SoDA library. The algorithm implements a general test case prioritization based on the coverage matrix. The test cases with higher coverage will be at the beginning of the prioritized list.
 
 ### Authors and Contributors
 
 SoDA is created and maintained by the [Department of Software Engineering](http://www.sed.hu), [University of Szeged](http://www.u-szeged.hu). 
 
-If you would like to contribute to the project, create an issue at our GitHub page or send a pull request. Every contributions are welcome!
+If you would like to contribute to the project, create an issue at our GitHub page or send a pull request. Every contribution is welcome!
