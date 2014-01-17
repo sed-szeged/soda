@@ -10,6 +10,24 @@ Visit our [wiki](https://github.com/sed-szeged/soda/wiki/SoDA-wiki) page to get 
 
 The library is released under LGPL license.
 
+### Getting started
+
+#### Dependencies
+
+* cmake
+* Boost 1.49 or higher
+* pthread
+* googletest (for unit tests)
+ 
+#### Compile
+
+```bash
+mkdir build #Create a build directory next to the cloned repository.
+cd build
+cmake ../soda/SoDA
+make
+```
+
 
 ### Authors and Contributors
 
