@@ -6,7 +6,7 @@ The SoDA library contains the necessary data structures to effeciently store a t
 
 We are planning to release some evaluation tools that will measure the quality of the implemented algorithms. 
 
-Visit our [wiki](https://github.com/sed-szeged/soda/wiki/SoDA-wiki) page to get more information about the project.
+Visit our [wiki](https://github.com/sed-szeged/soda/wiki/SoDA) page to get more information about the project.
 
 The library is released under LGPL license.
 
