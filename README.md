@@ -2,7 +2,7 @@
 
 SoDA is a library and toolchain designed to make dependency analysis, test prioritization or test selection on your test suite.
 
-The SoDA library contains the necessary data structures to effeciently store a coverage matrix for multiple test cases, the results of your test suite execution of multiple revisions and the changes in your program during multiple revisions. These data structures can be used to implement prioritization or other dependence analysis related algorithms. 
+The SoDA library contains the necessary data structures to efficiently store a coverage matrix for multiple test cases, the results of your test suite execution of multiple revisions and the changes in your program during multiple revisions. These data structures can be used to implement prioritization or other dependence analysis related algorithms. 
 
 We are planning to release evaluation tools that will measure the quality of the implemented algorithms. 
 
