@@ -1,0 +1,10 @@
+hex_init,/home/dtengeri/462/build/libiberty/../../gcc_4_6_2/libiberty/hex.c:160
+unlock_std_streams,/home/dtengeri/462/build/libiberty/../../gcc_4_6_2/libiberty/fopen_unlocked.c:101
+unlock_1,/home/dtengeri/462/build/libiberty/../../gcc_4_6_2/libiberty/fopen_unlocked.c:86
+gcc_init_libintl,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/intl.c:51
+diagnostic_initialize,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/diagnostic.c:84
+hook_void_void,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/hooks.c:35
+init_ggc,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/ggc-page.c:1501
+exact_log2,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/hwint.h:225
+ctz_hwi,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/hwint.h:193
+alloc_anon,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/ggc-page.c:658

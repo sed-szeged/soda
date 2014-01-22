@@ -1,0 +1,3 @@
+diagnostic_finish,gcc/diagnostic.c
+sched_init,gcc/haifa-sched.c
+sched_finish,gcc/haifa-sched.c

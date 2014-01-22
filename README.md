@@ -24,13 +24,13 @@ The library is released under LGPLv3 license.
 ```bash
 mkdir build #Create a build directory next to the cloned repository.
 cd build
-cmake ../soda/SoDA  # Pass -Dtest=ON argument if you want to execute the unit tests.
+cmake ../soda/src  # Pass -Dtest=ON argument if you want to execute the unit tests.
 make
 ```
 
 #### Sample application
 
-You can find a sample prioritization algorithm in the SoDa/cl/SoDATools/sample directory. It demonstrates some of the features available in the SoDA library. The algorithm implements a general test case prioritization based on the coverage matrix. The test cases with higher coverage will be at the beginning of the prioritized list.
+You can find a sample prioritization algorithm in the src/cl/SoDATools/sample directory. It demonstrates some of the features available in the SoDA library. The algorithm implements a general test case prioritization based on the coverage matrix. The test cases with higher coverage will be at the beginning of the prioritized list.
 
 ### Authors and Contributors
 
@@ -40,4 +40,4 @@ SoDA is created and maintained by the [Department of Software Engineering](http:
 If you would like to contribute to the project, create an issue at our GitHub page or send a pull request. Every contribution is welcome!
 
 We are using [git flow](http://danielkummer.github.io/git-flow-cheatsheet/) to manage our repository.
-The *origin/develop* is our main development branch. *origin/master* is always in prodection ready state.
+The *origin/develop* is our main development branch. *origin/master* is always in production ready state.

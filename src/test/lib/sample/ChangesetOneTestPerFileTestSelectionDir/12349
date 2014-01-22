@@ -1,0 +1,10 @@
+main,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/main.c:35
+toplev_main,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/toplev.c:1920
+expandargv,/home/dtengeri/462/build/libiberty/../../gcc_4_6_2/libiberty/argv.c:384
+general_init,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/toplev.c:1127
+xmalloc_set_program_name,/home/dtengeri/462/build/libiberty/../../gcc_4_6_2/libiberty/xmalloc.c:107
+allocate_file_hash_entries,/home/dtengeri/462/build/libcpp/../../gcc_4_6_2/libcpp/files.c:1062
+_cpp_init_hashtable,/home/dtengeri/462/build/libcpp/../../gcc_4_6_2/libcpp/identifiers.c:49
+_cpp_init_directives,/home/dtengeri/462/build/libcpp/../../gcc_4_6_2/libcpp/directives.c:2550
+cpp_lookup,/home/dtengeri/462/build/libcpp/../../gcc_4_6_2/libcpp/identifiers.c:93
+ht_lookup,/home/dtengeri/462/build/libcpp/../../gcc_4_6_2/libcpp/symtab.c:96
