@@ -1,0 +1,44 @@
+Test Run By dtengeri on Tue Jul 10 10:35:54 2012
+Native configuration is x86_64-unknown-linux-gnu
+
+		=== gcc tests ===
+
+Schedule of variations:
+    unix
+
+Running target unix
+Running /home/dtengeri/builder10/gcc/gcc/testsuite/gcc.c-torture/compile/compile.exp ...
+PASS: gcc.c-torture/compile/20000105-1.c  -O0  (test for excess errors)
+PASS: gcc.c-torture/compile/20000105-1.c  -O1  (test for excess errors)
+PASS: gcc.c-torture/compile/20010408-1.c  -O2  (test for excess errors)
+PASS: gcc.c-torture/compile/20010408-1.c  -O3 -fomit-frame-pointer  (test for excess errors)
+PASS: gcc.c-torture/compile/20010408-1.c  -O3 -fomit-frame-pointer -funroll-loops  (test for excess errors)
+PASS: gcc.c-torture/compile/20010408-1.c  -O3 -fomit-frame-pointer -funroll-all-loops -finline-functions  (test for excess errors)
+Running /home/dtengeri/builder10/gcc/gcc/testsuite/gcc.dg/autopar/autopar.exp ...
+XFAIL: gcc.dg/autopar/outer-4.c scan-tree-dump-times parloops "parallelizing outer loop" 1
+PASS: gcc.dg/autopar/outer-4.c scan-tree-dump-times optimized "loopfn" 5
+XFAIL: gcc.dg/autopar/outer-5.c scan-tree-dump-times parloops "parallelizing outer loop" 1
+FAIL: gcc.dg/autopar/outer-6.c scan-tree-dump-times parloops "parallelizing inner loop" 0
+PASS: gcc.dg/autopar/outer-6.c scan-tree-dump-times optimized "loopfn" 5
+FAIL: gcc.dg/autopar/parallelization-1.c (test for excess errors)
+XPASS: gcc.dg/autopar/pr39500-1.c (test for excess errors)
+PASS: gcc.dg/autopar/pr39500-1.c scan-tree-dump-times parloops "SUCCESS: may be parallelized" 1
+PASS: gcc.dg/autopar/pr39500-2.c (test for excess errors)
+Running /home/dtengeri/builder10/gcc/gcc/testsuite/gcc.dg/charset/charset.exp ...
+UNSUPPORTED: gcc.dg/cpp/isysroot-1.c
+UNSUPPORTED: gcc.dg/cpp/isysroot-2.c
+PASS: gcc.dg/cpp/lexident.c (test for excess errors)
+PASS: gcc.dg/cpp/lexnum.c (test for excess errors)
+PASS: gcc.dg/cpp/lexstrng.c (test for excess errors)
+PASS: gcc.dg/cpp/lexstrng.c execution test
+Running /home/dtengeri/builder10/gcc/gcc/testsuite/gcc.target/xstormy16/xstormy16.exp ...
+Running /home/dtengeri/builder10/gcc/gcc/testsuite/gcc.test-framework/test-framework.exp ...
+
+		=== gcc Summary ===
+
+# of expected passes		79724
+# of unexpected failures	2
+# of unexpected successes	6
+# of expected failures		238
+# of unsupported tests		1106
+/home/dtengeri/builder10/build/gcc/xgcc  version 4.7.0 20110629 (experimental) (GCC) 

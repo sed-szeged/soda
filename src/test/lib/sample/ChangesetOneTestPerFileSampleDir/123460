@@ -1,0 +1,3 @@
+do_ifdef,libcpp/directives.c
+do_ifndef,libcpp/directives.c
+parse_defined,libcpp/expr.c
