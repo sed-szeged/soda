@@ -36,4 +36,8 @@ You can find a sample prioritization algorithm in the SoDa/cl/SoDATools/sample d
 
 SoDA is created and maintained by the [Department of Software Engineering](http://www.sed.hu), [University of Szeged](http://www.u-szeged.hu). 
 
+#### Contribution
 If you would like to contribute to the project, create an issue at our GitHub page or send a pull request. Every contribution is welcome!
+
+We are using [git flow](http://danielkummer.github.io/git-flow-cheatsheet/) to manage our repository.
+The *origin/develop* is our main development branch. *origin/master* is always in prodection ready state.
