@@ -183,22 +183,6 @@ void CCoverageMatrix::addCodeElementName(const String& codeElementName)
     }
 }
 
-void CCoverageMatrix::addTestcase(const String& testcaseName)
-{
-    if (!m_testcases->containsValue(testcaseName)) {
-        m_data->resize(m_data->getNumOfRows()+1, m_data->getNumOfCols());
-        m_testcases->add(m_data->getNumOfRows()-1, testcaseName);
-    }
-}
-
-void CCoverageMatrix::addCodeElement(const String& codeElementName)
-{
-    if (!m_codeElements->containsValue(codeElementName)) {
-        m_data->resize(m_data->getNumOfRows(), m_data->getNumOfCols()+1);
-        m_codeElements->add(m_data->getNumOfCols()-1, codeElementName);
-    }
-}
-
 void CCoverageMatrix::save(io::CBinaryIO *out) const
 {
     m_testcases->save(out, io::CSoDAio::TCLIST);

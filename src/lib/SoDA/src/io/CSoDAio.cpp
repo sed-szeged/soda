@@ -110,12 +110,12 @@ bool CSoDAio::nextChunkID()
     if(m_file->tellg() == m_lastpos) {
         for(unsigned long long int i = 0; i < m_length; ++i) {
             readByte1();
-            m_length--;
             if(eof()) {
                 throw CException("soda::CSoDAio::nextChunkID()", "Unexpected end of file!");
             }
         }
     }
+
     /*
      * WARNING: the results are not defined if the integer value is outside the range
      * of the defined enumeration

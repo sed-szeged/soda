@@ -36,7 +36,7 @@ namespace soda {
 class CResultsMatrix {
 public:
 
-    typedef enum { trtNotExecuted=0, trtFailed=2, trtPassed=3 } TestResultType;
+    enum TestResultType { trtNotExecuted=0, trtFailed=2, trtPassed=3 };
 
     /**
      * @brief Constructor, creates an empty CResultsMatrix object.

@@ -191,6 +191,9 @@ IntVector CChangeset::getRevisions() const
 
 void CChangeset::removeRevision(const RevNumType revNum)
 {
+    if (!exists(revNum))
+        return;
+
     delete m_changes->getRevision(revNum);
     m_changes->getRevision(revNum) = NULL;
     m_changes->removeRevision(revNum);

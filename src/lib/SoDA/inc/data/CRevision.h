@@ -29,7 +29,8 @@
 namespace soda {
 
 /**
- * @brief The CRevision class stores revision number, Type pairs in a map.
+ * @brief The CRevision class is a template class which stores revision number, Type pairs in a map
+ *        where Type is a specified data structure.
  */
 template <class Type>
 class CRevision {

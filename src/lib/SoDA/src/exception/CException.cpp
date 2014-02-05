@@ -30,7 +30,7 @@ CException::CException(const String &location, const String &message) throw() :
 
 const char* CException::what() const throw()
 {
-    String exceptionMessage = "soda::io::IOException@" + location + ": " + message;
+    String exceptionMessage = "soda::IOException@" + location + ": " + message;
     return exceptionMessage.c_str();
 }
 

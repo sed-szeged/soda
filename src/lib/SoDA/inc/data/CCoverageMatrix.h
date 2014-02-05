@@ -199,20 +199,6 @@ public:
 private:
 
     /**
-     * @brief Resizes the coverage matrix and
-     *          adds a specified test case name to the IIDManager if it's not in it.
-     */
-    void addTestcase(const String&);
-
-    /**
-     * @brief Resizes the coverage matrix and
-     *          adds a specified code element name to the IIDManager if it's not in it.
-     */
-    void addCodeElement(const String&);
-
-private:
-
-    /**
      * @brief IIDManager for test cases names.
      */
     IIDManager* m_testcases;

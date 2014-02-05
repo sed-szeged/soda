@@ -50,8 +50,7 @@ public:
     }
     IBitListIterator& operator++(int)
     {
-        //TODO: make it postfix!!
-        ++p;
+        p++;
         return *this;
     }
     bool operator==(IBitListIterator& rhs)
