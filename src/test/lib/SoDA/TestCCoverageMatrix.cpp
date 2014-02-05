@@ -23,6 +23,8 @@
 #include "gtest/gtest.h"
 #include "io/CSoDAio.h"
 #include "data/CCoverageMatrix.h"
+#include "data/CIDManager.h"
+#include "data/CBitMatrix.h"
 #include "exception/CException.h"
 
 using namespace soda;
@@ -41,13 +43,32 @@ protected:
     }
 };
 
+TEST(CCoverageMatrix, Constructor)
+{
+    CIDManager *testcases = new CIDManager();
+    CIDManager *codeElements = new CIDManager();
+    IBitMatrix *bitMatrix = new CBitMatrix();
+    CCoverageMatrix *coverage = new CCoverageMatrix(testcases, codeElements, bitMatrix);
+    coverage->addTestcaseName("testcase1");
+    coverage->addCodeElementName("codeElement1");
+    coverage->refitMatrixSize();
+    EXPECT_TRUE(testcases->size() == coverage->getTestcases().size());
+    EXPECT_TRUE(codeElements->size() == coverage->getCodeElements().size());
+    EXPECT_TRUE((*bitMatrix) == coverage->getBitMatrix());
+    delete coverage;
+    delete testcases;
+    delete codeElements;
+    delete bitMatrix;
+}
+
 TEST_F(CCoverageMatrixTest, SaveAndLoad)
 {
     CCoverageMatrix* coverageMatrixLoaded = new CCoverageMatrix();
     EXPECT_NO_THROW(coverageMatrix->load("sample/CoverageMatrixSampleBit"));
     EXPECT_NO_THROW(coverageMatrix->save("sample/coverageMatrix.saved"));
-    EXPECT_NO_THROW(coverageMatrixLoaded->load("sample/coverageMatrix.saved"));
+    EXPECT_NO_THROW(coverageMatrixLoaded->load(String("sample/coverageMatrix.saved")));
     EXPECT_EQ(coverageMatrix->getBitMatrix(), coverageMatrixLoaded->getBitMatrix());
+    EXPECT_NO_THROW(coverageMatrix->save(String("sample/coverageMatrix.saved")));
     delete coverageMatrixLoaded;
 }
 
@@ -68,6 +89,18 @@ TEST_F(CCoverageMatrixTest, GetCodeElements)
     coverageMatrix->setRelation("testName1", "codeElement2", true);
     EXPECT_EQ(2u, coverageMatrix->getCodeElements("testName1").size());
     EXPECT_EQ(0u, coverageMatrix->getCodeElements("unknown test").size());
+}
+
+TEST_F(CCoverageMatrixTest, GetTestcases)
+{
+    coverageMatrix->addTestcaseName("testName1");
+    coverageMatrix->addTestcaseName("testName2");
+    coverageMatrix->addCodeElementName("codeElement1");
+    coverageMatrix->refitMatrixSize();
+    coverageMatrix->setRelation("testName1", "codeElement1", true);
+    coverageMatrix->setRelation(coverageMatrix->getTestcases().getID("testName2"), coverageMatrix->getCodeElements().getID("codeElement1"), true);
+    EXPECT_EQ(2u, coverageMatrix->getTestcases("codeElement1").size());
+    EXPECT_EQ(0u, coverageMatrix->getTestcases("unknown code element").size());
 }
 
 TEST_F(CCoverageMatrixTest, GetRelation)

@@ -44,8 +44,8 @@ TEST(CIDManager, Constructor)
 {
     EXPECT_NO_THROW(
         CIDManager c;
-        StringVector v(4, "something");
 
+        StringVector v(4, "something");
         CIDManager c1(v);
         EXPECT_EQ(4u, c1.size());
 
@@ -56,6 +56,14 @@ TEST(CIDManager, Constructor)
         EXPECT_EQ(2u, c2.size());
         EXPECT_EQ("Zero", c2[0]);
         EXPECT_EQ("One",  c2[1]);
+
+        IdxStrMap idxmap;
+        idxmap.insert(std::pair<String, IndexType>("Zero", 0));
+        idxmap.insert(std::pair<String, IndexType>("One", 1));
+        CIDManager c3(idxmap);
+        EXPECT_EQ(2u, c3.size());
+        EXPECT_EQ("Zero", c3[0]);
+        EXPECT_EQ("One", c3[1]);
     );
 }
 
@@ -164,7 +172,7 @@ TEST_F(CIDManagerTest, SaveAndLoad)
 
 TEST_F(CIDManagerTest, GetIDThrowsException)
 {
-    EXPECT_THROW(idManager->getID("this elment does not exists"), std::out_of_range);
+    EXPECT_THROW(idManager->getID("this element does not exists"), std::out_of_range);
 }
 
 TEST_F(CIDManagerTest, GetIDNotThrowsException)
@@ -185,3 +193,9 @@ TEST_F(CIDManagerTest, ContainsValue)
     EXPECT_FALSE(idManager->containsValue("unknown code element"));
 }
 
+TEST_F(CIDManagerTest, Clear)
+{
+    idManager->clear();
+    EXPECT_EQ(0u, idManager->getIDList().size());
+    EXPECT_EQ(0u, idManager->getValueList().size());
+}

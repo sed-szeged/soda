@@ -26,38 +26,54 @@
 
 using namespace soda;
 
-class CRevisionTest : public testing::Test
+TEST(CRevisionTest, BasicOperations)
 {
-protected:
-    CRevision<String>* stringRevisions;
+    CRevision<String> stringRevisions;
 
-    virtual void SetUp() {
-        stringRevisions = new CRevision<String>();
-    }
-
-    virtual void TearDown() {
-        delete stringRevisions;
-        stringRevisions = 0;
-    }
-};
-
-TEST_F(CRevisionTest, basicOperations)
-{
     IndexType keys[7] = {1u,  5u,  10u, 50u, 100u, 500u, 1000u};
     String    vals[7] = {"I", "V", "X", "L", "C",  "D",  "M"};
-    for(int i=0; i<7; i++) {
-        stringRevisions->addRevision(keys[i], vals[i]);
-        EXPECT_EQ(stringRevisions->getRevision(keys[i]), vals[i]);
-        EXPECT_EQ(stringRevisions->size(), (IndexType)i+1);
+    for (int i = 0; i < 7; i++) {
+        stringRevisions.addRevision(keys[i], vals[i]);
+        EXPECT_EQ(stringRevisions.getRevision(keys[i]), vals[i]);
+        EXPECT_EQ(stringRevisions.size(), (IndexType)i+1);
     }
-    IntVector ids=stringRevisions->getRevisionNumbers();
-    for(int i=0; i<7; i++) {
+
+    IntVector ids = stringRevisions.getRevisionNumbers();
+    for (int i = 0; i < 7; i++) {
         EXPECT_EQ(ids[i], keys[i]);
     }
-    for(int i=0; i<7; i++) {
-        EXPECT_EQ((*stringRevisions)[keys[i]], vals[i]);
-        stringRevisions->removeRevision(keys[i]);
-        EXPECT_THROW(stringRevisions->getRevision(keys[i]), std::out_of_range);
-        EXPECT_EQ(stringRevisions->size(), (IndexType)6-i);
+
+    for (int i = 0; i < 7; i++) {
+        EXPECT_EQ(stringRevisions[keys[i]], vals[i]);
+        stringRevisions.removeRevision(keys[i]);
+        EXPECT_THROW(stringRevisions.getRevision(keys[i]), std::out_of_range);
+        EXPECT_EQ(stringRevisions.size(), (IndexType)6-i);
     }
+}
+
+TEST(CRevision, SaveAndLoad)
+{
+    IndexType keys[7] = {1u,  5u,  10u, 50u, 100u, 500u, 1000u};
+    int vals[7] = {50, 70, 20, 110, 5221, 67000, 213123 };
+
+    CRevision<int>* intRevisions = new CRevision<int>();
+    for (int i = 0; i < 7; ++i)
+        intRevisions->addRevision(keys[i], vals[i]);
+
+    io::CSoDAio *io = new io::CSoDAio("sample/revisionTest.saved", io::CBinaryIO::omWrite);
+    EXPECT_NO_THROW(intRevisions->save(io));
+    delete io;
+
+    CRevision<int>* intRevisions2 = new CRevision<int>();
+    io = new io::CSoDAio("sample/revisionTest.saved", io::CBinaryIO::omRead);
+    EXPECT_TRUE(io->findChunkID(io::CSoDAio::REVISIONS));
+    EXPECT_NO_THROW(intRevisions2->load(io));
+
+    EXPECT_EQ(intRevisions->getRevisionNumbers().size(), intRevisions2->getRevisionNumbers().size());
+    for (int i = 0; i < 7; ++i) {
+        EXPECT_EQ(intRevisions->getRevision(keys[i]), intRevisions2->getRevision(keys[i]));
+    }
+
+    delete intRevisions;
+    delete intRevisions2;
 }

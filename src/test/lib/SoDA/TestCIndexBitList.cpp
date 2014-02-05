@@ -23,6 +23,7 @@
 #include "data/CIndexBitList.h"
 #include "interface/IIterators.h"
 #include "gtest/gtest.h"
+#include "exception/CException.h"
 
 using namespace soda;
 
@@ -49,6 +50,9 @@ TEST(CIndexBitList, SetAndGet)
         EXPECT_NO_THROW(indexBitList.set(i,true));
         EXPECT_TRUE(indexBitList.at(i));
     }
+
+    EXPECT_THROW(indexBitList.set(-1, true), CException);
+    EXPECT_THROW(indexBitList.set(n, true), CException);
 
     EXPECT_NO_THROW(indexBitList.front());
     EXPECT_NO_THROW(indexBitList.back());
@@ -123,11 +127,20 @@ TEST(CIndexBitList, Iterators)
 {
     int n = 100;
     CIndexBitList indexBitList(n);
+    indexBitList.setAll(true);
+
     int i = 0;
-    for(IBitListIterator& it = indexBitList.begin(); it != indexBitList.end(); it++) {
-        EXPECT_NO_THROW(indexBitList.set(i,false));
+    for(IBitListIterator& it = indexBitList.begin(); it != indexBitList.end();) {
         i++;
-        EXPECT_FALSE(*it);
+        EXPECT_TRUE(*it);
+
+        if (i == 1)
+            EXPECT_TRUE(it == indexBitList.begin());
+
+        if ((i % 2) == 0)
+            ++it;
+        else
+            it++;
     }
 
     EXPECT_EQ(n,i);
@@ -147,6 +160,30 @@ TEST(CIndexBitList, Clear)
     EXPECT_ANY_THROW(indexBitList.at(0));
     EXPECT_ANY_THROW(indexBitList.front());
     EXPECT_ANY_THROW(indexBitList.back());
+    EXPECT_THROW(indexBitList.pop_back(), CException);
+    EXPECT_THROW(indexBitList.pop_front(), CException);
+}
+
+TEST(CIndexBitList, Count)
+{
+    int n = 10;
+    CIndexBitList indexBitList(n);
+    for (IndexType i = 0; i < n; ++i) {
+        if ((i % 2) == 0)
+            indexBitList.set(i, false);
+        else
+            indexBitList.set(i, true);
+    }
+
+    EXPECT_EQ(5u, indexBitList.count());
+}
+
+TEST(CIndexBitList, Resize)
+{
+    CIndexBitList indexBitList(10);
+    indexBitList.setAll(true);
+    indexBitList.resize(5);
+    EXPECT_EQ(5u, indexBitList.count());
 }
 
 TEST(CIndexBitList, SaveAndLoad)

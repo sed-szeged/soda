@@ -28,102 +28,120 @@ using namespace soda;
 
 TEST(CBitList, DefaultConstructor)
 {
-    CBitList vectorBitList;
-    EXPECT_EQ(0u, vectorBitList.size());
+    CBitList bitList;
+    EXPECT_EQ(0u, bitList.size());
 }
 
 TEST(CBitList, Constructor)
 {
-    CBitList vectorBitList(1000);
-    EXPECT_EQ(1000u, vectorBitList.size());
-    EXPECT_NO_THROW(vectorBitList.front());
-    EXPECT_NO_THROW(vectorBitList.back());
+    CBitList bitList(1000);
+    EXPECT_EQ(1000u, bitList.size());
+    EXPECT_NO_THROW(bitList.front());
+    EXPECT_NO_THROW(bitList.back());
 }
 
 TEST(CBitList, SetAndGet)
 {
     int n = 10;
-    CBitList vectorBitList(n);
+    CBitList bitList(n);
 
     for (int i = 0; i < n; ++i) {
-        EXPECT_NO_THROW(vectorBitList.set(i,true));
-        EXPECT_TRUE(vectorBitList.at(i));
+        EXPECT_NO_THROW(bitList.set(i,true));
+        EXPECT_TRUE(bitList.at(i));
     }
 
-    EXPECT_NO_THROW(vectorBitList.front());
-    EXPECT_NO_THROW(vectorBitList.back());
-    EXPECT_TRUE(vectorBitList.front());
-    EXPECT_TRUE(vectorBitList.back());
+    EXPECT_ANY_THROW(bitList.set(-1, false));
+    EXPECT_ANY_THROW(bitList.set(n, false));
 
-    EXPECT_ANY_THROW(vectorBitList.at(-1));
-    EXPECT_ANY_THROW(vectorBitList.at(n));
+    EXPECT_NO_THROW(bitList.front());
+    EXPECT_NO_THROW(bitList.back());
+    EXPECT_TRUE(bitList.front());
+    EXPECT_TRUE(bitList.back());
+
+    EXPECT_ANY_THROW(bitList.at(-1));
+    EXPECT_ANY_THROW(bitList.at(n));
 }
 
 TEST(CBitList, AddAndRemove)
 {
     IndexType n = 100;
-    CBitList vectorBitList;
+    CBitList bitList;
     for (IndexType i = 0; i < n; ++i) {
-        EXPECT_NO_THROW(vectorBitList.push_back(true));
-        EXPECT_TRUE(vectorBitList.at(i));
+        EXPECT_NO_THROW(bitList.push_back(true));
+        EXPECT_TRUE(bitList.at(i));
     }
-    EXPECT_EQ(n, vectorBitList.size());
+    EXPECT_EQ(n, bitList.size());
 
-    EXPECT_NO_THROW(vectorBitList.pop_front());
+    EXPECT_NO_THROW(bitList.pop_front());
     n-=1;
-    EXPECT_EQ(n, vectorBitList.size());
+    EXPECT_EQ(n, bitList.size());
 
-    EXPECT_NO_THROW(vectorBitList.pop_back());
+    EXPECT_NO_THROW(bitList.pop_back());
     n-=1;
-    EXPECT_EQ(n, vectorBitList.size());
+    EXPECT_EQ(n, bitList.size());
 
-    EXPECT_NO_THROW(vectorBitList.erase(n/2));
+    EXPECT_NO_THROW(bitList.erase(n/2));
     n-=1;
-    EXPECT_EQ(n, vectorBitList.size());
+    EXPECT_EQ(n, bitList.size());
 
-    EXPECT_ANY_THROW(vectorBitList.erase(-1));
-    EXPECT_ANY_THROW(vectorBitList.erase(n));
+    EXPECT_NO_THROW(bitList.erase(n-1));
+    n-=1;
+    EXPECT_EQ(n, bitList.size());
+
+    EXPECT_ANY_THROW(bitList.erase(-1));
+    EXPECT_ANY_THROW(bitList.erase(n));
+
+    bitList.clear();
+    EXPECT_ANY_THROW(bitList.pop_back());
+    EXPECT_ANY_THROW(bitList.pop_front());
 }
 
 TEST(CBitList, Toggle)
 {
     int n = 10;
-    CBitList vectorBitList(n);
+    CBitList bitList(n);
 
     for (int i = 0; i < n; ++i) {
-        EXPECT_NO_THROW(vectorBitList.set(i,false));
-        EXPECT_NO_THROW(vectorBitList.toggleValue(i));
-        EXPECT_TRUE(vectorBitList.at(i));
-        EXPECT_NO_THROW(vectorBitList.toggleValue(i));
-        EXPECT_FALSE(vectorBitList.at(i));
+        EXPECT_NO_THROW(bitList.set(i,false));
+        EXPECT_NO_THROW(bitList.toggleValue(i));
+        EXPECT_TRUE(bitList.at(i));
+        EXPECT_NO_THROW(bitList.toggleValue(i));
+        EXPECT_FALSE(bitList.at(i));
     }
 
-    EXPECT_ANY_THROW(vectorBitList.toggleValue(-1));
-    EXPECT_ANY_THROW(vectorBitList.toggleValue(n));
+    EXPECT_ANY_THROW(bitList.toggleValue(-1));
+    EXPECT_ANY_THROW(bitList.toggleValue(n));
 }
 
 TEST(CBitList, ArrayIndexOperator)
 {
     int n = 10;
-    CBitList vectorBitList(n);
+    CBitList bitList(n);
 
     for (int i = 0; i < n; ++i) {
-        EXPECT_NO_THROW(vectorBitList.set(i, true));
-        EXPECT_TRUE(vectorBitList[i]);
-        EXPECT_NO_THROW(vectorBitList.set(i, false));
-        EXPECT_FALSE(vectorBitList[i]);
+        EXPECT_NO_THROW(bitList.set(i, true));
+        EXPECT_TRUE(bitList[i]);
+        EXPECT_NO_THROW(bitList.set(i, false));
+        EXPECT_FALSE(bitList[i]);
     }
 }
 
 TEST(CBitList, Iterators)
 {
     int n = 100;
-    CBitList vectorBitList(n);
+    CBitList bitList(n);
     int i = 0;
-    for(IBitListIterator& it = vectorBitList.begin(); it != vectorBitList.end(); it++) {
-        EXPECT_NO_THROW(vectorBitList.set(i,false));
+    for(IBitListIterator& it = bitList.begin(); it != bitList.end();) {
+        EXPECT_NO_THROW(bitList.set(i,false));
         i++;
         EXPECT_FALSE(*it);
+        if (i == 1)
+            EXPECT_TRUE(it == bitList.begin());
+
+        if ((i % 2) == 0)
+            it++;
+        else
+            ++it;
     }
 
     EXPECT_EQ(n,i);
@@ -132,55 +150,59 @@ TEST(CBitList, Iterators)
 TEST(CBitList, Clear)
 {
     int n = 100;
-    CBitList vectorBitList(n);
+    CBitList bitList(n);
 
     for (int i = 0; i < n; ++i) {
-        EXPECT_NO_THROW(vectorBitList.set(i,true));
+        EXPECT_NO_THROW(bitList.set(i,true));
     }
 
-    EXPECT_NO_THROW(vectorBitList.clear());
+    EXPECT_NO_THROW(bitList.clear());
 
-    EXPECT_ANY_THROW(vectorBitList.at(0));
-    EXPECT_ANY_THROW(vectorBitList.front());
-    EXPECT_ANY_THROW(vectorBitList.back());
+    EXPECT_ANY_THROW(bitList.at(0));
+    EXPECT_ANY_THROW(bitList.front());
+    EXPECT_ANY_THROW(bitList.back());
 }
 
 TEST(CBitList, SaveAndLoad)
 {
     int n = 100;
-    CBitList vectorBitList(n);
+    CBitList bitList(n);
 
     for (int i = 0; i < n; ++i) {
-        EXPECT_NO_THROW(vectorBitList.set(i,true));
+        EXPECT_NO_THROW(bitList.set(i,true));
     }
 
-    io::CSoDAio *io = new io::CSoDAio("sample/vectorBitListTest.saved", io::CBinaryIO::omWrite);
-    EXPECT_NO_THROW(vectorBitList.save(io));
+    io::CSoDAio *io = new io::CSoDAio("sample/bitListTest.saved", io::CBinaryIO::omWrite);
+    EXPECT_NO_THROW(bitList.save(io));
     delete io;
 
-    io = new io::CSoDAio("sample/vectorBitListTest.saved", io::CBinaryIO::omRead);
-    CBitList vectorBitList2(n/2);
+    io = new io::CSoDAio("sample/bitListTest.saved", io::CBinaryIO::omRead);
+    CBitList bitList2(n/2);
     EXPECT_TRUE(io->findChunkID(io::CSoDAio::BITLIST));
-    EXPECT_NO_THROW(vectorBitList2.load(io));
+    EXPECT_NO_THROW(bitList2.load(io));
     delete io;
 
     for (int i = 0; i < n; ++i) {
-        EXPECT_TRUE(vectorBitList2.at(i));
+        EXPECT_TRUE(bitList2.at(i));
     }
+
+    EXPECT_TRUE(bitList == bitList2);
+    bitList2.resize(50);
+    EXPECT_FALSE(bitList == bitList2);
 }
 
 TEST(CBitList, Resize_Count)
 {
     IndexType n = 100;
-    CBitList vectorBitList;
+    CBitList bitList;
 
     for(IndexType i = 0; i < n; ++i){
-        EXPECT_NO_THROW(vectorBitList.push_back(true));
-        EXPECT_TRUE(vectorBitList.at(i));
+        EXPECT_NO_THROW(bitList.push_back(true));
+        EXPECT_TRUE(bitList.at(i));
     }
 
-    EXPECT_EQ(100u, vectorBitList.count());
-    EXPECT_NO_THROW(vectorBitList.resize(104));
-    EXPECT_EQ(104u, vectorBitList.size());
-    EXPECT_EQ(100u, vectorBitList.count());
+    EXPECT_EQ(100u, bitList.count());
+    EXPECT_NO_THROW(bitList.resize(104));
+    EXPECT_EQ(104u, bitList.size());
+    EXPECT_EQ(100u, bitList.count());
 }
