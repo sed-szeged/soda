@@ -260,18 +260,16 @@ void CChangeset::load(io::CSoDAio *in)
 
 void CChangeset::save(const char * filename) const
 {
-    io::CSoDAio *out;
-    out = new io::CSoDAio(filename, io::CBinaryIO::omWrite);
+    io::CSoDAio *out = new io::CSoDAio(filename, io::CBinaryIO::omWrite);
     save(out);
-    out->close();
+    delete out;
 }
 
 void CChangeset::load(const char * filename)
 {
-    io::CSoDAio *in;
-    in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
+    io::CSoDAio *in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
     load(in);
-    in->close();
+    delete in;
 }
 
 void CChangeset::save(const String& filename) const

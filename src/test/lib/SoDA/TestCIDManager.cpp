@@ -161,8 +161,8 @@ TEST_F(CIDManagerTest, SaveAndLoad)
     EXPECT_TRUE(io->findChunkID(io::CSoDAio::IDMANAGER));
     EXPECT_NO_THROW(loadedIdManager.load(io));
     delete io;
-    EXPECT_EQ(n, loadedIdManager.size());
 
+    EXPECT_EQ(n, loadedIdManager.size());
     for (unsigned int i = 0; i < n; ++i) {
         sprintf(str, "%d th", i);
         EXPECT_EQ(str, loadedIdManager.getValue(i));

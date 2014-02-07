@@ -44,7 +44,7 @@ TEST(CSoDAio, ChunkOperations)
 
     EXPECT_THROW(io->findChunkID(CSoDAio::EXECUTION), CException);
 
-    io->open("sample/CoverageMatrixSampleBit", CBinaryIO::omRead);
+    EXPECT_NO_THROW(io->open("sample/CoverageMatrixSampleBit", CBinaryIO::omRead));
     EXPECT_EQ(CSoDAio::UNKNOWN_TYPE, io->getChunkID());
     EXPECT_TRUE(io->findChunkID(CSoDAio::TCLIST));
     EXPECT_EQ(CSoDAio::TCLIST, io->getChunkID());

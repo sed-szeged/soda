@@ -199,8 +199,8 @@ TEST(CIndexBitList, SaveAndLoad)
     EXPECT_NO_THROW(indexBitList.save(io));
     delete io;
 
-    io = new io::CSoDAio("sample/indexBitListTest.saved", io::CBinaryIO::omRead);
     CIndexBitList indexBitList2(n/2);
+    io = new io::CSoDAio("sample/indexBitListTest.saved", io::CBinaryIO::omRead);
     EXPECT_TRUE(io->findChunkID(io::CSoDAio::BITLIST));
     EXPECT_NO_THROW(indexBitList2.load(io));
     delete io;

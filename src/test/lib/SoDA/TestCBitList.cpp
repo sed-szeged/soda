@@ -176,8 +176,8 @@ TEST(CBitList, SaveAndLoad)
     EXPECT_NO_THROW(bitList.save(io));
     delete io;
 
-    io = new io::CSoDAio("sample/bitListTest.saved", io::CBinaryIO::omRead);
     CBitList bitList2(n/2);
+    io = new io::CSoDAio("sample/bitListTest.saved", io::CBinaryIO::omRead);
     EXPECT_TRUE(io->findChunkID(io::CSoDAio::BITLIST));
     EXPECT_NO_THROW(bitList2.load(io));
     delete io;
