@@ -27,6 +27,12 @@ CIOException::CIOException(const String &location, const String &message) throw(
     CException(location, message)
 {}
 
+const char* CIOException::what() const throw()
+{
+    String exceptionMessage = "soda::io::CIOException@" + location + ": " + message;
+    return exceptionMessage.c_str();
+}
+
 } /* namespace io */
 
 } /* namespace soda */

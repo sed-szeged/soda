@@ -27,11 +27,11 @@ using namespace soda::io;
 
 TEST(CIOException, ThrowAMessage)
 {
-    CIOException e("CException::ThrowAMessage", "Test message");
-    CIOException *e2 = new CIOException("CException::ThrowAMessage", "Test message");
+    CIOException e("CIOException::ThrowAMessage", "Test message");
+    CIOException *e2 = new CIOException("CIOException::ThrowAMessage", "Test message");
 
-    EXPECT_EQ(String("soda::IOException@CException::ThrowAMessage: Test message"), String(e2->what()));
-    EXPECT_EQ(String("soda::IOException@CException::ThrowAMessage: Test message"), String(e.what()));
+    EXPECT_EQ(String("soda::io::CIOException@CIOException::ThrowAMessage: Test message"), String(e2->what()));
+    EXPECT_EQ(String("soda::io::CIOException@CIOException::ThrowAMessage: Test message"), String(e.what()));
     EXPECT_THROW(throw e, CIOException);
 
     delete e2;

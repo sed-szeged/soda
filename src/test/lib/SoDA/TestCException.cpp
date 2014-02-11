@@ -29,8 +29,8 @@ TEST(CException, ThrowAMessage)
     CException e("CException::ThrowAMessage", "Test message");
     CException *e2 = new CException("CException::ThrowAMessage", "Test message");
 
-    EXPECT_EQ(String("soda::IOException@CException::ThrowAMessage: Test message"), String(e2->what()));
-    EXPECT_EQ(String("soda::IOException@CException::ThrowAMessage: Test message"), String(e.what()));
+    EXPECT_EQ(String("soda::CException@CException::ThrowAMessage: Test message"), String(e2->what()));
+    EXPECT_EQ(String("soda::CException@CException::ThrowAMessage: Test message"), String(e.what()));
     EXPECT_THROW(throw e, CException);
 
     delete e2;

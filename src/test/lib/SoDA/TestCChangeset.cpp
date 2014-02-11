@@ -125,6 +125,14 @@ TEST_F(CChangesetTest, Toggle)
     EXPECT_EQ(revCount, changeset->getRevisions("codeElement1").size());
 }
 
+TEST_F(CChangesetTest, Exists)
+{
+    changeset->addCodeElement(strVector);
+    changeset->addRevision(intVector);
+    EXPECT_TRUE(changeset->exists(1));
+    EXPECT_FALSE(changeset->exists(20));
+}
+
 TEST_F(CChangesetTest, SaveAndLoad)
 {
     changeset->addRevision(intVector);

@@ -28,14 +28,13 @@ CException::CException(const String &location, const String &message) throw() :
     message(message)
 {}
 
-const char* CException::what() const throw()
-{
-    String exceptionMessage = "soda::IOException@" + location + ": " + message;
-    return exceptionMessage.c_str();
-}
-
 CException::~CException() throw()
 {}
 
+const char* CException::what() const throw()
+{
+    String exceptionMessage = "soda::CException@" + location + ": " + message;
+    return exceptionMessage.c_str();
+}
 
 } /* namespace soda */
