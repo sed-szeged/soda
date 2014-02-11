@@ -20,9 +20,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <fstream>
 #include <boost/lexical_cast.hpp>
+
 #include "data/CResultsMatrix.h"
 #include "data/CBitMatrix.h"
 #include "data/CIDManager.h"

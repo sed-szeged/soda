@@ -130,12 +130,13 @@ TEST(CIndexBitList, Iterators)
     indexBitList.setAll(true);
 
     int i = 0;
+    IBitListIterator& begin = indexBitList.begin();
     for(IBitListIterator& it = indexBitList.begin(); it != indexBitList.end();) {
         i++;
         EXPECT_TRUE(*it);
 
         if (i == 1)
-            EXPECT_TRUE(it == indexBitList.begin());
+            EXPECT_TRUE(it == begin);
 
         if ((i % 2) == 0)
             ++it;

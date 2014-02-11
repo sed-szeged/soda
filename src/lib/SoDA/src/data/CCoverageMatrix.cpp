@@ -21,7 +21,6 @@
  */
 
 #include <stdexcept>
-#include <iostream>
 
 #include "data/CCoverageMatrix.h"
 #include "data/CBitMatrix.h"

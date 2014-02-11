@@ -22,11 +22,10 @@
 
 #include <stdexcept>
 #include <boost/lexical_cast.hpp>
+
 #include "io/CBinaryIO.h"
 #include "data/CIDMapper.h"
 #include "exception/CException.h"
-
-#include <iostream>
 
 namespace soda {
 

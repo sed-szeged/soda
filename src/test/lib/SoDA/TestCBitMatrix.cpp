@@ -227,6 +227,7 @@ TEST(CBitMatrix, SaveAndLoad)
             EXPECT_NO_THROW(bitMatrix.set(i,j,true));
         }
     }
+
     io::CSoDAio *io = new io::CSoDAio("sample/bitMatrixTest.saved", io::CBinaryIO::omWrite);
     EXPECT_NO_THROW(bitMatrix.save(io));
     delete io;

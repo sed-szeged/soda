@@ -21,7 +21,6 @@
  */
 
 #include <algorithm>
-#include <iterator>
 
 #include "data/CIndexBitList.h"
 #include "exception/CException.h"

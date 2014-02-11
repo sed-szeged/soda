@@ -22,8 +22,6 @@
 #include "data/CSelectionData.h"
 #include "exception/CException.h"
 
-#include <iostream>
-
 namespace soda {
 
 CSelectionData::CSelectionData() :

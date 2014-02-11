@@ -132,17 +132,11 @@ TEST_F(CChangesetTest, SaveAndLoad)
 
     EXPECT_NO_THROW(changeset->save("sample/changesetTest.saved"));
 
-    delete changeset;
-    changeset = new CChangeset();
     EXPECT_ANY_THROW(changeset->load("sample/idManagerTest.saved"));
     EXPECT_ANY_THROW(changeset->load("sample/ResultsMatrixSampleBit"));
 
     EXPECT_NO_THROW(changeset->load("sample/changesetTest.saved"));
-
     EXPECT_NO_THROW(changeset->save(String("sample/changesetTest.saved")));
-
-    delete changeset;
-    changeset = new CChangeset();
     EXPECT_NO_THROW(changeset->load(String("sample/changesetTest.saved")));
 
     const IIDManager *loadedCodeElements = &(changeset->getCodeElements());

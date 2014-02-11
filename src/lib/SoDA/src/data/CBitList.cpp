@@ -22,7 +22,6 @@
 
 #include "data/CBitList.h"
 #include "exception/CException.h"
-#include <iterator>
 #include "interface/IIterators.h"
 
 namespace soda {

@@ -20,8 +20,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <stdexcept>
+
 #include "io/CBinaryIO.h"
 #include "data/CIDManager.h"
 

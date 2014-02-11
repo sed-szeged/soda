@@ -120,7 +120,7 @@ TEST_F(CRelationMatrixTest, SaveAndLoad)
 
     CRelationMatrix otherRelMatrix;
     EXPECT_NO_THROW(RMatrix->save("sample/relationMatrixTest.saved"));
-    EXPECT_THROW(otherRelMatrix.load("sample/revisionTest.saved"), CException);
+    EXPECT_THROW(otherRelMatrix.load("sample/ioTest.saved"), CException);
     EXPECT_NO_THROW(otherRelMatrix.load("sample/relationMatrixTest.saved"));
     EXPECT_NO_THROW(RMatrix->save(String("sample/relationMatrixTest.saved")));
     EXPECT_NO_THROW(otherRelMatrix.load(String("sample/relationMatrixTest.saved")));

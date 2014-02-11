@@ -47,7 +47,9 @@ TEST_F(CBinaryIOTest, BasicOperations)
     EXPECT_THROW(io->close(), CIOException);
     EXPECT_THROW(io->open(String("sample/notexists"), CBinaryIO::omRead), CIOException);
     EXPECT_NO_THROW(io->open(String("sample/CoverageMatrixSampleBit"), CBinaryIO::omRead));
+    EXPECT_TRUE(io->isOpen());
     EXPECT_FALSE(io->eof());
+    EXPECT_NO_THROW(io->close());
 }
 
 TEST_F(CBinaryIOTest, InvalidReadOperations)
@@ -66,8 +68,6 @@ TEST_F(CBinaryIOTest, InvalidReadOperations)
     EXPECT_THROW(io->readUByte1(), CIOException);
     EXPECT_THROW(io->readUInt4(), CIOException);
     EXPECT_THROW(io->readULongLong8(), CIOException);
-
-    EXPECT_NO_THROW(io->close());
 }
 
 TEST_F(CBinaryIOTest, WriteOperations)
@@ -84,8 +84,6 @@ TEST_F(CBinaryIOTest, WriteOperations)
     EXPECT_NO_THROW(io->writeUByte1(23));
     EXPECT_NO_THROW(io->writeUInt4(87235));
     EXPECT_NO_THROW(io->writeULongLong8(83249832));
-
-    EXPECT_NO_THROW(io->close());
 }
 
 TEST_F(CBinaryIOTest, InvalidWriteOperations)
@@ -104,8 +102,6 @@ TEST_F(CBinaryIOTest, InvalidWriteOperations)
     EXPECT_THROW(io->writeUByte1(23), CIOException);
     EXPECT_THROW(io->writeUInt4(87235), CIOException);
     EXPECT_THROW(io->writeULongLong8(83249832), CIOException);
-
-    EXPECT_NO_THROW(io->close());
 }
 
 TEST_F(CBinaryIOTest, ReadOperations)
@@ -123,6 +119,4 @@ TEST_F(CBinaryIOTest, ReadOperations)
     EXPECT_NO_THROW(EXPECT_EQ(23u, io->readUByte1()));
     EXPECT_NO_THROW(EXPECT_EQ(87235u, io->readUInt4()));
     EXPECT_NO_THROW(EXPECT_EQ(83249832u, io->readULongLong8()));
-
-    EXPECT_NO_THROW(io->close());
 }

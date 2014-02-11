@@ -26,11 +26,11 @@
 
 using namespace soda;
 
-TEST(CRevisionTest, BasicOperations)
+TEST(CRevision, BasicOperations)
 {
     CRevision<String> stringRevisions;
 
-    IndexType keys[7] = {1u,  5u,  10u, 50u, 100u, 500u, 1000u};
+    RevNumType keys[7] = {1u,  5u,  10u, 50u, 100u, 500u, 1000u};
     String    vals[7] = {"I", "V", "X", "L", "C",  "D",  "M"};
     for (int i = 0; i < 7; i++) {
         stringRevisions.addRevision(keys[i], vals[i]);
@@ -53,7 +53,7 @@ TEST(CRevisionTest, BasicOperations)
 
 TEST(CRevision, SaveAndLoad)
 {
-    IndexType keys[7] = {1u,  5u,  10u, 50u, 100u, 500u, 1000u};
+    RevNumType keys[7] = {1u,  5u,  10u, 50u, 100u, 500u, 1000u};
     int vals[7] = {50, 70, 20, 110, 5221, 67000, 213123 };
 
     CRevision<int>* intRevisions = new CRevision<int>();
@@ -68,6 +68,7 @@ TEST(CRevision, SaveAndLoad)
     io = new io::CSoDAio("sample/revisionTest.saved", io::CBinaryIO::omRead);
     EXPECT_TRUE(io->findChunkID(io::CSoDAio::REVISIONS));
     EXPECT_NO_THROW(intRevisions2->load(io));
+    delete io;
 
     EXPECT_EQ(intRevisions->getRevisionNumbers().size(), intRevisions2->getRevisionNumbers().size());
     for (int i = 0; i < 7; ++i) {

@@ -131,12 +131,13 @@ TEST(CBitList, Iterators)
     int n = 100;
     CBitList bitList(n);
     int i = 0;
+    IBitListIterator& begin = bitList.begin();
     for(IBitListIterator& it = bitList.begin(); it != bitList.end();) {
         EXPECT_NO_THROW(bitList.set(i,false));
         i++;
         EXPECT_FALSE(*it);
         if (i == 1)
-            EXPECT_TRUE(it == bitList.begin());
+            EXPECT_TRUE(it == begin);
 
         if ((i % 2) == 0)
             it++;

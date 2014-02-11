@@ -20,9 +20,10 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <fstream>
+
 #include "io/CSoDAio.h"
 #include "exception/CException.h"
-#include <fstream>
 
 namespace soda { namespace io {
 
@@ -71,7 +72,6 @@ CSoDAio::CSoDAio(const String& filename, io::CBinaryIO::eOpenMode openMode) :
 
 CSoDAio::~CSoDAio()
 {
-    close();
 }
 
 void CSoDAio::open(const char* filename, io::CBinaryIO::eOpenMode openMode)
