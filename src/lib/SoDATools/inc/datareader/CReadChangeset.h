@@ -50,7 +50,7 @@ public:
     /**
      * @brief Destroys a CReadChangeset object.
      */
-    ~CReadChangeset();
+    virtual ~CReadChangeset();
 
     /**
      * @brief Reads One Test per File format change set data from the specified path.

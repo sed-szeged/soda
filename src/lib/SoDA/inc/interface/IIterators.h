@@ -30,6 +30,8 @@ namespace soda {
  */
 class IBitListIterator {
 public:
+    virtual ~IBitListIterator() {}
+
     virtual IBitListIterator& operator++() = 0;
     virtual IBitListIterator& operator++(int) = 0;
 
@@ -43,6 +45,8 @@ public:
  */
 class IBitMatrixIterator {
 public:
+    virtual ~IBitMatrixIterator() {}
+
     virtual IBitMatrixIterator& operator++() = 0;
     virtual IBitMatrixIterator& operator++(int) = 0;
 

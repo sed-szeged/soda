@@ -61,7 +61,7 @@ public:
     /**
      * @brief Destroys a CBinaryIO object.
      */
-    ~CBinaryIO();
+    virtual ~CBinaryIO();
 
     /**
      * @brief Open a file, if screen is open it will be closed.

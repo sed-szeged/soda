@@ -51,7 +51,7 @@ public:
     /**
      * @brief Destroys a CReadCoverage object.
      */
-    ~CReadCoverage();
+    virtual ~CReadCoverage();
 
     /**
      * @brief Reads One Test per File format coverage data from the specified path.

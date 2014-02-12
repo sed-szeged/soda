@@ -40,6 +40,11 @@ class IBitList
 public:
 
     /**
+     * @brief Virtual destructor.
+     */
+    virtual ~IBitList() {}
+
+    /**
      * @brief Returns the value of the first element in the vector.
      * @throw Exception if the vector is empty.
      * @return Value stored at the first element in the vector

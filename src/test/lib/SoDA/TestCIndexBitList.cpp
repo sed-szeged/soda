@@ -167,7 +167,7 @@ TEST(CIndexBitList, Clear)
 
 TEST(CIndexBitList, Count)
 {
-    int n = 10;
+    unsigned int n = 10;
     CIndexBitList indexBitList(n);
     for (IndexType i = 0; i < n; ++i) {
         if ((i % 2) == 0)

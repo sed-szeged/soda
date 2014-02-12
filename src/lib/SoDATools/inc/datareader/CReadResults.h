@@ -50,7 +50,7 @@ public:
     /**
      * @brief Destroys a CReadResults object.
      */
-    ~CReadResults();
+    virtual ~CReadResults();
 
     /**
      * @brief Reads One Test per File format results data from the specified path.

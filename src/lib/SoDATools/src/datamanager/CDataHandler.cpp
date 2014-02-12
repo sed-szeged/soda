@@ -27,20 +27,20 @@
 namespace sodatools {
 
 CDataHandler::CDataHandler() :
-    m_pChanges(NULL), m_pCoverage(NULL), m_pCodeElements(NULL),
+    m_bPrintInfo(true), m_bWithPassFail(true), m_bWithNames(false),
+    m_eReadFormat(rfUnknown), m_pChanges(NULL), m_pCoverage(NULL),
     m_pResults(NULL), m_pSelection(NULL), m_pTestcases(NULL),
-    m_bPrintInfo(true), m_bWithNames(false), m_bWithPassFail(true),
-    m_eReadFormat(rfUnknown)
+    m_pCodeElements(NULL)
 {}
 
 CDataHandler::~CDataHandler()
 {
-    if (m_pChanges != NULL) delete m_pChanges;
-    if (m_pCoverage != NULL) delete m_pCoverage;
-    if (m_pCodeElements != NULL) delete m_pCodeElements;
-    if (m_pResults != NULL) delete m_pResults;
-    if (m_pSelection != NULL) delete m_pSelection;
-    if (m_pTestcases != NULL) delete m_pTestcases;
+    delete m_pChanges;
+    delete m_pCoverage;
+    delete m_pCodeElements;
+    delete m_pResults;
+    delete m_pSelection;
+    delete m_pTestcases;
 }
 
 CCoverageDataManager CDataHandler::getCoverageDataMgr()
@@ -60,7 +60,7 @@ CResultsDataManager CDataHandler::getResultsDataMgr()
 
 bool CDataHandler::createSelection()
 {
-    return m_pSelection = new CSelectionData();
+    return (m_pSelection = new CSelectionData());
 }
 
 CChangeset* CDataHandler::getChanges(bool create)

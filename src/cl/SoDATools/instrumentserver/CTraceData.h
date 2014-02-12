@@ -45,7 +45,7 @@ public:
     /**
       * @brief Destroy a CTraceData instance.
       */
-    ~CTraceData();
+    virtual ~CTraceData();
 
     /**
      * @brief Saves the coverage information in binary SoDA format.

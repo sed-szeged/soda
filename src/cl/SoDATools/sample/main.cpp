@@ -67,6 +67,7 @@ int processArgs(int ac, char *av[])
     }
 
     delete matrix;
+    return 0;
 }
 
 int main(int argc, char *argv[])

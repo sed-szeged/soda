@@ -61,7 +61,7 @@ public:
     /**
      * @brief Destroys a CResultsMatrix object.
      */
-    ~CResultsMatrix();
+    virtual ~CResultsMatrix();
 
     /**
      * @brief Returns a reference to the revisions.
@@ -181,7 +181,7 @@ public:
     virtual void refitMatrixSize();
 
     /**
-    /* @brief Adds a new revision to the CRevision list if it's not in it.
+     * @brief Adds a new revision to the CRevision list if it's not in it.
      * WARNING: This method does not allocate new memory for the matrix!
      *                    Use refitMatrixSize()!
      */

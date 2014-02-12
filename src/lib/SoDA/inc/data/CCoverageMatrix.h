@@ -60,7 +60,7 @@ public:
     /**
      * @brief Destroys a CCoverageMatrix object.
      */
-    ~CCoverageMatrix();
+    virtual ~CCoverageMatrix();
 
     /**
      * @brief Returns a reference to the test cases IIDManager.

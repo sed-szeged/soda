@@ -45,7 +45,7 @@ public:
     /**
      * @brief Destroys a CSelectionData object.
      */
-    ~CSelectionData();
+    virtual ~CSelectionData();
 
     /**
      * @brief Loads the content of a changeset data from the specified path.

@@ -39,6 +39,11 @@ class IBitMatrix {
 public:
 
     /**
+     * @brief Virtual destructor.
+     */
+    virtual ~IBitMatrix() {}
+
+    /**
      * @brief Returns the number of rows of the matrix.
      * @return Number of rows of the matrix.
      */

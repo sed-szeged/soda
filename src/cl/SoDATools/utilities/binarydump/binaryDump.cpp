@@ -74,10 +74,11 @@ int processArgs(options_description desc, int ac, char* av[])
                 return 1;
             }
 
-            if (handler->createSelection())
+            if (handler->createSelection()) {
                 INFO(handler->getPrintInfo(), "Working with selection data");
-            else
+            } else {
                 WARN("Can't create selection data");
+            }
         }
 
         /*
@@ -142,7 +143,8 @@ int processArgs(options_description desc, int ac, char* av[])
         ERRO("Exception of unknown type while processsing command line arguments!");
     }
 
-    if (handler != NULL) delete handler;
+    delete handler;
+    return 0;
 }
 
 int main(int argc, char *argv[])
