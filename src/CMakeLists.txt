@@ -16,6 +16,8 @@ find_package(Threads REQUIRED)
 option(test "Build tests" OFF)
 option(coverage "Build with coverage analysis support" OFF)
 
+add_definitions(-Wall)
+
 if(test)
     if(coverage)
         set(CMAKE_BUILD_TYPE, Debug)
