@@ -13,4 +13,4 @@ aux_source_directory(${SoDALib_SOURCE_DIR}/src/interface interface_src)
 aux_source_directory(${SoDALib_SOURCE_DIR}/src/io io_src)
 aux_source_directory(${SoDALib_SOURCE_DIR}/src src)
 
-add_library(SoDA STATIC ${headers} ${data_src} ${exception_src} ${interface_src} ${io_src} ${src})
+add_library(SoDA SHARED ${headers} ${data_src} ${exception_src} ${interface_src} ${io_src} ${src})
