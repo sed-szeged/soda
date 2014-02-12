@@ -1,17 +1,16 @@
 project(SoDATools)
 
 include_directories(${SoDATools_SOURCE_DIR}/../../lib/SoDA/inc
+                    ${SoDATools_SOURCE_DIR}/../../lib/SoDAPlugin/inc
                     ${SoDATools_SOURCE_DIR}/../../lib/SoDATools/inc
+                    ${SoDATools_SOURCE_DIR}/../../inc
                     ${Boost_INCLUDE_DIRS})
-
 # rawDataReader
-aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/rawdatareader rawDataReader_src)
-add_executable(rawDataReader ${headers} ${rawDataReader_src})
-target_link_libraries(rawDataReader SoDATools SoDA ${Boost_LIBRARIES})
+add_subdirectory(utilities/rawdatareader)
 
 # binaryDump
 aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/binarydump binaryDump_src)
-add_executable(binaryDump ${headers} ${binaryDump_src})
+add_executable(binaryDump ${binaryDump_src})
 target_link_libraries(binaryDump SoDATools SoDA ${Boost_LIBRARIES})
 
 # instrumentServer
