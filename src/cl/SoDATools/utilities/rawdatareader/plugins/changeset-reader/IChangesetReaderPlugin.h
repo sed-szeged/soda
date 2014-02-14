@@ -22,7 +22,6 @@
 #ifndef ICHANGESETREADERPLUGIN_H
 #define ICHANGESETREADERPLUGIN_H
 
-#include "data/CRevision.h"
 #include "data/CChangeset.h"
 
 namespace soda {
@@ -38,11 +37,13 @@ public:
      * @return
      */
     virtual std::string getName() = 0;
+
     /**
      * @brief Returns the description of the plugin.
      * @return
      */
     virtual std::string getDescription() = 0;
+
     /**
      * @brief Reads a changeset from the specified path.
      * @param path The path to the changeset.

@@ -20,21 +20,24 @@
  */
 
 #include <iostream>
+#include <fstream>
 
+#include "boost/tokenizer.hpp"
 #include "CRawDataReaderPluginManager.h"
 #include "OneTestPerFileCoverageReaderPlugin.h"
+#include "exception/CException.h"
+
+using namespace std;
+using namespace boost::filesystem;
 
 namespace soda {
 
-OneTestPerFileCoverageReaderPlugin::OneTestPerFileCoverageReaderPlugin()
-{
-
-}
+OneTestPerFileCoverageReaderPlugin::OneTestPerFileCoverageReaderPlugin() :
+    m_coverage(NULL)
+{}
 
 OneTestPerFileCoverageReaderPlugin::~OneTestPerFileCoverageReaderPlugin()
-{
-
-}
+{}
 
 std::string OneTestPerFileCoverageReaderPlugin::getName()
 {
@@ -48,12 +51,153 @@ std::string OneTestPerFileCoverageReaderPlugin::getDescription()
 
 CCoverageMatrix* OneTestPerFileCoverageReaderPlugin::read(const std::string &path)
 {
-    CCoverageMatrix *matrix = new CCoverageMatrix();
-    std::cout << "Reading " << path << std::endl;
-    return matrix;
+    m_coverage = new CCoverageMatrix();
+    readFromDirectoryStructure(path);
+    return m_coverage;
 }
 
-extern "C" void registerPlugin(CRawDataReaderPluginManager &manager) {
+static void cutPassFailInfo(String& str)
+{
+    size_t b = str.find("PASS: ");
+    size_t l = 6;
+    if (b == string::npos) {
+        b = str.find("FAIL: ");
+    }
+    if (b != string::npos) {
+        str.erase(b, l);
+    }
+}
+
+static void cutExtension(String& str)
+{
+    size_t b = str.find_last_of('.');
+    if (b != string::npos) {
+        str.erase(b);
+    }
+}
+
+void OneTestPerFileCoverageReaderPlugin::readFromDirectoryStructure(const char * dirname)
+{
+    path coverage_path(dirname);
+    if (!(exists(coverage_path) && is_directory(coverage_path))) {
+        throw CException("OneTestPerFileCoverageReaderPlugin::readFromDirectoryStructure()", "Specified path does not exists or is not a directory.");
+    }
+
+    size_t cutsize = coverage_path.generic_string().length() + ((*(coverage_path.generic_string().rbegin()) == '/') ? 0 : 1);
+    readFromDirectory1stPass(coverage_path, cutsize);
+    m_coverage->refitMatrixSize();
+    readFromDirectory(coverage_path, cutsize);
+}
+
+void OneTestPerFileCoverageReaderPlugin::readFromDirectoryStructure(const String& dirname)
+{
+    readFromDirectoryStructure(dirname.c_str());
+}
+
+void OneTestPerFileCoverageReaderPlugin::readFromDirectory1stPass(path p, size_t cut)
+{
+    static int info_tcnt = 0; //INFO
+    static int info_tmax = 0;
+    int info_cnt = 0; //INFO
+    int info_max;
+
+    cout << "Directory: " << p << " 1st pass" << endl;
+    cout.flush();
+
+    vector<path> pathVector;
+    copy(directory_iterator(p), directory_iterator(), back_inserter(pathVector));
+    sort(pathVector.begin(), pathVector.end());
+    info_tmax += info_max = pathVector.size();
+
+    for (vector<path>::iterator it = pathVector.begin(); it != pathVector.end(); it++) {
+        if (is_directory(*it)) { // recurse into subdirs
+            if (basename(*it) != "") {
+                readFromDirectory1stPass(*it, cut);
+            } else {
+                info_tmax--;
+                info_max--;
+            }
+        } else {
+            cout << info_cnt++ << "/" << info_max << ' ' << info_tcnt++ << "/" << info_tmax << '\r';
+            cout.flush();
+
+            String tcname = it->generic_string().substr(cut);
+            //cutPassFailInfo(tcname);
+            cutExtension(tcname);
+            m_coverage->addTestcaseName(tcname);
+
+            std::ifstream in(it->c_str());
+            String line;
+            boost::char_separator<char> sep(",");
+            StringVector data;
+            while (getline(in, line)) {
+                boost::tokenizer<boost::char_separator<char> > tokens(line, sep);
+                boost::tokenizer<boost::char_separator<char> >::iterator it;
+                for (it = tokens.begin(); it != tokens.end(); ++it) {
+                    data.push_back(*it);
+                }
+                if (data.size() == 2u) {
+                    m_coverage->addCodeElementName(data[0]);
+                }
+                data.clear();
+            }
+            in.close();
+        }
+    }
+}
+
+void OneTestPerFileCoverageReaderPlugin::readFromDirectory(path p, size_t cut)
+{
+    static int info_tcnt = 0; //INFO
+    static int info_tmax = 0;
+    int info_cnt = 0; //INFO
+    int info_max;
+
+    cout << "Directory: " << p << endl;
+    cout.flush();
+
+    vector<path> pathVector;
+    copy(directory_iterator(p), directory_iterator(), back_inserter(pathVector));
+    sort(pathVector.begin(), pathVector.end());
+    info_tmax+=info_max=pathVector.size();
+
+    for (vector<path>::iterator it = pathVector.begin(); it != pathVector.end(); it++) {
+        if (is_directory(*it)) { // recurse into subdirs
+            if (basename(*it) != "") {
+                readFromDirectory(*it, cut);
+            } else {
+                info_tmax--; info_max--;
+            }
+        } else {
+            cout << info_cnt++ << "/" << info_max << ' ' << info_tcnt++ << "/" << info_tmax << '\r';
+            cout.flush();
+
+            String tcname = it->generic_string().substr(cut);
+            //cutPassFailInfo(tcname);
+            cutExtension(tcname);
+
+            std::ifstream in(it->c_str());
+            String line;
+            boost::char_separator<char> sep(",");
+            StringVector data;
+            while (getline(in, line)) {
+                boost::tokenizer<boost::char_separator<char> > tokens(line, sep);
+                boost::tokenizer<boost::char_separator<char> >::iterator it;
+                for (it = tokens.begin(); it != tokens.end(); ++it) {
+                    data.push_back(*it);
+                }
+                if (data.size() == 2u) {
+                    m_coverage->setRelation(tcname, data[0], true);
+                }
+                data.clear();
+            }
+            in.close();
+        }
+    }
+}
+
+extern "C" void registerPlugin(CRawDataReaderPluginManager &manager)
+{
     manager.addCoverageReaderPlugin(new OneTestPerFileCoverageReaderPlugin());
 }
 

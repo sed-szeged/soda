@@ -54,16 +54,19 @@ public:
      * @param plugin An instance of the plugin.
      */
     void addChangesetReaderPlugin(IChangesetReaderPlugin *plugin);
+
     /**
      * @brief Loads changeset reader plugins.
      */
     void loadChangesetReaderPlugins();
+
     /**
      * @brief Returns a plugin by its name.
      * @param name The name of the plugin.
      * @return The plugin instance.
      */
     IChangesetReaderPlugin* getChangesetReaderPlugin(const std::string &name);
+
     /**
      * @brief Returns the names of the available changeset reader plugins.
      * @return A list of plugin names.
@@ -75,16 +78,19 @@ public:
      * @param plugin An instance of the plugin.
      */
     void addCoverageReaderPlugin(ICoverageReaderPlugin *plugin);
+
     /**
      * @brief Loads coverage reader plugins.
      */
     void loadCoverageReaderPlugins();
+
     /**
      * @brief Returns a plugin by its name.
      * @param name The name of the plugin.
      * @return The plugin instance.
      */
     ICoverageReaderPlugin* getCoverageReaderPlugin(const std::string &name);
+
     /**
      * @brief Returns the names of the available coverage reader plugins.
      * @return A list of plugin names.
@@ -96,16 +102,19 @@ public:
      * @param plugin An instance of the plugin.
      */
     void addResultsReaderPlugin(IResultsReaderPlugin *plugin);
+
     /**
      * @brief Loads results reader plugins.
      */
     void loadResultsReaderPlugins();
+
     /**
      * @brief Returns a plugin by its name.
      * @param name The name of the plugin.
      * @return The plugin instance.
      */
     IResultsReaderPlugin* getResultsReaderPlugin(const std::string &name);
+
     /**
      * @brief Returns the names of the available results reader plugins.
      * @return A list of plugin names.

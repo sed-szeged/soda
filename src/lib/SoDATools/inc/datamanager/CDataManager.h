@@ -59,12 +59,6 @@ public:
     ~CDataManager();
 
     /**
-     * @brief Reads raw data content from a specified directory.
-     * @param filepath  Directory path.
-     */
-    virtual void read(const String& filepath) = 0;
-
-    /**
      * @brief Saves the content of a data type.
      * @param filepath  File path.
      */

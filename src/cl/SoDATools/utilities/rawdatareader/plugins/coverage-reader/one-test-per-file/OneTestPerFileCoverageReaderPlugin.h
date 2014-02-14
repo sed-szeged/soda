@@ -22,6 +22,11 @@
 #ifndef ONETESTPERFILECOVERAGEREADERPLUGIN_H
 #define ONETESTPERFILECOVERAGEREADERPLUGIN_H
 
+#ifndef BOOST_FILESYSTEM_VERSION
+#define BOOST_FILESYSTEM_VERSION 3
+#endif
+
+#include "boost/filesystem.hpp"
 #include "../ICoverageReaderPlugin.h"
 
 namespace soda {
@@ -37,6 +42,44 @@ public:
     std::string getDescription();
 
     CCoverageMatrix* read(const std::string &path);
+
+private:
+    /**
+     * @brief Reads One Test per File format coverage data from the specified path.
+     * @throw Exception at invalid directory path.
+     */
+    void readFromDirectoryStructure(const char *);
+
+    /**
+     * @brief Reads One Test per File format coverage data from the specified path.
+     */
+    void readFromDirectoryStructure(const String&);
+
+    /**
+     * @brief Reads One Test per File format code element names and test case names
+     *        from the specified directory.
+     *        Recursively searches the files in the given path p
+     *        File name format: <Dirname>/<Basename>.<Extension>
+     *        substring beginning at the cut position of <Dirname>/<Basename> is used as the test case name
+     *        File format is: <CodeElementName>,<SourceFilePath>
+     *        <CodeElementName> is used as the codeElement name
+     */
+    void readFromDirectory1stPass(boost::filesystem::path, size_t);
+
+    /**
+     * @brief Reads One Test per File format coverage data from the specified directory.
+     *        Recursively searches the files in the given path p
+     *        File name format: <Dirname>/<Basename>.<Extension>
+     *        substring beginning at the cut position of <Dirname>/<Basename> is used as the test case name
+     *        File format is: <CodeElementName>,<SourceFilePath>
+     *        <CodeElementName> is used as the codeElement name
+     */
+    void readFromDirectory(boost::filesystem::path, size_t);
+
+    /**
+     * @brief Stores coverage data.
+     */
+    CCoverageMatrix *m_coverage;
 };
 
 }

@@ -22,6 +22,11 @@
 #ifndef ONEREVISIONPERFILECHANGESETREADERPLUGIN_H
 #define ONEREVISIONPERFILECHANGESETREADERPLUGIN_H
 
+#ifndef BOOST_FILESYSTEM_VERSION
+#define BOOST_FILESYSTEM_VERSION 3
+#endif
+
+#include "boost/filesystem.hpp"
 #include "../IChangesetReaderPlugin.h"
 
 namespace soda {
@@ -37,6 +42,44 @@ public:
     std::string getDescription();
 
     CChangeset* read(const std::string &path);
+
+private:
+    /**
+     * @brief Reads Revision Test per File format change set data from the specified path.
+     * @param path  Directory path.
+     * @throw Exception at invalid directory path.
+     */
+    void readFromDirectoryStructure(const char * path);
+
+    /**
+     * @brief Reads One Revision per File format change set data from the specified path.
+     * @param path  Directory path.
+     */
+    void readFromDirectoryStructure(const String& path);
+
+    /**
+     * @brief Reads One Revision per File format code element names from the specified directory.
+     *        Recursively searches the files in the given path p
+     *        File format is: <CodeElementName>,<SourceFilePath>
+     *        <CodeElementName> is used as the codeElement name
+     */
+    void readFromDirectory1stPass(boost::filesystem::path);
+
+    /**
+     * @brief Reads One Revision per File format change set data from the specified directory.
+     *        Recursively searches the files in the given path p
+     *        File name format: <Dirname>/<Basename>.<Extension>
+     *        <Basename> is used as the revision number, <Dirname> and <Extension> are not used
+     *        File format is: <CodeElementName>,<SourceFilePath>
+     *        <CodeElementName> is used as the codeElement name
+     * @throw Exception at invalid code element name.
+     */
+    void readFromDirectory(boost::filesystem::path);
+
+    /**
+     * @brief Stores change set data.
+     */
+    CChangeset *m_changeset;
 };
 
 } /* namespace soda */

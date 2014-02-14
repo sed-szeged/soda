@@ -19,22 +19,26 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <fstream>
 #include <iostream>
 
+#include "boost/lexical_cast.hpp"
+#include "boost/tokenizer.hpp"
 #include "CRawDataReaderPluginManager.h"
 #include "OneRevisionPerFileChangesetReaderPlugin.h"
+#include "exception/CException.h"
+
+using namespace std;
+using namespace boost::filesystem;
 
 namespace soda {
 
-OneRevisionPerFileChangesetReaderPlugin::OneRevisionPerFileChangesetReaderPlugin()
-{
-
-}
+OneRevisionPerFileChangesetReaderPlugin::OneRevisionPerFileChangesetReaderPlugin() :
+    m_changeset(NULL)
+{}
 
 OneRevisionPerFileChangesetReaderPlugin::~OneRevisionPerFileChangesetReaderPlugin()
-{
-
-}
+{}
 
 std::string OneRevisionPerFileChangesetReaderPlugin::getName()
 {
@@ -48,12 +52,127 @@ std::string OneRevisionPerFileChangesetReaderPlugin::getDescription()
 
 CChangeset* OneRevisionPerFileChangesetReaderPlugin::read(const std::string &path)
 {
-    CChangeset *changeset = new CChangeset();
-    std::cout << "Reading " << path << std::endl;
-    return NULL;
+    m_changeset = new CChangeset();
+    readFromDirectoryStructure(path);
+    return m_changeset;
 }
 
-extern "C" void registerPlugin(CRawDataReaderPluginManager &manager) {
+void OneRevisionPerFileChangesetReaderPlugin::readFromDirectoryStructure(const char * dirname)
+{
+    path changes_path(dirname);
+    if (!(exists(changes_path) && is_directory(changes_path))) {
+        throw CException("OneRevisionPerFileChangesetReaderPlugin::readFromDirectoryStructure()", "Specified path does not exists or is not a directory.");
+    }
+
+    readFromDirectory1stPass(changes_path);
+    m_changeset->refitSize();
+    readFromDirectory(changes_path);
+}
+
+void OneRevisionPerFileChangesetReaderPlugin::readFromDirectoryStructure(const String& dirname)
+{
+    readFromDirectoryStructure(dirname.c_str());
+}
+
+void OneRevisionPerFileChangesetReaderPlugin::readFromDirectory1stPass(path p)
+{
+    static int info_Tcnt = 0;
+    static int info_Tmax = 0;
+    int info_cnt = 0; //INFO
+    int info_max;
+
+    cout << "Directory: " << p << " 1st pass" << endl;
+    cout.flush();
+
+    vector<path> pathVector;
+    copy(directory_iterator(p), directory_iterator(), back_inserter(pathVector));
+    sort(pathVector.begin(), pathVector.end());
+    info_Tmax += info_max = pathVector.size();
+
+    for (vector<path>::iterator it = pathVector.begin(); it != pathVector.end(); it++) {
+        if (is_directory(*it)) { // recurse into subdirs
+            if (basename(*it) != "") {
+                readFromDirectory1stPass(*it);
+            } else {
+                info_max--;
+                info_Tmax--;
+            }
+        } else {
+            cout << info_cnt++ << "/" << info_max << ' ' << info_Tcnt++ << "/" << info_Tmax << '\r';
+            cout.flush();
+
+            std::ifstream in(it->c_str());
+            String line;
+            boost::char_separator<char> sep(",");
+            StringVector data;
+            while (getline(in, line)) {
+                boost::tokenizer<boost::char_separator<char> > tokens(line, sep);
+                boost::tokenizer<boost::char_separator<char> >::iterator it;
+                for (it = tokens.begin(); it != tokens.end(); ++it) {
+                    data.push_back(*it);
+                }
+
+                if (data.size() == 2u) {
+                    m_changeset->addCodeElementName(data[0]);
+                }
+                data.clear();
+            }
+            in.close();
+        }
+    }
+}
+
+void OneRevisionPerFileChangesetReaderPlugin::readFromDirectory(path p)
+{
+    int info_cnt = 0; //INFO
+    int info_max;
+
+    cout << "Directory: " << p << endl;
+    cout.flush();
+
+    vector<path> pathVector;
+    copy(directory_iterator(p), directory_iterator(), back_inserter(pathVector));
+    sort(pathVector.begin(), pathVector.end());
+    info_max = pathVector.size();
+
+    for (vector<path>::iterator it = pathVector.begin(); it != pathVector.end(); it++) {
+        if (is_directory(*it)) { // recurse into subdirs
+            if (basename(*it) != "")
+                readFromDirectory(*it);
+        } else {
+            cout << info_cnt++ << "/" << info_max << '\r';
+            cout.flush();
+
+            RevNumType revision = boost::lexical_cast<RevNumType>(basename(*it));
+            m_changeset->addRevision(revision);
+
+            std::ifstream in(it->c_str());
+            String line;
+            boost::char_separator<char> sep(",");
+            StringVector data;
+            while (getline(in, line)) {
+                boost::tokenizer<boost::char_separator<char> > tokens(line, sep);
+                boost::tokenizer<boost::char_separator<char> >::iterator it;
+                for (it = tokens.begin(); it != tokens.end(); ++it) {
+                    data.push_back(*it);
+                }
+
+                if (data.size() == 2u) {
+                    if (m_changeset->getCodeElements().containsValue(data[0])) {
+                        m_changeset->setChange(revision, data[0]);
+                    } else {
+                        throw CException("OneRevisionPerFileChangesetReaderPlugin::readFromDirectory", "Invalid codeElement name: `" + data[0] + "'");
+                    }
+                }
+                data.clear();
+            }
+            in.close();
+        }
+    }
+}
+
+extern "C" void registerPlugin(CRawDataReaderPluginManager &manager)
+{
     manager.addChangesetReaderPlugin(new OneRevisionPerFileChangesetReaderPlugin());
 }
 
