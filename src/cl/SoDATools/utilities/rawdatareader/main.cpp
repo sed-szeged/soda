@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
             ("list,l",                    "list the available reading modes")
             ("output,o", value<String>(), "output file")
             ("path,p",   value<String>(), "path to input directory")
-            ("quiet,q",                   "silent mode")
     ;
 
     if(argc < 2) {

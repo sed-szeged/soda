@@ -122,7 +122,7 @@ void OneTestPerFileCoverageReaderPlugin::readFromDirectory1stPass(path p, size_t
             cout.flush();
 
             String tcname = it->generic_string().substr(cut);
-            //cutPassFailInfo(tcname);
+            cutPassFailInfo(tcname);
             cutExtension(tcname);
             m_coverage->addTestcaseName(tcname);
 
@@ -173,7 +173,7 @@ void OneTestPerFileCoverageReaderPlugin::readFromDirectory(path p, size_t cut)
             cout.flush();
 
             String tcname = it->generic_string().substr(cut);
-            //cutPassFailInfo(tcname);
+            cutPassFailInfo(tcname);
             cutExtension(tcname);
 
             std::ifstream in(it->c_str());
