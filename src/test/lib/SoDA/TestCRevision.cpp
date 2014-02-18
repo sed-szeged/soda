@@ -53,28 +53,47 @@ TEST(CRevision, BasicOperations)
 
 TEST(CRevision, SaveAndLoad)
 {
+    CRevision<int> intRevisions;
     RevNumType keys[7] = {1u,  5u,  10u, 50u, 100u, 500u, 1000u};
     int vals[7] = {50, 70, 20, 110, 5221, 67000, 213123 };
 
-    CRevision<int>* intRevisions = new CRevision<int>();
     for (int i = 0; i < 7; ++i)
-        intRevisions->addRevision(keys[i], vals[i]);
+        intRevisions.addRevision(keys[i], vals[i]);
 
     io::CSoDAio *io = new io::CSoDAio("sample/revisionTest.saved", io::CBinaryIO::omWrite);
-    EXPECT_NO_THROW(intRevisions->save(io));
+    EXPECT_NO_THROW(intRevisions.save(io));
     delete io;
 
-    CRevision<int>* intRevisions2 = new CRevision<int>();
     io = new io::CSoDAio("sample/revisionTest.saved", io::CBinaryIO::omRead);
     EXPECT_TRUE(io->findChunkID(io::CSoDAio::REVISIONS));
-    EXPECT_NO_THROW(intRevisions2->load(io));
+    EXPECT_NO_THROW(intRevisions.load(io));
     delete io;
 
-    EXPECT_EQ(intRevisions->getRevisionNumbers().size(), intRevisions2->getRevisionNumbers().size());
+    EXPECT_EQ(intRevisions.getRevisionNumbers().size(), 7u);
     for (int i = 0; i < 7; ++i) {
-        EXPECT_EQ(intRevisions->getRevision(keys[i]), intRevisions2->getRevision(keys[i]));
+        EXPECT_EQ(intRevisions.getRevision(keys[i]), vals[i]);
     }
-
-    delete intRevisions;
-    delete intRevisions2;
 }
+
+TEST(CRevision, StringTemplateSpecialization)
+{
+    CRevision<String> stringRevisions;
+    RevNumType keys[7] = {1u,  5u,  10u, 50u, 100u, 500u, 1000u};
+    String    vals[7] = {"test1", "longstringcodelement2codelement2", "string3", "codeElement4", "revision100",  "D2", "M"};
+    for (int i = 0; i < 7; i++)
+        stringRevisions.addRevision(keys[i], vals[i]);
+
+    io::CSoDAio *io = new io::CSoDAio("sample/revisionTest.saved", io::CBinaryIO::omWrite);
+    EXPECT_NO_THROW(stringRevisions.save(io));
+
+    EXPECT_NO_THROW(io->open("sample/revisionTest.saved", io::CBinaryIO::omRead));
+    EXPECT_TRUE(io->findChunkID(io::CSoDAio::REVISIONS));
+    EXPECT_NO_THROW(stringRevisions.load(io));
+    delete io;
+
+    EXPECT_EQ(stringRevisions.getRevisionNumbers().size(), 7u);
+
+    for (int i = 0; i < 7; ++i) {
+        EXPECT_EQ(stringRevisions.getRevision(keys[i]), vals[i]);
+    }
+ }
