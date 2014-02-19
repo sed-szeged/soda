@@ -20,7 +20,6 @@
  */
 
 #include "exception/CException.h"
-#include "datareader/CReadChangeset.h"
 #include "datamanager/CChangesDataManager.h"
 #include "datamanager/CDataHandler.h"
 #include <fstream>
@@ -36,18 +35,6 @@ CChangesDataManager::CChangesDataManager(CDataHandler *handler) :
 
 CChangesDataManager::~CChangesDataManager()
 {}
-
-void CChangesDataManager::read(const String &filepath)
-{
-    INFO(getPrintInfo(), "CChangesDataManager::read(\"" << filepath << "\")");
-
-    switch(getReadFormat()) {
-        case rfOneTestPerFile:
-            CReadChangeset(getDataHandler()->getChanges(true), (getDataHandler()->getCoverage() == NULL) && (getDataHandler()->getResults() == NULL), getPrintInfo()).readOneTestPerFileChangesetFromDirectoryStructure(filepath);
-            break;
-        default: throw new CException("CChangesDataManager::read", "Input format not specified");
-    }
-}
 
 void CChangesDataManager::load(const String &filepath)
 {

@@ -50,13 +50,6 @@ public:
     ~CResultsDataManager();
 
     /**
-     * @brief Reads the content of a results data from the specified directory.
-     * @param filepath  Directory path.
-     * @throw Exception at invalid input format.
-     */
-    void read(const String &filepath);
-
-    /**
      * @brief Writes the content of a results data to a specified file.
      * @param filepath  File path.
      */

@@ -20,7 +20,6 @@
  */
 
 #include "exception/CException.h"
-#include "datareader/CReadCoverage.h"
 #include "datamanager/CCoverageDataManager.h"
 #include "datamanager/CDataHandler.h"
 #include <fstream>
@@ -36,18 +35,6 @@ CCoverageDataManager::CCoverageDataManager(CDataHandler *handler) :
 
 CCoverageDataManager::~CCoverageDataManager()
 {}
-
-void CCoverageDataManager::read(const String &filepath)
-{
-    INFO(getPrintInfo(), "CCoverageDataManager::read(\"" << filepath << "\")");
-
-    switch(getReadFormat()) {
-        case rfOneTestPerFile:
-            CReadCoverage(*getDataHandler()->getCoverage(true), getWithPassFail(), true, true, getPrintInfo()).readOneTestPerFileCoverageFromDirectoryStructure(filepath);
-            break;
-        default: throw new CException("CCoverageDataManager::read", "Input format not specified");
-    }
-}
 
 void CCoverageDataManager::load(const String &filepath)
 {

@@ -20,7 +20,6 @@
  */
 
 #include "exception/CException.h"
-#include "datareader/CReadResults.h"
 #include "datamanager/CResultsDataManager.h"
 #include "datamanager/CDataHandler.h"
 #include <fstream>
@@ -36,18 +35,6 @@ CResultsDataManager::CResultsDataManager(CDataHandler *handler) :
 
 CResultsDataManager::~CResultsDataManager()
 {}
-
-void CResultsDataManager::read(const String &filepath)
-{
-    INFO(getPrintInfo(), "CResultsDataManager::read(\"" << filepath << "\")");
-
-    switch(getReadFormat()) {
-        case rfOneTestPerFile:
-            CReadResults(getDataHandler()->getResults(true), true, (getDataHandler()->getCoverage() == NULL), getPrintInfo()).readOneTestPerFileResultsFromDirectoryStructure(filepath);
-            break;
-        default: throw new CException("CResultsDataManager::read", "Input format not specified");
-    }
-}
 
 void CResultsDataManager::load(const String &filepath)
 {

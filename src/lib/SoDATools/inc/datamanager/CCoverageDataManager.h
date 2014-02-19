@@ -50,13 +50,6 @@ public:
     ~CCoverageDataManager();
 
     /**
-     * @brief Reads the content of a coverage data from the specified directory.
-     * @param filepath  Directory path.
-     * @throw Exception at invalid input format.
-     */
-    void read(const String &filepath);
-
-    /**
      * @brief Writes the content of a coverage data to a specified file.
      * @param filepath  File path.
      */
