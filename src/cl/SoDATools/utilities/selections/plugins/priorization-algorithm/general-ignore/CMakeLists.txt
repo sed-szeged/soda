@@ -1,0 +1,7 @@
+project(GeneralIgnorePriorizationAlgorithmPlugin)
+
+file(GLOB_RECURSE headers ./*.h)
+aux_source_directory(${GeneralIgnorePriorizationAlgorithmPlugin_SOURCE_DIR} general_ignore_priorization_algorithm_src)
+
+add_library(general_ignore_priorization_algorithm SHARED ${priorization_algorithm_plugin_header} ${headers} ${general_ignore_priorization_algorithm_src})
+target_link_libraries(general_ignore_priorization_algorithm SoDA)
