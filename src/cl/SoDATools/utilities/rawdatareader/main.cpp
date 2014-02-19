@@ -168,5 +168,7 @@ int processArgs(options_description desc, int ac, char* av[])
         return 1;
     } catch(...) {
         std::cerr << "Exception of unknown type while processsing command line arguments!" << std::endl;
+        return 1;
     }
+    return 0;
 }
