@@ -34,7 +34,6 @@ int processArgs(options_description desc, int ac, char* av[]);
 
 int main(int argc, char *argv[])
 {
-
     std::cout << "rawDataReader (SoDA tool)" << std::endl;
     options_description desc("Allowed options");
     desc.add_options()

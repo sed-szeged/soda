@@ -53,14 +53,29 @@ public:
     virtual void loadChangeset(const char*);
 
     /**
+     * @brief Loads the content of a changeset data from the specified path.
+     */
+    virtual void loadChangeset(const String&);
+
+    /**
      * @brief Loads the content of a coverage data from the specified path.
      */
     virtual void loadCoverage(const char*);
 
     /**
+     * @brief Loads the content of a coverage data from the specified path.
+     */
+    virtual void loadCoverage(const String&);
+
+    /**
      * @brief Loads the content of a results data from the specified path.
      */
     virtual void loadResults(const char*);
+
+    /**
+     * @brief Loads the content of a results data from the specified path.
+     */
+    virtual void loadResults(const String&);
 
     /**
      * @brief Returns a changeset object.
