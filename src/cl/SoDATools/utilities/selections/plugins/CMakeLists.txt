@@ -1,1 +1,1 @@
-add_subdirectory(priorization-algorithm)
+add_subdirectory(prioritization)

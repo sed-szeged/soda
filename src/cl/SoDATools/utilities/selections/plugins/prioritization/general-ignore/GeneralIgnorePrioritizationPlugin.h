@@ -22,16 +22,16 @@
 #ifndef GENERALIGNOREPRIORIZATIONALGORITHM_H
 #define GENERALIGNOREPRIORIZATIONALGORITHM_H
 
-#include "../IPriorizationAlgorithmPlugin.h"
-#include "data/CCoverageMatrix.h"
+#include "../IPrioritizationPlugin.h"
+#include "data/CSelectionData.h"
 
 namespace soda {
 
 /**
- * @brief Prioritization algorithm that is based on coverage information.
+ * @brief Prioritization plugin that is based on coverage information.
  *          - testcase covering more functions has higher coverage
  */
-class GeneralIgnorePriorizationAlgorithmPlugin : public IPrioritizationAlgorithmPlugin
+class GeneralIgnorePrioritizationPlugin : public IPrioritizationPlugin
 {
 private:
     typedef struct {
@@ -43,23 +43,27 @@ private:
 public:
     /**
      * @brief Creates a new instance.
-     * @param [in] coverageMatrix The matrix we are working on.
      */
-    GeneralIgnorePriorizationAlgorithmPlugin(CCoverageMatrix* coverageMatrix);
+    GeneralIgnorePrioritizationPlugin();
 
-    ~GeneralIgnorePriorizationAlgorithmPlugin();
+    ~GeneralIgnorePrioritizationPlugin();
 
     /**
      * @brief Returns the name of the plugin.
      * @return
      */
-    virtual String getName() = 0;
+    String getName();
 
     /**
      * @brief Returns the description of the plugin.
      * @return
      */
-    virtual String getDescription() = 0;
+    String getDescription();
+
+    /**
+     * @brief Fills the plugin with data.
+     */
+    void init(CSelectionData *);
 
     /**
      * @brief Gets the first n prioritized testcases.
@@ -69,14 +73,14 @@ public:
     void fillSelection(IntVector& selected, size_t size);
 
     /**
-     * @brief Revision data is not used by this algorithm.
+     * @brief Revision data is not used by this plugin.
      */
-    void reset(RevNumType) { return; }
+    void reset(RevNumType);
 
 private:
-    CCoverageMatrix*       m_coverageMatrix;
-    size_t                 m_nofElementsReady;
-    IntVector*             m_elementsReady;
+    CSelectionData* m_data;
+    size_t m_nofElementsReady;
+    IntVector* m_elementsReady;
     std::vector<qelement>* m_priorityQueue;
 };
 

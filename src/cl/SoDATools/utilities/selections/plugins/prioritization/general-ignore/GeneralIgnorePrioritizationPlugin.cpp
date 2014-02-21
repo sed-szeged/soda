@@ -20,7 +20,8 @@
  */
 
 #include <algorithm>
-#include "GeneralIgnorePriorizationAlgorithmPlugin.h"
+#include "CSelectionsPluginManager.h"
+#include "GeneralIgnorePrioritizationPlugin.h"
 
 /**
  * Prioritization is based on coverage information
@@ -30,28 +31,18 @@
 
 namespace soda {
 
-bool operator<(GeneralIgnorePriorizationAlgorithmPlugin::qelement d1, GeneralIgnorePriorizationAlgorithmPlugin::qelement d2) {
+bool operator<(GeneralIgnorePrioritizationPlugin::qelement d1, GeneralIgnorePrioritizationPlugin::qelement d2) {
     return d1.priorityValue < d2.priorityValue;
 }
 
-GeneralIgnorePriorizationAlgorithmPlugin::GeneralIgnorePriorizationAlgorithmPlugin(CCoverageMatrix *coverageMatrix):
-        m_coverageMatrix(coverageMatrix),
+GeneralIgnorePrioritizationPlugin::GeneralIgnorePrioritizationPlugin():
+        m_data(NULL),
         m_nofElementsReady(0),
         m_elementsReady(new IntVector()),
         m_priorityQueue(new std::vector<qelement>())
-{
-    IndexType nofTestcases = m_coverageMatrix->getNumOfTestcases();
-    const IBitMatrix& coverageBitMatrix = m_coverageMatrix->getBitMatrix();
-    for(IndexType tcid = 0; tcid < nofTestcases; tcid++) {
-        qelement d;
-        d.testcaseId    = tcid;
-        d.priorityValue = coverageBitMatrix[tcid].count();
-        m_priorityQueue->push_back(d);
-    }
-    sort(m_priorityQueue->begin(), m_priorityQueue->end());
-}
+{}
 
-GeneralIgnorePriorizationAlgorithmPlugin::~GeneralIgnorePriorizationAlgorithmPlugin()
+GeneralIgnorePrioritizationPlugin::~GeneralIgnorePrioritizationPlugin()
 {
     delete m_priorityQueue;
     delete m_elementsReady;
@@ -59,17 +50,39 @@ GeneralIgnorePriorizationAlgorithmPlugin::~GeneralIgnorePriorizationAlgorithmPlu
     m_nofElementsReady = 0;
 }
 
-String GeneralIgnorePriorizationAlgorithmPlugin::getName()
+String GeneralIgnorePrioritizationPlugin::getName()
 {
     return "general-ignore";
 }
 
-String GeneralIgnorePriorizationAlgorithmPlugin::getDescription()
+String GeneralIgnorePrioritizationPlugin::getDescription()
 {
     return "";
 }
 
-void GeneralIgnorePriorizationAlgorithmPlugin::fillSelection(IntVector& selected, size_t size)
+void GeneralIgnorePrioritizationPlugin::init(CSelectionData *data)
+{
+    m_data = data;
+
+    IndexType nofTestcases = m_data->getCoverage()->getNumOfTestcases();
+    const IBitMatrix& coverageBitMatrix = m_data->getCoverage()->getBitMatrix();
+    for(IndexType tcid = 0; tcid < nofTestcases; tcid++) {
+        qelement d;
+        d.testcaseId = tcid;
+        d.priorityValue = coverageBitMatrix[tcid].count();
+        m_priorityQueue->push_back(d);
+    }
+
+    sort(m_priorityQueue->begin(), m_priorityQueue->end());
+}
+
+void GeneralIgnorePrioritizationPlugin::reset(RevNumType)
+{
+    // revision information are not taken into account
+    return;
+}
+
+void GeneralIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
 {
     for(;m_nofElementsReady < size && !(m_priorityQueue->empty()); m_nofElementsReady++) {
         m_elementsReady->push_back((m_priorityQueue->back()).testcaseId);
@@ -77,9 +90,14 @@ void GeneralIgnorePriorizationAlgorithmPlugin::fillSelection(IntVector& selected
     }
 
     selected.clear();
-    for(size_t i=0; i<size && i<m_nofElementsReady; i++) {
+    for(size_t i = 0; i < size && i < m_nofElementsReady; i++) {
         selected.push_back((*m_elementsReady)[i]);
     }
+}
+
+extern "C" void registerPlugin(CSelectionsPluginManager &manager)
+{
+    manager.addPrioritizationPlugin(new GeneralIgnorePrioritizationPlugin());
 }
 
 } /* namespace soda */

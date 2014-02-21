@@ -19,7 +19,6 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <iostream>
 #include "CComputeSelectionMetrics.h"
 #include "exception/CException.h"
@@ -35,7 +34,7 @@ CComputeSelectionMetrics::SelectionData::SelectionData():
 CComputeSelectionMetrics::SelectionData::~SelectionData()
 {}
 
-CComputeSelectionMetrics::CComputeSelectionMetrics(CSelectionData* data, IPrioritizationAlgorithmPlugin* prio, IntVector* revlist, IntVector* sizelist, int dbg):
+CComputeSelectionMetrics::CComputeSelectionMetrics(CSelectionData* data, IPrioritizationPlugin* prio, IntVector* revlist, IntVector* sizelist, int dbg):
         m_data(data),
         m_prioAlg(prio),
         m_revisionList(revlist),
@@ -70,7 +69,7 @@ CComputeSelectionMetrics::~CComputeSelectionMetrics()
     }
 }
 
-void CComputeSelectionMetrics::runMeasurementForOneSelectionSize(RevNumType rev, SelectionData* pdata, int siz, SelectionData* sdata)
+void CComputeSelectionMetrics::runMeasurementForOneSelectionSize(RevNumType rev, SelectionData* pdata, int size, SelectionData* sdata)
 {
     int prg = 0;
     if (d_progress_bar > 2) {
@@ -78,7 +77,7 @@ void CComputeSelectionMetrics::runMeasurementForOneSelectionSize(RevNumType rev,
     }
 
     IntVector selectedTestcases;
-    m_prioAlg->fillSelection(selectedTestcases, siz);
+    m_prioAlg->fillSelection(selectedTestcases, size);
 
     pdata->nofSelected = selectedTestcases.size();
     pdata->nofFailed = m_data->getResults()->getExecutionBitList(rev).count() - m_data->getResults()->getPassedBitList(rev).count();
@@ -126,12 +125,12 @@ void CComputeSelectionMetrics::runMeasurementForOneRevision(RevNumType rev, Sele
     SelectionData* pidx = pdata;
     SelectionData* sidx = m_sumTestcaseData;
 
-    for (IntVector::iterator sizit = m_sizeList->begin(); sizit != m_sizeList->end(); ++sizit) {
+    for (IntVector::iterator sizeit = m_sizeList->begin(); sizeit != m_sizeList->end(); ++sizeit) {
         if (d_progress_bar > 1) {
             std::cerr << "|/-\\"[prg++%4];
         }
 
-        runMeasurementForOneSelectionSize(rev, pidx++, *sizit, sidx++);
+        runMeasurementForOneSelectionSize(rev, pidx++, *sizeit, sidx++);
 
         if (d_progress_bar > 1) {
             std::cerr << '\b';
@@ -196,7 +195,7 @@ void CComputeSelectionMetrics::printData()
         avgSelSize /= m_numberOfRevisions;
         inclusiveness /= m_numberOfRevisions;
         precision /= m_numberOfRevisions;
-        f_measure = (precision+inclusiveness > 0.0) ? (2 * (precision * inclusiveness) / (precision + inclusiveness)) : 0.0;
+        f_measure = (precision + inclusiveness > 0.0) ? (2 * (precision * inclusiveness) / (precision + inclusiveness)) : 0.0;
         std::cout
             << m_sizeList->at(sel) << ';'
             << avgSelSize << ';'

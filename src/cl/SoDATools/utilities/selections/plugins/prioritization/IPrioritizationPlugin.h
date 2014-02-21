@@ -22,14 +22,14 @@
 #ifndef IPRIORITIZATIONALGORITHMPLUGIN_H
 #define IPRIORITIZATIONALGORITHMPLUGIN_H
 
-#include "data/SoDALibDefs.h"
+#include "data/CSelectionData.h"
 
 namespace soda {
 
 /**
- * @brief Interface of the priorization algorithm plugins.
+ * @brief Interface of the prioritization plugins.
  */
-class IPrioritizationAlgorithmPlugin
+class IPrioritizationPlugin
 {
 public:
     /**
@@ -45,7 +45,12 @@ public:
     virtual String getDescription() = 0;
 
     /**
-     * @brief Runs the priorization algorithm on a specified revision.
+     * @brief Fills the prioritization plugin with data
+     */
+    virtual void init(CSelectionData *) = 0;
+
+    /**
+     * @brief Runs the prioritization on a specified revision.
      */
     virtual void reset(RevNumType) = 0;
 

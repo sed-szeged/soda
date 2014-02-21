@@ -23,7 +23,7 @@
 #define CCOMPUTESELECTIONMETRICS_H
 
 #include "data/CSelectionData.h"
-#include "plugins/priorization-algorithm/IPriorizationAlgorithmPlugin.h"
+#include "plugins/prioritization/IPrioritizationPlugin.h"
 
 namespace soda {
 
@@ -61,7 +61,7 @@ public:
         IndexType nofHit;
     };
 
-    CComputeSelectionMetrics(CSelectionData*, IPrioritizationAlgorithmPlugin*, IntVector*, IntVector*, int dbg = 0);
+    CComputeSelectionMetrics(CSelectionData*, IPrioritizationPlugin*, IntVector*, IntVector*, int dbg = 0);
 
     ~CComputeSelectionMetrics();
 
@@ -79,7 +79,7 @@ private:
 
     CSelectionData* m_data;
 
-    IPrioritizationAlgorithmPlugin* m_prioAlg;
+    IPrioritizationPlugin* m_prioAlg;
 
     IntVector* m_revisionList;
 
