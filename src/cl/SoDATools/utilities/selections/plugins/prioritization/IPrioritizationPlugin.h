@@ -34,11 +34,6 @@ class IPrioritizationPlugin
 public:
 
     /**
-     * @brief Virtual destructor.
-     */
-    virtual ~IPrioritizationPlugin() = 0;
-
-    /**
      * @brief Returns the name of the plugin.
      * @return
      */

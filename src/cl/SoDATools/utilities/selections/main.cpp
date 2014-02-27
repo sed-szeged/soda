@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
         ("changes-data,x",  value<String>(), "input file containing change matrix")
         ("results-data,r",  value<String>(), "input file containing test execution results")
         ("type,t",          value<String>(), "type of the algorithm. Could be: prioritization")
-        ("mode,m",          value<String>(), "the algorithm mode")
+        ("mode,m",          value<String>(), "coma separated list of the algorithm modes")
         ("list,l",                           "lists the avaiable algorithm modes")
         ("sizes,s",         value<String>(), "coma separated list of integers representing selection set sizes")
         ("print-details",                    "")
@@ -91,6 +91,16 @@ int processArgs(options_description desc, int ac, char* av[])
             return 1;
         }
 
+        String type = vm["type"].as<std::string>();
+        if (type == "prioritization") {
+            pluginManager.loadPrioritizationPlugins();
+        }
+
+        if (vm.count("list")) {
+            printPluginNames(type, pluginManager.getPrioritizationPluginNames());
+            return 0;
+        }
+
         if (vm.count("coverage-data") && vm.count("changes-data") && vm.count("results-data")) {
             (cerr << "[INFO] loading coverage from " << vm["coverage-data"].as<String>() << " ...").flush();
             selectionData.loadCoverage(vm["coverage-data"].as<String>());
@@ -115,44 +125,44 @@ int processArgs(options_description desc, int ac, char* av[])
 
         IntVector revisionlist = selectionData.getResults()->getRevisionNumbers();
 
-        String type = vm["type"].as<std::string>();
-
-        if (type == "prioritization") {
-            IPrioritizationPlugin *plugin = NULL;
-            pluginManager.loadPrioritizationPlugins();
-
-            if (vm.count("list")) {
-                printPluginNames("prioritization", pluginManager.getPrioritizationPluginNames());
-                return 0;
+        StringVector priolist;
+        if(vm.count("mode")) {
+            boost::char_separator<char> sep(",");
+            boost::tokenizer< boost::char_separator<char> > tokens(vm["mode"].as<String>(), sep);
+            BOOST_FOREACH (const string& t, tokens) {
+                priolist.push_back(t);
+                cout << t << endl;
             }
+        }
 
-            if (vm.count("mode")) {
-                String mode = vm["mode"].as<std::string>();
+        while(!priolist.empty()) {
+            string t = priolist.back();
+            priolist.pop_back();
+
+            if (type == "prioritization") {
+                IPrioritizationPlugin *plugin = NULL;
                 try {
-                    plugin = pluginManager.getPrioritizationPlugin(mode);
+                    plugin = pluginManager.getPrioritizationPlugin(t);
                     plugin->init(&selectionData);
                 } catch (std::out_of_range &e) {
                     std::cerr << "[ERROR] Unknown algorithm mode. " << std::endl;
                     printPluginNames("prioritization", pluginManager.getPrioritizationPluginNames());
                     return 1;
                 }
+
+                CComputeSelectionMetrics *selectionStat = new CComputeSelectionMetrics(&selectionData, plugin, &revisionlist, &sizelist, ((vm.count("progress-level")) ? (vm["progress-level"].as<int>()) : 0));
+                (cerr << "[INFO] Measurements on " << revisionlist.size() << " revisions ...").flush();
+                selectionStat->runMeasurement();
+                (cerr << " done." << endl).flush();
+
+                if (vm.count("print-details")) {
+                    selectionStat->printDetailedData();
+                } else {
+                    selectionStat->printData();
+                }
+
+                delete selectionStat;
             }
-
-            CComputeSelectionMetrics *selectionStat = new CComputeSelectionMetrics(&selectionData, plugin, &revisionlist, &sizelist, ((vm.count("progress-level")) ? (vm["progress-level"].as<int>()) : 0));
-
-            (cerr << "[INFO] Measurements on " << revisionlist.size() << " revisions ...").flush();
-
-            selectionStat->runMeasurement();
-
-            (cerr << " done." << endl).flush();
-
-            if (vm.count("print-details")) {
-                selectionStat->printDetailedData();
-            } else {
-                selectionStat->printData();
-            }
-
-            delete selectionStat;
         }
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
