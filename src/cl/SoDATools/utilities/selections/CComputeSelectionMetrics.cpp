@@ -106,7 +106,7 @@ void CComputeSelectionMetrics::runMeasurementForOneSelectionSize(RevNumType rev,
         }
     }
 
-    sdata->add(*pdata);
+    (*sdata) += *pdata;
 
     if (d_progress_bar > 2) {
         std::cerr << " \b" ;

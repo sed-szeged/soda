@@ -51,10 +51,14 @@ public:
          * @brief Adds the values of the specified selection data to the current object.
          * @param rhs SelectionMetrics object.
          */
-        inline void add(const SelectionMetrics& rhs) {
+        inline SelectionMetrics& operator+=(const SelectionMetrics& rhs) {
+            if (this == &rhs)
+                return *this;
+
             nofSelected += rhs.nofSelected;
             nofFailed += rhs.nofFailed;
             nofHit += rhs.nofHit;
+            return *this;
         }
 
         /**
