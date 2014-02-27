@@ -35,23 +35,23 @@ class CComputeSelectionMetrics
 {
 public:
     /**
-     * @brief The SelectionData class stores the results of the measurements
+     * @brief The SelectionMetrics class stores the results of the measurements
      *         made on the specified selection data.
      */
-    class SelectionData
+    class SelectionMetrics
     {
     public:
         /**
          * @brief Creates a new SelectionData object.
          */
-        SelectionData();
-        ~SelectionData();
+        SelectionMetrics();
+        ~SelectionMetrics();
 
         /**
          * @brief Adds the values of the specified selection data to the current object.
-         * @param rhs Selection data.
+         * @param rhs SelectionMetrics object.
          */
-        inline void add(const SelectionData& rhs) {
+        inline void add(const SelectionMetrics& rhs) {
             nofSelected += rhs.nofSelected;
             nofFailed += rhs.nofFailed;
             nofHit += rhs.nofHit;
@@ -112,14 +112,14 @@ public:
      * @param siz Selection size.
      * @param sdata Stores the measured data.
      */
-    void runMeasurementForOneSelectionSize(RevNumType rev, SelectionData* pdata, int size, SelectionData* sdata);
+    void runMeasurementForOneSelectionSize(RevNumType rev, SelectionMetrics* pdata, int size, SelectionMetrics* sdata);
 
     /**
      * @brief Measures the data of a specified revision.
      * @param rev Revision number.
      * @param pdata Stores the measured data.
      */
-    void runMeasurementForOneRevision(RevNumType rev, SelectionData* pdata);
+    void runMeasurementForOneRevision(RevNumType rev, SelectionMetrics* pdata);
 
     /**
      * @brief Measures the given data.
@@ -171,12 +171,12 @@ private:
     /**
      * @brief Stores measured data in an array for every revision grouped by the number of selections.
      */
-    SelectionData* m_perRevisionData;
+    SelectionMetrics* m_perRevisionData;
 
     /**
      * @brief Stores measured data in an array for every selection.
      */
-    SelectionData* m_sumTestcaseData;
+    SelectionMetrics* m_sumTestcaseData;
 
     /**
      * @brief Translation error counter.

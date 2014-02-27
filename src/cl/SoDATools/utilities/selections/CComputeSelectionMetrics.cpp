@@ -25,13 +25,13 @@
 
 namespace soda {
 
-CComputeSelectionMetrics::SelectionData::SelectionData():
+CComputeSelectionMetrics::SelectionMetrics::SelectionMetrics():
         nofSelected(0),
         nofFailed(0),
         nofHit(0)
 {}
 
-CComputeSelectionMetrics::SelectionData::~SelectionData()
+CComputeSelectionMetrics::SelectionMetrics::~SelectionMetrics()
 {}
 
 CComputeSelectionMetrics::CComputeSelectionMetrics(CSelectionData* data, IPrioritizationPlugin* prio, IntVector* revlist, IntVector* sizelist, int dbg):
@@ -46,8 +46,8 @@ CComputeSelectionMetrics::CComputeSelectionMetrics(CSelectionData* data, IPriori
         e_translation(0),
         d_progress_bar(dbg)
 {
-    m_perRevisionData    = new SelectionData[m_numberOfRevisions*m_numberOfSelections];
-    m_sumTestcaseData    = new SelectionData[m_numberOfSelections];
+    m_perRevisionData    = new SelectionMetrics[m_numberOfRevisions*m_numberOfSelections];
+    m_sumTestcaseData    = new SelectionMetrics[m_numberOfSelections];
 }
 
 CComputeSelectionMetrics::~CComputeSelectionMetrics()
@@ -69,7 +69,7 @@ CComputeSelectionMetrics::~CComputeSelectionMetrics()
     }
 }
 
-void CComputeSelectionMetrics::runMeasurementForOneSelectionSize(RevNumType rev, SelectionData* pdata, int size, SelectionData* sdata)
+void CComputeSelectionMetrics::runMeasurementForOneSelectionSize(RevNumType rev, SelectionMetrics* pdata, int size, SelectionMetrics* sdata)
 {
     int prg = 0;
     if (d_progress_bar > 2) {
@@ -113,7 +113,7 @@ void CComputeSelectionMetrics::runMeasurementForOneSelectionSize(RevNumType rev,
     }
 }
 
-void CComputeSelectionMetrics::runMeasurementForOneRevision(RevNumType rev, SelectionData* pdata)
+void CComputeSelectionMetrics::runMeasurementForOneRevision(RevNumType rev, SelectionMetrics* pdata)
 {
     int prg = 0;
     if (d_progress_bar > 1) {
@@ -122,8 +122,8 @@ void CComputeSelectionMetrics::runMeasurementForOneRevision(RevNumType rev, Sele
 
     m_prioAlg->reset(rev);
 
-    SelectionData* pidx = pdata;
-    SelectionData* sidx = m_sumTestcaseData;
+    SelectionMetrics* pidx = pdata;
+    SelectionMetrics* sidx = m_sumTestcaseData;
 
     for (IntVector::iterator sizeit = m_sizeList->begin(); sizeit != m_sizeList->end(); ++sizeit) {
         if (d_progress_bar > 1) {
@@ -145,7 +145,7 @@ void CComputeSelectionMetrics::runMeasurementForOneRevision(RevNumType rev, Sele
 void CComputeSelectionMetrics::runMeasurement()
 {
     int prg = 0;
-    SelectionData* pidx = m_perRevisionData;
+    SelectionMetrics* pidx = m_perRevisionData;
 
     for (IntVector::iterator revit = m_revisionList->begin(); revit != m_revisionList->end(); ++revit) {
         if (d_progress_bar > 0) {
@@ -184,7 +184,7 @@ void CComputeSelectionMetrics::printData()
         double inclusiveness = 0.0;
         double precision = 0.0;
         double f_measure = 0.0;
-        SelectionData* ptr = m_perRevisionData + sel;
+        SelectionMetrics* ptr = m_perRevisionData + sel;
 
         for (size_t rev = 0; rev < m_numberOfRevisions; rev++, ptr += m_numberOfSelections) {
             avgSelSize += ptr->nofSelected;
@@ -229,7 +229,7 @@ void CComputeSelectionMetrics::printDetailedData()
         double inclusiveness = 0.0;
         double precision = 0.0;
         double f_measure = 0.0;
-        SelectionData* ptr = m_perRevisionData + sel;
+        SelectionMetrics* ptr = m_perRevisionData + sel;
 
         for (size_t rev = 0; rev < m_numberOfRevisions; rev++, ptr += m_numberOfSelections) {
             avgSelSize += ptr->nofSelected;
