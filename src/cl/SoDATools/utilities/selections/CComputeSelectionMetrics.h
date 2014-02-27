@@ -27,74 +27,165 @@
 
 namespace soda {
 
+/**
+ * @brief The CComputeSelectionMetrics class measures the specified selection data
+ *        with a choosen sorting algorithm.
+ */
 class CComputeSelectionMetrics
 {
 public:
+    /**
+     * @brief The SelectionData class stores the results of the measurements
+     *         made on the specified selection data.
+     */
     class SelectionData
     {
     public:
+        /**
+         * @brief Creates a new SelectionData object.
+         */
         SelectionData();
-
         ~SelectionData();
 
+        /**
+         * @brief Adds the values of the specified selection data to the current object.
+         * @param rhs Selection data.
+         */
         inline void add(const SelectionData& rhs) {
             nofSelected += rhs.nofSelected;
             nofFailed += rhs.nofFailed;
             nofHit += rhs.nofHit;
         }
 
+        /**
+         * @brief Returns the inclusiveness of the selection data.
+         * @return Number of executed test cases divided by the number of failed test cases.
+         */
         inline double inclusiveness() {
             return (nofFailed) ? ((double)nofHit / (double)nofFailed) : (1.0);
         }
 
+        /**
+         * @brief Returns the precision of the selection data.
+         * @return Number of executed test cases divided by the number of selected test cases.
+         */
         inline double precision() {
             return (nofSelected) ?((double)nofHit / (double)nofSelected) : (1.0);
         }
 
+        /**
+         * @brief Computes a value from precision and inclusiveness values.
+         * @return Value computed from precision and inclusiveness.
+         */
         inline double f_measure() {
             return (precision() + inclusiveness() > 0.0) ?
                     (2 * (precision() * inclusiveness()) / (precision() + inclusiveness())) : (0.0);
         }
 
+        /**
+         * @brief Number of selected test cases.
+         */
         IndexType nofSelected;
+
+        /**
+         * @brief Number of failed test cases.
+         */
         IndexType nofFailed;
+
+        /**
+         * @brief Number of executed test cases.
+         */
         IndexType nofHit;
     };
 
+    /**
+     * @brief Creates a new CComputeSelectionMetrics object.
+     * @param dbg Progress bar level.
+     */
     CComputeSelectionMetrics(CSelectionData*, IPrioritizationPlugin*, IntVector*, IntVector*, int dbg = 0);
-
     ~CComputeSelectionMetrics();
 
-    void runMeasurementForOneSelectionSize(RevNumType rev, SelectionData* pdata, int siz, SelectionData* sdata);
+    /**
+     * @brief Measures the data of a specified selection.
+     * @param rev Revision number.
+     * @param pdata Stores the measured data.
+     * @param siz Selection size.
+     * @param sdata Stores the measured data.
+     */
+    void runMeasurementForOneSelectionSize(RevNumType rev, SelectionData* pdata, int size, SelectionData* sdata);
 
+    /**
+     * @brief Measures the data of a specified revision.
+     * @param rev Revision number.
+     * @param pdata Stores the measured data.
+     */
     void runMeasurementForOneRevision(RevNumType rev, SelectionData* pdata);
 
+    /**
+     * @brief Measures the given data.
+     */
     void runMeasurement();
 
+    /**
+     * @brief Prints the results of measures.
+     */
     void printData();
 
+    /**
+     * @brief Prints detailed results of measures.
+     */
     void printDetailedData();
 
 private:
 
+    /**
+     * @brief Data for measures.
+     */
     CSelectionData* m_data;
 
+    /**
+     * @brief Sorting method.
+     */
     IPrioritizationPlugin* m_prioAlg;
 
+    /**
+     * @brief List of revision numbers.
+     */
     IntVector* m_revisionList;
 
+    /**
+     * @brief List of selection sizes.
+     */
     IntVector* m_sizeList;
 
+    /**
+     * @brief Number of revisions.
+     */
     size_t m_numberOfRevisions;
 
+    /**
+     * @brief Number of selections.
+     */
     size_t m_numberOfSelections;
 
+    /**
+     * @brief Stores measured data in an array for every revision grouped by the number of selections.
+     */
     SelectionData* m_perRevisionData;
 
+    /**
+     * @brief Stores measured data in an array for every selection.
+     */
     SelectionData* m_sumTestcaseData;
 
+    /**
+     * @brief Translation error counter.
+     */
     unsigned int e_translation;
 
+    /**
+     * @brief Progress bar level.
+     */
     unsigned int d_progress_bar;
 };
 
