@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
- * Authors: Tamás Gergely <gertom@inf.u-szeged.hu>
+ * Authors:
  *
  * This file is part of SoDA.
  *
@@ -19,8 +19,9 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GENERALIGNOREPRIORITIZATIONPLUGIN_H
-#define GENERALIGNOREPRIORITIZATIONPLUGIN_H
+
+#ifndef RANDOMIGNOREPRIORITIZATIONPLUGIN_H
+#define RANDOMIGNOREPRIORITIZATIONPLUGIN_H
 
 #include "../IPrioritizationPlugin.h"
 #include "data/CSelectionData.h"
@@ -28,11 +29,9 @@
 namespace soda {
 
 /**
- * @brief Prioritization plugin that is based on coverage information.
- *          - testcase covering more functions has higher coverage
+ * @brief Prioritization plugin which uses random priority values.
  */
-class GeneralIgnorePrioritizationPlugin : public IPrioritizationPlugin
-{
+class RandomIgnorePrioritizationPlugin : public IPrioritizationPlugin {
 private:
     typedef struct {
         IndexType testcaseId;
@@ -45,8 +44,8 @@ public:
     /**
      * @brief Creates a new instance.
      */
-    GeneralIgnorePrioritizationPlugin();
-    ~GeneralIgnorePrioritizationPlugin();
+    RandomIgnorePrioritizationPlugin();
+    ~RandomIgnorePrioritizationPlugin();
 
     /**
      * @brief Returns the name of the plugin.
@@ -82,24 +81,24 @@ private:
     /**
      * @brief Selection data.
      */
-    CSelectionData* m_data;
+    CSelectionData*        m_data;
 
     /**
      * @brief Number of ready elements.
      */
-    size_t m_nofElementsReady;
+    size_t                 m_nofElementsReady;
 
     /**
      * @brief Vector of ready elements.
      */
-    IntVector* m_elementsReady;
+    IntVector*             m_elementsReady;
 
     /**
-     * @brief Priority queue.
+     * @brief Priority queue
      */
     std::vector<qelement>* m_priorityQueue;
 };
 
 } /* namespace soda */
 
-#endif /* GENERALIGNOREPRIORITIZATIONPLUGIN_H */
+#endif /* RANDOMIGNOREPRIORITIZATIONPLUGIN_H */

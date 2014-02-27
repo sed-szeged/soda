@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
 
 void printPluginNames(const std::string &type, const std::vector<std::string> &plugins)
 {
-    std::cout << "The available read modes for reading type: " << type << std::endl;
+    std::cout << "The available algorithm modes for algorithm type: " << type << std::endl;
     for (size_t i = 0; i < plugins.size(); i++) {
         std::cout << "  * " << plugins[i] << std::endl;
     }

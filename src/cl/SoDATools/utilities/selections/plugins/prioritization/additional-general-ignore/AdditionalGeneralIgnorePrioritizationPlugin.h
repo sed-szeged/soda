@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
- * Authors: Tamás Gergely <gertom@inf.u-szeged.hu>
+ * Authors:
  *
  * This file is part of SoDA.
  *
@@ -19,8 +19,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GENERALIGNOREPRIORITIZATIONPLUGIN_H
-#define GENERALIGNOREPRIORITIZATIONPLUGIN_H
+#ifndef ADDITIONALGENERALIGNOREPRIORITIZATIONPLUGIN_H
+#define ADDITIONALGENERALIGNOREPRIORITIZATIONPLUGIN_H
 
 #include "../IPrioritizationPlugin.h"
 #include "data/CSelectionData.h"
@@ -28,11 +28,10 @@
 namespace soda {
 
 /**
- * @brief Prioritization plugin that is based on coverage information.
- *          - testcase covering more functions has higher coverage
+ *  @brief Prioritization is based on coverage information. Testcase covering more not yet covered
+ *         functions has higher coverage.
  */
-class GeneralIgnorePrioritizationPlugin : public IPrioritizationPlugin
-{
+class AdditionalGeneralIgnorePrioritizationPlugin : public IPrioritizationPlugin {
 private:
     typedef struct {
         IndexType testcaseId;
@@ -45,8 +44,8 @@ public:
     /**
      * @brief Creates a new instance.
      */
-    GeneralIgnorePrioritizationPlugin();
-    ~GeneralIgnorePrioritizationPlugin();
+    AdditionalGeneralIgnorePrioritizationPlugin();
+    ~AdditionalGeneralIgnorePrioritizationPlugin();
 
     /**
      * @brief Returns the name of the plugin.
@@ -98,8 +97,13 @@ private:
      * @brief Priority queue.
      */
     std::vector<qelement>* m_priorityQueue;
+
+    /**
+     * @brief List of not covered code element ids.
+     */
+    std::list<IndexType>* m_notCoveredCEIDs;
 };
 
 } /* namespace soda */
 
-#endif /* GENERALIGNOREPRIORITIZATIONPLUGIN_H */
+#endif /* ADDITIONALGENERALIGNOREPRIORITIZATIONPLUGIN_H */

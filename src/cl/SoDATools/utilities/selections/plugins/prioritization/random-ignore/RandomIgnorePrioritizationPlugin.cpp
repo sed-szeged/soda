@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
- * Authors: Tamás Gergely <gertom@inf.u-szeged.hu>
+ * Authors:
  *
  * This file is part of SoDA.
  *
@@ -20,23 +20,26 @@
  */
 
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
+
+#include "RandomIgnorePrioritizationPlugin.h"
 #include "CSelectionsPluginManager.h"
-#include "GeneralIgnorePrioritizationPlugin.h"
 
 namespace soda {
 
-bool operator<(GeneralIgnorePrioritizationPlugin::qelement d1, GeneralIgnorePrioritizationPlugin::qelement d2) {
+bool operator<(RandomIgnorePrioritizationPlugin::qelement d1, RandomIgnorePrioritizationPlugin::qelement d2) {
     return d1.priorityValue < d2.priorityValue;
 }
 
-GeneralIgnorePrioritizationPlugin::GeneralIgnorePrioritizationPlugin():
+RandomIgnorePrioritizationPlugin::RandomIgnorePrioritizationPlugin():
         m_data(NULL),
         m_nofElementsReady(0),
         m_elementsReady(new IntVector()),
         m_priorityQueue(new std::vector<qelement>())
 {}
 
-GeneralIgnorePrioritizationPlugin::~GeneralIgnorePrioritizationPlugin()
+RandomIgnorePrioritizationPlugin::~RandomIgnorePrioritizationPlugin()
 {
     delete m_priorityQueue;
     delete m_elementsReady;
@@ -44,39 +47,39 @@ GeneralIgnorePrioritizationPlugin::~GeneralIgnorePrioritizationPlugin()
     m_nofElementsReady = 0;
 }
 
-String GeneralIgnorePrioritizationPlugin::getName()
+String RandomIgnorePrioritizationPlugin::getName()
 {
-    return "general-ignore";
+    return "random-ignore";
 }
 
-String GeneralIgnorePrioritizationPlugin::getDescription()
+String RandomIgnorePrioritizationPlugin::getDescription()
 {
-    return "GeneralIgnorePrioritization plugin is based on coverage information.";
+    return "RandomIgnorePrioritizationPlugin generates random priority values.";
 }
 
-void GeneralIgnorePrioritizationPlugin::init(CSelectionData *data)
+void RandomIgnorePrioritizationPlugin::init(CSelectionData *data)
 {
     m_data = data;
 
     IndexType nofTestcases = m_data->getCoverage()->getNumOfTestcases();
-    const IBitMatrix& coverageBitMatrix = m_data->getCoverage()->getBitMatrix();
-    for(IndexType tcid = 0; tcid < nofTestcases; tcid++) {
+    srand(time(NULL));
+    for (IndexType tcid = 0; tcid < nofTestcases; tcid++) {
         qelement d;
-        d.testcaseId = tcid;
-        d.priorityValue = coverageBitMatrix[tcid].count();
+        d.testcaseId    = tcid;
+        d.priorityValue = rand();
         m_priorityQueue->push_back(d);
     }
 
     sort(m_priorityQueue->begin(), m_priorityQueue->end());
 }
 
-void GeneralIgnorePrioritizationPlugin::reset(RevNumType)
+void RandomIgnorePrioritizationPlugin::reset(RevNumType rev)
 {
-    // revision information are not taken into account
+    //revision information are not taken into account
     return;
 }
 
-void GeneralIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
+void RandomIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
 {
     for (; m_nofElementsReady < size && !(m_priorityQueue->empty()); m_nofElementsReady++) {
         m_elementsReady->push_back((m_priorityQueue->back()).testcaseId);
@@ -91,7 +94,7 @@ void GeneralIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_
 
 extern "C" void registerPlugin(CSelectionsPluginManager &manager)
 {
-    manager.addPrioritizationPlugin(new GeneralIgnorePrioritizationPlugin());
+    manager.addPrioritizationPlugin(new RandomIgnorePrioritizationPlugin());
 }
 
-} /* namespace soda */
+} // namespace soda

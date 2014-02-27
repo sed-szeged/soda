@@ -27,6 +27,7 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <list>
 
 namespace soda {
 
