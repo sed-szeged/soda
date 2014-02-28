@@ -29,7 +29,7 @@ CRevisionFilters::CRevisionFilters()
 CRevisionFilters::~CRevisionFilters()
 {}
 
-IntVector CRevisionFilters::filter(IntVector& allrevs, CSelectionData* data, bool keepEmptyChanged, bool keepEmptyFailed) const
+IntVector CRevisionFilters::filterNonChangedOrNonFailed(IntVector& allrevs, CSelectionData* data, bool keepEmptyChanged, bool keepEmptyFailed) const
 {
     IntVector revlist;
     for (IntVector::iterator revit = allrevs.begin(); revit != allrevs.end(); ++revit) {
@@ -58,7 +58,7 @@ IntVector CRevisionFilters::filter(IntVector& allrevs, CSelectionData* data, boo
     return revlist;
 }
 
-IntVector CRevisionFilters::filter(IntVector &allrevs, IndexType first, IndexType last) const
+IntVector CRevisionFilters::filterRange(IntVector &allrevs, IndexType first, IndexType last) const
 {
     IntVector revlist;
     for (IndexType i = 0; i < allrevs.size(); i++) {

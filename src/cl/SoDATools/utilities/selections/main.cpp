@@ -128,7 +128,7 @@ int processArgs(options_description desc, int ac, char* av[])
         }
 
         IntVector revisionlist = selectionData.getResults()->getRevisionNumbers();
-        revisionlist = CRevisionFilters().filter(revisionlist, &selectionData, !vm.count("drop-nonchanged-revisions"), !vm.count("drop-nonfailed-revisions"));
+        revisionlist = CRevisionFilters().filterNonChangedOrNonFailed(revisionlist, &selectionData, !vm.count("drop-nonchanged-revisions"), !vm.count("drop-nonfailed-revisions"));
         if (vm.count("revision-range")) {
             IntVector tmp;
             boost::char_separator<char> sep(":");
@@ -138,7 +138,7 @@ int processArgs(options_description desc, int ac, char* av[])
             }
             if (tmp.size() == 2) {
                 (cerr << "[INFO] Filtering revisions to [" << tmp[0] << "," << tmp[1] << ")" << endl).flush();
-                revisionlist = CRevisionFilters().filter(revisionlist, tmp[0], tmp[1]);
+                revisionlist = CRevisionFilters().filterRange(revisionlist, tmp[0], tmp[1]);
             } else {
                 (cerr << "[WARN] Invalid revision range" << endl).flush();
             }

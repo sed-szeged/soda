@@ -26,17 +26,32 @@
 
 namespace soda {
 
+/**
+ * @brief The CRevisionFilters class contains methods for revision filtering.
+ */
 class CRevisionFilters {
 public:
+
+    /**
+     * @brief Creates a new CRevisionFilters object.
+     */
     CRevisionFilters();
     ~CRevisionFilters();
 
     /**
-     * Filters the revision list according to the settings
-     *
+     * @brief Filters non changed or non failed revision numbers.
+     * @return Filtered revision numbers.
      */
-    IntVector filter(IntVector& , CSelectionData*, bool, bool) const;
-    IntVector filter(IntVector &allrevs, IndexType first, IndexType last) const;
+    IntVector filterNonChangedOrNonFailed(IntVector& , CSelectionData*, bool, bool) const;
+
+    /**
+     * @brief Returns the filtered revision numbers which are in the specified interval.
+     * @param allrevs Revision numbers.
+     * @param first Lower revision limit.
+     * @param last Upper revision limit.
+     * @return Filtered revision numbers.
+     */
+    IntVector filterRange(IntVector &allrevs, IndexType first, IndexType last) const;
 };
 
 } /* namespace soda */
