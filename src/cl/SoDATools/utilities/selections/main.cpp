@@ -31,6 +31,7 @@
 
 #include "data/CSelectionData.h"
 
+#include "CRevisionFilters.h"
 #include "CSelectionsPluginManager.h"
 #include "CComputeSelectionMetrics.h"
 #include "plugins/prioritization/IPrioritizationPlugin.h"
@@ -58,6 +59,9 @@ int main(int argc, char* argv[]) {
         ("mode,m",          value<String>(), "coma separated list of the algorithm modes")
         ("list,l",                           "lists the avaiable algorithm modes")
         ("sizes,s",         value<String>(), "coma separated list of integers representing selection set sizes")
+        ("drop-nonchanged-revisions",        "ignore revisions without changed methods")
+        ("drop-nonfailed-revisions",         "ignore revisions without failed testcases")
+        ("revision-range",  value<String>(), "A:B : keep revisions within the [A,B) range only")
         ("print-details",                    "")
         ("progress-level",  value<int>(),    "progress indicator level")
     ;
@@ -124,6 +128,21 @@ int processArgs(options_description desc, int ac, char* av[])
         }
 
         IntVector revisionlist = selectionData.getResults()->getRevisionNumbers();
+        revisionlist = CRevisionFilters().filter(revisionlist, &selectionData, !vm.count("drop-nonchanged-revisions"), !vm.count("drop-nonfailed-revisions"));
+        if (vm.count("revision-range")) {
+            IntVector tmp;
+            boost::char_separator<char> sep(":");
+            boost::tokenizer< boost::char_separator<char> > tokens(vm["revision-range"].as<String>(), sep);
+            BOOST_FOREACH (const string& t, tokens) {
+                tmp.push_back(boost::lexical_cast<int>(t));
+            }
+            if (tmp.size() == 2) {
+                (cerr << "[INFO] Filtering revisions to [" << tmp[0] << "," << tmp[1] << ")" << endl).flush();
+                revisionlist = CRevisionFilters().filter(revisionlist, tmp[0], tmp[1]);
+            } else {
+                (cerr << "[WARN] Invalid revision range" << endl).flush();
+            }
+        }
 
         StringVector priolist;
         if(vm.count("mode")) {
@@ -131,7 +150,6 @@ int processArgs(options_description desc, int ac, char* av[])
             boost::tokenizer< boost::char_separator<char> > tokens(vm["mode"].as<String>(), sep);
             BOOST_FOREACH (const string& t, tokens) {
                 priolist.push_back(t);
-                cout << t << endl;
             }
         }
 
