@@ -21,6 +21,7 @@
 
 #define BOOST_FILESYSTEM_VERSION 3
 
+#include <fstream>
 #include <iostream>
 
 #include <boost/program_options.hpp>
@@ -63,6 +64,7 @@ int main(int argc, char* argv[]) {
         ("drop-nonfailed-revisions",         "ignore revisions without failed testcases")
         ("revision-range",  value<String>(), "A:B : keep revisions within the [A,B) range only")
         ("print-details",                    "")
+        ("output,o",        value<String>(), "output file")
         ("progress-level",  value<int>(),    "progress indicator level")
     ;
 
@@ -153,6 +155,11 @@ int processArgs(options_description desc, int ac, char* av[])
             }
         }
 
+        std::ofstream of;
+        if (vm.count("output")) {
+            of.open((vm["output"].as<String>() + ".csv").c_str());
+        }
+
         while(!priolist.empty()) {
             string t = priolist.back();
             priolist.pop_back();
@@ -174,14 +181,24 @@ int processArgs(options_description desc, int ac, char* av[])
                 (cerr << " done." << endl).flush();
 
                 if (vm.count("print-details")) {
-                    selectionStat->printDetailedData();
+                    if (vm.count("output"))
+                        of << selectionStat->getDetailedData();
+                    else {
+                        std::cout.precision(5);
+                        std::cout << selectionStat->getDetailedData();
+                    }
                 } else {
-                    selectionStat->printData();
+                    if (vm.count("output"))
+                        of << selectionStat->getData();
+                    else {
+                        std::cout.precision(5);
+                        std::cout << selectionStat->getData();
+                    }
                 }
-
                 delete selectionStat;
             }
         }
+        of.close();
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
         return 1;

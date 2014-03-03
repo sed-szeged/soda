@@ -20,6 +20,8 @@
  */
 
 #include <iostream>
+#include <sstream>
+
 #include "CComputeSelectionMetrics.h"
 #include "exception/CException.h"
 
@@ -166,14 +168,14 @@ void CComputeSelectionMetrics::runMeasurement()
     }
 }
 
-void CComputeSelectionMetrics::printData()
+String CComputeSelectionMetrics::getData()
 {
-    std::cout.precision(5);
-    std::cout
+    std::stringstream ss;
+    ss
         << ";#revs;" << m_numberOfRevisions
         << ";;#fail;" << m_sumTestcaseData->nofFailed
         << ";;" << std::endl;
-    std::cout
+    ss
         << "Sel.lim;Sel.avg;"
         << "incl. (r);prec. (r);f (r);"
         << "incl. (f);prec. (f);f (f);"
@@ -196,7 +198,7 @@ void CComputeSelectionMetrics::printData()
         inclusiveness /= m_numberOfRevisions;
         precision /= m_numberOfRevisions;
         f_measure = (precision + inclusiveness > 0.0) ? (2 * (precision * inclusiveness) / (precision + inclusiveness)) : 0.0;
-        std::cout
+        ss
             << m_sizeList->at(sel) << ';'
             << avgSelSize << ';'
             << std::fixed << inclusiveness << ';'
@@ -208,19 +210,20 @@ void CComputeSelectionMetrics::printData()
             << std::endl;
     }
 
-    std::cout << std::endl;
+    ss << std::endl;
+
+    return ss.str();
 }
 
-void CComputeSelectionMetrics::printDetailedData()
+String CComputeSelectionMetrics::getDetailedData()
 {
-    std::cout.precision(5);
-
+    std::stringstream ss;
     for (size_t sel = 0; sel < m_numberOfSelections; sel++) {
-        std::cout
+        ss
             << "============================================================" << std::endl
-            << "Selection size: " << m_sizeList->at(sel) << std::endl
-            << "Revisions ....: " << m_numberOfRevisions << std::endl
-            << "Failed .......: " << m_sumTestcaseData->nofFailed << std::endl
+            << "Selection size; " << m_sizeList->at(sel) << std::endl
+            << "Revisions ....; " << m_numberOfRevisions << std::endl
+            << "Failed .......; " << m_sumTestcaseData->nofFailed << std::endl
             << " rev.;  sel. ; fail. ;  hit. ; incl. ; prec. ;   f   ;" << std::endl;
 
         IndexType avgSelSize = 0;
@@ -238,7 +241,7 @@ void CComputeSelectionMetrics::printDetailedData()
             inclusiveness += ptr->inclusiveness();
             precision += ptr->precision();
 
-            std::cout
+            ss
                 << m_revisionList->at(rev) << ';'
                 << ptr->nofSelected << ';'
                 << ptr->nofFailed << ';'
@@ -255,7 +258,7 @@ void CComputeSelectionMetrics::printDetailedData()
         precision /= m_numberOfRevisions;
         f_measure = (precision + inclusiveness > 0.0) ? (2 * (precision * inclusiveness) / (precision + inclusiveness)) : 0.0;
 
-        std::cout
+        ss
             << " avg.;"
             << avgSelSize << ';'
             << avgFail << ';'
@@ -273,7 +276,8 @@ void CComputeSelectionMetrics::printDetailedData()
             << std::endl;
     }
 
-    std::cout << std::endl;
+    ss << std::endl;
+    return ss.str();
 }
 
 } /* namespace soda */

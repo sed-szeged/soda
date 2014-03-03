@@ -133,12 +133,12 @@ public:
     /**
      * @brief Prints the results of measures.
      */
-    void printData();
+    String getData();
 
     /**
      * @brief Prints detailed results of measures.
      */
-    void printDetailedData();
+    String getDetailedData();
 
 private:
 
