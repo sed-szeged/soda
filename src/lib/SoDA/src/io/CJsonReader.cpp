@@ -29,13 +29,13 @@ namespace soda { namespace io {
 
 CJsonReader::CJsonReader(String path)
 {
-    open(path);
+    load(path);
 }
 
 CJsonReader::~CJsonReader()
 {}
 
-void CJsonReader::open(String path)
+void CJsonReader::load(String path)
 {
     m_data.clear();
     try {
@@ -57,17 +57,17 @@ bool CJsonReader::existsProperty(String property)
 
 String CJsonReader::getStringFromProperty(String property)
 {
-    return  m_data.get<String>(property);
+    return  m_data.get<String>(property, "");
 }
 
 bool CJsonReader::getBoolFromProperty(String property)
 {
-    return m_data.get<bool>(property);
+    return m_data.get<bool>(property, false);
 }
 
-int CJsonReader::getIntFromProperty(String property, int def)
+int CJsonReader::getIntFromProperty(String property)
 {
-    return m_data.get<int>(property, def);
+    return m_data.get<int>(property, 0);
 }
 
 IntVector CJsonReader::getIntVectorFromProperty(String property)

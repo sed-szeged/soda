@@ -43,10 +43,10 @@ public:
     ~CJsonReader();
 
     /**
-     * @brief Opens a new json file and parses it.
+     * @brief Loads a json file and parses it.
      * @param path File path.
      */
-    void open(String path);
+    void load(String path);
 
     /**
      * @brief Clears the property tree.
@@ -60,12 +60,43 @@ public:
      */
     bool existsProperty(String property);
 
+    /**
+     * @brief Returns the value of the specified property from property tree as String.
+     * @param property Specified path in property tree.
+     * @return Value of the specified property.
+     */
     String getStringFromProperty(String property);
+
+    /**
+     * @brief Returns the value of the specified property from property tree as bool.
+     * @param property Specified path in property tree.
+     * @return Value of the specified property.
+     */
     bool getBoolFromProperty(String property);
-    int getIntFromProperty(String property, int def = 0);
+
+    /**
+     * @brief Returns the value of the specified property from property tree as int.
+     * @param property Specified path in property tree.
+     * @return Value of the specified property.
+     */
+    int getIntFromProperty(String property);
+
+    /**
+     * @brief Returns the values of the specified property from property tree as IntVector.
+     * @param property Specified path in property tree.
+     * @return Value of the specified property.
+     */
     IntVector getIntVectorFromProperty(String property);
+
+    /**
+     * @brief Returns the value of the specified property from property tree as StringVector.
+     * @param property Specified path in property tree.
+     * @return Value of the specified property.
+     */
     StringVector getStringVectorFromProperty(String property);
+
 private:
+
     /**
      * @brief Property tree stores json file data.
      */

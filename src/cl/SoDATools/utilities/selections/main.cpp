@@ -25,40 +25,81 @@
 #include <iostream>
 
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/lexical_cast.hpp>
+#include <boost/program_options.hpp>
 
-#include "data/CSelectionData.h"
-#include "io/CJsonReader.h"
 #include "CRevisionFilters.h"
 #include "CSelectionsPluginManager.h"
 #include "CComputeSelectionMetrics.h"
+#include "data/CSelectionData.h"
+#include "io/CJsonReader.h"
 #include "plugins/prioritization/IPrioritizationPlugin.h"
 
+using namespace std;
 using namespace soda;
 using namespace soda::io;
-using namespace std;
 using namespace boost::filesystem;
+using namespace boost::program_options;
 
-void runMeasurement(String path);
+void processJsonFiles(String path);
 int loadJsonFiles(String path);
-void printPluginNames(const std::string &type, const std::vector<std::string> &plugins);
+void printPluginNames(const String &type, const std::vector<String> &plugins);
+void printHelp();
 
 CSelectionsPluginManager pluginManager;
 
 int main(int argc, char* argv[]) {
     cout << "selections (SoDA tool)" << endl;
+    pluginManager.loadPrioritizationPlugins();
+
+    options_description desc("Options");
+    desc.add_options()
+            ("help,h", "Prints help message")
+            ("list-algorithms,l", "Lists the prioritization algorithms");
+
+    variables_map vm;
+    store(parse_command_line(argc, argv, desc), vm);
+    notify(vm);
 
     if (argc < 2) {
-        cerr << "ERROR: There are no arguments!" << endl;
+        cerr << "[ERROR] There are no arguments!" << endl;
+        printHelp();
         return 1;
+    }
+
+    if (vm.count("help")) {
+        printHelp();
+        cout << desc << endl;
+        return 0;
+    }
+
+    if (vm.count("list-algorithms")) {
+        printPluginNames("prioritization", pluginManager.getPrioritizationPluginNames());
+        return 0;
     }
 
     return loadJsonFiles(String(argv[1]));
 }
 
-void printPluginNames(const std::string &type, const std::vector<std::string> &plugins)
+void printHelp()
+{
+    cout << "This application measures the given selection data with the specified options in a json config files."
+         << endl << endl;
+    cout << "USAGE:" << endl
+         << "\tselections [-hl]" << endl
+         << "\tselections json file path" << endl
+         << "\tselections directory which contains one or more json files" << endl << endl;
+    cout << "Json configuration file format:" << endl
+         << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
+         << "\"results-data\": \"results file path\",\n\t\"changeset\": \"changeset file path\",\n\t"
+         << "\"selection-sizes\": [1, 10, 100],\n\t"
+         << "\"prioritization-algorithms\": [ \"list of prioritization algorithms\" ],\n\t"
+         << "\"output-file\": \"output file name\",\n\t"
+         << "\"filter\": {\n\t\t\"revision\": {\n\t\t\t\"non-changed\": false,\n\t\t\t\"non-failed\": false"
+         << "\n\t\t\t\"},\n\t\t\"revision-range\": [ ]\n\t\t},\n\t"
+         << "\"print-details\": false,\n\t\"progress-level\": 0\n}" << endl;
+}
+
+void printPluginNames(const String &type, const std::vector<String> &plugins)
 {
     std::cout << "The available algorithm modes for algorithm type: " << type << std::endl;
     for (size_t i = 0; i < plugins.size(); i++) {
@@ -74,7 +115,7 @@ int loadJsonFiles(String path)
     }
 
     if (is_regular_file(path)) {
-        runMeasurement(path);
+        processJsonFiles(path);
     } else if (is_directory(path)) {
         directory_iterator endIt;
         for (directory_iterator it(path); it != endIt; it++) {
@@ -84,26 +125,40 @@ int loadJsonFiles(String path)
             if (it->path().extension() != ".json") {
                 continue;
             }
-            runMeasurement(it->path().string());
+            processJsonFiles(it->path().string());
         }
     }
     return 0;
 }
 
-void runMeasurement(String path)
+void processJsonFiles(String path)
 {
     try {
+        std::cout << "[INFO] Processing " << path << " configuration file." << endl;
         CSelectionData selectionData;
         CJsonReader reader = CJsonReader(path);
-        pluginManager.loadPrioritizationPlugins();
 
-        if (!reader.existsProperty("prioritization-algorithms")) {
-            std::cerr << "[ERROR] prioritization-algorithms is missing from the configuration file." << std::endl;
+        StringVector priolist = reader.getStringVectorFromProperty("prioritization-algorithms");
+        if (priolist.empty()) {
+            std::cerr << "[ERROR] prioritization-algorithms is missing from the configuration file("
+                      << path << ")." << std::endl;
             printPluginNames("prioritization", pluginManager.getPrioritizationPluginNames());
             return;
+        } else {
+            for (StringVector::const_iterator it = priolist.begin(); it != priolist.end(); ++it) {
+                try {
+                    pluginManager.getPrioritizationPlugin(*it);
+                } catch (std::out_of_range &e) {
+                    std::cerr << "[ERROR] Invalid prioritization algorithm name(" << *it
+                              << ") in configuration file: " << path << "." << std::endl;
+                    return;
+                }
+            }
         }
 
-        if (reader.existsProperty("coverage-data") && reader.existsProperty("changeset") && reader.existsProperty("results-data")) {
+        if (exists(reader.getStringFromProperty("coverage-data")) &&
+                exists(reader.getStringFromProperty("changeset")) &&
+                exists(reader.getStringFromProperty("results-data"))) {
             (cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
             selectionData.loadCoverage(reader.getStringFromProperty("coverage-data"));
             (cerr << " done\n[INFO] loading changes from " << reader.getStringFromProperty("changeset") << " ...").flush();
@@ -112,13 +167,13 @@ void runMeasurement(String path)
             selectionData.loadResults(reader.getStringFromProperty("results-data"));
             (cerr << " done" << endl).flush();
         } else {
-            std::cerr << "[ERROR] Missing input files." << std::endl;
+            std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
             return;
         }
 
         IntVector sizelist = reader.getIntVectorFromProperty("selection-sizes");
-
         IntVector revisionlist = selectionData.getResults()->getRevisionNumbers();
+
         revisionlist = CRevisionFilters().filterNonChangedOrNonFailed(revisionlist, &selectionData, !reader.getBoolFromProperty("filter.revision.non-changed"), !reader.getBoolFromProperty("filter.revision.non-failed"));
         if (reader.existsProperty("filter.revision-range")) {
             IntVector tmp = reader.getIntVectorFromProperty("filter.revision-range");
@@ -130,10 +185,8 @@ void runMeasurement(String path)
             }
         }
 
-        StringVector priolist = reader.getStringVectorFromProperty("prioritization-algorithms");
-
         std::ofstream of;
-        if (reader.existsProperty("output-file")) {
+        if (!reader.getStringFromProperty("output-file").empty()) {
             of.open((reader.getStringFromProperty("output-file") + ".csv").c_str());
         }
 
@@ -157,14 +210,14 @@ void runMeasurement(String path)
             (cerr << " done." << endl).flush();
 
             if (reader.getBoolFromProperty("print-details")) {
-                if (reader.existsProperty("output-file"))
+                if (!reader.getStringFromProperty("output-file").empty())
                     of << selectionStat->getDetailedData();
                 else {
                     std::cout.precision(5);
                     std::cout << selectionStat->getDetailedData();
                 }
             } else {
-                if (reader.existsProperty("output-file"))
+                if (!reader.getStringFromProperty("output-file").empty())
                     of << selectionStat->getData();
                 else {
                     std::cout.precision(5);
@@ -178,7 +231,8 @@ void runMeasurement(String path)
         std::cerr << e.what() << std::endl;
         return;
     } catch (...) {
-        std::cerr << "Exception of unknown type while processsing command line arguments!" << std::endl;
+        std::cerr << "Exception of unknown type while processsing configuration file(" << path << ") arguments."
+                  << std::endl;
         return;
     }
     return;
