@@ -59,14 +59,29 @@ void CSelectionData::loadChangeset(const char* fname)
     m_changeset->load(fname);
 }
 
+void CSelectionData::loadChangeset(const String &filename)
+{
+    m_changeset->load(filename);
+}
+
 void CSelectionData::loadCoverage(const char* fname)
 {
     m_coverage->load(fname);
 }
 
+void CSelectionData::loadCoverage(const String &filename)
+{
+    m_coverage->load(filename);
+}
+
 void CSelectionData::loadResults(const char* fname)
 {
     m_results->load(fname);
+}
+
+void CSelectionData::loadResults(const String &filename)
+{
+    m_results->load(filename);
 }
 
 void CSelectionData::globalize()

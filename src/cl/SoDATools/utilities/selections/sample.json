@@ -1,0 +1,17 @@
+{
+    "coverage-data": "coverage file path",
+    "results-data": "results file path",
+    "changeset": "changeset file path",
+    "selection-sizes": [1, 10, 100],
+    "prioritization-algorithms": [ "list of prioritization algorithms" ],
+    "output-file": "output file name",
+    "filter": {
+        "revision": {
+		"non-changed": false,
+		"non-failed": false
+	},
+	"revision-range": [ ]
+    },
+    "print-details": false,
+    "progress-level": 0
+}
