@@ -9,7 +9,7 @@ include_directories(${SoDATools_SOURCE_DIR}/../../lib/SoDA/inc
 add_subdirectory(utilities/rawdatareader)
 
 # selections
-add_subdirectory(utilities/selections)
+add_subdirectory(selections)
 
 # binaryDump
 aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/binarydump binaryDump_src)

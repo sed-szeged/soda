@@ -1,11 +1,11 @@
 project(selections)
 
 include_directories(${selections_SOURCE_DIR}
-                    ${selections_SOURCE_DIR}/../../../../lib/SoDA/inc
-                    ${selections_SOURCE_DIR}/../../../../lib/SoDAPlugin/inc)
+                    ${selections_SOURCE_DIR}/../../../lib/SoDA/inc
+                    ${selections_SOURCE_DIR}/../../../lib/SoDAPlugin/inc)
 
 file(GLOB selections_headers ./*.h)
-file(GLOB_RECURSE plugin_headers ./../../../../lib/SoDAPlugin/inc/*.h)
+file(GLOB_RECURSE plugin_headers ./../../../lib/SoDAPlugin/inc/*.h)
 
 aux_source_directory(${selections_SOURCE_DIR} selections_src)
 
