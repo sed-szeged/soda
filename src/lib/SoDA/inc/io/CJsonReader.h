@@ -29,7 +29,7 @@ using namespace boost::property_tree;
 namespace soda { namespace io {
 
 /**
- * @brief The CJsonReader class contains methods for opening and reading json type files.
+ * @brief The CJsonReader class implements methods for opening and reading json type files.
  */
 class CJsonReader
 {
@@ -98,7 +98,7 @@ public:
 private:
 
     /**
-     * @brief Property tree stores json file data.
+     * @brief Property tree which stores json file data.
      */
     ptree m_data;
 };

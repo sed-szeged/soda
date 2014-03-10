@@ -43,7 +43,7 @@ public:
     CBinaryIO();
 
     /**
-     * @brief Create BinaryIO object and open a file.
+     * @brief Creates BinaryIO object and open a file.
      * @param filename  File name.
      * @param mode  Open mode.
      * @throw IOException if open is failed.
@@ -51,7 +51,7 @@ public:
     CBinaryIO(const char *filename, eOpenMode m_mode);
 
     /**
-     * @brief Create BinaryIO object and open a file.
+     * @brief Creates BinaryIO object and open a file.
      * @param filename  File name.
      * @param mode  Open mode.
      * @throw IOException if open is failed.
@@ -64,7 +64,7 @@ public:
     virtual ~CBinaryIO();
 
     /**
-     * @brief Open a file, if screen is open it will be closed.
+     * @brief Opens a file, if a file is already opened it will be closed.
      * @param filename  File name.
      * @param mode  Open mode.
      * @throw IOException if a file already opened.
@@ -73,7 +73,7 @@ public:
     virtual void open(const String& filename, eOpenMode m_mode);
 
     /**
-     * @brief Open a file, if screen is open it will be closed.
+     * @brief Opens a file, if a file is already opened it will be closed.
      * @param filename  File name.
      * @param mode  Open mode.
      * @throw IOException if a file already opened.
@@ -82,19 +82,19 @@ public:
     virtual void open(const char *filename, eOpenMode m_mode);
 
     /**
-     * @brief Check file is open.
+     * @brief Checks if a file is already opened.
      */
     virtual bool isOpen();
 
     /**
-     * @brief Close the opened file, after then we can open other file with open function.
+     * @brief Closes an opened file..
      * @throw IOException if the the file is already closed or not opened.
      * @throw IOException if can't close the file.
      */
     virtual void close();
 
     /**
-     * @brief Return true, if file is end.
+     * @brief Returns true, if the file stream is at the end of file.
      * @return True, if file is end, otherwise return false.
      */
     virtual bool eof();

@@ -50,6 +50,4 @@ void CThread::join()
     pthread_join(m_pthread, 0);
 }
 
-
-
 }

@@ -31,6 +31,10 @@
 
 namespace soda {
 
+/**
+ * @brief The OneRevisionPerFileChangesetReaderPlugin class implements methods which reads raw
+ *        one revision per file data and converts it to changeset data.
+ */
 class OneRevisionPerFileChangesetReaderPlugin : public IChangesetReaderPlugin
 {
 public:
@@ -45,7 +49,7 @@ public:
 
 private:
     /**
-     * @brief Reads Revision Test per File format change set data from the specified path.
+     * @brief Reads One Revision per File format changeset data from the specified path.
      * @param path  Directory path.
      * @throw Exception at invalid directory path.
      */

@@ -27,6 +27,9 @@
 
 namespace soda {
 
+/**
+ * @brief This class manages the prioritization plugins.
+ */
 class CSelectionsPluginManager
 {
 public:

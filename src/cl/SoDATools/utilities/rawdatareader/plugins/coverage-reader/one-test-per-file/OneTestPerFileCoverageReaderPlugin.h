@@ -31,6 +31,10 @@
 
 namespace soda {
 
+/**
+ * @brief The OneTestPerFileCoverageReaderPlugin class implements methods which reads raw
+ *        one test per file data and converts it to coverage data.
+ */
 class OneTestPerFileCoverageReaderPlugin : public ICoverageReaderPlugin
 {
 public:

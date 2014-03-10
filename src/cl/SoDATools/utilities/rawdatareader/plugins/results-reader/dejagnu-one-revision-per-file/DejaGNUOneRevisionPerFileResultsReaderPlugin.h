@@ -31,6 +31,10 @@
 
 namespace soda {
 
+/**
+ * @brief The DejaGNUOneRevisionPerFileResultsReaderPlugin class implements methods which reads raw
+ *        one revision per file data and converts it to results data.
+ */
 class DejaGNUOneRevisionPerFileResultsReaderPlugin : public IResultsReaderPlugin
 {
 public:
