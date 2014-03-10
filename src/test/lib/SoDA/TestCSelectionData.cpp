@@ -40,7 +40,7 @@ protected:
     }
 };
 
-TEST_F(CSelectionDataTest, loadChangeset)
+TEST_F(CSelectionDataTest, loadSelection)
 {
     EXPECT_NO_THROW(data->loadChangeset("sample/ChangesetSampleBit"));
     EXPECT_NO_THROW(data->loadCoverage("sample/CoverageMatrixSampleBit"));
