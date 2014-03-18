@@ -8,6 +8,9 @@ include_directories(${SoDATools_SOURCE_DIR}/../../lib/SoDA/inc
 # rawDataReader
 add_subdirectory(utilities/rawdatareader)
 
+# reduction
+add_subdirectory(utilities/reduction)
+
 # selections
 add_subdirectory(selections)
 

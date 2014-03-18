@@ -140,7 +140,7 @@ void processJsonFiles(String path)
 
         StringVector priolist = reader.getStringVectorFromProperty("prioritization-algorithms");
         if (priolist.empty()) {
-            std::cerr << "[ERROR] prioritization-algorithms is missing from the configuration file("
+            std::cerr << "[ERROR] prioritization-algorithm is missing from the configuration file("
                       << path << ")." << std::endl;
             printPluginNames("prioritization", pluginManager.getPrioritizationPluginNames());
             return;

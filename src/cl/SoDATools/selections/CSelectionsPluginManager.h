@@ -70,4 +70,4 @@ private:
 
 } /* namespace soda */
 
-#endif // CSELECTIONSPLUGINMANAGER_H
+#endif /* CSELECTIONSPLUGINMANAGER_H */

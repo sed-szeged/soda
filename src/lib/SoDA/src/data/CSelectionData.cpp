@@ -103,4 +103,62 @@ void CSelectionData::globalize()
     m_results->refitMatrixSize();
 }
 
+void CSelectionData::filterToCoverage()
+{
+    CIDMapper *l_changesetCodeElements = new CIDMapper(m_globalCodeElements);
+    CIDMapper *l_resultsTestcases = new CIDMapper(m_globalTestcases);
+
+    CChangeset *l_changeset = new CChangeset(l_changesetCodeElements);
+    CResultsMatrix *l_results = new CResultsMatrix(l_resultsTestcases);
+
+    for (IndexType i = 0; i < m_coverageCodeElements->size(); i++) {
+        String fname = (*m_globalCodeElements)[i];
+        l_changeset->addCodeElementName(fname);
+    }
+
+    for (IndexType i = 0; i < m_coverageTestcases->size(); i++) {
+        String tcname = (*m_globalTestcases)[i];
+        l_results->addTestcaseName(tcname);
+    }
+
+    const IntVector& revs = m_results->getRevisionNumbers();
+    for (size_t r = 0; r < revs.size(); ++r) {
+        l_results->addRevisionNumber(revs[r]);
+        l_changeset->addRevision(revs[r]);
+    }
+
+    l_changeset->refitSize();
+    l_results->refitMatrixSize();
+
+    for (IndexType i = 0; i < m_coverageTestcases->size(); i++) {
+        String tcname = (*m_coverageTestcases)[i];
+        for (size_t r = 0; r < revs.size(); ++r) {
+            IndexType lid, ceid;
+            if ((lid = l_resultsTestcases->getID(tcname)) && ((ceid = m_resultsTestcases->getID(tcname)))) {
+                l_results->setResult(revs[r], lid, m_results->getResult(revs[r], ceid));
+            }
+        }
+    }
+
+    for (size_t r = 0; r < revs.size(); ++r) {
+        if (m_changeset->exists(revs[r])) {
+            const StringVector& chng = m_changeset->getCodeElementNames(revs[r]);
+            for (size_t s = 0; s < chng.size(); ++s) {
+                if (l_changesetCodeElements->getID(chng[s])) {
+                    l_changeset->setChange(revs[r], chng[s]);
+                }
+            }
+        }
+    }
+
+    delete m_changeset;
+    m_changeset = l_changeset;
+    delete m_results;
+    m_results = l_results;
+    delete m_changesetCodeElements;
+    m_changesetCodeElements = l_changesetCodeElements;
+    delete m_resultsTestcases;
+    m_resultsTestcases = l_resultsTestcases;
+}
+
 } /* namespace soda*/
