@@ -1,0 +1,9 @@
+{
+  "coverage-data": "coverage file",
+  "results-data": "results file",
+  "iteration": 15,
+  "reduction-method": ["reduction methods"],
+  "program-name": "program name",
+  "output-dir": "output dir",
+  "globalize": true
+}

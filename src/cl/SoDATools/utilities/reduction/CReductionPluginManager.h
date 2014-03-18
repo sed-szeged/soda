@@ -19,55 +19,55 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CSELECTIONSPLUGINMANAGER_H
-#define CSELECTIONSPLUGINMANAGER_H
+#ifndef CREDUCTIONPLUGINMANAGER_H
+#define CREDUCTIONPLUGINMANAGER_H
 
 #include "plugin/CInternalPluginManager.h"
-#include "plugins/prioritization/IPrioritizationPlugin.h"
+#include "plugins/IReductionPlugin.h"
 
 namespace soda {
 
 /**
- * @brief This class manages the prioritization plugins.
+ * @brief This class manages the reduction algorithm plugins.
  */
-class CSelectionsPluginManager
+class CReductionPluginManager
 {
 public:
     /**
      * @brief Creates a new manager.
      */
-    CSelectionsPluginManager();
-    ~CSelectionsPluginManager();
+    CReductionPluginManager();
+    ~CReductionPluginManager();
 
     /**
-     * @brief Registers a prioritization plugin. The plugin calls this in its registerPlugin function.
+     * @brief Registers a reduction plugin. The plugin calls this in its registerPlugin function.
      * @param plugin An instance of the plugin.
      */
-    void addPrioritizationPlugin(IPrioritizationPlugin *plugin);
+    void addReductionPlugin(IReductionPlugin *plugin);
 
     /**
-     * @brief Loads prioritization plugins.
+     * @brief Loads reduction plugins.
      */
-    void loadPrioritizationPlugins();
+    void loadReductionPlugins();
 
     /**
      * @brief Returns a plugin by its name.
      * @param name The name of the plugin.
      * @return The plugin instance.
      */
-    IPrioritizationPlugin* getPrioritizationPlugin(const String &name);
+    IReductionPlugin* getReductionPlugin(const String &name);
 
     /**
-     * @brief Returns the names of the available prioritization plugins.
+     * @brief Returns the names of the available reduction plugins.
      * @return A list of plugin names.
      */
-    std::vector<String> getPrioritizationPluginNames();
+    std::vector<String> getReductionPluginNames();
 
 private:
-    CInternalPluginManager<CSelectionsPluginManager> *m_prioritizationPluginManager;
-    std::map<std::string, IPrioritizationPlugin*> *m_prioritizationPlugins;
+    CInternalPluginManager<CReductionPluginManager> *m_reductionPluginManager;
+    std::map<std::string, IReductionPlugin*> *m_reductionPlugins;
 };
 
 } /* namespace soda */
 
-#endif /* CSELECTIONSPLUGINMANAGER_H */
+#endif /* CREDUCTIONPLUGINMANAGER_H */

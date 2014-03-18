@@ -1,8 +1,7 @@
 /*
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
- * Authors: László Langó <lango@inf.u-szeged.hu>
- *          Tamás Gergely <gertom@inf.u-szeged.hu>
+ * Authors:
  *
  * This file is part of SoDA.
  *
@@ -20,30 +19,34 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SODALIBDEFS_H
-#define SODALIBDEFS_H
+#ifndef CFLREDUCTIONDATA_H
+#define CFLREDUCTIONDATA_H
 
-#include <map>
-#include <string>
-#include <set>
-#include <vector>
-#include <list>
+#include "data/CCoverageMatrix.h"
+#include "data/CIDManager.h"
 
 namespace soda {
 
-class CBitList;
+class CReductionData
+{
+public:
+    CReductionData(CCoverageMatrix* baseCoverage, String programName, String dirPath);
+    ~CReductionData();
 
-#define IndexType unsigned long long int
-#define RevNumType unsigned int
+    void add(const std::set<IndexType> &testcases);
+    void save(IndexType iteration);
+private:
+    CIDManager      *m_testcases;
 
-typedef CBitList BitList;
-typedef std::string String;
-typedef std::vector<IndexType> IntVector;
-typedef std::vector<String> StringVector;
-typedef std::map<IndexType, String> StringMap;
-typedef std::map<String, IndexType> IdxStrMap;
-typedef std::map<IndexType, IndexType> IdxIdxMap;
+    CCoverageMatrix *m_baseCoverage;
+    CCoverageMatrix *m_coverage;
 
-} // namespace soda
+    std::vector<bool> *m_storedTestcases;
 
-#endif /* SODALIBDEFS_H */
+    String m_programName;
+    String m_dirPath;
+};
+
+} /* namespace soda */
+
+#endif /* CFLREDUCTIONDATA_H */
