@@ -25,10 +25,10 @@
   *       The binary dump program dumps the specified data from the specified data file.
   */
 
-#include "datamanager/CDataHandler.h"
-#include "datamanager/CCoverageDataManager.h"
-#include "datamanager/CResultsDataManager.h"
-#include "datamanager/CChangesDataManager.h"
+#include "CDataHandler.h"
+#include "CCoverageDataManager.h"
+#include "CResultsDataManager.h"
+#include "CChangesDataManager.h"
 #include "boost/program_options.hpp"
 
 using namespace soda;
@@ -154,18 +154,18 @@ int main(int argc, char *argv[])
     desc.add_options()
             ("help,h",                                           "produce help message")
             ("selection-data,S",                                 "create and work with selection data")
-            ("load-coverage",                   value<String>(), "input file")
+            ("load-coverage,c",                   value<String>(), "input file")
             ("dump-coverage-data",              value<String>(), "output file")
             ("dump-coverage-testcases",         value<String>(), "output file")
             ("dump-coverage-code-elements",     value<String>(), "output file")
-            ("load-results",                    value<String>(), "input file")
+            ("load-results,r",                    value<String>(), "input file")
             ("dump-results-testcases",          value<String>(), "output file")
             ("dump-results-revisions",          value<String>(), "output file")
             ("dump-results-execution",          value<String>(), "output file")
             ("dump-results-passfail",           value<String>(), "output file")
-            ("load-changes",                    value<String>(), "input file")
+            ("load-changes,x",                    value<String>(), "input file")
             ("dump-changes-code-elements",      value<String>(), "output file")
-            ("with-names", "dump coverage data and results data with names")
+            ("with-names,w", "dump coverage data and results data with names")
             ("quiet,q", "silent mode")
     ;
 

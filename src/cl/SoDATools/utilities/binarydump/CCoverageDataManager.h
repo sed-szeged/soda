@@ -69,7 +69,7 @@ public:
      * @param csep  Column separator.
      * @param rsep  Record separator.
      */
-    void dumpData(const String& filepath, bool psize=false, char csep=' ', char rsep='\n');
+    void dumpData(const String& filepath, bool psize=false, char csep=';', char rsep='\n');
 
     /**
      * @brief Dumps test case names to a specified file.

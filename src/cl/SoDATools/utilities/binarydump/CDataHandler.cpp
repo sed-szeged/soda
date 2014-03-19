@@ -19,10 +19,10 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "datamanager/CDataHandler.h"
-#include "datamanager/CCoverageDataManager.h"
-#include "datamanager/CResultsDataManager.h"
-#include "datamanager/CChangesDataManager.h"
+#include "CDataHandler.h"
+#include "CCoverageDataManager.h"
+#include "CResultsDataManager.h"
+#include "CChangesDataManager.h"
 
 namespace sodatools {
 

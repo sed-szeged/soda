@@ -19,8 +19,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "datamanager/CDataManager.h"
-#include "datamanager/CDataHandler.h"
+#include "CDataManager.h"
+#include "CDataHandler.h"
 
 namespace sodatools {
 

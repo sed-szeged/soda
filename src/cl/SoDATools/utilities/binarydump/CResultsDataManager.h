@@ -81,7 +81,7 @@ public:
      * @param csep  Column separator.
      * @param rsep  Record separator.
      */
-    void dumpExecution(const String& filepath, bool psize=false, char csep=' ', char rsep='\n');
+    void dumpExecution(const String& filepath, bool psize=false, char csep=';', char rsep='\n');
 
     /**
      * @brief Dumps passed bit matrix to a specified file.
@@ -90,7 +90,7 @@ public:
      * @param csep  Column separator.
      * @param rsep  Record separator.
      */
-    void dumpPassFail(const String& filepath, bool psize=false, char csep=' ', char rsep='\n');
+    void dumpPassFail(const String& filepath, bool psize=false, char csep=';', char rsep='\n');
 };
 
 } // namespace sodatools

@@ -17,7 +17,7 @@ add_subdirectory(selections)
 # binaryDump
 aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/binarydump binaryDump_src)
 add_executable(binaryDump ${binaryDump_src})
-target_link_libraries(binaryDump SoDATools SoDA ${Boost_LIBRARIES})
+target_link_libraries(binaryDump SoDA ${Boost_LIBRARIES})
 
 # instrumentServer
 aux_source_directory(${SoDATools_SOURCE_DIR}/instrumentserver instrumentServer_src)

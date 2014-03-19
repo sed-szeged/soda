@@ -20,8 +20,8 @@
  */
 
 #include "exception/CException.h"
-#include "datamanager/CResultsDataManager.h"
-#include "datamanager/CDataHandler.h"
+#include "CResultsDataManager.h"
+#include "CDataHandler.h"
 #include <fstream>
 
 namespace sodatools {
