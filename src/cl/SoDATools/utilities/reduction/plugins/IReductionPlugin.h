@@ -29,6 +29,9 @@
 
 namespace soda {
 
+/**
+ * @brief The IReductionPlugin class is an interface class for reduction plugins.
+ */
 class IReductionPlugin
 {
 public:

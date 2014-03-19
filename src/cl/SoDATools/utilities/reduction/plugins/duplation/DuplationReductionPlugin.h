@@ -27,11 +27,20 @@
 
 namespace soda {
 
+/**
+ * @brief The DuplationReductionPlugin class is a reduction plugin which uses duplation for coverage data
+ *        reducing.
+ */
 class DuplationReductionPlugin : public IReductionPlugin
 {
 public:
+
+    /**
+     * @brief Creates a new instance.
+     */
     DuplationReductionPlugin();
     ~DuplationReductionPlugin();
+
     /**
      * @brief Returns the name of the plugin.
      * @return
@@ -48,23 +57,56 @@ public:
      * @brief Fills the reduction plugin with data.
      */
     void init(CSelectionData *data, String programName, String dirPath, unsigned int iterationLimit = 15);
+
+    /**
+     * @brief Runs the reduction plugin.
+     * @param outStream Output stream for log file.
+     */
     void reduction(std::ofstream &outStream);
 
 private:
 
+    /**
+     * @brief Reduces the size of the coverage data.
+     * @param outStream Output stream for log file.
+     */
     void duplationReduction(std::ofstream &outStream);
 
+    /**
+     * @brief shuffle
+     * @param T
+     */
     void shuffle(std::vector<IndexType>& T);
     int addRandom(std::vector<IndexType>& from, std::set<IndexType>& to, unsigned int N);
 
+    /**
+     * @brief Selection data.
+     */
     CSelectionData *m_data;
 
+    /**
+     * @brief Output file name.
+     */
     String m_programName;
+
+    /**
+     * @brief Output directory path.
+     */
     String m_dirPath;
 
+    /**
+     * @brief Number of code elements.
+     */
     IndexType m_nrOfCodeElements;
+
+    /**
+     * @brief Number of test cases.
+     */
     IndexType m_nrOfTestCases;
 
+    /**
+     * @brief Iteration limit.
+     */
     unsigned int m_iterationLimit;
 };
 

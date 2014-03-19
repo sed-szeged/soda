@@ -27,6 +27,10 @@
 
 namespace soda {
 
+/**
+ * @brief The AdditionalCoverageReductionPlugin class is a reduction plugin which is based on
+ *        coverage information.
+ */
 class AdditionalCoverageReductionPlugin : public IReductionPlugin
 {
 private:
@@ -60,18 +64,42 @@ public:
      * @brief Fills the reduction plugin with data.
      */
     void init(CSelectionData *data, String programName, String dirPath, unsigned int iterationLimit = 15);
+
+    /**
+     * @brief Runs the reduction plugin.
+     */
     void reduction(std::ofstream&);
 
 private:
 
+    /**
+     * @brief Reduces the size of the coverage data.
+     */
     void additionalCoverageReduction(std::ofstream&);
 
+    /**
+     * @brief Selection data.
+     */
     CSelectionData *m_data;
 
+    /**
+     * @brief Output file name.
+     */
     String m_programName;
+
+    /**
+     * @brief Output directory path.
+     */
     String m_dirPath;
 
+    /**
+     * @brief Number of code elements.
+     */
     IndexType m_nrOfCodeElements;
+
+    /**
+     * @brief Number of test cases.
+     */
     IndexType m_nrOfTestCases;
 };
 

@@ -221,34 +221,34 @@ void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
 
 void DuplationReductionPlugin::shuffle(std::vector<IndexType>& v)
 {
-  srand(time(0));
-  double norm = ((double)v.size() - 1) / RAND_MAX;
-  size_t i2;
-  IndexType t;
-  for (size_t i = 0; i < v.size(); i++) {
-    i2 = (size_t)(rand() * norm);
-    if (i2 < 0 || i2 > v.size() - 1) // oops
-      std::cerr << "[COVERAGE] wrong random index: " << i2 << std::endl;
-    t = v[i];
-    v[i] = v[i2];
-    v[i2] = t;
-  }
+    srand(time(0));
+    double norm = ((double)v.size() - 1) / RAND_MAX;
+    size_t i2;
+    IndexType t;
+    for (size_t i = 0; i < v.size(); i++) {
+        i2 = (size_t)(rand() * norm);
+        if (i2 < 0 || i2 > v.size() - 1) // oops
+            std::cerr << "[COVERAGE] wrong random index: " << i2 << std::endl;
+        t = v[i];
+        v[i] = v[i2];
+        v[i2] = t;
+    }
 }
 
 int DuplationReductionPlugin::addRandom(std::vector<IndexType>& from, std::set<IndexType>& to, unsigned int N)
 {
-  size_t origsize = from.size();
-  if (N > origsize)
-    return -1;
+    size_t origsize = from.size();
+    if (N > origsize)
+        return -1;
 
-  for (size_t i = origsize - N; i < origsize; i++) {
-    if (!to.insert(from[i]).second) { // already in, should not happen
-      return 0;
+    for (size_t i = origsize - N; i < origsize; i++) {
+        if (!to.insert(from[i]).second) { // already in, should not happen
+            return 0;
+        }
     }
-  }
 
-  from.erase(from.begin() + origsize - N, from.end());
-  return origsize - from.size();
+    from.erase(from.begin() + origsize - N, from.end());
+    return origsize - from.size();
 }
 
 extern "C" void registerPlugin(CReductionPluginManager &manager)

@@ -27,11 +27,20 @@
 
 namespace soda {
 
+/**
+ * @brief The CoverageReductionPlugin class is a reduction plugin which uses coverage for reducing coverage
+ *        data.
+ */
 class CoverageReductionPlugin : public IReductionPlugin
 {
 public:
+
+    /**
+     * @brief Creates a new instance.
+     */
     CoverageReductionPlugin();
     ~CoverageReductionPlugin();
+
     /**
      * @brief Returns the name of the plugin.
      * @return
@@ -49,21 +58,51 @@ public:
      */
     void init(CSelectionData *data, String programName, String dirPath, unsigned int iterationLimit = 15);
 
+    /**
+     * @brief Runs the reduction plugin.
+     * @param outStream Output stream for log file.
+     */
     void reduction(std::ofstream &outStream);
 
 private:
+
+    /**
+     * @brief Reduces the size of the coverage data.
+     * @param outStream Output strema for log file.
+     */
     void coverageReduction(std::ofstream &outStream);
+
     void shuffle(std::vector<IndexType>& T);
+
     int addRandom(std::vector<IndexType>& from, std::set<IndexType>& to, unsigned int N);
+
     IndexType addCoverage(IBitList& to, const IBitList& from) const;
+
     bool setSmaller(const IBitList& lhs, const IBitList& rhs) const;
 
+    /**
+     * @brief Selection data.
+     */
     CSelectionData *m_data;
 
+    /**
+     * @brief Output file name.
+     */
     String m_programName;
+
+    /**
+     * @brief Output directory path.
+     */
     String m_dirPath;
 
+    /**
+     * @brief Number of code elements.
+     */
     IndexType m_nrOfCodeElements;
+
+    /**
+     * @brief Number of test cases.
+     */
     IndexType m_nrOfTestCases;
 };
 
