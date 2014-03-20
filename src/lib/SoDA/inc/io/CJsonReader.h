@@ -19,6 +19,9 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CJSONREADER_H
+#define CJSONREADER_H
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -106,3 +109,5 @@ private:
 } /* namespace io */
 
 } /* namespace soda */
+
+#endif /* CJSONREADER_H */
