@@ -29,7 +29,8 @@
 
 namespace soda {
 
-DuplationReductionPlugin::DuplationReductionPlugin()
+DuplationReductionPlugin::DuplationReductionPlugin() :
+    m_data(NULL)
 {
 }
 
@@ -43,14 +44,14 @@ String DuplationReductionPlugin::getDescription()
     return "DuplationReductionPlugin is based on duplation.";
 }
 
-void DuplationReductionPlugin::init(CSelectionData *data, String programName, String dirPath, unsigned int iterationLimit)
+void DuplationReductionPlugin::init(CSelectionData *data, CJsonReader &reader)
 {
     m_data = data;
-    m_programName = programName;
-    m_dirPath = dirPath;
+    m_programName = reader.getStringFromProperty("program-name");
+    m_dirPath = reader.getStringFromProperty("output-dir");
     m_nrOfCodeElements = data->getCoverage()->getNumOfCodeElements();
     m_nrOfTestCases = data->getCoverage()->getNumOfTestcases();
-    m_iterationLimit = iterationLimit;
+    m_iterationLimit = reader.getIntFromProperty("iteration");
 }
 
 void DuplationReductionPlugin::reduction(std::ofstream &outStream)
@@ -60,12 +61,10 @@ void DuplationReductionPlugin::reduction(std::ofstream &outStream)
 
 void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
 {
-    std::cerr << "[INFO] Duplation reduction (iteration limit: " << m_iterationLimit << ") ... ";
+    std::cerr << "[INFO] Duplation reduction (iteration limit: " << m_iterationLimit << ") ... " << std::endl;
 
     std::set<IndexType> Trem;  // remaining test set
     std::set<IndexType> Tv;    // actual test set
-    std::set<IndexType> Trand; // random test set
-    std::vector<IndexType> randomizedTests; // stores the shuffled test case id-s
 
     // print initial test suite
     outStream << "Number of procedures: " << m_nrOfCodeElements << std::endl;
@@ -74,26 +73,21 @@ void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
     std::set<IndexType>::iterator it = Trem.begin();
     for(unsigned int i = 0; i < m_nrOfTestCases; i++) {
             it = Trem.insert(it, i);
-            randomizedTests.push_back(i);
     }
 
     unsigned int fullSize = Trem.size();
-    shuffle(randomizedTests); // make randomized order
 
     // print initial test suite
     outStream << "Total " << fullSize << " test cases in full test suite." << std::endl;
-
     Tv.clear();
-    Trand.clear();
 
-    CReductionData reducedMatrix(m_data->getCoverage(), m_programName, m_dirPath);
-    CReductionData randomMatrix(m_data->getCoverage(), m_programName + "-RANDOM", m_dirPath);
+    CReductionData reducedMatrix(m_data->getCoverage(), m_programName + "-DUPLATION", m_dirPath);
 
     /* ----- algo start ----- */
 
     std::vector<unsigned int> R(m_nrOfCodeElements,1); // stores the classification of methods: in each iteration there are 2^i different values
     std::vector<unsigned int> RCount; // counter for R for finding optimal division: in each iteration its size is 2^i and stores the counts for each category
-    std::map<IndexType,std::vector<unsigned int> >  divCount;  // stores 2^i counts for each test case
+    std::map<IndexType, std::vector<unsigned int> >  divCount;  // stores 2^i counts for each test case
     unsigned int iter = 0;
     unsigned int numClasses = 1;
 
@@ -117,9 +111,6 @@ void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
             // mark test case:
             Tv.insert(selectedTest);
             Trem.erase(selectedTest);
-            // in parallel, fill the random matrix:
-            if (addRandom(randomizedTests, Trand, 1) != 1) // oops
-                std::cerr << "[DUPLATION] random test addition failed (adding 1 test)" << std::endl;
             // update R:
             RCount.clear();
             RCount.resize(numClasses * 2, 0); // for the next iteration
@@ -132,12 +123,9 @@ void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
             // add it to the new global matrix:
             reducedMatrix.add(Tv);
             reducedMatrix.save(1);
-            // in parallel, creat the random matrix as well:
-            randomMatrix.add(Trand);
-            randomMatrix.save(1);
         } else { // all other iterations: fill count vectors and R based on the matrix
-            std::vector<IndexType> selectedTestVec(numClasses,0);
-            std::vector<unsigned int> coverBestVec(numClasses,m_nrOfCodeElements*2+1); // sufficiently large init value
+            std::vector<IndexType> selectedTestVec(numClasses, 0);
+            std::vector<unsigned int> coverBestVec(numClasses, m_nrOfCodeElements * 2 + 1); // sufficiently large init value
             std::set<IndexType> testOccupied; // not to select the best test case for multiple classes
             for (it = Trem.begin(); it != Trem.end(); it++) {
                 IBitList& actRow = m_data->getCoverage()->getBitMatrix().getRow(*it);
@@ -151,8 +139,8 @@ void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
             for (size_t c = 0; c < numClasses; c++) {
                 bool haveIt = false;
                 for (it = Trem.begin(); it != Trem.end(); it++) {
-                    if (std::abs(RCount[c]/2.0 - divCount[*it][c]) < std::abs(RCount[c]/2.0 - coverBestVec[c])
-                            && testOccupied.find(*it)==testOccupied.end() ) { // we want exactly i^2 different tests to be selected
+                    if (std::abs(RCount[c] / 2.0 - divCount[*it][c]) < std::abs(RCount[c] / 2.0 - coverBestVec[c])
+                            && testOccupied.find(*it) == testOccupied.end() ) { // we want exactly i^2 different tests to be selected
                         coverBestVec[c] = divCount[*it][c];
                         selectedTestVec[c] = *it;
                         haveIt=true;
@@ -178,25 +166,18 @@ void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
                 }
             }
 
-            // in parallel, fill the random matrix:
-            if (addRandom(randomizedTests, Trand, maxc + 1) != (int)maxc + 1) // oops
-                std::cerr << "[DUPLATION] random test addition failed (adding " << maxc+1 << " tests)" << std::endl;
-
             // update R:
             RCount.clear();
             RCount.resize(numClasses * 2, 0); // for the next iteration
             for (size_t i = 0; i < m_nrOfCodeElements ; i++) {
-                R[i] = m_data->getCoverage()->getBitMatrix().getRow(selectedTestVec[R[i]-1])[i] ? R[i]*2 : R[i]*2-1;
-                RCount[R[i]-1]++;
+                R[i] = m_data->getCoverage()->getBitMatrix().getRow(selectedTestVec[R[i] - 1])[i] ? R[i] * 2 : R[i] * 2 - 1;
+                RCount[R[i] - 1]++;
             }
-            outStream << "Selected tests in the " << iter+1 << "th iteration: " << std::endl;
+            outStream << "Selected tests in the " << iter + 1 << "th iteration: " << std::endl;
             outStream << maxc + 1 << " tests added" << std::endl;
             // add it to the new global matrix:
             reducedMatrix.add(Tv);
-            reducedMatrix.save(iter+1);
-            // in parallel, creat the random matrix as well:
-            randomMatrix.add(Trand);
-            randomMatrix.save(iter+1);
+            reducedMatrix.save(iter + 1);
         }
 
         numClasses *= 2;
@@ -209,7 +190,7 @@ void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
 
     /* ----- algo end ----- */
 
-    unsigned int reducedSize=Tv.size();
+    unsigned int reducedSize = Tv.size();
     outStream << "Duplation reduction ended" << std::endl;
 
     // print final test suite:
@@ -217,38 +198,6 @@ void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
     outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize) / fullSize << "\%" << std::endl;
 
     std::cerr << "done." << std::endl;
-}
-
-void DuplationReductionPlugin::shuffle(std::vector<IndexType>& v)
-{
-    srand(time(0));
-    double norm = ((double)v.size() - 1) / RAND_MAX;
-    size_t i2;
-    IndexType t;
-    for (size_t i = 0; i < v.size(); i++) {
-        i2 = (size_t)(rand() * norm);
-        if (i2 < 0 || i2 > v.size() - 1) // oops
-            std::cerr << "[COVERAGE] wrong random index: " << i2 << std::endl;
-        t = v[i];
-        v[i] = v[i2];
-        v[i2] = t;
-    }
-}
-
-int DuplationReductionPlugin::addRandom(std::vector<IndexType>& from, std::set<IndexType>& to, unsigned int N)
-{
-    size_t origsize = from.size();
-    if (N > origsize)
-        return -1;
-
-    for (size_t i = origsize - N; i < origsize; i++) {
-        if (!to.insert(from[i]).second) { // already in, should not happen
-            return 0;
-        }
-    }
-
-    from.erase(from.begin() + origsize - N, from.end());
-    return origsize - from.size();
 }
 
 extern "C" void registerPlugin(CReductionPluginManager &manager)

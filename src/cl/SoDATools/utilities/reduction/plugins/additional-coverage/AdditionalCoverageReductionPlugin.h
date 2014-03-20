@@ -63,7 +63,7 @@ public:
     /**
      * @brief Fills the reduction plugin with data.
      */
-    void init(CSelectionData *data, String programName, String dirPath, unsigned int iterationLimit = 15);
+    void init(CSelectionData *data, CJsonReader &reader);
 
     /**
      * @brief Runs the reduction plugin.

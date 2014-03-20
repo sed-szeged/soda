@@ -56,7 +56,7 @@ public:
     /**
      * @brief Fills the reduction plugin with data.
      */
-    void init(CSelectionData *data, String programName, String dirPath, unsigned int iterationLimit = 15);
+    void init(CSelectionData *data, CJsonReader &reader);
 
     /**
      * @brief Runs the reduction plugin.
@@ -71,13 +71,6 @@ private:
      * @param outStream Output stream for log file.
      */
     void duplationReduction(std::ofstream &outStream);
-
-    /**
-     * @brief shuffle
-     * @param T
-     */
-    void shuffle(std::vector<IndexType>& T);
-    int addRandom(std::vector<IndexType>& from, std::set<IndexType>& to, unsigned int N);
 
     /**
      * @brief Selection data.

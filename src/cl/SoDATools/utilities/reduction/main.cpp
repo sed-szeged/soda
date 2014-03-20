@@ -189,14 +189,13 @@ void processJsonFiles(String path)
             throw CException("Reduction output file error.", reader.getStringFromProperty("coverage-data") + ".reduced");
         }
 
-        int reductionIter = reader.getIntFromProperty("iteration");
         while (!reductionList.empty()) {
             string reductionMethod = reductionList.back();
             reductionList.pop_back();
             IReductionPlugin *plugin = NULL;
             try {
                 plugin = pluginManager.getReductionPlugin(reductionMethod);
-                plugin->init(&selectionData, programName, dirPath, reductionIter);
+                plugin->init(&selectionData, reader);
             } catch (std::out_of_range &e) {
                 std::cerr << "[ERROR] Unknown reduction mode. " << std::endl;
                 printPluginNames(pluginManager.getReductionPluginNames());

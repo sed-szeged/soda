@@ -33,7 +33,8 @@ bool operator<(AdditionalCoverageReductionPlugin::qelement d1, AdditionalCoverag
     return d1.priorityValue < d2.priorityValue;
 }
 
-AdditionalCoverageReductionPlugin::AdditionalCoverageReductionPlugin()
+AdditionalCoverageReductionPlugin::AdditionalCoverageReductionPlugin() :
+    m_data(NULL)
 {
 }
 
@@ -47,11 +48,11 @@ String AdditionalCoverageReductionPlugin::getDescription()
     return "AdditionalCoverageReductionPlugin is based on coverage information.";
 }
 
-void AdditionalCoverageReductionPlugin::init(CSelectionData *data, String programName, String dirPath, unsigned int)
+void AdditionalCoverageReductionPlugin::init(CSelectionData *data, CJsonReader &reader)
 {
     m_data = data;
-    m_programName = programName;
-    m_dirPath = dirPath;
+    m_programName = reader.getStringFromProperty("program-name");
+    m_dirPath = reader.getStringFromProperty("output-dir");
     m_nrOfCodeElements = data->getCoverage()->getNumOfCodeElements();
     m_nrOfTestCases = data->getCoverage()->getNumOfTestcases();
 }

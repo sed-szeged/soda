@@ -56,7 +56,7 @@ public:
     /**
      * @brief Fills the reduction plugin with data.
      */
-    void init(CSelectionData *data, String programName, String dirPath, unsigned int iterationLimit = 15);
+    void init(CSelectionData *data, CJsonReader &reader);
 
     /**
      * @brief Runs the reduction plugin.
@@ -71,10 +71,6 @@ private:
      * @param outStream Output strema for log file.
      */
     void coverageReduction(std::ofstream &outStream);
-
-    void shuffle(std::vector<IndexType>& T);
-
-    int addRandom(std::vector<IndexType>& from, std::set<IndexType>& to, unsigned int N);
 
     IndexType addCoverage(IBitList& to, const IBitList& from) const;
 

@@ -58,7 +58,7 @@ void CReductionData::save(IndexType iteration)
 void CReductionData::add(const std::set<IndexType> &testcases)
 {
     IdxIdxMap tcMap;
-    IndexType nrOfMethods = m_baseCoverage->getNumOfCodeElements();
+    IndexType nrOfCodeElements = m_baseCoverage->getNumOfCodeElements();
     // Add new testcases.
     for (std::set<IndexType>::iterator it = testcases.begin(); it != testcases.end(); it++) {
         if (!(*m_storedTestcases)[*it]) {
@@ -79,8 +79,8 @@ void CReductionData::add(const std::set<IndexType> &testcases)
             IndexType bTcid = it->first;
             IndexType cTcid = it->second;
 
-            for (IndexType mid = 0; mid < nrOfMethods; mid++) {
-                m_coverage->setRelation(cTcid, mid, m_baseCoverage->getBitMatrix().get(bTcid, mid));
+            for (IndexType ceid = 0; ceid < nrOfCodeElements; ceid++) {
+                m_coverage->setRelation(cTcid, ceid, m_baseCoverage->getBitMatrix().get(bTcid, ceid));
             }
         }
     }

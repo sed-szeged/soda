@@ -26,6 +26,9 @@
 #include <fstream>
 
 #include "data/CSelectionData.h"
+#include "io/CJsonReader.h"
+
+using namespace soda::io;
 
 namespace soda {
 
@@ -51,7 +54,7 @@ public:
     /**
      * @brief Fills the reduction plugin with data.
      */
-    virtual void init(CSelectionData *data, String programName, String dirPath, unsigned int iterationLimit = 15) = 0;
+    virtual void init(CSelectionData *data, CJsonReader &reader) = 0;
 
     /**
      * @brief Runs the reduction algorithm.
