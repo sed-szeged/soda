@@ -72,10 +72,18 @@ private:
     void randomReduction(std::ofstream &outStream);
 
     /**
-     * @brief shuffle
-     * @param T
+     * @brief Shuffles the elements of the specified vector.
+     * @param T Specified vector.
      */
     void shuffle(std::vector<IndexType>& T);
+
+    /**
+     * @brief Adds random number of elements to a set.
+     * @param from Elements will be selected from here.
+     * @param to Selected elements will be inserted to here.
+     * @param N Number of elements to add.
+     * @return Number of inserted elements.
+     */
     int addRandom(std::vector<IndexType>& from, std::set<IndexType>& to, unsigned int N);
 
     /**
