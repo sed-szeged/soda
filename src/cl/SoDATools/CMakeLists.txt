@@ -14,6 +14,9 @@ add_subdirectory(utilities/reduction)
 # selections
 add_subdirectory(selections)
 
+# test-suite-metrics
+add_subdirectory(test-suite-metrics)
+
 # binaryDump
 aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/binarydump binaryDump_src)
 add_executable(binaryDump ${binaryDump_src})
