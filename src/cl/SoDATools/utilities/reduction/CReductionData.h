@@ -19,34 +19,69 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CFLREDUCTIONDATA_H
-#define CFLREDUCTIONDATA_H
+#ifndef CREDUCTIONDATA_H
+#define CREDUCTIONDATA_H
 
 #include "data/CCoverageMatrix.h"
 #include "data/CIDManager.h"
 
 namespace soda {
 
+/**
+ * @brief The CReductionData class manages base and reduced coverage data
+ *        according to the calls from the reduction plugins.
+ */
 class CReductionData
 {
 public:
+
     CReductionData(CCoverageMatrix* baseCoverage, String programName, String dirPath);
     ~CReductionData();
 
+    /**
+     * @brief Adds specified test cases to the reduced coverage matrix.
+     * @param testcases Set of specified test cases.
+     */
     void add(const std::set<IndexType> &testcases);
+
+    /**
+     * @brief Saves the reduced coverage matrix.
+     * @param iteration Filename part.
+     */
     void save(IndexType iteration);
 private:
-    CIDManager      *m_testcases;
 
+    /**
+     * @brief Test case names.
+     */
+    CIDManager *m_testcases;
+
+    /**
+     * @brief Base coverage data.
+     */
     CCoverageMatrix *m_baseCoverage;
+
+    /**
+     * @brief Reduced coverage data.
+     */
     CCoverageMatrix *m_coverage;
 
+    /**
+     * @brief Already inserted test cases.
+     */
     std::vector<bool> *m_storedTestcases;
 
+    /**
+     * @brief Output file name part.
+     */
     String m_programName;
+
+    /**
+     * @brief Output directory.
+     */
     String m_dirPath;
 };
 
 } /* namespace soda */
 
-#endif /* CFLREDUCTIONDATA_H */
+#endif /* CREDUCTIONDATA_H */

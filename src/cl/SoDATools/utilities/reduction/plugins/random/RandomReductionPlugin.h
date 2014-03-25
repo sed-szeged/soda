@@ -28,7 +28,7 @@
 namespace soda {
 
 /**
- * @brief The DuplationReductionPlugin class
+ * @brief The RandomReductionPlugin class implements a reduction plugin which selects random test cases.
  */
 class RandomReductionPlugin : public IReductionPlugin
 {
