@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
- * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
+ * Authors: David Havas <havasd@inf.u-szeged.hu>
  *
  * This file is part of SoDA.
  *
@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <ctype.h>
 
 #include "boost/tokenizer.hpp"
 #include "boost/lexical_cast.hpp"
@@ -79,6 +80,7 @@ void GcovCoverageReaderPlugin::readFromDirectoryStructure(const char * dirname)
     for (vector<path>::iterator it = pathVector.begin(); it != pathVector.end(); ++it) {
         if (is_directory((*it))) {
             m_currentTestcase = (*it).leaf().string();
+            std::cout << "[INFO] Reading coverage data from directory: " << *it << std::endl;
             readCoverage((*it));
         }
     }
@@ -108,6 +110,15 @@ void GcovCoverageReaderPlugin::readCoverage(path p)
     }
 }
 
+static bool isNumber(String& str)
+{
+    for (int i = 0; i < (int)str.length(); ++i) {
+        if (!isdigit(str[i]))
+            return false;
+    }
+    return true;
+}
+
 void GcovCoverageReaderPlugin::readCoverageDataFromFile(path p)
 {
     std::ifstream in(p.c_str());
@@ -125,19 +136,20 @@ void GcovCoverageReaderPlugin::readCoverageDataFromFile(path p)
             boost::algorithm::trim(tmp);
             data.push_back(tmp);
         }
+
+        // read source path from first line
         if (firstLine) {
             sourcePath = data[3];
             firstLine = false;
         }
 
-        try {
-            // TODO: store execution count
-            int numExecution = boost::lexical_cast<int>(data[0]);
-            int lineNumber = boost::lexical_cast<int>(data[1]);
+        // data[0] is always non-zero if it's a numer
+        if (isNumber(data[0])) {
+            int lineNumber = boost::lexical_cast<int>(data[1]); // executed line number
             stringstream codeElementName;
-            codeElementName << sourcePath << ":" << lineNumber;
+            codeElementName << sourcePath << ":" << lineNumber;;
             m_coverage->addOrSetRelation(m_currentTestcase, codeElementName.str());
-        } catch (boost::bad_lexical_cast&) {
+        } else {
             continue;
         }
     }
