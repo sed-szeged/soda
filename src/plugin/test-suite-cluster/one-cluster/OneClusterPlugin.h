@@ -31,7 +31,7 @@ class OneClusterPlugin : public ITestSuiteClusterPlugin
 public:
 
     OneClusterPlugin();
-    ~OneClusterPlugin();
+    virtual ~OneClusterPlugin();
 
     std::string getName();
     std::string getDescription();

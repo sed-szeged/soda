@@ -65,6 +65,8 @@ private:
      TestSuiteMetricPluginManager         *m_testSuiteMetricPluginManager;
      TestSuitePrioritizationPluginManager *m_testSuitePrioritizationPluginManager;
      TestSuiteReductionPluginManager      *m_testSuiteReductionPluginManager;
+
+     std::string m_pluginDir;
 };
 
 } /* namespace soda */

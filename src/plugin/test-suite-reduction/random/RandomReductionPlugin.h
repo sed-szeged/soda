@@ -25,6 +25,8 @@
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
 
+using namespace std;
+
 namespace soda {
 
 /**
@@ -38,7 +40,7 @@ public:
      * @brief Creates a new instance.
      */
     RandomReductionPlugin();
-    ~RandomReductionPlugin();
+    virtual ~RandomReductionPlugin();
 
     /**
      * @brief Returns the name of the plugin.

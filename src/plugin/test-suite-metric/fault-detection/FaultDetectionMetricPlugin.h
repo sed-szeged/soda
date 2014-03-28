@@ -30,7 +30,7 @@ class FaultDetectionMetricPlugin : public ITestSuiteMetricPlugin
 {
 public:
     FaultDetectionMetricPlugin();
-    ~FaultDetectionMetricPlugin();
+    virtual ~FaultDetectionMetricPlugin();
 
     /**
      * @brief Returns the name of the plugin.

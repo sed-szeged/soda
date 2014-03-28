@@ -19,6 +19,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <sstream>
+
 #include "engine/CKernel.h"
 
 namespace soda {
@@ -31,7 +33,8 @@ CKernel::CKernel() :
     m_testSuiteClusterPluginManager(NULL),
     m_testSuiteMetricPluginManager(NULL),
     m_testSuitePrioritizationPluginManager(NULL),
-    m_testSuiteReductionPluginManager(NULL)
+    m_testSuiteReductionPluginManager(NULL),
+    m_pluginDir(SODA_PLUGIN_DIR)
 {
 
 }
@@ -70,7 +73,7 @@ ChangesetReaderPluginManager& CKernel::getChangesetReaderPluginManager()
 {
     if (m_changesetReaderPluginManager == NULL) {
         m_changesetReaderPluginManager = new ChangesetReaderPluginManager();
-        loadPluginsFromDirectory("plugin/changeset-reader");
+        loadPluginsFromDirectory(m_pluginDir + "/changeset-reader");
     }
     return *m_changesetReaderPluginManager;
 }
@@ -79,7 +82,7 @@ CoverageReaderPluginManager& CKernel::getCoverageReaderPluginManager()
 {
     if (m_coverageReaderPluginManager == NULL) {
         m_coverageReaderPluginManager = new CoverageReaderPluginManager();
-        loadPluginsFromDirectory("plugin/coverage-reader");
+        loadPluginsFromDirectory(m_pluginDir + "/coverage-reader");
     }
     return *m_coverageReaderPluginManager;
 }
@@ -88,7 +91,7 @@ ResultsReaderPluginManager& CKernel::getResultsReaderPluginManager()
 {
     if (m_resultsReaderPluginManager == NULL) {
         m_resultsReaderPluginManager = new ResultsReaderPluginManager();
-        loadPluginsFromDirectory("plugin/results-reader");
+        loadPluginsFromDirectory(m_pluginDir + "/results-reader");
     }
     return *m_resultsReaderPluginManager;
 }
@@ -97,7 +100,7 @@ TestSuiteClusterPluginManager& CKernel::getTestSuiteClusterPluginManager()
 {
     if (m_testSuiteClusterPluginManager == NULL) {
         m_testSuiteClusterPluginManager = new TestSuiteClusterPluginManager();
-        loadPluginsFromDirectory("plugin/test-suite-cluster");
+        loadPluginsFromDirectory(m_pluginDir + "/test-suite-cluster");
     }
     return *m_testSuiteClusterPluginManager;
 }
@@ -106,7 +109,7 @@ TestSuiteMetricPluginManager& CKernel::getTestSuiteMetricPluginManager()
 {
     if (m_testSuiteMetricPluginManager == NULL) {
         m_testSuiteMetricPluginManager = new TestSuiteMetricPluginManager();
-        loadPluginsFromDirectory("plugin/test-suite-metric");
+        loadPluginsFromDirectory(m_pluginDir + "/test-suite-metric");
     }
     return *m_testSuiteMetricPluginManager;
 }
@@ -115,7 +118,7 @@ TestSuitePrioritizationPluginManager& CKernel::getTestSuitePrioritizationPluginM
 {
     if (m_testSuitePrioritizationPluginManager == NULL) {
         m_testSuitePrioritizationPluginManager = new TestSuitePrioritizationPluginManager();
-        loadPluginsFromDirectory("plugin/test-suite-prioritization");
+        loadPluginsFromDirectory(m_pluginDir + "/test-suite-prioritization");
     }
     return *m_testSuitePrioritizationPluginManager;
 }
@@ -124,7 +127,7 @@ TestSuiteReductionPluginManager& CKernel::getTestSuiteReductionPluginManager()
 {
     if (m_testSuiteReductionPluginManager == NULL) {
         m_testSuiteReductionPluginManager = new TestSuiteReductionPluginManager();
-        loadPluginsFromDirectory("plugin/test-suite-reduction");
+        loadPluginsFromDirectory(m_pluginDir + "/test-suite-reduction");
     }
     return *m_testSuiteReductionPluginManager;
 }

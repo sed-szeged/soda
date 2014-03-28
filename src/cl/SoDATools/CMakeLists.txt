@@ -29,5 +29,5 @@ target_link_libraries(instrumentServer SoDA ${Boost_LIBRARIES} ${CMAKE_THREAD_LI
 
 # sample
 aux_source_directory(${SoDATools_SOURCE_DIR}/sample sample_src)
-add_executable(testSelection ${sample_src})
-target_link_libraries(testSelection SoDA ${Boost_LIBRARIES})
+add_executable(sample ${sample_src})
+target_link_libraries(sample SoDA ${Boost_LIBRARIES})

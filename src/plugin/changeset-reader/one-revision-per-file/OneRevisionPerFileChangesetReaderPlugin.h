@@ -42,7 +42,7 @@ class OneRevisionPerFileChangesetReaderPlugin : public IChangesetReaderPlugin
 public:
 
     OneRevisionPerFileChangesetReaderPlugin();
-    ~OneRevisionPerFileChangesetReaderPlugin();
+    virtual ~OneRevisionPerFileChangesetReaderPlugin();
 
     std::string getName();
     std::string getDescription();

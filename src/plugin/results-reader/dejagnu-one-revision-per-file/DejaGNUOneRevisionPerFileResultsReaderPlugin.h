@@ -42,7 +42,7 @@ class DejaGNUOneRevisionPerFileResultsReaderPlugin : public IResultsReaderPlugin
 public:
 
     DejaGNUOneRevisionPerFileResultsReaderPlugin();
-    ~DejaGNUOneRevisionPerFileResultsReaderPlugin();
+    virtual ~DejaGNUOneRevisionPerFileResultsReaderPlugin();
 
     std::string getName();
     std::string getDescription();

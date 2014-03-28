@@ -35,6 +35,9 @@ CoverageReductionPlugin::CoverageReductionPlugin() :
 {
 }
 
+CoverageReductionPlugin::~CoverageReductionPlugin()
+{}
+
 String CoverageReductionPlugin::getName()
 {
     return "coverage";

@@ -33,6 +33,9 @@ RandomReductionPlugin::RandomReductionPlugin() :
 {
 }
 
+RandomReductionPlugin::~RandomReductionPlugin()
+{}
+
 String RandomReductionPlugin::getName()
 {
     return "random";

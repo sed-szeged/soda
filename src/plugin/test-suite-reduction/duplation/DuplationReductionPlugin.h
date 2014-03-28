@@ -25,6 +25,8 @@
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
 
+using namespace std;
+
 namespace soda {
 
 /**
@@ -39,7 +41,7 @@ public:
      * @brief Creates a new instance.
      */
     DuplationReductionPlugin();
-    ~DuplationReductionPlugin();
+    virtual ~DuplationReductionPlugin();
 
     /**
      * @brief Returns the name of the plugin.

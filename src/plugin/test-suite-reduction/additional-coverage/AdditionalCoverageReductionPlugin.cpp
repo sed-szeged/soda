@@ -26,14 +26,17 @@
 #include "data/CReductionData.h"
 #include "data/CBitList.h"
 
+using namespace std;
+
 namespace soda {
 
-bool operator<(AdditionalCoverageReductionPlugin::qelement d1, AdditionalCoverageReductionPlugin::qelement d2) {
-    return d1.priorityValue < d2.priorityValue;
-}
 
 AdditionalCoverageReductionPlugin::AdditionalCoverageReductionPlugin() :
     m_data(NULL)
+{
+}
+
+AdditionalCoverageReductionPlugin::~AdditionalCoverageReductionPlugin()
 {
 }
 
@@ -94,7 +97,7 @@ void AdditionalCoverageReductionPlugin::additionalCoverageReduction(std::ofstrea
 
     while (!priorityQueue->empty()) {
         if (previous != 0) {
-            sort(priorityQueue->begin(), priorityQueue->end());
+            std::sort(priorityQueue->begin(), priorityQueue->end(), *this);
         }
 
         qelement nxt = priorityQueue->back();
@@ -150,6 +153,12 @@ void AdditionalCoverageReductionPlugin::additionalCoverageReduction(std::ofstrea
     delete priorityQueue;
     delete notCoveredCEIDs;
 }
+
+bool AdditionalCoverageReductionPlugin::operator()(qelement d1, qelement d2)
+{
+    return d1.priorityValue < d2.priorityValue;
+}
+
 
 extern "C" void registerPlugin(CKernel &kernel)
 {

@@ -42,7 +42,7 @@ class OneTestPerFileCoverageReaderPlugin : public ICoverageReaderPlugin
 public:
 
     OneTestPerFileCoverageReaderPlugin();
-    ~OneTestPerFileCoverageReaderPlugin();
+    virtual ~OneTestPerFileCoverageReaderPlugin();
 
     std::string getName();
     std::string getDescription();

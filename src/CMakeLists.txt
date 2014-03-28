@@ -18,6 +18,8 @@ option(coverage "Build with coverage analysis support" OFF)
 
 add_definitions(-Wall)
 
+add_definitions(-DSODA_PLUGIN_DIR="${SoDA_BINARY_DIR}/plugin")
+
 if(test)
     if(coverage)
         set(CMAKE_BUILD_TYPE, Debug)

@@ -45,7 +45,7 @@ public:
      * @brief Creates a new instance.
      */
     RandomIgnorePrioritizationPlugin();
-    ~RandomIgnorePrioritizationPlugin();
+    virtual ~RandomIgnorePrioritizationPlugin();
 
     /**
      * @brief Returns the name of the plugin.

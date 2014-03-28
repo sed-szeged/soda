@@ -42,7 +42,7 @@ class GcovCoverageReaderPlugin : public ICoverageReaderPlugin
 public:
 
     GcovCoverageReaderPlugin();
-    ~GcovCoverageReaderPlugin();
+    virtual ~GcovCoverageReaderPlugin();
 
     std::string getName();
     std::string getDescription();

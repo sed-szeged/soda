@@ -38,7 +38,6 @@ private:
         IndexType testcaseId;
         IndexType priorityValue;
     } qelement;
-    friend bool operator<(qelement d1, qelement d2);
 
 public:
 
@@ -46,7 +45,7 @@ public:
      * @brief Creates a new object.
      */
     AdditionalCoverageReductionPlugin();
-    ~AdditionalCoverageReductionPlugin();
+    virtual ~AdditionalCoverageReductionPlugin();
 
     /**
      * @brief Returns the name of the plugin.
@@ -69,6 +68,14 @@ public:
      * @brief Runs the reduction plugin.
      */
     void reduction(std::ofstream&);
+
+    /**
+     * @brief operator ()
+     * @param d1
+     * @param d2
+     * @return
+     */
+    bool operator()(qelement d1, qelement d2);
 
 private:
 

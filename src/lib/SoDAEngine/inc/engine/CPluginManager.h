@@ -39,9 +39,10 @@ public:
     ~CPluginManager()
     {
         typename PluginInstanceMap::iterator it;
-        for (it = m_plugins->begin(); it != m_plugins->end(); it++) {
+        // FIXME Deleting causes segfault. Memory is leaking here.
+        /*for (it = m_plugins->begin(); it != m_plugins->end(); it++) {
             delete it->second;
-        }
+        }*/
         delete m_plugins;
     }
 

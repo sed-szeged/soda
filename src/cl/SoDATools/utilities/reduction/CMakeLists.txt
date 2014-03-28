@@ -8,5 +8,5 @@ file(GLOB reduction_headers ./*.h)
 
 aux_source_directory(${reduction_SOURCE_DIR} reduction_src)
 
-add_executable(reduction ${reduction_data_src} ${reduction_headers} ${reduction_src})
+add_executable(reduction ${reduction_headers} ${reduction_src})
 target_link_libraries(reduction SoDAEngine SoDA ${Boost_LIBRARIES} dl)

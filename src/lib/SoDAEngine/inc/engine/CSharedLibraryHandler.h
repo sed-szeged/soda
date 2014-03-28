@@ -46,7 +46,7 @@ public:
     {
         void *sharedLibraryHandle = dlopen(path.c_str(), RTLD_NOW);
         if (sharedLibraryHandle == NULL) {
-            throw std::runtime_error("Can not load the shared library.");
+            throw std::runtime_error("Can not load the shared library.\n\t" + std::string(dlerror()));
         }
 
         return sharedLibraryHandle;

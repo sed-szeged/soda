@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
- * Authors:
+ * Authors: Árpád Beszédes <beszedes@inf.u-szeged.hu>
  *
  * This file is part of SoDA.
  *
@@ -32,6 +32,9 @@ DuplationReductionPlugin::DuplationReductionPlugin() :
     m_data(NULL)
 {
 }
+
+DuplationReductionPlugin::~DuplationReductionPlugin()
+{}
 
 String DuplationReductionPlugin::getName()
 {
