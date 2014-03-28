@@ -1,7 +1,0 @@
-project(OneRevisionPerFileChangesetReaderPlugin)
-
-file(GLOB_RECURSE headers ./*.h)
-aux_source_directory(${OneRevisionPerFileChangesetReaderPlugin_SOURCE_DIR} one_revision_per_file_changeset_reader_src)
-
-add_library(one_revision_per_file_changeset_reader SHARED ${changeset_reader_plugin_header} ${headers} ${one_revision_per_file_changeset_reader_src})
-target_link_libraries(one_revision_per_file_changeset_reader SoDA)
