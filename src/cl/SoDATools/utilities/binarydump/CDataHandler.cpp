@@ -24,7 +24,7 @@
 #include "CResultsDataManager.h"
 #include "CChangesDataManager.h"
 
-namespace sodatools {
+namespace soda {
 
 CDataHandler::CDataHandler() :
     m_bPrintInfo(true), m_bWithPassFail(true), m_bWithNames(false),
@@ -152,4 +152,4 @@ void CDataHandler::setReadFormat(ReadFormat format)
     m_eReadFormat = format;
 }
 
-} // namespace sodatools
+} // namespace soda

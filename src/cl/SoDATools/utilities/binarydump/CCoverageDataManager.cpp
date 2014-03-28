@@ -24,10 +24,7 @@
 #include "CDataHandler.h"
 #include <fstream>
 
-namespace sodatools {
-
-CCoverageDataManager::CCoverageDataManager() : CDataManager()
-{}
+namespace soda {
 
 CCoverageDataManager::CCoverageDataManager(CDataHandler *handler) :
     CDataManager(handler)
@@ -49,79 +46,71 @@ void CCoverageDataManager::load(const String &filepath)
         throw new CException("CCoverageDataManager::load", filepath + " is not a regular file");
 }
 
-void CCoverageDataManager::save(const String &filepath)
-{
-    INFO(getPrintInfo(), "CCoverageDataManager::save(\"" << filepath << "\")");
-    if (getDataHandler()->getSelection())
-        getDataHandler()->getSelection()->getCoverage()->save(filepath);
-    else if (getDataHandler()->getCoverage())
-        getDataHandler()->getCoverage()->save(filepath);
-    else
-        WARN("There are no coverage data to be saved.");
-}
-
 void CCoverageDataManager::dumpData(const String &filepath, bool psize, char csep, char rsep)
 {
     INFO(getPrintInfo(), "CCoverageDataManager::dumpData(\"" << filepath << "\")");
     if (getDataHandler()->getCoverage() || getDataHandler()->getSelection()) {
-        ofstream O(filepath.c_str());
+        ofstream O((filepath + ".csv").c_str());
         CCoverageMatrix* coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
         const IBitMatrix& m = coverage->getBitMatrix();
 
-        if(psize) {
+        if (psize) {
             O << m.getNumOfRows() << csep << m.getNumOfCols() << rsep;
         }
 
         if (getWithNames()) {
             O << csep << coverage->getCodeElements().getValue(0);
-            for (IndexType mtidx = 1; mtidx < m.getNumOfCols(); ++mtidx) {
-                O << csep << coverage->getCodeElements().getValue(mtidx);
+            for (IndexType ceidx = 1; ceidx < m.getNumOfCols(); ++ceidx) {
+                O << csep << coverage->getCodeElements().getValue(ceidx);
             }
             O << rsep;
         }
 
-        for(IndexType tcidx = 0; tcidx < m.getNumOfRows(); ++tcidx) {
+        for (IndexType tcidx = 0; tcidx < m.getNumOfRows(); ++tcidx) {
             if (getWithNames()) {
                 O << coverage->getTestcases().getValue(tcidx) << csep;
             }
             O << m[tcidx][0];
-            for(IndexType mtidx = 1; mtidx < m.getNumOfCols(); ++mtidx) {
-                O << csep << (m[tcidx][mtidx] ? '1' : '0');
+
+            for (IndexType ceidx = 1; ceidx < m.getNumOfCols(); ++ceidx) {
+                O << csep << (m[tcidx][ceidx] ? '1' : '0');
             }
             O << rsep;
         }
         O.close();
     } else
-        WARN("There are no Coverage data to be dumped.");
+        WARN("There is no coverage data to be dumped.");
 }
 
 void CCoverageDataManager::dumpTestcases(const String &filepath)
 {
     INFO(getPrintInfo(), "CCoverageDataManager::dumpTestcases(\"" << filepath << "\")");
     if (getDataHandler()->getCoverage() || getDataHandler()->getSelection()) {
-        ofstream O(filepath.c_str());
+        ofstream O((filepath + ".csv").c_str());
         const IIDManager& idm = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage())->getTestcases();
-        for(IndexType idx = 0; idx < idm.size(); ++idx) {
+
+        for (IndexType idx = 0; idx < idm.size(); ++idx) {
             O << idx << ':' << idm[idx] << std::endl;
         }
         O.close();
     } else
-        WARN("There are no Coverage data to be dumped.");
+        WARN("There is no coverage data to be dumped.");
 }
 
 void CCoverageDataManager::dumpCodeElements(const String &filepath)
 {
     INFO(getPrintInfo(), "CCoverageDataManager::dumpCodeElements(\"" << filepath << "\")");
     if (getDataHandler()->getCoverage() || getDataHandler()->getSelection()) {
-        ofstream O(filepath.c_str());
+        ofstream O((filepath + ".csv").c_str());
         const IIDManager& idm = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage())->getCodeElements();
-        for(IndexType idx = 0; idx < idm.size(); ++idx) {
+
+        for (IndexType idx = 0; idx < idm.size(); ++idx) {
             O << idx << ':' << idm[idx] << std::endl;
         }
         O.close();
     } else {
-        WARN("There are no Coverage data to be dumped.");
+        WARN("There is no coverage data to be dumped.");
     }
 }
 
-} // namespace sodatools
+} // namespace soda

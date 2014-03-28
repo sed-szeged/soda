@@ -24,10 +24,7 @@
 #include "CDataHandler.h"
 #include <fstream>
 
-namespace sodatools {
-
-CChangesDataManager::CChangesDataManager() : CDataManager()
-{}
+namespace soda {
 
 CChangesDataManager::CChangesDataManager(CDataHandler *handler) :
     CDataManager(handler)
@@ -49,30 +46,20 @@ void CChangesDataManager::load(const String &filepath)
         throw new CException("CChangesDataManager::load", filepath + " is not a regular file");
 }
 
-void CChangesDataManager::save(const String &filepath)
-{
-    INFO(getPrintInfo(), "CChangesDataManager::save(\"" << filepath << "\")");
-    if (getDataHandler()->getSelection())
-        getDataHandler()->getSelection()->getChangeset()->save(filepath);
-    else if (getDataHandler()->getChanges())
-        getDataHandler()->getChanges()->save(filepath);
-    else
-        WARN("There are no changes data to be saved.");
-}
-
 void CChangesDataManager::dumpCodeElements(const String &filepath)
 {
     INFO(getPrintInfo(), "CChangesDataManager::dumpCodeElements(\"" << filepath << "\")");
     if (getDataHandler()->getChanges() || getDataHandler()->getSelection()) {
-        ofstream O(filepath.c_str());
+        ofstream O((filepath + ".csv").c_str());
         const IIDManager& idm = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getChangeset() : getDataHandler()->getChanges())->getCodeElements();
-        for(IndexType idx = 0; idx < idm.size(); ++idx) {
+
+        for (IndexType idx = 0; idx < idm.size(); ++idx) {
             O << idx << ':' << idm[idx] << std::endl;
         }
         O.close();
     } else {
-        WARN("There are no Changes data to be dumped.");
+        WARN("There is no changes data to be dumped.");
     }
 }
 
-} // namespace sodatools
+} // namespace soda

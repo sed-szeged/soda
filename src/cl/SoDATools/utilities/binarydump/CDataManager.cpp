@@ -22,11 +22,7 @@
 #include "CDataManager.h"
 #include "CDataHandler.h"
 
-namespace sodatools {
-
-CDataManager::CDataManager() :
-    m_pDataHandler(NULL)
-{}
+namespace soda {
 
 CDataManager::CDataManager(CDataHandler *handler) :
     m_pDataHandler(handler)
@@ -78,4 +74,4 @@ int CDataManager::checkPathOk(path p)
     return 0;
 }
 
-} // namespace sodatools
+} // namespace soda

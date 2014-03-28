@@ -24,7 +24,7 @@
 
 #include "CDataManager.h"
 
-namespace sodatools {
+namespace soda {
 
 /**
  * @brief The CChangesDataManager class contains methods for managing change set data files.
@@ -32,11 +32,6 @@ namespace sodatools {
 class CChangesDataManager : public CDataManager
 {
 public:
-
-    /**
-     * @brief Constructor, creates an empty CChangesDataManager object.
-     */
-    CChangesDataManager();
 
     /**
      * @brief Creates a CChangesDataManager object with a specified handler.
@@ -48,12 +43,6 @@ public:
      * @brief Destroys a CChangesDataManager object.
      */
     ~CChangesDataManager();
-
-    /**
-     * @brief Writes the content of a change set data to a specified file.
-     * @param filepath  File path.
-     */
-    void save(const String &filepath);
 
     /**
      * @brief Loads the content of a change set data from a specified file.
@@ -69,6 +58,6 @@ public:
     void dumpCodeElements(const String &filepath);
 };
 
-} // namespace sodatools
+} // namespace soda
 
 #endif /* CCHANGESDATAMANAGER_H */

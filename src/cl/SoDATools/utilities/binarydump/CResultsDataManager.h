@@ -24,7 +24,7 @@
 
 #include "CDataManager.h"
 
-namespace sodatools {
+namespace soda {
 
 /**
  * @brief The CResultsDataManager class contains methods for managing results data files.
@@ -32,11 +32,6 @@ namespace sodatools {
 class CResultsDataManager : public CDataManager
 {
 public:
-
-    /**
-     * @brief Constructor, creates an empty CResultsDataManager object.
-     */
-    CResultsDataManager();
 
     /**
      * @brief Creates a CResultsDataManager object with a specified handler.
@@ -48,12 +43,6 @@ public:
      * @brief Destroys a CResultsDataManager object.
      */
     ~CResultsDataManager();
-
-    /**
-     * @brief Writes the content of a results data to a specified file.
-     * @param filepath  File path.
-     */
-    void save(const String &filepath);
 
     /**
      * @brief Loads the content of a results data from a specified file.
@@ -81,7 +70,7 @@ public:
      * @param csep  Column separator.
      * @param rsep  Record separator.
      */
-    void dumpExecution(const String& filepath, bool psize=false, char csep=';', char rsep='\n');
+    void dumpExecution(const String& filepath, bool psize = false, char csep = ';', char rsep = '\n');
 
     /**
      * @brief Dumps passed bit matrix to a specified file.
@@ -90,9 +79,9 @@ public:
      * @param csep  Column separator.
      * @param rsep  Record separator.
      */
-    void dumpPassFail(const String& filepath, bool psize=false, char csep=';', char rsep='\n');
+    void dumpPassFail(const String& filepath, bool psize = false, char csep = ';', char rsep = '\n');
 };
 
-} // namespace sodatools
+} // namespace soda
 
 #endif /* CRESULTSDATAMANAGER_H */

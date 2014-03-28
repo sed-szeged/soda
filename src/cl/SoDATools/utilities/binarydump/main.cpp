@@ -32,7 +32,6 @@
 #include "boost/program_options.hpp"
 
 using namespace soda;
-using namespace sodatools;
 using namespace boost::program_options;
 
 /**
