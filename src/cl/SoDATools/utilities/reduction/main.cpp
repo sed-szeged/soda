@@ -27,11 +27,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#include "plugins/IReductionPlugin.h"
 #include "data/CSelectionData.h"
 #include "exception/CException.h"
+#include "engine/CKernel.h"
 #include "io/CJsonReader.h"
-#include "CReductionPluginManager.h"
 
 using namespace std;
 using namespace soda;
@@ -44,11 +43,10 @@ int loadJsonFiles(String path);
 void printPluginNames(const std::vector<String> &plugins);
 void printHelp();
 
-CReductionPluginManager pluginManager;
+CKernel kernel;
 
 int main(int argc, char* argv[]) {
     cout << "reduction (SoDA tool)" << endl;
-    pluginManager.loadReductionPlugins();
 
     options_description desc("Options");
     desc.add_options()
@@ -72,7 +70,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (vm.count("list-algorithms")) {
-        printPluginNames(pluginManager.getReductionPluginNames());
+        printPluginNames(kernel.getTestSuiteReductionPluginManager().getPluginNames());
         return 0;
     }
 
@@ -145,12 +143,12 @@ void processJsonFiles(String path)
         if (reductionList.empty()) {
             std::cerr << "[ERROR] reduction-algorithm is missing from the configuration file("
                       << path << ")." << std::endl;
-            printPluginNames(pluginManager.getReductionPluginNames());
+            printPluginNames(kernel.getTestSuiteReductionPluginManager().getPluginNames());
             return;
         } else {
             for (StringVector::const_iterator it = reductionList.begin(); it != reductionList.end(); ++it) {
                 try {
-                    pluginManager.getReductionPlugin(*it);
+                    kernel.getTestSuiteReductionPluginManager().getPlugin(*it);
                 } catch (std::out_of_range &e) {
                     std::cerr << "[ERROR] Invalid reduction algorithm name(" << *it
                               << ") in configuration file: " << path << "." << std::endl;
@@ -192,13 +190,13 @@ void processJsonFiles(String path)
         while (!reductionList.empty()) {
             string reductionMethod = reductionList.back();
             reductionList.pop_back();
-            IReductionPlugin *plugin = NULL;
+            ITestSuiteReductionPlugin *plugin = NULL;
             try {
-                plugin = pluginManager.getReductionPlugin(reductionMethod);
+                plugin = kernel.getTestSuiteReductionPluginManager().getPlugin(reductionMethod);
                 plugin->init(&selectionData, reader);
             } catch (std::out_of_range &e) {
                 std::cerr << "[ERROR] Unknown reduction mode. " << std::endl;
-                printPluginNames(pluginManager.getReductionPluginNames());
+                printPluginNames(kernel.getTestSuiteReductionPluginManager().getPluginNames());
                 return;
             }
             plugin->reduction(outStream);

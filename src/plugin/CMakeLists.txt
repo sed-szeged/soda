@@ -1,0 +1,7 @@
+add_subdirectory(changeset-reader)
+add_subdirectory(coverage-reader)
+add_subdirectory(results-reader)
+add_subdirectory(test-suite-cluster)
+add_subdirectory(test-suite-metric)
+add_subdirectory(test-suite-prioritization)
+add_subdirectory(test-suite-reduction)

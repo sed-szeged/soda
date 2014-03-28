@@ -28,11 +28,10 @@
 #include <boost/program_options.hpp>
 
 #include "CRevisionFilters.h"
-#include "CSelectionsPluginManager.h"
 #include "CComputeSelectionMetrics.h"
 #include "data/CSelectionData.h"
+#include "engine/CKernel.h"
 #include "io/CJsonReader.h"
-#include "plugins/prioritization/IPrioritizationPlugin.h"
 
 using namespace std;
 using namespace soda;
@@ -45,11 +44,10 @@ int loadJsonFiles(String path);
 void printPluginNames(const String &type, const std::vector<String> &plugins);
 void printHelp();
 
-CSelectionsPluginManager pluginManager;
+CKernel kernel;
 
 int main(int argc, char* argv[]) {
     cout << "selections (SoDA tool)" << endl;
-    pluginManager.loadPrioritizationPlugins();
 
     options_description desc("Options");
     desc.add_options()
@@ -73,7 +71,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (vm.count("list-algorithms")) {
-        printPluginNames("prioritization", pluginManager.getPrioritizationPluginNames());
+        printPluginNames("prioritization", kernel.getTestSuitePrioritizationPluginManager().getPluginNames());
         return 0;
     }
 
@@ -142,12 +140,12 @@ void processJsonFiles(String path)
         if (priolist.empty()) {
             std::cerr << "[ERROR] prioritization-algorithm is missing from the configuration file("
                       << path << ")." << std::endl;
-            printPluginNames("prioritization", pluginManager.getPrioritizationPluginNames());
+            printPluginNames("prioritization", kernel.getTestSuitePrioritizationPluginManager().getPluginNames());
             return;
         } else {
             for (StringVector::const_iterator it = priolist.begin(); it != priolist.end(); ++it) {
                 try {
-                    pluginManager.getPrioritizationPlugin(*it);
+                    kernel.getTestSuitePrioritizationPluginManager().getPlugin(*it);
                 } catch (std::out_of_range &e) {
                     std::cerr << "[ERROR] Invalid prioritization algorithm name(" << *it
                               << ") in configuration file: " << path << "." << std::endl;
@@ -194,13 +192,13 @@ void processJsonFiles(String path)
             string t = priolist.back();
             priolist.pop_back();
 
-            IPrioritizationPlugin *plugin = NULL;
+            ITestSuitePrioritizationPlugin *plugin = NULL;
             try {
-                plugin = pluginManager.getPrioritizationPlugin(t);
+                plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin(t);
                 plugin->init(&selectionData);
             } catch (std::out_of_range &e) {
                 std::cerr << "[ERROR] Unknown algorithm mode. " << std::endl;
-                printPluginNames("prioritization", pluginManager.getPrioritizationPluginNames());
+                printPluginNames("prioritization", kernel.getTestSuitePrioritizationPluginManager().getPluginNames());
                 return;
             }
 

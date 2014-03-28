@@ -23,7 +23,7 @@
 #define CCOMPUTESELECTIONMETRICS_H
 
 #include "data/CSelectionData.h"
-#include "plugins/prioritization/IPrioritizationPlugin.h"
+#include "engine/CKernel.h"
 
 namespace soda {
 
@@ -106,7 +106,7 @@ public:
      * @brief Creates a new CComputeSelectionMetrics object.
      * @param dbg Progress bar level.
      */
-    CComputeSelectionMetrics(CSelectionData*, IPrioritizationPlugin*, IntVector*, IntVector*, int dbg = 0);
+    CComputeSelectionMetrics(CSelectionData*, ITestSuitePrioritizationPlugin*, IntVector*, IntVector*, int dbg = 0);
     ~CComputeSelectionMetrics();
 
     /**
@@ -150,7 +150,7 @@ private:
     /**
      * @brief Sorting method.
      */
-    IPrioritizationPlugin* m_prioAlg;
+    ITestSuitePrioritizationPlugin* m_prioAlg;
 
     /**
      * @brief List of revision numbers.

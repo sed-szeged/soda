@@ -32,6 +32,8 @@ if(test)
 endif(test)
 
 add_subdirectory(lib/SoDA)
+add_subdirectory(lib/SoDAEngine)
+add_subdirectory(plugin)
 add_subdirectory(cl)
 
 if(test)
