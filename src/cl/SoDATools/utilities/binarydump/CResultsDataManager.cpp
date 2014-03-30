@@ -24,10 +24,7 @@
 #include "CDataHandler.h"
 #include <fstream>
 
-namespace sodatools {
-
-CResultsDataManager::CResultsDataManager() : CDataManager()
-{}
+namespace soda {
 
 CResultsDataManager::CResultsDataManager(CDataHandler *handler) :
     CDataManager(handler)
@@ -49,43 +46,34 @@ void CResultsDataManager::load(const String &filepath)
         throw new CException("CResultsDataManager::load", filepath + " is not a regular file");
 }
 
-void CResultsDataManager::save(const String &filepath)
-{
-    INFO(getPrintInfo(), "CResultsDataManager::save(\"" << filepath << "\")");
-    if (getDataHandler()->getSelection())
-        getDataHandler()->getSelection()->getResults()->save(filepath);
-    else if (getDataHandler()->getResults())
-        getDataHandler()->getResults()->save(filepath);
-    else
-        WARN("There are no results data to be saved.");
-}
-
 void CResultsDataManager::dumpTestcases(const String &filepath)
 {
     INFO(getPrintInfo(), "CResultsDataManager::dumpTestcases(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
-        ofstream O(filepath.c_str());
+        ofstream O((filepath + ".csv").c_str());
         const IIDManager& idm = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults())->getTestcases();
-        for(IndexType idx = 0; idx < idm.size(); ++idx) {
+
+        for (IndexType idx = 0; idx < idm.size(); ++idx) {
             O << idx << ':' << idm[idx] << std::endl;
         }
         O.close();
     } else
-        WARN("There are no Results data to be dumped.");
+        WARN("There is no results data to be dumped.");
 }
 
 void CResultsDataManager::dumpRevisions(const String& filepath)
 {
     INFO(getPrintInfo(), "CResultsDataManager::dumpRevisions(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
-        ofstream O(filepath.c_str());
+        ofstream O((filepath + ".csv").c_str());
         IntVector revList = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults())->getRevisionNumbers();
-        for(IndexType idx = 0; idx < revList.size(); ++idx) {
+
+        for (IndexType idx = 0; idx < revList.size(); ++idx) {
             O << idx << ':' << revList[idx] << std::endl;
         }
         O.close();
     } else {
-        WARN("There are no Results data to be dumped.");
+        WARN("There is no results data to be dumped.");
     }
 }
 
@@ -93,12 +81,14 @@ void CResultsDataManager::dumpExecution(const String& filepath, bool psize, char
 {
     INFO(getPrintInfo(), "CResultsDataManager::dumpExecution(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
-        ofstream O(filepath.c_str());
+        ofstream O((filepath + ".csv").c_str());
         const IBitMatrix& m = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults())->getExecutionBitMatrix();
+
         if (psize) {
             O << m.getNumOfRows() << csep << m.getNumOfCols() << rsep;
         }
-        for(IndexType rev = 0; rev < m.getNumOfRows(); ++rev) {
+
+        for (IndexType rev = 0; rev < m.getNumOfRows(); ++rev) {
             O << m[rev][0];
             for(IndexType tcidx = 1; tcidx < m.getNumOfCols(); ++tcidx) {
                 O << csep << (m[rev][tcidx] ? '1' : '0');
@@ -107,7 +97,7 @@ void CResultsDataManager::dumpExecution(const String& filepath, bool psize, char
         }
         O.close();
     } else {
-        WARN("There are no Coverage data to be dumped.");
+        WARN("There is no results data to be dumped.");
     }
 }
 
@@ -115,21 +105,23 @@ void CResultsDataManager::dumpPassFail(const String& filepath, bool psize, char 
 {
     INFO(getPrintInfo(), "CResultsDataManager::dumpPassFail(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
-        ofstream O(filepath.c_str());
+        ofstream O((filepath + ".csv").c_str());
         const IBitMatrix& m = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults())->getPassedBitMatrix();
-        if(psize) {
+
+        if (psize) {
             O << m.getNumOfRows() << csep << m.getNumOfCols() << rsep;
         }
-        for(IndexType rev=0; rev < m.getNumOfRows(); ++rev) {
+
+        for (IndexType rev = 0; rev < m.getNumOfRows(); ++rev) {
             O << m[rev][0];
-            for(IndexType tcidx=1; tcidx<m.getNumOfCols(); ++tcidx) {
+            for(IndexType tcidx = 1; tcidx < m.getNumOfCols(); ++tcidx) {
                 O << csep << (m[rev][tcidx] ? '1' : '0');
             }
             O << rsep;
         }
         O.close();
     } else
-        WARN("There are no Result data to be dumped.");
+        WARN("There is no results data to be dumped.");
 }
 
-} // namespace sodatools
+} // namespace soda

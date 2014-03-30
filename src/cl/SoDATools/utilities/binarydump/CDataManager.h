@@ -31,7 +31,7 @@
 
 using namespace boost::filesystem;
 
-namespace sodatools {
+namespace soda {
 
 class CDataHandler;
 
@@ -43,11 +43,6 @@ class CDataManager
 public:
 
     /**
-     * @brief Constructor, creates an empty CDataManager object.
-     */
-    CDataManager();
-
-    /**
      * @brief Creates a CDataManager object with a specified handler.
      * @param handler  CDataHandler object.
      */
@@ -57,12 +52,6 @@ public:
      * @brief Destroys a CDataManager object.
      */
     ~CDataManager();
-
-    /**
-     * @brief Saves the content of a data type.
-     * @param filepath  File path.
-     */
-    virtual void save(const String& filepath) = 0;
 
     /**
      * @brief Loads binary data from a specified file.
@@ -114,6 +103,6 @@ private:
     CDataHandler *m_pDataHandler;
 };
 
-} // namespace sodatools
+} // namespace soda
 
 #endif /* CDATAMANAGER_H */

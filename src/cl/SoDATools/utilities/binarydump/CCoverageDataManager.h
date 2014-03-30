@@ -24,7 +24,7 @@
 
 #include "CDataManager.h"
 
-namespace sodatools {
+namespace soda {
 
 /**
  * @brief The CCoverageDataManager class contains methods for managing coverage data files.
@@ -32,11 +32,6 @@ namespace sodatools {
 class CCoverageDataManager : public CDataManager
 {
 public:
-
-    /**
-     * @brief Constructor, creates an empty CCoverageDataManager object.
-     */
-    CCoverageDataManager();
 
     /**
      * @brief Creates a CCoverageDataManager object with a specified handler.
@@ -48,12 +43,6 @@ public:
      * @brief Destroys a CCoverageDataManager object.
      */
     ~CCoverageDataManager();
-
-    /**
-     * @brief Writes the content of a coverage data to a specified file.
-     * @param filepath  File path.
-     */
-    void save(const String &filepath);
 
     /**
      * @brief Loads the content of a coverage data from a specified file.
@@ -84,6 +73,6 @@ public:
     void dumpCodeElements(const String &filepath);
 };
 
-} // namespace sodatools
+} // namespace soda
 
 #endif /* CCOVERAGEDATAMANAGER_H */

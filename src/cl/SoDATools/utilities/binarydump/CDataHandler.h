@@ -31,9 +31,8 @@
 #include <iostream>
 
 using namespace std;
-using namespace soda;
 
-namespace sodatools {
+namespace soda {
 
 class CCoverageDataManager;
 class CChangesDataManager;
@@ -239,6 +238,6 @@ private:
     CIDManager *m_pCodeElements;
 };
 
-} // namespace sodatools
+} // namespace soda
 
 #endif /* CDATAHANDLER_H */
