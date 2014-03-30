@@ -36,7 +36,7 @@ CComputeSelectionMetrics::SelectionMetrics::SelectionMetrics():
 CComputeSelectionMetrics::SelectionMetrics::~SelectionMetrics()
 {}
 
-CComputeSelectionMetrics::CComputeSelectionMetrics(CSelectionData* data, IPrioritizationPlugin* prio, IntVector* revlist, IntVector* sizelist, int dbg):
+CComputeSelectionMetrics::CComputeSelectionMetrics(CSelectionData* data, ITestSuitePrioritizationPlugin* prio, IntVector* revlist, IntVector* sizelist, int dbg):
         m_data(data),
         m_prioAlg(prio),
         m_revisionList(revlist),

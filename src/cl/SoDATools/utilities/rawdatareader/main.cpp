@@ -24,12 +24,12 @@
 
 #include "boost/program_options.hpp"
 
-#include "CRawDataReaderPluginManager.h"
+#include "engine/CKernel.h"
 
 using namespace boost::program_options;
 using namespace soda;
 
-CRawDataReaderPluginManager pluginManager;
+CKernel kernel;
 int processArgs(options_description desc, int ac, char* av[]);
 
 int main(int argc, char *argv[])
@@ -80,16 +80,15 @@ int processArgs(options_description desc, int ac, char* av[])
 
 
         if (type == "coverage") {
-            pluginManager.loadCoverageReaderPlugins();
             if (vm.count("list")) {
-                printPluginNames("coverage", pluginManager.getCoverageReaderPluginNames());
+                printPluginNames("coverage", kernel.getCoverageReaderPluginManager().getPluginNames());
                 return 0;
             }
             if (vm.count("mode")) {
                 std::string mode = vm["mode"].as<std::string>();
                 std::string path = vm["path"].as<std::string>();
                 try {
-                    ICoverageReaderPlugin *plugin = pluginManager.getCoverageReaderPlugin(mode);
+                    ICoverageReaderPlugin *plugin = kernel.getCoverageReaderPluginManager().getPlugin(mode);
                     CCoverageMatrix *matrix = plugin->read(path);
                     if (vm.count("output")) {
                         std::string output = vm["output"].as<std::string>();
@@ -100,22 +99,21 @@ int processArgs(options_description desc, int ac, char* av[])
                     }
                 } catch (std::out_of_range &e) {
                     std::cerr << "[ERROR] Unknown read mode. " << std::endl;
-                    printPluginNames("coverage", pluginManager.getCoverageReaderPluginNames());
+                    printPluginNames("coverage", kernel.getCoverageReaderPluginManager().getPluginNames());
                     return 1;
                 }
                 return 0;
             }
         } else if (type == "results") {
-            pluginManager.loadResultsReaderPlugins();
             if (vm.count("list")) {
-                printPluginNames("results", pluginManager.getResultsReaderPluginNames());
+                printPluginNames("results", kernel.getResultsReaderPluginManager().getPluginNames());
                 return 0;
             }
             if (vm.count("mode")) {
                 std::string mode = vm["mode"].as<std::string>();
                 std::string path = vm["path"].as<std::string>();
                 try {
-                    IResultsReaderPlugin *plugin = pluginManager.getResultsReaderPlugin(mode);
+                    IResultsReaderPlugin *plugin = kernel.getResultsReaderPluginManager().getPlugin(mode);
                     CResultsMatrix *results = plugin->read(path);
                     if (vm.count("output")) {
                         std::string output = vm["output"].as<std::string>();
@@ -126,22 +124,21 @@ int processArgs(options_description desc, int ac, char* av[])
                     }
                 } catch (std::out_of_range &e) {
                     std::cerr << "[ERROR] Unknown read mode. " << std::endl;
-                    printPluginNames("results", pluginManager.getResultsReaderPluginNames());
+                    printPluginNames("results", kernel.getResultsReaderPluginManager().getPluginNames());
                     return 1;
                 }
                 return 0;
             }
         } else if (type == "changeset") {
-            pluginManager.loadChangesetReaderPlugins();
             if (vm.count("list")) {
-                printPluginNames("changeset", pluginManager.getChangesetReaderPluginNames());
+                printPluginNames("changeset", kernel.getChangesetReaderPluginManager().getPluginNames());
                 return 0;
             }
             if (vm.count("mode")) {
                 std::string mode = vm["mode"].as<std::string>();
                 std::string path = vm["path"].as<std::string>();
                 try {
-                    IChangesetReaderPlugin *plugin = pluginManager.getChangesetReaderPlugin(mode);
+                    IChangesetReaderPlugin *plugin = kernel.getChangesetReaderPluginManager().getPlugin(mode);
                     CChangeset *changeset = plugin->read(path);
                     if (vm.count("output")) {
                         std::string output = vm["output"].as<std::string>();
@@ -152,7 +149,7 @@ int processArgs(options_description desc, int ac, char* av[])
                     }
                 } catch (std::out_of_range &e) {
                     std::cerr << "[ERROR] Unknown read mode. " << std::endl;
-                    printPluginNames("changeset", pluginManager.getChangesetReaderPluginNames());
+                    printPluginNames("changeset", kernel.getChangesetReaderPluginManager().getPluginNames());
                     return 1;
                 }
                 return 0;

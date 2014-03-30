@@ -27,12 +27,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#include "CTestSuiteMetricsPluginManager.h"
-#include "CClusterDefinition.h"
+#include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
+#include "engine/CKernel.h"
 #include "io/CJsonReader.h"
-#include "plugins/cluster/IClusterPlugin.h"
-#include "plugins/metric/IMetricPlugin.h"
 
 
 using namespace soda;
@@ -45,12 +43,10 @@ int loadJsonFiles(String path);
 void printPluginNames(const String &type, const std::vector<String> &plugins);
 void printHelp();
 
-CTestSuiteMetricsPluginManager pluginManager;
+CKernel kernel;
 
 int main(int argc, char* argv[]) {
     std::cout << "test-suite-metrics (SoDA tool)" << std::endl;
-    pluginManager.loadClusterPlugins();
-    pluginManager.loadMetricPlugins();
 
     options_description desc("Options");
     desc.add_options()
@@ -75,11 +71,11 @@ int main(int argc, char* argv[]) {
     }
 
     if (vm.count("list-cluster-algorithms")) {
-        printPluginNames("cluster", pluginManager.getClusterPluginNames());
+        printPluginNames("cluster", kernel.getTestSuiteClusterPluginManager().getPluginNames());
         return 0;
     }
     if (vm.count("list-metric-plugins")) {
-        printPluginNames("metric", pluginManager.getMetricPluginNames());
+        printPluginNames("metric", kernel.getTestSuiteMetricPluginManager().getPluginNames());
         return 0;
     }
 
@@ -145,7 +141,7 @@ void processJsonFiles(String path)
         CJsonReader reader = CJsonReader(path);
 
         std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
-        IClusterPlugin *clusterAlgorithm = pluginManager.getClusterPlugin(clusterAlgorithmName);
+        ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
 
         if (exists(reader.getStringFromProperty("coverage-data")) &&
                 exists(reader.getStringFromProperty("results-data"))) {
@@ -170,7 +166,7 @@ void processJsonFiles(String path)
 
         StringVector metrics = reader.getStringVectorFromProperty("metrics");
         for (StringVector::iterator it = metrics.begin(); it != metrics.end(); it++) {
-            IMetricPlugin *metric = pluginManager.getMetricPlugin(*it);
+            ITestSuiteMetricPlugin *metric = kernel.getTestSuiteMetricPluginManager().getPlugin(*it);
             (std::cerr << "[INFO] Calculating metrics: " << metric->getName() << " ...").flush();
             metric->calculate(selectionData, clusterList, revisionList, outputDir);
             (std::cerr << " done" << std::endl).flush();
