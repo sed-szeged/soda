@@ -41,11 +41,6 @@ CKernel::CKernel() :
 
 CKernel::~CKernel()
 {
-    for (PluginMap::iterator it = m_pluginMap->begin(); it != m_pluginMap->end(); it++) {
-        delete it->second;
-    }
-    delete m_pluginMap;
-
     if (m_changesetReaderPluginManager) {
         delete m_changesetReaderPluginManager;
     }
@@ -67,6 +62,12 @@ CKernel::~CKernel()
     if (m_testSuiteReductionPluginManager) {
         delete m_testSuiteReductionPluginManager;
     }
+
+    // Delete internal plugin representations. The loaded libraries will be unloaded.
+    for (PluginMap::iterator it = m_pluginMap->begin(); it != m_pluginMap->end(); it++) {
+        delete it->second;
+    }
+    delete m_pluginMap;
 }
 
 ChangesetReaderPluginManager& CKernel::getChangesetReaderPluginManager()

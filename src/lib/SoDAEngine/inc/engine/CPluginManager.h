@@ -22,7 +22,7 @@
 
 #ifndef CPLUGINMANAGER_H
 #define CPLUGINMANAGER_H
-
+#include <string>
 #include <vector>
 #include <map>
 
@@ -39,10 +39,9 @@ public:
     ~CPluginManager()
     {
         typename PluginInstanceMap::iterator it;
-        // FIXME Deleting causes segfault. Memory is leaking here.
-        /*for (it = m_plugins->begin(); it != m_plugins->end(); it++) {
+        for (it = m_plugins->begin(); it != m_plugins->end(); it++) {
             delete it->second;
-        }*/
+        }
         delete m_plugins;
     }
 
