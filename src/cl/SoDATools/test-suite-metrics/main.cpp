@@ -23,6 +23,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <set>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -44,6 +45,14 @@ void printPluginNames(const String &type, const std::vector<String> &plugins);
 void printHelp();
 
 CKernel kernel;
+
+CSelectionData selectionData;
+IndexType revision;
+std::vector<CClusterDefinition> clusterList;
+std::string outputDir;
+std::vector<ITestSuiteMetricPlugin::MetricResults> results;
+
+std::set<std::string> metricsCalculated;
 
 int main(int argc, char* argv[]) {
     std::cout << "test-suite-metrics (SoDA tool)" << std::endl;
@@ -87,13 +96,13 @@ void printHelp()
     std::cout << "This application measures the given test suites with the specified options in a json config files."
          << std::endl << std::endl;
     std::cout << "USAGE:" << std::endl
-         << "\ttest-suite-metrics [-hl]" << std::endl
+         << "\ttest-suite-metrics [-hcm]" << std::endl
          << "\ttest-suite-metrics json file path" << std::endl
          << "\ttest-suite-metrics directory which contains one or more json files" << std::endl << std::endl;
     std::cout << "Json configuration file format:" << std::endl
          << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
          << "\"results-data\": \"results file path\",\n\t"
-         << "\"revision-list\": [1, 10, 100],\n\t"
+         << "\"revision\": 1,\n\t"
          << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the metrics\",\n\t"
          << "\"metrics\": [ \"list of metrics to calculate\" ],\n\t"
          << "\"output-dir\": \"output directory\"\n"
@@ -133,11 +142,29 @@ int loadJsonFiles(String path)
     return 0;
 }
 
+void calculateMetric(const std::string &name)
+{
+    ITestSuiteMetricPlugin *metric = kernel.getTestSuiteMetricPluginManager().getPlugin(name);
+
+    StringVector dependencies = metric->getDependency();
+    for (StringVector::iterator it = dependencies.begin(); it != dependencies.end(); it++) {
+        if (metricsCalculated.find(*it) == metricsCalculated.end()) {
+            calculateMetric(*it);
+        }
+    }
+
+    (std::cerr << "[INFO] Calculating metrics: " << metric->getName() << " ...").flush();
+    metric->init(&selectionData, &clusterList, revision);
+    metric->calculate(outputDir, results);
+    metricsCalculated.insert(name);
+    (std::cerr << " done." << std::endl).flush();
+}
+
 void processJsonFiles(String path)
 {
     try {
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
-        CSelectionData selectionData;
+
         CJsonReader reader = CJsonReader(path);
 
         std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
@@ -155,21 +182,19 @@ void processJsonFiles(String path)
             return;
         }
 
-        IntVector revisionList = reader.getIntVectorFromProperty("revision-list");
-        std::string outputDir = reader.getStringFromProperty("output-dir");
+        revision = reader.getIntFromProperty("revision");
+        outputDir = reader.getStringFromProperty("output-dir");
 
         (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
-        std::vector<CClusterDefinition> clusterList;
         clusterAlgorithm->execute(selectionData, clusterList);
         (std::cerr << " done" << std::endl).flush();
 
+        results.resize(clusterList.size());
 
         StringVector metrics = reader.getStringVectorFromProperty("metrics");
+
         for (StringVector::iterator it = metrics.begin(); it != metrics.end(); it++) {
-            ITestSuiteMetricPlugin *metric = kernel.getTestSuiteMetricPluginManager().getPlugin(*it);
-            (std::cerr << "[INFO] Calculating metrics: " << metric->getName() << " ...").flush();
-            metric->calculate(selectionData, clusterList, revisionList, outputDir);
-            (std::cerr << " done" << std::endl).flush();
+            calculateMetric(*it);
         }
 
 

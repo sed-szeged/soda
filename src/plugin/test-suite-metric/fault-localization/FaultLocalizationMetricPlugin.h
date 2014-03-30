@@ -43,18 +43,36 @@ public:
      */
     std::string getDescription();
 
+    /**
+     * @brief Returns the list of plugins names that the plugin depens on.
+     * @return List of dependencies.
+     */
+    std::vector<std::string> getDependency();
+
+    /**
+     * @brief Initialize the plugin.
+     * @param data The test suite data.
+     * @param clusterList The clusters of test cases and code elements.
+     * @param revisionList The revisions to consider.
+     */
+    void init(CSelectionData *data, std::vector<CClusterDefinition> *clusterList, IndexType revision);
+
 
     /**
      * @brief Calculates the metrics of a test suite.
-     * @param [IN] data The test suite data.
-     * @param [IN] clusterList The clusters of test cases and code elements.
-     * @param [IN] output The path to the output directory.
+     * @param output The path to the output directory.
+     * @param results Stores the results of the metric plugin for each cluster.
      */
-    void calculate(CSelectionData &data, std::vector<CClusterDefinition> &clusterList, const std::vector<IndexType> &revisionList, const std::string &output);
+    void calculate(const std::string &output, std::vector<MetricResults> &results);
 
 private:
     void writePartitions(CPartitionAlgorithm &algorithm, const std::string &output);
-    void partitionStatistics(CSelectionData &data, CPartitionAlgorithm &algorithm, const std::string &output);
+    void partitionStatistics(CPartitionAlgorithm &algorithm, const std::string &output, MetricResults &result);
+
+private:
+    CSelectionData *m_data;
+    std::vector<CClusterDefinition> *m_clusterList;
+    IndexType m_revision;
 };
 
 } /* namespace soda */

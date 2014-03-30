@@ -39,17 +39,13 @@ public:
     } partition_info;
 
     /**
-     * @brief Key is revision, value is the list of code elements with their partition identifier.
+     * @brief List of code elements with their partition identifier.
      */
-    typedef std::map<IndexType, std::vector<partition_info> > PartitionInfo;
+    typedef std::vector<partition_info> PartitionInfo;
     /**
      * @brief Key is a partition identifer and the value is a set of code elements belong to the partition.
      */
     typedef std::map<IndexType, std::set<IndexType> > PartitionData;
-    /**
-     * @brief Key is revision, value is PartitionData.
-     */
-    typedef std::map<IndexType, PartitionData > Partition;
 
 private:
     typedef struct {
@@ -62,14 +58,6 @@ private:
 public:
     CPartitionAlgorithm();
     ~CPartitionAlgorithm();
-
-    /**
-     * @brief Create the partitions of the test suite for every given revisions.
-     * @param [IN] data The input data.
-     * @param [IN] cluster The clusters of test cases and code elements.
-     * @param [IN] revisionList The revisions to consider.
-     */
-    void compute(CSelectionData &data, CClusterDefinition &cluster, const std::vector<IndexType> &revisionList);
 
     /**
      * @brief Create the partitions of the test suite for one revision.
@@ -89,10 +77,10 @@ public:
      * @brief Returns the data of partitions.
      * @return
      */
-    inline Partition& getPartitions() { return *m_partitions; }
+    inline PartitionData& getPartitions() { return *m_partitions; }
 private:
     PartitionInfo *m_partitionInfo;
-    Partition     *m_partitions;
+    PartitionData     *m_partitions;
 
 };
 

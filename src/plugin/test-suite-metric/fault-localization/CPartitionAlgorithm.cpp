@@ -30,7 +30,7 @@ bool operator<(CPartitionAlgorithm::code_element_info c1, CPartitionAlgorithm::c
 
 CPartitionAlgorithm::CPartitionAlgorithm() :
     m_partitionInfo(new PartitionInfo()),
-    m_partitions(new Partition())
+    m_partitions(new PartitionData())
 {
 }
 
@@ -38,13 +38,6 @@ CPartitionAlgorithm::~CPartitionAlgorithm()
 {
     delete m_partitionInfo;
     delete m_partitions;
-}
-
-void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &cluster, const std::vector<IndexType> &revisionList)
-{
-    for (IndexType i = 0; i < revisionList.size(); i++) {
-        compute(data, cluster, revisionList[i]);
-    }
 }
 
 void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &cluster, IndexType revision)
@@ -100,8 +93,8 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
 
         pInfo.cid = c.cid;
         pInfo.partitionId = partitionId;
-        (*m_partitionInfo)[revision].push_back(pInfo);
-        (*m_partitions)[revision][partitionId].insert(c.cid);
+        m_partitionInfo->push_back(pInfo);
+        (*m_partitions)[partitionId].insert(c.cid);
 
         std::vector<code_element_info> tmp;
         std::vector<bool> cVector;
@@ -125,8 +118,8 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
                 }
                 if (cVector == iVector) {
                     pInfo.cid = i.cid;
-                    (*m_partitionInfo)[revision].push_back(pInfo);
-                    (*m_partitions)[revision][partitionId].insert(i.cid);
+                    m_partitionInfo->push_back(pInfo);
+                    (*m_partitions)[partitionId].insert(i.cid);
                 } else {
                     tmp.push_back(i);
                 }

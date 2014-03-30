@@ -22,10 +22,13 @@
 #ifndef IMETRICPLUGIN_H
 #define IMETRICPLUGIN_H
 
+#include <map>
+#include <string>
 #include <vector>
 
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
+#include "data/SoDALibDefs.h"
 
 namespace soda {
 
@@ -34,6 +37,8 @@ namespace soda {
  */
 class ITestSuiteMetricPlugin
 {
+public:
+    typedef std::map<std::string, double> MetricResults;
 public:
 
     /**
@@ -54,12 +59,25 @@ public:
     virtual std::string getDescription() = 0;
 
     /**
-     * @brief Calculates the metrics of a test suite.
-     * @param [IN] data The test suite data.
-     * @param [IN] clusterList The clusters of test cases and code elements.
-     * @param [IN] output The path to the output directory.
+     * @brief Initialize the plugin.
+     * @param data The test suite data.
+     * @param clusterList The clusters of test cases and code elements.
+     * @param revisionList The revisions to consider.
      */
-    virtual void calculate(CSelectionData &data, std::vector<CClusterDefinition> &clusterList, const std::vector<IndexType> &revisionList, const std::string &output) = 0;
+    virtual void init(CSelectionData *data, std::vector<CClusterDefinition> *clusterList, IndexType revision) = 0;
+
+    /**
+     * @brief Returns the list of plugins names that the plugin depens on.
+     * @return List of dependencies.
+     */
+    virtual std::vector<std::string> getDependency() = 0;
+
+    /**
+     * @brief Calculates the metrics of a test suite.
+     * @param output The path to the output directory.
+     * @param results Stores the results of the metric plugin for each cluster.
+     */
+    virtual void calculate(const std::string &output, std::vector<MetricResults> &results) = 0;
 };
 
 } /* namespace soda */

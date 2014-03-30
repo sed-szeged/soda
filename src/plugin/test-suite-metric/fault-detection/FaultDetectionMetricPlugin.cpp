@@ -25,7 +25,9 @@
 
 namespace soda {
 
-FaultDetectionMetricPlugin::FaultDetectionMetricPlugin()
+FaultDetectionMetricPlugin::FaultDetectionMetricPlugin() :
+    m_data(NULL),
+    m_clusterList(NULL)
 {
 
 }
@@ -45,7 +47,19 @@ std::string FaultDetectionMetricPlugin::getDescription()
     return "Calculating fault detection metric of the test suite.";
 }
 
-void FaultDetectionMetricPlugin::calculate(CSelectionData &data, std::vector<CClusterDefinition> &clusterList, const std::vector<IndexType> &revisionList, const std::string &output)
+void FaultDetectionMetricPlugin::init(CSelectionData *data, std::vector<CClusterDefinition> *clusterList, IndexType revision)
+{
+    m_data = data;
+    m_clusterList = clusterList;
+}
+
+
+std::vector<std::string> FaultDetectionMetricPlugin::getDependency()
+{
+    return std::vector<std::string>();
+}
+
+void FaultDetectionMetricPlugin::calculate(const std::string &output, std::vector<MetricResults> &results)
 {
     std::ofstream coverageStream;
     coverageStream.open((output + "/fault.detection.metric.csv").c_str());
@@ -53,21 +67,21 @@ void FaultDetectionMetricPlugin::calculate(CSelectionData &data, std::vector<CCl
 
     std::set<IndexType> coveredElementIds;
 
-    CCoverageMatrix *coverage = data.getCoverage();
-    for (IndexType i = 0; i < clusterList.size(); i++) {
+    CCoverageMatrix *coverage = m_data->getCoverage();
+    for (IndexType i = 0; i < m_clusterList->size(); i++) {
 
-        IndexType nrOfCodeElements = clusterList[i].getCodeElements().size();
-        IndexType nrOfTestcases = clusterList[i].getTestCases().size();
+        IndexType nrOfCodeElements = (*m_clusterList)[i].getCodeElements().size();
+        IndexType nrOfTestcases = (*m_clusterList)[i].getTestCases().size();
         IndexType nrOfCoveredCodeElements = 0;
 
         coveredElementIds.clear();
 
         for (IndexType j = 0; j < nrOfCodeElements; j++) {
-            coveredElementIds.insert(clusterList[i].getCodeElements().at(j));
+            coveredElementIds.insert((*m_clusterList)[i].getCodeElements().at(j));
         }
 
         for (IndexType j = 0; j < nrOfTestcases; j++) {
-            IndexType tcid = clusterList[i].getTestCases().at(j);
+            IndexType tcid = (*m_clusterList)[i].getTestCases().at(j);
             std::set<IndexType>::iterator it = coveredElementIds.begin();
             while (it != coveredElementIds.end()) {
                 IndexType cid = *it;
@@ -80,6 +94,7 @@ void FaultDetectionMetricPlugin::calculate(CSelectionData &data, std::vector<CCl
             }
         }
 
+        results[i]["fault-detection"] = ((double)nrOfCoveredCodeElements / nrOfCodeElements);
         coverageStream << i << ";" << nrOfCodeElements << ";" << nrOfCoveredCodeElements << ";" << ((double)nrOfCoveredCodeElements / nrOfCodeElements) << std::endl;
     }
     coverageStream.close();
