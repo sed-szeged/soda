@@ -63,7 +63,7 @@ void FaultDetectionMetricPlugin::calculate(const std::string &output, std::vecto
 {
     std::ofstream coverageStream;
     coverageStream.open((output + "/fault.detection.metric.csv").c_str());
-    coverageStream << "# cluster id; number of methods; number of methods covered; coverage (%)" << std::endl;
+    coverageStream << "# cluster id;number of testcases in cluster;number of code elements;number of code elements covered; coverage (%)" << std::endl;
 
     std::set<IndexType> coveredElementIds;
 
@@ -95,7 +95,7 @@ void FaultDetectionMetricPlugin::calculate(const std::string &output, std::vecto
         }
 
         results[i]["fault-detection"] = ((double)nrOfCoveredCodeElements / nrOfCodeElements);
-        coverageStream << i << ";" << nrOfCodeElements << ";" << nrOfCoveredCodeElements << ";" << ((double)nrOfCoveredCodeElements / nrOfCodeElements) << std::endl;
+        coverageStream << i << ";" << nrOfTestcases << ";" << nrOfCodeElements << ";" << nrOfCoveredCodeElements << ";" << ((double)nrOfCoveredCodeElements / nrOfCodeElements) << std::endl;
     }
     coverageStream.close();
 }

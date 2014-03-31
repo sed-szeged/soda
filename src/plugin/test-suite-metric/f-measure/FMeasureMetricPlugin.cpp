@@ -61,7 +61,7 @@ void FMeasureMetricPlugin::calculate(const std::string &output, std::vector<Metr
 {
     std::ofstream fMeasureStream;
     fMeasureStream.open((output + "/f.measure.metric.csv").c_str());
-    fMeasureStream << "# cluster id; fault detection; fault localization; f-measure" << std::endl;
+    fMeasureStream << "# cluster id;number of testcases in cluster;number of code elements in cluster;fault detection; fault localization; f-measure" << std::endl;
 
     for (IndexType i = 0; i < results.size(); i++) {
         double faultDetection = results[i]["fault-detection"];
@@ -72,7 +72,10 @@ void FMeasureMetricPlugin::calculate(const std::string &output, std::vector<Metr
             fMeasure = (2 * faultDetection * faultLocalization) / (faultDetection + faultLocalization);
         }
 
-        fMeasureStream << i << ";" << faultDetection << ";" << faultLocalization << ";" << fMeasure << std::endl;
+        IndexType nrOfTestCases = (*m_clusterList)[i].getTestCases().size();
+        IndexType nrOfCodeElements = (*m_clusterList)[i].getCodeElements().size();
+
+        fMeasureStream << i << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << faultDetection << ";" << faultLocalization << ";" << fMeasure << std::endl;
     }
 
     fMeasureStream.close();
