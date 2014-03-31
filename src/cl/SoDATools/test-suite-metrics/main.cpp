@@ -105,6 +105,7 @@ void printHelp()
          << "\"revision\": 1,\n\t"
          << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the metrics\",\n\t"
          << "\"metrics\": [ \"list of metrics to calculate\" ],\n\t"
+         << "\"globalize\": true,\n\t"
          << "\"output-dir\": \"output directory\"\n"
          << "}"
          << std::endl;
@@ -180,6 +181,12 @@ void processJsonFiles(String path)
         } else {
             std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
             return;
+        }
+
+        if (reader.getBoolFromProperty("globalize")) {
+            (std::cerr << "[INFO] Globalizing ...").flush();
+            selectionData.globalize();
+            (std::cerr << " done" << std::endl).flush();
         }
 
         revision = reader.getIntFromProperty("revision");
