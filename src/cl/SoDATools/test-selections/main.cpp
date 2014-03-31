@@ -47,7 +47,7 @@ void printHelp();
 CKernel kernel;
 
 int main(int argc, char* argv[]) {
-    cout << "selections (SoDA tool)" << endl;
+    cout << "testselections (SoDA tool)" << endl;
 
     options_description desc("Options");
     desc.add_options()
@@ -83,9 +83,9 @@ void printHelp()
     cout << "This application measures the given selection data with the specified options in a json config files."
          << endl << endl;
     cout << "USAGE:" << endl
-         << "\tselections [-hl]" << endl
-         << "\tselections json file path" << endl
-         << "\tselections directory which contains one or more json files" << endl << endl;
+         << "\ttestselections [-hl]" << endl
+         << "\ttestselections json file path" << endl
+         << "\ttestselections directory which contains one or more json files" << endl << endl;
     cout << "Json configuration file format:" << endl
          << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
          << "\"results-data\": \"results file path\",\n\t\"changeset\": \"changeset file path\",\n\t"
@@ -202,27 +202,27 @@ void processJsonFiles(String path)
                 return;
             }
 
-            CComputeSelectionMetrics *selectionStat = new CComputeSelectionMetrics(&selectionData, plugin, &revisionlist, &sizelist, reader.getIntFromProperty("progress-level"));
+            CComputeSelectionMetrics *selectionstat = new CComputeSelectionMetrics(&selectionData, plugin, &revisionlist, &sizelist, reader.getIntFromProperty("progress-level"));
             (cerr << "[INFO] Measurements on " << revisionlist.size() << " revisions ...").flush();
-            selectionStat->runMeasurement();
+            selectionstat->runMeasurement();
             (cerr << " done." << endl).flush();
 
             if (reader.getBoolFromProperty("print-details")) {
                 if (!reader.getStringFromProperty("output-file").empty())
-                    of << selectionStat->getDetailedData();
+                    of << selectionstat->getDetailedData();
                 else {
                     std::cout.precision(5);
-                    std::cout << selectionStat->getDetailedData();
+                    std::cout << selectionstat->getDetailedData();
                 }
             } else {
                 if (!reader.getStringFromProperty("output-file").empty())
-                    of << selectionStat->getData();
+                    of << selectionstat->getData();
                 else {
                     std::cout.precision(5);
-                    std::cout << selectionStat->getData();
+                    std::cout << selectionstat->getData();
                 }
             }
-            delete selectionStat;
+            delete selectionstat;
         }
         of.close();
     } catch (std::exception &e) {

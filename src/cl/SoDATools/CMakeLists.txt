@@ -11,8 +11,8 @@ add_subdirectory(utilities/rawdatareader)
 # reduction
 add_subdirectory(utilities/reduction)
 
-# selections
-add_subdirectory(selections)
+# test-selections
+add_subdirectory(test-selections)
 
 # test-suite-metrics
 add_subdirectory(test-suite-metrics)
