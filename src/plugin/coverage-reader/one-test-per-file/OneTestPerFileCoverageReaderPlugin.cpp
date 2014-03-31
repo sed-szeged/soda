@@ -45,10 +45,10 @@ std::string OneTestPerFileCoverageReaderPlugin::getDescription()
     return "The coverage information of a test case is in one file and the file name is the test case name.";
 }
 
-CCoverageMatrix* OneTestPerFileCoverageReaderPlugin::read(const std::string &path)
+CCoverageMatrix* OneTestPerFileCoverageReaderPlugin::read(const variables_map &vm)
 {
     m_coverage = new CCoverageMatrix();
-    readFromDirectoryStructure(path);
+    readFromDirectoryStructure(vm["path"].as<String>());
     return m_coverage;
 }
 

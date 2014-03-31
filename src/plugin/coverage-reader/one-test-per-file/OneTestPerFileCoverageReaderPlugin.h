@@ -47,7 +47,7 @@ public:
     std::string getName();
     std::string getDescription();
 
-    CCoverageMatrix* read(const std::string &path);
+    CCoverageMatrix* read(const variables_map &vm);
 
 private:
     /**

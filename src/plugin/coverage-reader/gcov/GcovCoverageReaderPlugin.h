@@ -26,6 +26,7 @@
 #define BOOST_FILESYSTEM_VERSION 3
 #endif
 
+#include "boost/regex.hpp"
 #include "boost/filesystem.hpp"
 #include "engine/CKernel.h"
 
@@ -47,7 +48,7 @@ public:
     std::string getName();
     std::string getDescription();
 
-    CCoverageMatrix* read(const std::string &path);
+    CCoverageMatrix* read(const variables_map &vm);
 
 private:
     /**
@@ -91,6 +92,16 @@ private:
      * @brief Current test case name.
      */
     String m_currentTestcase;
+
+    /**
+     * @brief Regular expression for cut parts from the code element names.
+     */
+    boost::regex m_codeElementNameFilter;
+
+    /**
+     * @brief Multiple regular expressions for filtering input files.
+     */
+    std::vector<boost::regex> m_fileFilter;
 };
 
 }

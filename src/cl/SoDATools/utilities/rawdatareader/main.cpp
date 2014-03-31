@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
             ("list,l",                    "list the available reading modes")
             ("output,o", value<String>(), "output file")
             ("path,p",   value<String>(), "path to input directory")
+            ("cut-source-path,c", value<String>()->default_value(""), "removes the matched part from the code element names used by gcov reader plugin")
+            ("filter-input-files,f", value<String>()->default_value(""), "regex, skips the matched input files. Multiple expressions are separated with commas. Used by gcov reader plugin")
     ;
 
     if(argc < 2) {
@@ -86,10 +88,9 @@ int processArgs(options_description desc, int ac, char* av[])
             }
             if (vm.count("mode")) {
                 std::string mode = vm["mode"].as<std::string>();
-                std::string path = vm["path"].as<std::string>();
                 try {
                     ICoverageReaderPlugin *plugin = kernel.getCoverageReaderPluginManager().getPlugin(mode);
-                    CCoverageMatrix *matrix = plugin->read(path);
+                    CCoverageMatrix *matrix = plugin->read(vm);
                     if (vm.count("output")) {
                         std::string output = vm["output"].as<std::string>();
                         matrix->save(output);

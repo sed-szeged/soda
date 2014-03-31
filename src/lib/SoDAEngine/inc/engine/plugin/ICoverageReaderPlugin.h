@@ -22,7 +22,10 @@
 #ifndef ICOVERAGEREADERPLUGIN_H
 #define ICOVERAGEREADERPLUGIN_H
 
+#include <boost/program_options.hpp>
 #include "data/CCoverageMatrix.h"
+
+using namespace boost::program_options;
 
 namespace soda {
 
@@ -54,7 +57,7 @@ public:
      * @param [in] path The path to the coverage.
      * @return A CCoverageMatrix instance.
      */
-    virtual CCoverageMatrix* read(const std::string &path) = 0;
+    virtual CCoverageMatrix* read(const variables_map &vm) = 0;
 };
 
 } /* namespace soda */

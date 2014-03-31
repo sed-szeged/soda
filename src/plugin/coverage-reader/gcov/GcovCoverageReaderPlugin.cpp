@@ -49,10 +49,21 @@ std::string GcovCoverageReaderPlugin::getDescription()
     return "Reads statement level coverage data from gcov files.";
 }
 
-CCoverageMatrix* GcovCoverageReaderPlugin::read(const std::string &path)
+CCoverageMatrix* GcovCoverageReaderPlugin::read(const variables_map &vm)
 {
+    // prepare filters
+    m_fileFilter.clear();
+    m_codeElementNameFilter.assign(vm["cut-source-path"].as<String>());
+    String filter = vm["filter-input-files"].as<String>();
+    boost::char_separator<char> sep(",");
+    boost::tokenizer<boost::char_separator<char> > tokens(filter, sep);
+    boost::tokenizer<boost::char_separator<char> >::iterator it;
+    for (it = tokens.begin(); it != tokens.end(); ++it) {
+        m_fileFilter.push_back(boost::regex(*it));
+    }
+
     m_coverage = new CCoverageMatrix();
-    readFromDirectoryStructure(path);
+    readFromDirectoryStructure(vm["path"].as<String>());
     return m_coverage;
 }
 
@@ -106,15 +117,6 @@ void GcovCoverageReaderPlugin::readCoverage(fs::path p)
     }
 }
 
-static bool isNumber(String& str)
-{
-    for (int i = 0; i < (int)str.length(); ++i) {
-        if (!isdigit(str[i]))
-            return false;
-    }
-    return true;
-}
-
 void GcovCoverageReaderPlugin::readCoverageDataFromFile(fs::path p)
 {
     std::ifstream in(p.c_str());
@@ -124,24 +126,30 @@ void GcovCoverageReaderPlugin::readCoverageDataFromFile(fs::path p)
     boost::char_separator<char> sep(":");
 
     while (std::getline(in, line)) {
-        StringVector data;
+        StringVector rowData;
         boost::tokenizer<boost::char_separator<char> > tokens(line, sep);
         boost::tokenizer<boost::char_separator<char> >::iterator it;
         for (it = tokens.begin(); it != tokens.end(); ++it) {
             std::string tmp = *it;
             boost::algorithm::trim(tmp);
-            data.push_back(tmp);
+            rowData.push_back(tmp);
         }
 
         // read source path from first line
         if (firstLine) {
-            sourcePath = data[3];
+            for (std::vector<boost::regex>::iterator it = m_fileFilter.begin(); it != m_fileFilter.end(); ++it) {
+                if (boost::regex_search(rowData[3], *it)) {
+                    in.close();
+                    return;
+                }
+            }
+            sourcePath = boost::regex_replace(rowData[3], m_codeElementNameFilter, "");
             firstLine = false;
         }
 
-        // data[0] is always non-zero if it's a numer
-        if (isNumber(data[0])) {
-            int lineNumber = boost::lexical_cast<int>(data[1]); // executed line number
+        // data[0] is always non-zero if it's a number
+        if (isdigit(rowData[0][0])) {
+            int lineNumber = boost::lexical_cast<int>(rowData[1]); // executed line number
             std::stringstream codeElementName;
             codeElementName << sourcePath << ":" << lineNumber;
             m_coverage->addOrSetRelation(m_currentTestcase, codeElementName.str());
