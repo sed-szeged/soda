@@ -43,7 +43,7 @@ void CCoverageDataManager::load(const String &filepath)
         else
             getDataHandler()->getCoverage(true)->load(filepath);
     } else
-        throw new CException("CCoverageDataManager::load", filepath + " is not a regular file");
+        throw CException("CCoverageDataManager::load", filepath + " is not a regular file");
 }
 
 void CCoverageDataManager::dumpData(const String &filepath, bool psize, char csep, char rsep)

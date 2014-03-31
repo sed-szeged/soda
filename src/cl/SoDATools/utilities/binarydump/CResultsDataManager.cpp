@@ -43,7 +43,7 @@ void CResultsDataManager::load(const String &filepath)
         else
             getDataHandler()->getResults(true)->load(filepath);
     } else
-        throw new CException("CResultsDataManager::load", filepath + " is not a regular file");
+        throw CException("CResultsDataManager::load", filepath + " is not a regular file");
 }
 
 void CResultsDataManager::dumpTestcases(const String &filepath)

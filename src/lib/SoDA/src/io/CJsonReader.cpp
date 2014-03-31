@@ -41,7 +41,7 @@ void CJsonReader::load(String path)
     try {
         read_json(path, m_data);
     } catch (json_parser_error &e) {
-        throw e;
+        throw;
     }
 }
 

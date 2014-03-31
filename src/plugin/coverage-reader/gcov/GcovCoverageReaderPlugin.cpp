@@ -26,7 +26,6 @@
 #include "boost/tokenizer.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/algorithm/string.hpp"
-#include "boost/filesystem.hpp"
 #include "exception/CException.h"
 #include "GcovCoverageReaderPlugin.h"
 
@@ -144,7 +143,7 @@ void GcovCoverageReaderPlugin::readCoverageDataFromFile(fs::path p)
         if (isNumber(data[0])) {
             int lineNumber = boost::lexical_cast<int>(data[1]); // executed line number
             std::stringstream codeElementName;
-            codeElementName << sourcePath << ":" << lineNumber;;
+            codeElementName << sourcePath << ":" << lineNumber;
             m_coverage->addOrSetRelation(m_currentTestcase, codeElementName.str());
         } else {
             continue;

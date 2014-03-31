@@ -43,7 +43,7 @@ void CChangesDataManager::load(const String &filepath)
         else
             getDataHandler()->getChanges(true)->load(filepath);
     } else
-        throw new CException("CChangesDataManager::load", filepath + " is not a regular file");
+        throw CException("CChangesDataManager::load", filepath + " is not a regular file");
 }
 
 void CChangesDataManager::dumpCodeElements(const String &filepath)
