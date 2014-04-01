@@ -31,16 +31,18 @@
 #include "engine/plugin/ITestSuiteMetricPlugin.h"
 #include "engine/plugin/ITestSuitePrioritizationPlugin.h"
 #include "engine/plugin/ITestSuiteReductionPlugin.h"
+#include "engine/plugin/IFaultLocalizationTechniquePlugin.h"
 
 namespace soda {
 
-typedef CPluginManager<IChangesetReaderPlugin>         ChangesetReaderPluginManager;
-typedef CPluginManager<ICoverageReaderPlugin>          CoverageReaderPluginManager;
-typedef CPluginManager<IResultsReaderPlugin>           ResultsReaderPluginManager;
-typedef CPluginManager<ITestSuiteClusterPlugin>        TestSuiteClusterPluginManager;
-typedef CPluginManager<ITestSuiteMetricPlugin>         TestSuiteMetricPluginManager;
-typedef CPluginManager<ITestSuitePrioritizationPlugin> TestSuitePrioritizationPluginManager;
-typedef CPluginManager<ITestSuiteReductionPlugin>      TestSuiteReductionPluginManager;
+typedef CPluginManager<IChangesetReaderPlugin>            ChangesetReaderPluginManager;
+typedef CPluginManager<ICoverageReaderPlugin>             CoverageReaderPluginManager;
+typedef CPluginManager<IResultsReaderPlugin>              ResultsReaderPluginManager;
+typedef CPluginManager<ITestSuiteClusterPlugin>           TestSuiteClusterPluginManager;
+typedef CPluginManager<ITestSuiteMetricPlugin>            TestSuiteMetricPluginManager;
+typedef CPluginManager<ITestSuitePrioritizationPlugin>    TestSuitePrioritizationPluginManager;
+typedef CPluginManager<ITestSuiteReductionPlugin>         TestSuiteReductionPluginManager;
+typedef CPluginManager<IFaultLocalizationTechniquePlugin> FaultLocalizationTechniquePluginManager;
 
 } /* namespace soda */
 
