@@ -36,12 +36,12 @@ TarantulaFaultLocalizationTechniquePlugin::~TarantulaFaultLocalizationTechniqueP
     delete m_distribution;
 }
 
-TarantulaFaultLocalizationTechniquePlugin::getName()
+std::string TarantulaFaultLocalizationTechniquePlugin::getName()
 {
     return "tarantula";
 }
 
-TarantulaFaultLocalizationTechniquePlugin::getDescription()
+std::string TarantulaFaultLocalizationTechniquePlugin::getDescription()
 {
     return "Calculates the tarantula value for each code element.";
 }
@@ -94,12 +94,12 @@ void TarantulaFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &cl
         IndexType passedCovered = 0;
         IndexType failedNotCovered = 0;
         IndexType passedNotCovered = 0;
-        for (IndexType j = 0; j < testCaseIds; j++) {
+        for (IndexType j = 0; j < testCaseIds.size(); j++) {
             IndexType tcid = testCaseIds[j];
             IndexType tcidInResults = tcMap[tcid];
 
-            if (m_data->getResults()->getExecutionBitList(m_revision).getAt(tcidInResults)) {
-                bool isPassed = m_data->getResults()->getPassedBitList(m_revision).getAt(tcidInResults);
+            if (m_data->getResults()->getExecutionBitList(m_revision).at(tcidInResults)) {
+                bool isPassed = m_data->getResults()->getPassedBitList(m_revision).at(tcidInResults);
                 bool isCovered = coverageMatrix->getBitMatrix().get(tcid, cid);
                 if (isCovered) {
                     if (isPassed) {

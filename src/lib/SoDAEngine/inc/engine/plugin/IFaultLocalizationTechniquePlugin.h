@@ -89,7 +89,7 @@ public:
     virtual FLDistribution& getDistribution() = 0;
 
     /**
-     * @brief Calculates the metrics of a test suite.
+     * @brief Calculates the score values for each code element in the cluster.
      * @param cluster The cluster to use during the calculation.
      * @param output The path to the output directory.
      */

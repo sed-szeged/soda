@@ -37,12 +37,12 @@ OchiaiFaultLocalizationTechniquePlugin::~OchiaiFaultLocalizationTechniquePlugin(
     delete m_distribution;
 }
 
-OchiaiFaultLocalizationTechniquePlugin::getName()
+std::string OchiaiFaultLocalizationTechniquePlugin::getName()
 {
     return "ochiai";
 }
 
-OchiaiFaultLocalizationTechniquePlugin::getDescription()
+std::string OchiaiFaultLocalizationTechniquePlugin::getDescription()
 {
     return "Calculates the ochiai value for each code element.";
 }
@@ -95,11 +95,11 @@ void OchiaiFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &clust
         IndexType passedCovered = 0;
         IndexType failedNotCovered = 0;
         IndexType passedNotCovered = 0;
-        for (IndexType j = 0; j < testCaseIds; j++) {
+        for (IndexType j = 0; j < testCaseIds.size(); j++) {
             IndexType tcid = testCaseIds[j];
             IndexType tcidInResults = tcMap[tcid];
-            if (m_data->getResults()->getExecutionBitList(m_revision).getAt(tcidInResults)) {
-                bool isPassed = m_data->getResults()->getPassedBitList(m_revision).getAt(tcidInResults);
+            if (m_data->getResults()->getExecutionBitList(m_revision).at(tcidInResults)) {
+                bool isPassed = m_data->getResults()->getPassedBitList(m_revision).at(tcidInResults);
                 bool isCovered = coverageMatrix->getBitMatrix().get(tcid, cid);
                 if (isCovered) {
                     if (!isPassed) {
