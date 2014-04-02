@@ -11,6 +11,9 @@ add_subdirectory(utilities/rawdatareader)
 # reduction
 add_subdirectory(utilities/reduction)
 
+# test-selection-statistics
+add_subdirectory(test-selection-statistics)
+
 # test-selections
 add_subdirectory(test-selections)
 
