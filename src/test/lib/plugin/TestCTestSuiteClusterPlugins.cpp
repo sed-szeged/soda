@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
- * Authors:
+ * Authors: David Havas <havasd@inf.u-szeged.hu>
  *
  * This file is part of SoDA.
  *
@@ -20,34 +20,37 @@
  */
 
 #include "gtest/gtest.h"
+#include "data/CClusterDefinition.h"
+#include "data/CSelectionData.h"
+#include "engine/plugin/ITestSuiteClusterPlugin.h"
 #include "engine/CKernel.h"
-#include "engine/plugin/IResultsReaderPlugin.h"
 
 using namespace soda;
 
-class CResultsReaderPluginsTest : public testing::Test
+class CTestSuiteClusterPluginsTest : public testing::Test
 {
 protected:
-    CResultsMatrix* resultsMatrix;
-    IResultsReaderPlugin *plugin;
+    CSelectionData data;
+    ITestSuiteClusterPlugin *plugin;
+    std::vector<CClusterDefinition> clusterList;
     CKernel kernel;
 
     virtual void SetUp() {
         plugin = NULL;
-        resultsMatrix = NULL;
+        clusterList.clear();
+        data.loadCoverage("sample/CoverageMatrixOneTestPerFileTestSelectionBit");
     }
 
     virtual void TearDown() {
-        delete resultsMatrix;
-        resultsMatrix = 0;
     }
 };
 
-TEST_F(CResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPlugin)
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
 {
-    EXPECT_NO_THROW(plugin = kernel.getResultsReaderPluginManager().getPlugin("dejagnu-one-revision-per-file"));
-    EXPECT_NO_THROW(resultsMatrix = plugin->read("sample/ResultsMatrixDejaGNUOneRevisionPerFileSampleDir"));
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("one-cluster"));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
 
-    EXPECT_EQ(2u, resultsMatrix->getNumOfRevisions());
-    EXPECT_EQ(28u, resultsMatrix->getNumOfTestcases());
+    EXPECT_EQ(1u, clusterList.size());
+    EXPECT_EQ(data.getCoverage()->getNumOfCodeElements(), clusterList[0].getCodeElements().size());
+    EXPECT_EQ(data.getCoverage()->getNumOfTestcases(), clusterList[0].getTestCases().size());
 }

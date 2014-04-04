@@ -27,7 +27,8 @@
 using namespace boost::program_options;
 using namespace soda;
 
-class CCoverageReaderPluginTest : public testing::Test {
+class CCoverageReaderPluginsTest : public testing::Test
+{
 protected:
     CCoverageMatrix* coverageMatrix;
     ICoverageReaderPlugin* plugin;
@@ -45,7 +46,8 @@ protected:
     }
 };
 
-TEST_F(CCoverageReaderPluginTest, OneTestPerFileCoverageReaderPlugin) {
+TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPlugin)
+{
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("one-test-per-file"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/CoverageMatrixOneTestPerFileSampleDir"), ""))));
     EXPECT_NO_THROW(notify(vm));
@@ -56,7 +58,7 @@ TEST_F(CCoverageReaderPluginTest, OneTestPerFileCoverageReaderPlugin) {
     EXPECT_EQ(824u, coverageMatrix->getNumOfCodeElements());
 }
 
-TEST_F(CCoverageReaderPluginTest, GcovCoverageReaderPlugin)
+TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("gcov"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/CoverageMatrixGcovSampleDir"), ""))));

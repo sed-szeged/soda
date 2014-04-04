@@ -25,7 +25,8 @@
 
 using namespace soda;
 
-class CChangesetReaderPluginsTest : public testing::Test {
+class CChangesetReaderPluginsTest : public testing::Test
+{
 protected:
     CChangeset* changeset;
     IChangesetReaderPlugin *plugin;
@@ -43,7 +44,8 @@ protected:
 
 };
 
-TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPlugin) {
+TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPlugin)
+{
     EXPECT_NO_THROW(plugin = kernel.getChangesetReaderPluginManager().getPlugin("one-revision-per-file"));
     EXPECT_NO_THROW(changeset = plugin->read("sample/ChangesetOneRevisionPerFileSampleDir"));
 
