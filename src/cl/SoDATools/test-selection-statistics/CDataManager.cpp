@@ -19,6 +19,7 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <boost/filesystem.hpp>
 #include "CSelectionStatistics.h"
 #include "CDataManager.h"
 
@@ -54,8 +55,11 @@ void CDataManager::loadChangesetData(String path)
 
 void CDataManager::calcStatistics()
 {
-    CSelectionStatistics stats = CSelectionStatistics(this);
+    if(!(boost::filesystem::exists(m_outputDir))) {
+        boost::filesystem::create_directory(m_outputDir);
+    }
 
+    CSelectionStatistics stats = CSelectionStatistics(this);
     if (m_testMask & (tmTestcaseCoverage | tmFunctionCoverage)) {
         stats.calcCoverageRelatedStatistics();
     }
