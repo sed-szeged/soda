@@ -1,5 +1,0 @@
-finish_params,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/params.c:64
-init_options_once,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/opts-global.c:256
-c_common_option_lang_mask,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/c-family/c-opts.c:150
-c_initialize_diagnostics,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/c-objc-common.c:186
-c_common_initialize_diagnostics,/home/dtengeri/462/build/gcc/../../gcc_4_6_2/gcc/c-family/c-opts.c:159
