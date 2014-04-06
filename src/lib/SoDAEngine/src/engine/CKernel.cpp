@@ -34,6 +34,7 @@ CKernel::CKernel() :
     m_testSuiteMetricPluginManager(NULL),
     m_testSuitePrioritizationPluginManager(NULL),
     m_testSuiteReductionPluginManager(NULL),
+    m_faultLocalizationTechniquePluginManager(NULL),
     m_pluginDir(SODA_PLUGIN_DIR)
 {
 
@@ -61,6 +62,9 @@ CKernel::~CKernel()
     }
     if (m_testSuiteReductionPluginManager) {
         delete m_testSuiteReductionPluginManager;
+    }
+    if (m_faultLocalizationTechniquePluginManager) {
+       delete m_faultLocalizationTechniquePluginManager;
     }
 
     // Delete internal plugin representations. The loaded libraries will be unloaded.
@@ -131,6 +135,15 @@ TestSuiteReductionPluginManager& CKernel::getTestSuiteReductionPluginManager()
         loadPluginsFromDirectory(m_pluginDir + "/test-suite-reduction");
     }
     return *m_testSuiteReductionPluginManager;
+}
+
+FaultLocalizationTechniquePluginManager& CKernel::getFaultLocalizationTechniquePluginManager()
+{
+    if (m_faultLocalizationTechniquePluginManager == NULL) {
+        m_faultLocalizationTechniquePluginManager = new FaultLocalizationTechniquePluginManager();
+        loadPluginsFromDirectory(m_pluginDir + "/fault-localization-technique");
+    }
+    return *m_faultLocalizationTechniquePluginManager;
 }
 
 void CKernel::loadPluginsFromDirectory(const std::string &pluginDir)

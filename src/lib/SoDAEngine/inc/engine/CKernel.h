@@ -45,6 +45,7 @@ public:
     TestSuiteMetricPluginManager& getTestSuiteMetricPluginManager();
     TestSuitePrioritizationPluginManager& getTestSuitePrioritizationPluginManager();
     TestSuiteReductionPluginManager& getTestSuiteReductionPluginManager();
+    FaultLocalizationTechniquePluginManager& getFaultLocalizationTechniquePluginManager();
 
 private:
     /**
@@ -58,13 +59,14 @@ private:
      PluginMap *m_pluginMap;
 
      // Managers
-     ChangesetReaderPluginManager         *m_changesetReaderPluginManager;
-     CoverageReaderPluginManager          *m_coverageReaderPluginManager;
-     ResultsReaderPluginManager           *m_resultsReaderPluginManager;
-     TestSuiteClusterPluginManager        *m_testSuiteClusterPluginManager;
-     TestSuiteMetricPluginManager         *m_testSuiteMetricPluginManager;
-     TestSuitePrioritizationPluginManager *m_testSuitePrioritizationPluginManager;
-     TestSuiteReductionPluginManager      *m_testSuiteReductionPluginManager;
+     ChangesetReaderPluginManager            *m_changesetReaderPluginManager;
+     CoverageReaderPluginManager             *m_coverageReaderPluginManager;
+     ResultsReaderPluginManager              *m_resultsReaderPluginManager;
+     TestSuiteClusterPluginManager           *m_testSuiteClusterPluginManager;
+     TestSuiteMetricPluginManager            *m_testSuiteMetricPluginManager;
+     TestSuitePrioritizationPluginManager    *m_testSuitePrioritizationPluginManager;
+     TestSuiteReductionPluginManager         *m_testSuiteReductionPluginManager;
+     FaultLocalizationTechniquePluginManager *m_faultLocalizationTechniquePluginManager;
 
      std::string m_pluginDir;
 };
