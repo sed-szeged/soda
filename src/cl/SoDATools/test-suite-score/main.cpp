@@ -48,20 +48,13 @@ void printHelp();
 
 CKernel kernel;
 
-CSelectionData selectionData;
-IndexType revision;
-std::vector<CClusterDefinition> clusterList;
-std::string outputDir;
-std::vector<IndexType> failedCodeElements;
-IndexType totalFailedTestcases;
-
-std::set<std::string> metricsCalculated;
-
 // Code element -> technique -> value
 typedef std::map<IndexType, std::map<std::string, double> > FLScoreValues;
 
+std::vector<FLScoreValues> scoresByCluster;
+
 int main(int argc, char* argv[]) {
-    std::cout << "test-suite-metrics (SoDA tool)" << std::endl;
+    std::cout << "test-suite-score (SoDA tool)" << std::endl;
 
     options_description desc("Options");
     desc.add_options()
@@ -112,7 +105,7 @@ void printHelp()
          << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the scores\",\n\t"
          << "\"fault-localization-techniques\": [ \"list of fault localization techniques to use\" ],\n\t"
          << "\"failed-code-elements\": [ \"list of code elements that casue the failure of the test cases (by their string representation)\" ],\n\t"
-         << "\"total-failed-testcases\": 125,\n\t"
+         << "\"total-failed-testcases\": 125, //The total number of failing testcases in the whole test suite (without any reduction or selection and clusterization).\n\t"
          << "\"globalize\": true,\n\t"
          << "\"output-dir\": \"output directory\"\n"
          << "}"
@@ -139,6 +132,10 @@ int loadJsonFiles(std::string path)
     } else if (is_directory(path)) {
         directory_iterator endIt;
         for (directory_iterator it(path); it != endIt; it++) {
+            if (is_directory(it->status())) {
+                loadJsonFiles(it->path().string());
+                continue;
+            }
             if (!is_regular_file(it->status())) {
                 continue;
             }
@@ -151,22 +148,14 @@ int loadJsonFiles(std::string path)
     return 0;
 }
 
-void calculateFdScore(CClusterDefinition &cluster, const std::string &output)
-{
-    std::ofstream fdScoreStream;
-    fdScoreStream.open((output + "/fd.score.csv").c_str());
-    fdScoreStream << "#fd score;" << std::endl;
-
-    double fdScore = CTestSuiteScore::fdScore(selectionData, cluster, revision, totalFailedTestcases);
-    fdScoreStream << fdScore << std::endl;
-
-    fdScoreStream.close();
-}
-
 void processJsonFiles(std::string path)
 {
     try {
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
+
+        CSelectionData selectionData;
+        std::vector<CClusterDefinition> clusterList;
+        std::vector<IndexType> failedCodeElements;
 
         CJsonReader reader = CJsonReader(path);
 
@@ -191,9 +180,9 @@ void processJsonFiles(std::string path)
             (std::cerr << " done" << std::endl).flush();
         }
 
-        revision = reader.getIntFromProperty("revision");
-        totalFailedTestcases = reader.getIntFromProperty("total-failed-testcases");
-        outputDir = reader.getStringFromProperty("output-dir");
+        IndexType revision = reader.getIntFromProperty("revision");
+        IndexType totalFailedTestcases = reader.getIntFromProperty("total-failed-testcases");
+        std::string outputDir = reader.getStringFromProperty("output-dir");
 
         StringVector failedCodeElementNames = reader.getStringVectorFromProperty("failed-code-elements");
         for (IndexType i = 0; i < failedCodeElementNames.size(); i++) {
@@ -205,23 +194,38 @@ void processJsonFiles(std::string path)
         clusterAlgorithm->execute(selectionData, clusterList);
         (std::cerr << " done." << std::endl).flush();
 
+        scoresByCluster.resize(clusterList.size());
+
+        // FD score
+        for (IndexType i = 0; i < clusterList.size(); i++) {
+            // Prepare directory for the output.
+            std::stringstream ss;
+            ss << outputDir << "/" << i;
+            boost::filesystem::path dir(ss.str().c_str());
+            boost::filesystem::create_directory(dir);
+
+            ss << "/fd.score.csv";
+
+            std::ofstream fdScoreStream;
+            fdScoreStream.open(ss.str().c_str());
+            fdScoreStream << "#fd score;" << std::endl;
+
+            double fdScore = CTestSuiteScore::fdScore(selectionData, clusterList[i], revision, totalFailedTestcases);
+            fdScoreStream << fdScore << std::endl;
+
+            fdScoreStream.close();
+        }
+
         StringVector faultLocalizationTechniques = reader.getStringVectorFromProperty("fault-localization-techniques");
         for (IndexType i = 0; i < faultLocalizationTechniques.size(); i++) {
-            IFaultLocalizationTechniquePlugin *technique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin(faultLocalizationTechniques[i]);
+            std::string flTechniqueName = faultLocalizationTechniques[i];
+            IFaultLocalizationTechniquePlugin *technique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin(flTechniqueName);
 
             technique->init(&selectionData, revision);
             for (IndexType j = 0; j < clusterList.size(); j++) {
-                // Prepare directory for the output.
+                // Calculate FL score
                 std::stringstream ss;
                 ss << outputDir << "/" << j;
-                boost::filesystem::path dir(ss.str().c_str());
-                boost::filesystem::create_directory(dir);
-
-                // Calculate the FD score
-                calculateFdScore(clusterList[j], ss.str());
-
-                // Calculate FL score
-                FLScoreValues scoreValues;
                 technique->calculate(clusterList[j], ss.str());
 
                 IFaultLocalizationTechniquePlugin::FLValues values = technique->getValues();
@@ -229,10 +233,33 @@ void processJsonFiles(std::string path)
                 for (IndexType k = 0; k < failedCodeElements.size(); k++) {
                     IndexType cid = failedCodeElements[k];
                     double score = CTestSuiteScore::flScore(clusterList[j], values[cid], technique->getDistribution());
-                    scoreValues[cid][faultLocalizationTechniques[i]] = score;
+                    scoresByCluster[j][cid][flTechniqueName] = score;
                 }
-                // TODO collect the results and save them to a csv.
             }
+        }
+        // Save the score values
+        for (IndexType i = 0; i < scoresByCluster.size(); i++) {
+            std::stringstream ss;
+            ss << outputDir << "/" << i << "/fl.score.csv";
+
+            std::ofstream flScoreStream;
+            flScoreStream.open(ss.str().c_str());
+            flScoreStream << "#cluster id;code element id;";
+            for (IndexType j = 0; j < faultLocalizationTechniques.size(); j++) {
+                flScoreStream << faultLocalizationTechniques[j] << ";";
+            }
+            flScoreStream << std::endl;
+
+            for (IndexType j = 0; j < failedCodeElements.size(); j++) {
+                IndexType cid = failedCodeElements[j];
+                flScoreStream << i << ";" << cid << ";";
+                for (IndexType k = 0; k < faultLocalizationTechniques.size(); k++) {
+                    std::string flTechniqueName = faultLocalizationTechniques[k];
+                    flScoreStream << scoresByCluster[i][cid][flTechniqueName] << ";";
+                }
+                flScoreStream << std::endl;
+            }
+            flScoreStream.close();
         }
 
 

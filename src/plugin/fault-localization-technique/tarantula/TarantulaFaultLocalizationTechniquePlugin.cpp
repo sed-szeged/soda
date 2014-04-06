@@ -139,4 +139,9 @@ void TarantulaFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &cl
     (std::cerr << "done." << std::endl).flush();
 }
 
+extern "C" void registerPlugin(CKernel &kernel)
+{
+    kernel.getFaultLocalizationTechniquePluginManager().addPlugin(new TarantulaFaultLocalizationTechniquePlugin());
+}
+
 } /* namespace soda */
