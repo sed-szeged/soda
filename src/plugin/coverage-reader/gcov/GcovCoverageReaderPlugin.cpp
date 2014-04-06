@@ -123,6 +123,7 @@ void GcovCoverageReaderPlugin::readCoverageDataFromFile(fs::path p)
     std::string line;
     std::string sourcePath;
     bool firstLine = true;
+    bool skip = false;
     boost::char_separator<char> sep(":");
 
     while (std::getline(in, line)) {
@@ -147,15 +148,32 @@ void GcovCoverageReaderPlugin::readCoverageDataFromFile(fs::path p)
             firstLine = false;
         }
 
-        // data[0] is always non-zero if it's a number
-        if (isdigit(rowData[0][0])) {
-            int lineNumber = boost::lexical_cast<int>(rowData[1]); // executed line number
-            std::stringstream codeElementName;
-            codeElementName << sourcePath << ":" << lineNumber;
-            m_coverage->addOrSetRelation(m_currentTestcase, codeElementName.str());
-        } else {
+        int lineNumber = boost::lexical_cast<int>(rowData[1]); // executed line number
+
+        // skip gcov file messages
+        if (lineNumber == 0)
+            continue;
+        // skip empty lines
+        if (rowData.size() < 3)
+            continue;
+
+        boost::algorithm::trim(rowData[2]);
+        boost::regex reg("((^(\\{)$)|(^(\\})$)|(^//)|(^#))"); // regex for {, }, # and // chars
+        boost::regex openComment("^(\\/\\*)"); // regex for /*
+        boost::regex closeComment("(\\*\\/)$"); // regex for */
+        if (boost::regex_search(rowData[2], reg)) // skips lines starting with //, #, {, }
+            continue;
+        if (!skip && boost::regex_search(rowData[2], openComment)) // skips multi line comments
+            skip = true;
+        if (skip) {
+            if (boost::regex_search(rowData[2], closeComment))
+                skip = false;
             continue;
         }
+
+        std::stringstream codeElementName;
+        codeElementName << sourcePath << ":" << lineNumber;
+        m_coverage->addOrSetRelation(m_currentTestcase, codeElementName.str(), isdigit(rowData[0][0]));
     }
     in.close();
 }

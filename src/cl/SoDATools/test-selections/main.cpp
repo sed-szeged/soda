@@ -155,17 +155,24 @@ void processJsonFiles(String path)
         }
 
         if (exists(reader.getStringFromProperty("coverage-data")) &&
-                exists(reader.getStringFromProperty("changeset")) &&
                 exists(reader.getStringFromProperty("results-data"))) {
             (cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
             selectionData.loadCoverage(reader.getStringFromProperty("coverage-data"));
-            (cerr << " done\n[INFO] loading changes from " << reader.getStringFromProperty("changeset") << " ...").flush();
-            selectionData.loadChangeset(reader.getStringFromProperty("changeset"));
             (cerr << " done\n[INFO] loading results from " << reader.getStringFromProperty("results-data") << " ...").flush();
             selectionData.loadResults(reader.getStringFromProperty("results-data"));
             (cerr << " done" << endl).flush();
         } else {
-            std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
+            std::cerr << "[ERROR] Missing input files in config file " << path << "." << std::endl;
+            return;
+        }
+
+        if (reader.getBoolFromProperty("filter.revision.non-changed")
+                && exists(reader.getStringFromProperty("changeset"))) {
+            (cerr << "[INFO] loading changes from " << reader.getStringFromProperty("changeset") << " ...").flush();
+            selectionData.loadChangeset(reader.getStringFromProperty("changeset"));
+            (cerr << " done." << endl).flush();
+        } else if (reader.getBoolFromProperty("filter.revision.non-changed")) {
+            std::cerr << "[ERROR] Missing changeset files in config file " << path << "." << std::endl;
             return;
         }
 

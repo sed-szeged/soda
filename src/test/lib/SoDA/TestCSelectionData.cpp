@@ -62,8 +62,7 @@ TEST_F(CSelectionDataTest, translations)
     EXPECT_NO_THROW(data->loadChangeset("sample/SelectionDataChangeset"));
     EXPECT_NO_THROW(data->loadCoverage("sample/SelectionDataCoverage"));
     EXPECT_NO_THROW(data->loadResults("sample/SelectionDataResults"));
-
-    data->globalize();
+    EXPECT_NO_THROW(data->globalize());
 
     for(IndexType i=0; i<data->getChangeset()->getCodeElements().size(); i++) {
         EXPECT_EQ(i, data->translateCodeElementIdFromCoverageToChangeset(
@@ -81,4 +80,19 @@ TEST_F(CSelectionDataTest, translations)
         EXPECT_EQ(i, data->translateTestcaseIdFromCoverageToResults (
                         data->translateTestcaseIdFromResultsToCoverage(i)));
     }
+}
+
+TEST_F(CSelectionDataTest, globalize) {
+    EXPECT_NO_THROW(data->loadChangeset("sample/ChangesetSampleBit"));
+    EXPECT_NO_THROW(data->loadCoverage("sample/CoverageMatrixSampleBit"));
+    EXPECT_NO_THROW(data->loadResults("sample/ResultsMatrixSampleBit"));
+    EXPECT_NO_THROW(data->globalize());
+
+    size_t numberOfCodeElements = data->getCodeElements()->size();
+    size_t numberOfTestcases = data->getTestcases()->size();
+
+    EXPECT_EQ(numberOfCodeElements, data->getChangeset()->getCodeElements().size());
+    EXPECT_EQ(numberOfCodeElements, data->getCoverage()->getCodeElements().size());
+    EXPECT_EQ(numberOfTestcases, data->getCoverage()->getTestcases().size());
+    EXPECT_EQ(numberOfTestcases, data->getResults()->getNumOfTestcases());
 }
