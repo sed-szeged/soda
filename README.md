@@ -28,6 +28,18 @@ cmake ../soda/src  # Pass -Dtest=ON argument if you want to execute the unit tes
 make
 ```
 
+#### Command line programs
+
+The library contains several command line programs:
+* test-suite-selection
+ * Runs one or more selection algorithm on the test suite an computes the precision, inclusiveness of the selected test cases according to the results of the test executions.
+* test-selection-statistics
+ * Computes several statistics of the test suite like density of coverage matrix, average changes per revision, etc.
+* test-suite-metrics
+ * Computes the FL and FD metric values of the test suite.
+* test-suite-score
+ * Computes the fault detection score and fault localization score of a test suite based on actual faults.
+
 #### Sample application
 
 You can find a sample prioritization algorithm in the src/cl/SoDATools/sample directory. It demonstrates some of the features available in the SoDA library. The algorithm implements a general test case prioritization based on the coverage matrix. The test cases with higher coverage will be at the beginning of the prioritized list.
