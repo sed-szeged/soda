@@ -46,7 +46,7 @@ void printHelp();
 
 CKernel kernel;
 
-CSelectionData selectionData;
+
 IndexType revision;
 std::vector<CClusterDefinition> clusterList;
 std::string outputDir;
@@ -131,6 +131,10 @@ int loadJsonFiles(String path)
     } else if (is_directory(path)) {
         directory_iterator endIt;
         for (directory_iterator it(path); it != endIt; it++) {
+            if (is_directory(it->status())) {
+                loadJsonFiles(it->path().string());
+                continue;
+            }
             if (!is_regular_file(it->status())) {
                 continue;
             }
@@ -143,19 +147,19 @@ int loadJsonFiles(String path)
     return 0;
 }
 
-void calculateMetric(const std::string &name)
+void calculateMetric(CSelectionData *selectionData, const std::string &name)
 {
     ITestSuiteMetricPlugin *metric = kernel.getTestSuiteMetricPluginManager().getPlugin(name);
 
     StringVector dependencies = metric->getDependency();
     for (StringVector::iterator it = dependencies.begin(); it != dependencies.end(); it++) {
         if (metricsCalculated.find(*it) == metricsCalculated.end()) {
-            calculateMetric(*it);
+            calculateMetric(selectionData, *it);
         }
     }
 
     (std::cerr << "[INFO] Calculating metrics: " << metric->getName() << " ...").flush();
-    metric->init(&selectionData, &clusterList, revision);
+    metric->init(selectionData, &clusterList, revision);
     metric->calculate(outputDir, results);
     metricsCalculated.insert(name);
     (std::cerr << " done." << std::endl).flush();
@@ -171,12 +175,14 @@ void processJsonFiles(String path)
         std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
 
+        CSelectionData *selectionData = new CSelectionData();
+
         if (exists(reader.getStringFromProperty("coverage-data")) &&
                 exists(reader.getStringFromProperty("results-data"))) {
             (std::cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
-            selectionData.loadCoverage(reader.getStringFromProperty("coverage-data"));
+            selectionData->loadCoverage(reader.getStringFromProperty("coverage-data"));
             (std::cerr << " done\n[INFO] loading results from " << reader.getStringFromProperty("results-data") << " ...").flush();
-            selectionData.loadResults(reader.getStringFromProperty("results-data"));
+            selectionData->loadResults(reader.getStringFromProperty("results-data"));
             (std::cerr << " done" << std::endl).flush();
         } else {
             std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
@@ -185,15 +191,19 @@ void processJsonFiles(String path)
 
         if (reader.getBoolFromProperty("globalize")) {
             (std::cerr << "[INFO] Globalizing ...").flush();
-            selectionData.globalize();
+            selectionData->globalize();
             (std::cerr << " done" << std::endl).flush();
         }
 
         revision = reader.getIntFromProperty("revision");
         outputDir = reader.getStringFromProperty("output-dir");
 
+        clusterList.clear();
+        metricsCalculated.clear();
+        results.clear();
+
         (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
-        clusterAlgorithm->execute(selectionData, clusterList);
+        clusterAlgorithm->execute(*selectionData, clusterList);
         (std::cerr << " done" << std::endl).flush();
 
         results.resize(clusterList.size());
@@ -201,10 +211,10 @@ void processJsonFiles(String path)
         StringVector metrics = reader.getStringVectorFromProperty("metrics");
 
         for (StringVector::iterator it = metrics.begin(); it != metrics.end(); it++) {
-            calculateMetric(*it);
+            calculateMetric(selectionData, *it);
         }
 
-
+        delete selectionData;
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
         return;
