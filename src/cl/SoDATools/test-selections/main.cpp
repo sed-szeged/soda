@@ -190,14 +190,14 @@ void processJsonFiles(String path)
             }
         }
 
-        std::ofstream of;
         if (!reader.getStringFromProperty("output-file").empty()) {
-            of.open((reader.getStringFromProperty("output-file") + ".csv").c_str());
         }
+        String output = reader.getStringFromProperty("output-file");
 
         while(!priolist.empty()) {
             string t = priolist.back();
             priolist.pop_back();
+            std::ofstream of((output + "-" + t + ".csv").c_str());
 
             ITestSuitePrioritizationPlugin *plugin = NULL;
             try {
@@ -215,23 +215,23 @@ void processJsonFiles(String path)
             (cerr << " done." << endl).flush();
 
             if (reader.getBoolFromProperty("print-details")) {
-                if (!reader.getStringFromProperty("output-file").empty())
+                if (!output.empty())
                     of << selectionstat->getDetailedData();
                 else {
                     std::cout.precision(5);
                     std::cout << selectionstat->getDetailedData();
                 }
             } else {
-                if (!reader.getStringFromProperty("output-file").empty())
+                if (!output.empty())
                     of << selectionstat->getData();
                 else {
                     std::cout.precision(5);
                     std::cout << selectionstat->getData();
                 }
             }
+            of.close();
             delete selectionstat;
         }
-        of.close();
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
         return;
