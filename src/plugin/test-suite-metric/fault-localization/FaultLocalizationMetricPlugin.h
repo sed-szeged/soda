@@ -67,7 +67,7 @@ public:
 
 private:
     void writePartitions(CPartitionAlgorithm &algorithm, const std::string &output);
-    void partitionStatistics(CPartitionAlgorithm &algorithm, const std::string &output, MetricResults &result);
+    void partitionStatistics(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string &output, MetricResults &result);
 
 private:
     CSelectionData *m_data;

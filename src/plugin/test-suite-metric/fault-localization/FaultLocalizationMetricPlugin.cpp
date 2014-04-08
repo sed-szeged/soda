@@ -81,7 +81,7 @@ void FaultLocalizationMetricPlugin::calculate(const std::string &output, std::ve
         //writePartitions(algorithm, ss.str());
 
         std::cerr << "[INFO] Calculating statisitcs: " << i << std::endl;
-        partitionStatistics(algorithm, ss.str(), results[i]);
+        partitionStatistics(algorithm, (*m_clusterList)[i], ss.str(), results[i]);
         std::cerr << "[INFO] Calculating statisitcs: " << i << " DONE." << std::endl;
     }
 
@@ -109,7 +109,7 @@ void FaultLocalizationMetricPlugin::writePartitions(CPartitionAlgorithm &algorit
     out.close();
 }
 
-void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &algorithm, const std::string &output, MetricResults &result)
+void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string &output, MetricResults &result)
 {
     std::ofstream partitionStatistics;
     std::ofstream partitionDistribution;
@@ -125,8 +125,7 @@ void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &alg
 
     IndexType nrOfPartitions = partitions.size();
     IndexType nrOfCodeElementsInPartition = partitionInfo.size();
-    // FIXME: Get the test cases in the partition, not every TC-s!!
-    IndexType nrOfTestcases = m_data->getResults()->getExecutionBitList(m_revision).count();
+    IndexType nrOfTestcases = cluster.getTestCases().size();
     IndexType minSize = nrOfCodeElementsInPartition;
     IndexType maxSize = 0;
 

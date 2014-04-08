@@ -136,7 +136,7 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
             it = SI.rbegin();
             IndexType iCid = it->second;
             SI.erase(--it.base());
-            if (S[iCid] == S[cid]) {
+            if (S[iCid] == 0) {
                 // We do not need to compare the coverage vector of the code elements because they are not covered at all.
                 pInfo.cid = iCid;
                 m_partitionInfo->push_back(pInfo);
