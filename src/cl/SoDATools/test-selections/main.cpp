@@ -117,6 +117,10 @@ int loadJsonFiles(String path)
     } else if (is_directory(path)) {
         directory_iterator endIt;
         for (directory_iterator it(path); it != endIt; it++) {
+            if (is_directory(it->status())) {
+                loadJsonFiles(it->path().string());
+                continue;
+            }
             if (!is_regular_file(it->status())) {
                 continue;
             }
