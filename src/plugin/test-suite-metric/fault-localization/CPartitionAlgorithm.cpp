@@ -19,14 +19,12 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <algorithm>
+#include <iostream>
+#include <map>
 
 #include "CPartitionAlgorithm.h"
 
 namespace soda {
-
-bool operator<(CPartitionAlgorithm::code_element_info c1, CPartitionAlgorithm::code_element_info c2) {
-    return c1.sum < c2.sum;
-}
 
 CPartitionAlgorithm::CPartitionAlgorithm() :
     m_partitionInfo(new PartitionInfo()),
@@ -42,6 +40,7 @@ CPartitionAlgorithm::~CPartitionAlgorithm()
 
 void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &cluster, IndexType revision)
 {
+    std::cerr << "[INFO] Partitioning started" << std::endl;
     CCoverageMatrix *coverage = data.getCoverage();
     std::map<IndexType, IndexType> tcMap;
 
@@ -55,9 +54,16 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
     // The number of tests that covers the code elements respectively.
     std::map<IndexType, IndexType> S;
     // The sum of indices of test cases in the matrix that cover code elements.
-    std::vector<code_element_info> SI;
+    std::multimap<IndexType, IndexType> SI;
 
+    IndexType cnt = 0;
     for (IndexType i = 0; i < codeElementIds.size(); i++) {
+
+        if (cnt == 1000) {
+            cnt = 0;
+            (std::cerr << "[INFO] Preprocessing code element: " << i << "\r").flush();
+        }
+
         IndexType cid = codeElementIds[i];
 
         IndexType sum = 0;
@@ -76,70 +82,94 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
 
         S[cid] = sum;
 
-        code_element_info c;
-        c.cid = cid;
-        c.sum = indexSum;
-        SI.push_back(c);
+        SI.insert(std::pair<IndexType, IndexType>(indexSum, cid));
+
+        cnt++;
     }
 
-    std::sort(SI.begin(), SI.end());
+    std::cerr << std::endl << "[INFO] Preprocessing finished." << std::endl;
+    std::cerr << std::endl << "[INFO] Started the partitioning..." << std::endl;
+
 
     partition_info pInfo;
     IndexType partitionId = 1;
-    while (!SI.empty()) {
-        // Get the element with biggest indexSum.
-        code_element_info c = SI.back();
-        SI.pop_back();
 
-        pInfo.cid = c.cid;
+    cnt = 0;
+
+    while (!SI.empty()) {
+        cnt++;
+        if (cnt == 1000) {
+            cnt = 0;
+            (std::cerr << "[INFO] Partitioning. Code elements left: " << SI.size() << "\r").flush();
+        }
+
+        // Get the element with biggest indexSum.
+        std::multimap<IndexType, IndexType>::reverse_iterator it;
+
+        it = SI.rbegin();
+        IndexType cid = it->second;
+        IndexType sum = it->first;
+        SI.erase(--it.base());
+
+
+        pInfo.cid = cid;
         pInfo.partitionId = partitionId;
         m_partitionInfo->push_back(pInfo);
-        (*m_partitions)[partitionId].insert(c.cid);
+        (*m_partitions)[partitionId].insert(cid);
 
-        std::vector<code_element_info> tmp;
+        std::vector<IndexType> tmp;
         std::vector<bool> cVector;
 
         for (IndexType i = 0; i < testCaseIds.size(); i++) {
             IndexType tcid = testCaseIds[i];
             if (data.getResults()->getExecutionBitList(revision).at(tcMap[tcid])) {
-                cVector.push_back(coverage->getBitMatrix().get(tcid, c.cid));
+                cVector.push_back(coverage->getBitMatrix().get(tcid, cid));
             }
         }
-        while (!SI.empty() && SI.back().sum == c.sum) {
-            code_element_info i = SI.back();
-            SI.pop_back();
-            if (S[i.cid] == 0) {
-                // We do not need to compare the coverage vectors of the code elements because they are not covered at all.
-                // This means that they will be in the same partition.
-                pInfo.cid = i.cid;
+        while (!SI.empty() && SI.rbegin()->first == sum) {
+            cnt++;
+            if (cnt == 1000) {
+                cnt = 0;
+                (std::cerr << "[INFO] Partitioning. Code elements left: " << SI.size() << "\r").flush();
+            }
+
+            it = SI.rbegin();
+            IndexType iCid = it->second;
+            SI.erase(--it.base());
+            if (S[iCid] == S[cid]) {
+                // We do not need to compare the coverage vector of the code elements because they are not covered at all.
+                pInfo.cid = iCid;
                 m_partitionInfo->push_back(pInfo);
-                (*m_partitions)[partitionId].insert(i.cid);
-            } else if (S[i.cid] == S[c.cid]) {
-                // The coverage of code elements is the same, let's compare their coverage vector.
+                (*m_partitions)[partitionId].insert(iCid);
+            } else if (S[iCid] == S[cid]) {
                 std::vector<bool> iVector;
                 for (IndexType j = 0; j < testCaseIds.size(); j++) {
                     IndexType tcid = testCaseIds[j];
                     if (data.getResults()->getExecutionBitList(revision).at(tcMap[tcid])) {
-                        iVector.push_back(coverage->getBitMatrix().get(tcid, i.cid));
+                        iVector.push_back(coverage->getBitMatrix().get(tcid, iCid));
                     }
                 }
                 if (cVector == iVector) {
-                    pInfo.cid = i.cid;
+                    pInfo.cid = iCid;
                     m_partitionInfo->push_back(pInfo);
-                    (*m_partitions)[partitionId].insert(i.cid);
+                    (*m_partitions)[partitionId].insert(iCid);
                 } else {
-                    tmp.push_back(i);
+                    tmp.push_back(iCid);
                 }
             } else {
-                tmp.push_back(i);
+                tmp.push_back(iCid);
             }
         }
 
-        SI.insert(SI.end(), tmp.rbegin(), tmp.rend());
+        for (IndexType i = 0; i < tmp.size(); i++) {
+            SI.insert(std::pair<IndexType, IndexType>(sum, tmp[i]));
+        }
         tmp.clear();
 
         partitionId++;
     }
+
+    std::cerr << "[INFO] Partitioning FINISHED." << std::endl;
 }
 
 } /* namespace soda */

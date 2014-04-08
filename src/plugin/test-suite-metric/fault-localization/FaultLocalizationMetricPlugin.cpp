@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
  * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
@@ -18,6 +19,9 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <iostream>
+
 #include <fstream>
 #include <sstream>
 
@@ -74,9 +78,11 @@ void FaultLocalizationMetricPlugin::calculate(const std::string &output, std::ve
         boost::filesystem::path dir(ss.str().c_str());
         boost::filesystem::create_directory(dir);
 
-        writePartitions(algorithm, ss.str());
+        //writePartitions(algorithm, ss.str());
 
+        std::cerr << "[INFO] Calculating statisitcs: " << i << std::endl;
         partitionStatistics(algorithm, ss.str(), results[i]);
+        std::cerr << "[INFO] Calculating statisitcs: " << i << " DONE." << std::endl;
     }
 
 }
@@ -119,6 +125,7 @@ void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &alg
 
     IndexType nrOfPartitions = partitions.size();
     IndexType nrOfCodeElementsInPartition = partitionInfo.size();
+    // FIXME: Get the test cases in the partition, not every TC-s!!
     IndexType nrOfTestcases = m_data->getResults()->getExecutionBitList(m_revision).count();
     IndexType minSize = nrOfCodeElementsInPartition;
     IndexType maxSize = 0;

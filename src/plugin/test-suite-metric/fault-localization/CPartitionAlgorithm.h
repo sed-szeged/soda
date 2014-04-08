@@ -47,14 +47,6 @@ public:
      */
     typedef std::map<IndexType, std::set<IndexType> > PartitionData;
 
-private:
-    typedef struct {
-        IndexType sum;
-        IndexType cid;
-    } code_element_info;
-
-    friend bool operator<(code_element_info c1, code_element_info c2);
-
 public:
     CPartitionAlgorithm();
     ~CPartitionAlgorithm();
