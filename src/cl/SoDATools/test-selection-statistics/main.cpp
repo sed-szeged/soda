@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include "boost/filesystem.hpp"
 #include "boost/program_options.hpp"
 #include "CDataManager.h"
 #include "exception/CException.h"
@@ -67,6 +68,7 @@ int processArgs(int ac, char *av[])
         CDataManager mgr;
         positional_options_description p;
         variables_map vm;
+
         store(command_line_parser(ac, av).options(desc).positional(p).run(), vm);
         notify(vm);
 
@@ -136,6 +138,21 @@ int processArgs(int ac, char *av[])
         if (vm.count("filter-to-coverage")) {
             globalize = true;
             filterToCoverage = true;
+        }
+
+        if (loadCoverage && (!boost::filesystem::exists(vm["coverage-data"].as<String>()))) {
+            cout << "[ERROR] Invalid coverage-data file path!" << endl;
+            return 1;
+        }
+
+        if (loadResults && (!boost::filesystem::exists(vm["results-data"].as<String>()))) {
+            cout << "[ERROR] Invalid results-data file path!" << endl;
+            return 1;
+        }
+
+        if (loadChanges && (!boost::filesystem::exists(vm["changes-data"].as<String>()))) {
+            cout << "[ERROR] Invalid changes-data file path!" << endl;
+            return 1;
         }
 
         // Load data.
