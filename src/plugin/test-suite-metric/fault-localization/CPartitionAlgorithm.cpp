@@ -108,7 +108,14 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         while (!SI.empty() && SI.back().sum == c.sum) {
             code_element_info i = SI.back();
             SI.pop_back();
-            if (S[i.cid] == S[c.cid]) {
+            if (S[i.cid] == 0) {
+                // We do not need to compare the coverage vectors of the code elements because they are not covered at all.
+                // This means that they will be in the same partition.
+                pInfo.cid = i.cid;
+                m_partitionInfo->push_back(pInfo);
+                (*m_partitions)[partitionId].insert(i.cid);
+            } else if (S[i.cid] == S[c.cid]) {
+                // The coverage of code elements is the same, let's compare their coverage vector.
                 std::vector<bool> iVector;
                 for (IndexType j = 0; j < testCaseIds.size(); j++) {
                     IndexType tcid = testCaseIds[j];
