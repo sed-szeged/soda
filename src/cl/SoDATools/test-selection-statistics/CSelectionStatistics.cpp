@@ -66,6 +66,8 @@ void CSelectionStatistics::calcCoverageRelatedStatistics()
 
     if (m_dataManager->getTestMask() & tmTestcaseCoverage) {
         ofstream out((m_dataManager->getOutputDir() + "/" + "testcaseCoverage.csv").c_str());
+        out << "Number of code elements:;" << nrOfCodeElements << endl;
+        out << "Number of test cases:;" << nrOfTestCases << endl;
         out << "Density of coverage matrix: " << covered / (nrOfTestCases * nrOfCodeElements) << endl;
         out << "Average code elements per testcases: " << covered / nrOfTestCases << endl;
         out << "Number of covered code elements per test case;Occurrences" << endl;
@@ -79,8 +81,10 @@ void CSelectionStatistics::calcCoverageRelatedStatistics()
         }
 
         ofstream out((m_dataManager->getOutputDir() + "/" + "functionCoverage.csv").c_str());
-        out << "Density of coverage matrix: " << covered / (nrOfTestCases * nrOfCodeElements) << endl;
-        out << "Average testcases per code elements: " << covered / nrOfCodeElements << endl;
+        out << "Number of code elements:;" << nrOfCodeElements << endl;
+        out << "Number of test cases:;" << nrOfTestCases << endl;
+        out << "Density of coverage matrix:; " << covered / (nrOfTestCases * nrOfCodeElements) << endl;
+        out << "Average testcases per code elements:; " << covered / nrOfCodeElements << endl;
         out << "Number of test cases per code element;Occurrences" << endl;
         writeCsv(out, dataCodeElements);
         out.close();
@@ -103,7 +107,9 @@ void CSelectionStatistics::calcChangeRelatedStatistics()
     }
 
     ofstream out((m_dataManager->getOutputDir() + "/" + "changes.csv").c_str());
-    out << "Average changes per revision: " << changes / nrOfRevisions << endl;
+    out << "Number of revisions:;" << nrOfRevisions << endl;
+    out << "Number of changes:;" << changes << endl;
+    out << "Average changes per revision:; " << changes / nrOfRevisions << endl;
     out << "Number of changes per revision;Occurrences" << endl;
     writeCsv(out, data);
     out.close();
@@ -126,7 +132,9 @@ void CSelectionStatistics::calcFailStatistics()
     }
 
     ofstream out((m_dataManager->getOutputDir() + "/" + "fails.csv").c_str());
-    out << "Average failed test cases per revision: " << failed / nrOfRevisions << endl;
+    out << "Number of revisions:;" << nrOfRevisions << endl;
+    out << "Number of fails:;" << failed << endl;
+    out << "Average failed test cases per revision:; " << failed / nrOfRevisions << endl;
     out << "Number of failed test cases per revision;Occurrences" << endl;
     writeCsv(out, data);
     out.close();
@@ -146,6 +154,8 @@ void CSelectionStatistics::calcCovResultsSummary()
     IntVector revisions = getSelectionData()->getResults()->getRevisionNumbers();
 
 
+    output << "Number of revisions:;" << nOfRevisions << endl;
+    output << "Number of test cases:;" << nOfTestCases << endl;
     output << "Tcid;Coverage;Executed;Fails" << endl;
 
     for (IndexType tcid = 0; tcid < nOfTestCases; tcid++) {
