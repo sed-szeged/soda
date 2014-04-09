@@ -43,6 +43,7 @@ CComputeSelectionMetrics::CComputeSelectionMetrics(CSelectionData* data, ITestSu
         m_sizeList(sizelist),
         m_numberOfRevisions(revlist->size()),
         m_numberOfSelections(sizelist->size()),
+        m_nOfTestCases(data->getCoverage()->getNumOfTestcases()),
         m_perRevisionData(NULL),
         m_sumTestcaseData(NULL),
         e_translation(0),
@@ -137,6 +138,10 @@ void CComputeSelectionMetrics::runMeasurementForOneRevision(RevNumType rev, Sele
         if (d_progress_bar > 1) {
             std::cerr << '\b';
         }
+
+        // when size is larger than the number of test cases than the measurements will not change
+        if (*sizeit >= m_nOfTestCases)
+            break;
     }
 
     if (d_progress_bar > 1) {

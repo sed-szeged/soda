@@ -173,6 +173,11 @@ private:
     size_t m_numberOfSelections;
 
     /**
+     * @brief Caches number of test cases.
+     */
+    IndexType m_nOfTestCases;
+
+    /**
      * @brief Stores measured data in an array for every revision grouped by the number of selections.
      */
     SelectionMetrics* m_perRevisionData;
