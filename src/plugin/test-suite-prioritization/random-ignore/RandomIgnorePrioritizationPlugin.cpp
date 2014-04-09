@@ -58,6 +58,9 @@ String RandomIgnorePrioritizationPlugin::getDescription()
 
 void RandomIgnorePrioritizationPlugin::init(CSelectionData *data)
 {
+    m_elementsReady->clear();
+    m_priorityQueue->clear();
+    m_nofElementsReady = 0;
     m_data = data;
 
     IndexType nofTestcases = m_data->getCoverage()->getNumOfTestcases();
