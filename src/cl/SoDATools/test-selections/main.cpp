@@ -88,13 +88,21 @@ void printHelp()
          << "\ttestselections directory which contains one or more json files" << endl << endl;
     cout << "Json configuration file format:" << endl
          << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
-         << "\"results-data\": \"results file path\",\n\t\"changeset\": \"changeset file path\",\n\t"
+         << "\"results-data\": \"results file path\",\n"
+         << "\t\"changeset\": \"changeset file path\",\n\t"
          << "\"selection-sizes\": [1, 10, 100],\n\t"
          << "\"prioritization-algorithms\": [ \"list of prioritization algorithms\" ],\n\t"
          << "\"output-file\": \"output file name\",\n\t"
-         << "\"filter\": {\n\t\t\"revision\": {\n\t\t\t\"non-changed\": false,\n\t\t\t\"non-failed\": false"
-         << "\n\t\t\t\"},\n\t\t\"revision-range\": [ ]\n\t\t},\n\t"
-         << "\"print-details\": false,\n\t\"progress-level\": 0\n}" << endl;
+         << "\"filter\": {\n"
+         << "\t\t\"revision\": {\n"
+         << "\t\t\t\"non-changed\": false,\n"
+         << "\t\t\t\"non-failed\": false\n"
+         << "\t\t\t\"},\n"
+         << "\t\t\"revision-range\": [ ]\n"
+         << "\t\t},\n\t"
+         << "\"globalize\": false,\n\t"
+         << "\"print-details\": false,\n"
+         << "\t\"progress-level\": 0\n}" << endl;
 }
 
 void printPluginNames(const String &type, const std::vector<String> &plugins)
@@ -194,8 +202,12 @@ void processJsonFiles(String path)
             }
         }
 
-        if (!reader.getStringFromProperty("output-file").empty()) {
+        if (reader.getBoolFromProperty("globalize")) {
+            (cerr << "[INFO] Globalizing...").flush();
+            selectionData.globalize();
+            (cerr << " done" << endl).flush();
         }
+
         String output = reader.getStringFromProperty("output-file");
 
         while(!priolist.empty()) {
