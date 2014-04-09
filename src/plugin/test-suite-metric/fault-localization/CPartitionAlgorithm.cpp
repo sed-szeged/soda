@@ -51,6 +51,8 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         tcMap[testCaseIds[i]] = data.translateTestcaseIdFromCoverageToResults(testCaseIds[i]);
     }
 
+    std::map<IndexType, std::vector<bool> > coverageMap;
+
     // The number of tests that covers the code elements respectively.
     std::map<IndexType, IndexType> S;
     // The sum of indices of test cases in the matrix that cover code elements.
@@ -72,11 +74,13 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         // Count the number of tests covering this code element and
         // summarize these test case ids.
         for (IndexType j = 0; j < testCaseIds.size(); j++) {
-            IndexType tcid = testCaseIds[0];
-            if (data.getResults()->getExecutionBitList(revision).at(tcMap[tcid]) &&
-                    coverage->getBitMatrix().get(tcid, cid)) {
-                sum++;
-                indexSum += tcid;
+            IndexType tcid = testCaseIds[j];
+            if (data.getResults()->getExecutionBitList(revision).at(tcMap[tcid])) {
+                if (coverage->getBitMatrix().get(tcid, cid)) {
+                    sum++;
+                    indexSum += tcid;
+                }
+                coverageMap[cid].push_back(coverage->getBitMatrix().get(tcid, cid));
             }
         }
 
@@ -118,14 +122,7 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         (*m_partitions)[partitionId].insert(cid);
 
         std::vector<IndexType> tmp;
-        std::vector<bool> cVector;
 
-        for (IndexType i = 0; i < testCaseIds.size(); i++) {
-            IndexType tcid = testCaseIds[i];
-            if (data.getResults()->getExecutionBitList(revision).at(tcMap[tcid])) {
-                cVector.push_back(coverage->getBitMatrix().get(tcid, cid));
-            }
-        }
         while (!SI.empty() && SI.rbegin()->first == sum) {
             cnt++;
             if (cnt == 1000) {
@@ -142,14 +139,7 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
                 m_partitionInfo->push_back(pInfo);
                 (*m_partitions)[partitionId].insert(iCid);
             } else if (S[iCid] == S[cid]) {
-                std::vector<bool> iVector;
-                for (IndexType j = 0; j < testCaseIds.size(); j++) {
-                    IndexType tcid = testCaseIds[j];
-                    if (data.getResults()->getExecutionBitList(revision).at(tcMap[tcid])) {
-                        iVector.push_back(coverage->getBitMatrix().get(tcid, iCid));
-                    }
-                }
-                if (cVector == iVector) {
+                if (coverageMap[cid] == coverageMap[iCid]) {
                     pInfo.cid = iCid;
                     m_partitionInfo->push_back(pInfo);
                     (*m_partitions)[partitionId].insert(iCid);
@@ -169,7 +159,7 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         partitionId++;
     }
 
-    std::cerr << "[INFO] Partitioning FINISHED." << std::endl;
+    std::cerr << std::endl << "[INFO] Partitioning FINISHED." << std::endl;
 }
 
 } /* namespace soda */
