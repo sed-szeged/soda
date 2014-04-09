@@ -213,6 +213,9 @@ String CComputeSelectionMetrics::getData()
             << std::fixed << m_sumTestcaseData[sel].precision() << ';'
             << std::fixed << m_sumTestcaseData[sel].f_measure() << ';'
             << std::endl;
+
+        if (m_sizeList->at(sel) > m_nOfTestCases)
+            break;
     }
 
     ss << std::endl;
@@ -279,6 +282,9 @@ String CComputeSelectionMetrics::getDetailedData()
             << std::fixed << m_sumTestcaseData[sel].precision() << ';'
             << std::fixed << m_sumTestcaseData[sel].f_measure() << ';'
             << std::endl;
+
+        if (m_sizeList->at(sel) > m_nOfTestCases)
+            break;
     }
 
     ss << std::endl;
