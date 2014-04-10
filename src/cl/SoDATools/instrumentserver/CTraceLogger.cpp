@@ -26,6 +26,7 @@
 
 #include "CTraceLogger.h"
 #include "exception/CException.h"
+#include "util/CAddressResolver.h"
 
 namespace soda {
 
@@ -159,25 +160,16 @@ void CTraceLogger::handleFunctionExitMessage()
 
 String CTraceLogger::translateAddressToFunction(const String &binaryPath, const int address)
 {
-    std::ostringstream command;
-    if (access(binaryPath.c_str(), F_OK) == 0) {
-        command << "addr2line -C -f -p -e " << binaryPath << " 0x" << std::hex << address;
-    } else {
-        command << "addr2line -C -f -p -e " << m_data->getBaseDir() << "/" << binaryPath << " 0x" << std::hex << address;
+    String binaryFullPath = binaryPath;
+    if (!access(binaryPath.c_str(), F_OK) == 0) {
+        binaryFullPath = m_data->getBaseDir() + "/" + binaryPath;
     }
-    FILE *pf;
-    pf = popen(command.str().c_str(), "r");
-    if (!pf) {
-        //TODO throw exception
+    String output;
+    try {
+        output = CAddressResolver::resolve(binaryFullPath, address);
+    } catch (CException &e) {
+        output = "[SODA]not-resolved";
     }
-    String output = "";
-    char *buf = new char[3072];
-    if (fgets(buf, 3072, pf) != NULL) {
-        output = String(buf);
-    }
-
-    delete buf;
-    pclose(pf);
 
     return output;
 }
