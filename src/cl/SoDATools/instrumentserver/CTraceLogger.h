@@ -24,7 +24,7 @@
 
 #include <map>
 
-#include "CThread.h"
+#include "thread/CThread.h"
 #include "CTraceData.h"
 
 namespace soda {

@@ -19,7 +19,7 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CThread.h"
+#include "thread/CThread.h"
 
 namespace soda {
 
