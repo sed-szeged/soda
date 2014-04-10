@@ -55,9 +55,9 @@ public:
     /**
      * @brief Sets the coverage of the function in the test.
      * @param test  The name of the test.
-     * @param functionName  The name of the function.
+     * @param codeElementName  The name of the function.
      */
-    virtual void setCoverage(const String &test, const String &functionName);
+    virtual void setCoverage(const String &test, const String &codeElementName);
 
     /**
      * @brief Returns the name of the function by its address.
@@ -65,7 +65,7 @@ public:
      * @param address  The address of the function in the binary.
      * @return The name of the function.
      */
-    virtual String getFunctionName(const String &binaryPath, const int address);
+    virtual String getCodeElementName(const String &binaryPath, const int address);
 
     /**
      * @brief Adds the function name to the cache to speed up the look up process.
@@ -73,7 +73,7 @@ public:
      * @param address  The address of the function in the binary.
      * @param functionName  The name of the function.
      */
-    virtual void addFunctionName(const String &binaryPath, const int address, const String &functionName);
+    virtual void addCodeElementName(const String &binaryPath, const int address, const String &codeElementName);
 
     /**
      * @brief Returns the base directory where the executed binaries can be
@@ -99,7 +99,7 @@ private:
     String           m_coverageFilePath;
 
     /**
-     * @brief Stores the function names and their address to speed up lookup
+     * @brief Stores the code element names and their address to speed up lookup
      *        process.
      */
     std::map<String, std::map<int, String> > m_addressMap;

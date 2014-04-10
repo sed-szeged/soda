@@ -19,7 +19,7 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CTraceData.h"
+#include "data/CTraceData.h"
 #include "exception/CException.h"
 
 namespace soda {
@@ -48,32 +48,32 @@ void CTraceData::save()
     pthread_mutex_unlock(&m_coverageMutex);
 }
 
-void CTraceData::setCoverage(const String &test, const String &functionName)
+void CTraceData::setCoverage(const String &test, const String &codeElementName)
 {
     pthread_mutex_lock(&m_coverageMutex);
-    m_coverageMatrix->addOrSetRelation(test, functionName, true);
+    m_coverageMatrix->addOrSetRelation(test, codeElementName, true);
     pthread_mutex_unlock(&m_coverageMutex);
 }
 
-String CTraceData::getFunctionName(const String &binaryPath, const int address)
+String CTraceData::getCodeElementName(const String &binaryPath, const int address)
 {
     pthread_mutex_lock(&m_addressMapMutex);
     if (m_addressMap.find(binaryPath) == m_addressMap.end()) {
         pthread_mutex_unlock(&m_addressMapMutex);
-        throw CException("soda::CtTaceData::getFunctionName", "Address not found.");
+        throw CException("soda::CtTaceData::getCodeElementName", "Address not found.");
     }
     if (m_addressMap[binaryPath].find(address) == m_addressMap[binaryPath].end()) {
         pthread_mutex_unlock(&m_addressMapMutex);
-        throw CException("soda::CtTaceData::getFunctionName", "Address not found.");
+        throw CException("soda::CtTaceData::getCodeElementName", "Address not found.");
     }
     pthread_mutex_unlock(&m_addressMapMutex);
     return m_addressMap[binaryPath][address];
 }
 
-void CTraceData::addFunctionName(const String &binaryPath, const int address, const String &functionName)
+void CTraceData::addCodeElementName(const String &binaryPath, const int address, const String &codeElementName)
 {
     pthread_mutex_lock(&m_addressMapMutex);
-    m_addressMap[binaryPath][address] = functionName;
+    m_addressMap[binaryPath][address] = codeElementName;
     pthread_mutex_unlock(&m_addressMapMutex);
 }
 

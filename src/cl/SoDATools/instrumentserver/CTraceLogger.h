@@ -25,7 +25,7 @@
 #include <map>
 
 #include "thread/CThread.h"
-#include "CTraceData.h"
+#include "data/CTraceData.h"
 
 namespace soda {
 
@@ -38,7 +38,7 @@ class CTraceLogger : public CThread
 {
 public:
     /**
-     * @brief Creates a new CTraceLogger instance. The logger will listent on
+     * @brief Creates a new CTraceLogger instance. The logger will listen on
      *        the socket and saves the informations in the data.
      * @param socket  The socket identifier.
      * @param data  The CTraceData instance.

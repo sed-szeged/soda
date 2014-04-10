@@ -126,11 +126,11 @@ String CTraceLogger::handleFunctionMessage()
     String binaryPath = String(text);
 
     try {
-        function = m_data->getFunctionName(binaryPath, address);
+        function = m_data->getCodeElementName(binaryPath, address);
     } catch (CException &e) {
         String output = translateAddressToFunction(binaryPath, address);
         function = output.substr(0, output.find(" at "));
-        m_data->addFunctionName(binaryPath, address, function);
+        m_data->addCodeElementName(binaryPath, address, function);
     }
 
     /* Free the buffer. */

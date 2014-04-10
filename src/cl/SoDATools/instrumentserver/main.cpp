@@ -38,7 +38,7 @@
 #include <vector>
 
 #include "boost/program_options.hpp"
-#include "CTraceData.h"
+#include "data/CTraceData.h"
 #include "CTraceLogger.h"
 
 using namespace soda;
