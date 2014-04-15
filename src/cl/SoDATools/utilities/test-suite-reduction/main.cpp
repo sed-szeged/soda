@@ -46,7 +46,7 @@ void printHelp();
 CKernel kernel;
 
 int main(int argc, char* argv[]) {
-    cout << "reduction (SoDA tool)" << endl;
+    cout << "test-suite-reduction (SoDA tool)" << endl;
 
     options_description desc("Options");
     desc.add_options()
@@ -79,19 +79,21 @@ int main(int argc, char* argv[]) {
 
 void printHelp()
 {
-    cout << "This application measures the given selection data with the specified options in a json config files."
+    cout << "The application reduces the given coverage data with specified reduction algorithms."
          << endl << endl;
     cout << "USAGE:" << endl
-         << "\treduction [-hl]" << endl
-         << "\treduction json file path" << endl
-         << "\treduction directory which contains one or more json files" << endl << endl;
+         << "\ttest_suite_reduction [-hl]" << endl
+         << "\ttest_suite_reduction json file path" << endl
+         << "\ttest_suite_reduction directory which contains one or more json files" << endl << endl;
     cout << "Json configuration file format:" << endl
          << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
          << "\"results-data\": \"results file path\",\n\t"
          << "\"iteration\": 15,\n\t"
-         << "\"reduction-method\": \"reduction method\",\n\t"
+         << "\"reduction-sizes\": [1000, 5000, 10000, 25000, 30000],\n\t"
+         << "\"reduction-method\": [\"reduction methods\"],\n\t"
          << "\"program-name\": \"program name\",\n\t"
-         << "\"output-dir\": \"output dir\",\n\t\"globalize\": true\n}" << endl;
+         << "\"output-dir\": \"output dir\",\n"
+         << "\t\"globalize\": true\n}" << endl;
 }
 
 void printPluginNames(const std::vector<String> &plugins)
@@ -114,6 +116,10 @@ int loadJsonFiles(String path)
     } else if (is_directory(path)) {
         directory_iterator endIt;
         for (directory_iterator it(path); it != endIt; it++) {
+            if (is_directory(it->status())) {
+                loadJsonFiles(it->path().string());
+                continue;
+            }
             if (!is_regular_file(it->status())) {
                 continue;
             }
@@ -161,7 +167,7 @@ void processJsonFiles(String path)
                 && exists(reader.getStringFromProperty("results-data"))) {
             (std::cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
             selectionData.loadCoverage(reader.getStringFromProperty("coverage-data"));
-            (std::cerr << " done\n[INFO] loading results from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
+            (std::cerr << " done\n[INFO] loading results from " << reader.getStringFromProperty("results-data") << " ...").flush();
             selectionData.loadResults(reader.getStringFromProperty("results-data"));
             (std::cerr << " done" << std::endl).flush();
         } else {
@@ -172,6 +178,7 @@ void processJsonFiles(String path)
         if (reader.getBoolFromProperty("globalize")) {
             // Globalize data.
             (std::cerr << "[INFO] Globalizing ... ").flush();
+            selectionData.globalize();
             selectionData.filterToCoverage();
             (std::cerr << " done" << std::endl).flush();
         }
@@ -182,15 +189,16 @@ void processJsonFiles(String path)
             boost::filesystem::create_directory(dirPath);
         }
 
-        std::ofstream outStream((dirPath + "/" + p.string() + ".reduced").c_str());
-        if (!outStream.good()) {
-            throw CException("Reduction output file error.", reader.getStringFromProperty("coverage-data") + ".reduced");
-        }
-
         while (!reductionList.empty()) {
             string reductionMethod = reductionList.back();
             reductionList.pop_back();
             ITestSuiteReductionPlugin *plugin = NULL;
+
+            std::ofstream outStream((dirPath + "/" + reductionMethod + "-" + p.string() + ".reduced").c_str());
+            if (!outStream.good()) {
+                throw CException("Reduction output file error.", reader.getStringFromProperty("coverage-data") + ".reduced");
+            }
+
             try {
                 plugin = kernel.getTestSuiteReductionPluginManager().getPlugin(reductionMethod);
                 plugin->init(&selectionData, reader);
@@ -200,8 +208,8 @@ void processJsonFiles(String path)
                 return;
             }
             plugin->reduction(outStream);
+            outStream.close();
         }
-        outStream.close();
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
         return;

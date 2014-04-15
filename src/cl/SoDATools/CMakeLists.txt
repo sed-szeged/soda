@@ -9,7 +9,7 @@ include_directories(${SoDATools_SOURCE_DIR}/../../lib/SoDA/inc
 add_subdirectory(utilities/rawdatareader)
 
 # reduction
-add_subdirectory(utilities/reduction)
+add_subdirectory(utilities/test-suite-reduction)
 
 # test-selection-statistics
 add_subdirectory(test-selection-statistics)
