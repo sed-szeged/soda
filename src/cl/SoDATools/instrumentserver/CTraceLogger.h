@@ -23,6 +23,7 @@
 #define CTRACELOGGER_H
 
 #include <map>
+#include <set>
 
 #include "thread/CThread.h"
 #include "data/CTraceData.h"
@@ -50,6 +51,11 @@ public:
      * @brief Processes the messages coming through the socket.
      */
     virtual void run();
+
+    /**
+     * @brief Returns the socket identifier.
+     * @return
+     */
     int getSocket();
 
 private:

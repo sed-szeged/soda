@@ -27,18 +27,21 @@ namespace soda {
 CTraceData::CTraceData(const String& coverageFileName, const String& baseDir ) :
     m_coverageMatrix(new CCoverageMatrix()),
     m_coverageFilePath(coverageFileName),
+    m_codeElementLocations(new std::set<std::string>()),
     m_baseDir(baseDir)
 {
     pthread_mutex_init(&m_coverageMutex, NULL);
     pthread_mutex_init(&m_addressMapMutex, NULL);
-
+    pthread_mutex_init(&m_codeElementLocationsMutex, NULL);
 }
 
 CTraceData::~CTraceData()
 {
     delete m_coverageMatrix;
+    delete m_codeElementLocations;
     pthread_mutex_destroy(&m_coverageMutex);
     pthread_mutex_destroy(&m_addressMapMutex);
+    pthread_mutex_destroy(&m_codeElementLocationsMutex);
 }
 
 void CTraceData::save()
@@ -75,6 +78,18 @@ void CTraceData::addCodeElementName(const String &binaryPath, const int address,
     pthread_mutex_lock(&m_addressMapMutex);
     m_addressMap[binaryPath][address] = codeElementName;
     pthread_mutex_unlock(&m_addressMapMutex);
+}
+
+void CTraceData::addCodeElementLocation(const String &location)
+{
+    pthread_mutex_lock(&m_codeElementLocationsMutex);
+    m_codeElementLocations->insert(location);
+    pthread_mutex_unlock(&m_codeElementLocationsMutex);
+}
+
+std::set<std::string>& CTraceData::getCodeElementLocations()
+{
+    return *m_codeElementLocations;
 }
 
 String CTraceData::getBaseDir()

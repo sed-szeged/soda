@@ -76,6 +76,14 @@ public:
     virtual void addCodeElementName(const String &binaryPath, const int address, const String &codeElementName);
 
     /**
+     * @brief Add a code element location.
+     * @param location
+     */
+    virtual void addCodeElementLocation(const String &location);
+
+    virtual std::set<std::string>& getCodeElementLocations();
+
+    /**
      * @brief Returns the base directory where the executed binaries can be
      *        found.
      * @return
@@ -108,6 +116,16 @@ private:
      * @brief A mutex to prevent parallel access to the address map.
      */
     pthread_mutex_t  m_addressMapMutex;
+
+    /**
+     * @brief Stores the location of code elements in the source files.
+     */
+    std::set<std::string> *m_codeElementLocations;
+
+    /**
+     * @brief A mutex to prevent parallel access to the code element locations vector.
+     */
+    pthread_mutex_t  m_codeElementLocationsMutex;
 
     String m_baseDir;
 };

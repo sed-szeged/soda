@@ -129,7 +129,7 @@ String CTraceLogger::handleFunctionMessage()
         function = m_data->getCodeElementName(binaryPath, address);
     } catch (CException &e) {
         String output = translateAddressToFunction(binaryPath, address);
-        function = output.substr(0, output.find(" at "));
+        m_data->addCodeElementLocation(output);
         m_data->addCodeElementName(binaryPath, address, function);
     }
 
