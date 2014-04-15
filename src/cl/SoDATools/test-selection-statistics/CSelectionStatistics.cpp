@@ -123,11 +123,13 @@ void CSelectionStatistics::calcFailStatistics()
     IntVector revisions = getSelectionData()->getResults()->getRevisions().getRevisionNumbers();
     float failed = 0;
     IdxIdxMap data;
+    IdxIdxMap revdata;
 
     for (IndexType i = 0; i < nrOfRevisions; i++) {
         IndexType rev = revisions[i];
         IndexType count = getSelectionData()->getResults()->getExecutionBitList(rev).count() - getSelectionData()->getResults()->getPassedBitList(rev).count();
         failed += count;
+        revdata[revisions[i]] = count;
         data[count]++;
     }
 
@@ -135,6 +137,8 @@ void CSelectionStatistics::calcFailStatistics()
     out << "Number of revisions:;" << nrOfRevisions << endl;
     out << "Number of fails:;" << failed << endl;
     out << "Average failed test cases per revision:; " << failed / nrOfRevisions << endl;
+    out << "Revision number;Number of fails";
+    writeCsv(out, revdata);
     out << "Number of failed test cases per revision;Occurrences" << endl;
     writeCsv(out, data);
     out.close();
