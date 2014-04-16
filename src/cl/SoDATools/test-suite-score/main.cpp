@@ -51,8 +51,6 @@ CKernel kernel;
 // Code element -> technique -> value
 typedef std::map<IndexType, std::map<std::string, double> > FLScoreValues;
 
-std::vector<FLScoreValues> scoresByCluster;
-
 int main(int argc, char* argv[]) {
     std::cout << "test-suite-score (SoDA tool)" << std::endl;
 
@@ -101,13 +99,16 @@ void printHelp()
     std::cout << "Json configuration file format:" << std::endl
          << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
          << "\"results-data\": \"results file path\",\n\t"
-         << "\"revision\": 1,\n\t"
          << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the scores\",\n\t"
          << "\"fault-localization-techniques\": [ \"list of fault localization techniques to use\" ],\n\t"
-         << "\"failed-code-elements\": [ \"list of code elements that casue the failure of the test cases (by their string representation)\" ],\n\t"
-         << "\"total-failed-testcases\": 125, //The total number of failing testcases in the whole test suite (without any reduction or selection and clusterization).\n\t"
          << "\"globalize\": true,\n\t"
-         << "\"output-dir\": \"output directory\"\n"
+         << "\"selected-revisions\":\n\t"
+         << "[ // multiple revisions with the required parameters\n\t\t{\n\t\t\t"
+         << "\"revision\": 1,\n\t\t\t"
+         << "\"failed-code-elements\": [ \"list of code elements that casue the failure of the test cases (by their string representation)\" ],\n\t\t\t"
+         << "\"output-dir\": \"output directory\",\n\t\t\t"
+         << "\"total-failed-testcases\": 125 //The total number of failing testcases in the whole test suite (without any reduction or selection and clusterization).\n\t\t"
+         << "}\n\t]\n"
          << "}"
          << std::endl;
 }
@@ -154,9 +155,6 @@ void processJsonFiles(std::string path)
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
 
         CSelectionData selectionData;
-        std::vector<CClusterDefinition> clusterList;
-        std::vector<IndexType> failedCodeElements;
-
         CJsonReader reader = CJsonReader(path);
 
         std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
@@ -180,89 +178,96 @@ void processJsonFiles(std::string path)
             (std::cerr << " done" << std::endl).flush();
         }
 
-        IndexType revision = reader.getIntFromProperty("revision");
-        IndexType totalFailedTestcases = reader.getIntFromProperty("total-failed-testcases");
-        std::string outputDir = reader.getStringFromProperty("output-dir");
+        std::vector<CJsonReader> selectedRevs = reader.getPropertyVectorFromProperty("selected-revisions");
+        for (std::vector<CJsonReader>::iterator it = selectedRevs.begin(); it != selectedRevs.end(); ++it) {
+            std::vector<FLScoreValues> scoresByCluster;
+            std::vector<CClusterDefinition> clusterList;
+            std::vector<IndexType> failedCodeElements;
 
-        StringVector failedCodeElementNames = reader.getStringVectorFromProperty("failed-code-elements");
-        for (IndexType i = 0; i < failedCodeElementNames.size(); i++) {
-            IndexType cid = selectionData.getCoverage()->getCodeElements().getID(failedCodeElementNames[i]);
-            failedCodeElements.push_back(cid);
-        }
+            IndexType revision = (*it).getIntFromProperty("revision");
+            IndexType totalFailedTestcases = (*it).getIntFromProperty("total-failed-testcases");
+            std::string outputDir = (*it).getStringFromProperty("output-dir");
 
-        (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
-        clusterAlgorithm->execute(selectionData, clusterList);
-        (std::cerr << " done." << std::endl).flush();
+            std::cout << "[INFO] Calculating scores for revision: " << revision << std::endl;
 
-        scoresByCluster.resize(clusterList.size());
+            StringVector failedCodeElementNames = (*it).getStringVectorFromProperty("failed-code-elements");
+            for (IndexType i = 0; i < failedCodeElementNames.size(); i++) {
+                IndexType cid = selectionData.getCoverage()->getCodeElements().getID(failedCodeElementNames[i]);
+                failedCodeElements.push_back(cid);
+            }
 
-        // FD score
-        for (IndexType i = 0; i < clusterList.size(); i++) {
-            // Prepare directory for the output.
-            std::stringstream ss;
-            ss << outputDir << "/" << i;
-            boost::filesystem::path dir(ss.str().c_str());
-            boost::filesystem::create_directory(dir);
+            (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
+            clusterAlgorithm->execute(selectionData, clusterList);
+            (std::cerr << " done." << std::endl).flush();
 
-            ss << "/fd.score.csv";
+            scoresByCluster.resize(clusterList.size());
 
-            std::ofstream fdScoreStream;
-            fdScoreStream.open(ss.str().c_str());
-            fdScoreStream << "#fd score;" << std::endl;
-
-            double fdScore = CTestSuiteScore::fdScore(selectionData, clusterList[i], revision, totalFailedTestcases);
-            fdScoreStream << fdScore << std::endl;
-
-            fdScoreStream.close();
-        }
-
-        StringVector faultLocalizationTechniques = reader.getStringVectorFromProperty("fault-localization-techniques");
-        for (IndexType i = 0; i < faultLocalizationTechniques.size(); i++) {
-            std::string flTechniqueName = faultLocalizationTechniques[i];
-            IFaultLocalizationTechniquePlugin *technique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin(flTechniqueName);
-
-            technique->init(&selectionData, revision);
-            for (IndexType j = 0; j < clusterList.size(); j++) {
-                // Calculate FL score
+            // FD score
+            for (IndexType i = 0; i < clusterList.size(); i++) {
+                // Prepare directory for the output.
                 std::stringstream ss;
-                ss << outputDir << "/" << j;
-                technique->calculate(clusterList[j], ss.str());
+                ss << outputDir << "/" << i;
+                boost::filesystem::path dir(ss.str().c_str());
+                boost::filesystem::create_directory(dir);
 
-                IFaultLocalizationTechniquePlugin::FLValues values = technique->getValues();
+                ss << "/fd.score.csv";
 
-                for (IndexType k = 0; k < failedCodeElements.size(); k++) {
-                    IndexType cid = failedCodeElements[k];
-                    double score = CTestSuiteScore::flScore(clusterList[j], values[cid], technique->getDistribution());
-                    scoresByCluster[j][cid][flTechniqueName] = score;
+                std::ofstream fdScoreStream;
+                fdScoreStream.open(ss.str().c_str());
+                fdScoreStream << "#fd score;" << std::endl;
+
+                double fdScore = CTestSuiteScore::fdScore(selectionData, clusterList[i], revision, totalFailedTestcases);
+                fdScoreStream << fdScore << std::endl;
+
+                fdScoreStream.close();
+            }
+
+            StringVector faultLocalizationTechniques = reader.getStringVectorFromProperty("fault-localization-techniques");
+            for (IndexType i = 0; i < faultLocalizationTechniques.size(); i++) {
+                std::string flTechniqueName = faultLocalizationTechniques[i];
+                IFaultLocalizationTechniquePlugin *technique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin(flTechniqueName);
+
+                technique->init(&selectionData, revision);
+                for (IndexType j = 0; j < clusterList.size(); j++) {
+                    // Calculate FL score
+                    std::stringstream ss;
+                    ss << outputDir << "/" << j;
+                    technique->calculate(clusterList[j], ss.str());
+
+                    IFaultLocalizationTechniquePlugin::FLValues values = technique->getValues();
+
+                    for (IndexType k = 0; k < failedCodeElements.size(); k++) {
+                        IndexType cid = failedCodeElements[k];
+                        double score = CTestSuiteScore::flScore(clusterList[j], values[cid], technique->getDistribution());
+                        scoresByCluster[j][cid][flTechniqueName] = score;
+                    }
                 }
             }
-        }
-        // Save the score values
-        for (IndexType i = 0; i < scoresByCluster.size(); i++) {
-            std::stringstream ss;
-            ss << outputDir << "/" << i << "/fl.score.csv";
+            // Save the score values
+            for (IndexType i = 0; i < scoresByCluster.size(); i++) {
+                std::stringstream ss;
+                ss << outputDir << "/" << i << "/fl.score.csv";
 
-            std::ofstream flScoreStream;
-            flScoreStream.open(ss.str().c_str());
-            flScoreStream << "#cluster id;code element id;";
-            for (IndexType j = 0; j < faultLocalizationTechniques.size(); j++) {
-                flScoreStream << faultLocalizationTechniques[j] << ";";
-            }
-            flScoreStream << std::endl;
-
-            for (IndexType j = 0; j < failedCodeElements.size(); j++) {
-                IndexType cid = failedCodeElements[j];
-                flScoreStream << i << ";" << cid << ";";
-                for (IndexType k = 0; k < faultLocalizationTechniques.size(); k++) {
-                    std::string flTechniqueName = faultLocalizationTechniques[k];
-                    flScoreStream << scoresByCluster[i][cid][flTechniqueName] << ";";
+                std::ofstream flScoreStream;
+                flScoreStream.open(ss.str().c_str());
+                flScoreStream << "#cluster id;code element id;";
+                for (IndexType j = 0; j < faultLocalizationTechniques.size(); j++) {
+                    flScoreStream << faultLocalizationTechniques[j] << ";";
                 }
                 flScoreStream << std::endl;
+
+                for (IndexType j = 0; j < failedCodeElements.size(); j++) {
+                    IndexType cid = failedCodeElements[j];
+                    flScoreStream << i << ";" << cid << ";";
+                    for (IndexType k = 0; k < faultLocalizationTechniques.size(); k++) {
+                        std::string flTechniqueName = faultLocalizationTechniques[k];
+                        flScoreStream << scoresByCluster[i][cid][flTechniqueName] << ";";
+                    }
+                    flScoreStream << std::endl;
+                }
+                flScoreStream.close();
             }
-            flScoreStream.close();
         }
-
-
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
         return;

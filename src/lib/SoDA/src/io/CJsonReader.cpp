@@ -27,6 +27,10 @@
 
 namespace soda { namespace io {
 
+CJsonReader::CJsonReader(ptree tr) :
+    m_data(tr)
+{}
+
 CJsonReader::CJsonReader(String path)
 {
     load(path);
@@ -73,9 +77,8 @@ int CJsonReader::getIntFromProperty(String property)
 IntVector CJsonReader::getIntVectorFromProperty(String property)
 {
     IntVector tmp;
-    BOOST_FOREACH(ptree::value_type &v,
-                  m_data.get_child(property))
-            tmp.push_back(boost::lexical_cast<int>(v.second.data()));
+    BOOST_FOREACH(ptree::value_type &v, m_data.get_child(property))
+        tmp.push_back(boost::lexical_cast<int>(v.second.data()));
 
     return tmp;
 }
@@ -83,9 +86,17 @@ IntVector CJsonReader::getIntVectorFromProperty(String property)
 StringVector CJsonReader::getStringVectorFromProperty(String property)
 {
     StringVector tmp;
-    BOOST_FOREACH(ptree::value_type &v,
-                  m_data.get_child(property))
-            tmp.push_back(v.second.data());
+    BOOST_FOREACH(ptree::value_type &v, m_data.get_child(property))
+        tmp.push_back(v.second.data());
+
+    return tmp;
+}
+
+std::vector<CJsonReader> CJsonReader::getPropertyVectorFromProperty(String property)
+{
+    std::vector<CJsonReader> tmp;
+    BOOST_FOREACH(ptree::value_type &v, m_data.get_child(property))
+        tmp.push_back(CJsonReader(v.second));
 
     return tmp;
 }

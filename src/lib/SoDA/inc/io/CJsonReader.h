@@ -42,6 +42,7 @@ public:
      * @brief Creates a new CJsonReader object.
      * @param path File path.
      */
+    CJsonReader(ptree tr);
     CJsonReader(String path);
     ~CJsonReader();
 
@@ -97,6 +98,13 @@ public:
      * @return Value of the specified property.
      */
     StringVector getStringVectorFromProperty(String property);
+
+    /**
+     * @brief Returns property trees from the specified property as CJsonReader vector.
+     * @param property Specified path in property tree.
+     * @return Property trees from the specified property.
+     */
+    std::vector<CJsonReader> getPropertyVectorFromProperty(String property);
 
 private:
 
