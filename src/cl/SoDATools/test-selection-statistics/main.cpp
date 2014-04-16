@@ -38,6 +38,8 @@ int processArgs(int ac, char *av[]);
 
 int main(int argc, char *argv[])
 {
+    cout << "test-selection-statistics (SoDA tool)" << endl;
+
     // Usage
     desc.add_options()
             ("help,h", "help message")

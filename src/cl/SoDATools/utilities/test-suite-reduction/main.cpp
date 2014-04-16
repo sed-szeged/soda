@@ -42,6 +42,8 @@ void processJsonFiles(String path);
 int loadJsonFiles(String path);
 void printPluginNames(const std::vector<String> &plugins);
 void printHelp();
+std::string getJsonString();
+void createJsonFile();
 
 CKernel kernel;
 
@@ -51,6 +53,7 @@ int main(int argc, char* argv[]) {
     options_description desc("Options");
     desc.add_options()
             ("help,h", "Prints help message")
+            ("create-json-file,j", "Creates a sample json file")
             ("list-algorithms,l", "Lists the reduction algorithms");
 
     variables_map vm;
@@ -74,7 +77,19 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    if (vm.count("create-json-file")) {
+        createJsonFile();
+        return 0;
+    }
+
     return loadJsonFiles(String(argv[1]));
+}
+
+void createJsonFile()
+{
+    std::ofstream of("sample.json");
+    of << getJsonString();
+    of.close();
 }
 
 void printHelp()
@@ -82,18 +97,26 @@ void printHelp()
     cout << "The application reduces the given coverage data with specified reduction algorithms."
          << endl << endl;
     cout << "USAGE:" << endl
-         << "\ttest_suite_reduction [-hl]" << endl
-         << "\ttest_suite_reduction json file path" << endl
-         << "\ttest_suite_reduction directory which contains one or more json files" << endl << endl;
+         << "\ttest-suite-reduction [-h|l|j]" << endl
+         << "\ttest-suite-reduction json file path" << endl
+         << "\ttest-suite-reduction directory which contains one or more json files" << endl << endl;
     cout << "Json configuration file format:" << endl
-         << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
-         << "\"results-data\": \"results file path\",\n\t"
-         << "\"iteration\": 15,\n\t"
-         << "\"reduction-sizes\": [1000, 5000, 10000, 25000, 30000],\n\t"
-         << "\"reduction-method\": [\"reduction methods\"],\n\t"
-         << "\"program-name\": \"program name\",\n\t"
-         << "\"output-dir\": \"output dir\",\n"
-         << "\t\"globalize\": true\n}" << endl;
+         << getJsonString();
+}
+
+std::string getJsonString()
+{
+    std::stringstream ss;
+    ss << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
+       << "\"results-data\": \"results file path\",\n\t"
+       << "\"iteration\": 15,\n\t"
+       << "\"reduction-sizes\": [1000, 5000, 10000, 25000, 30000],\n\t"
+       << "\"reduction-method\": [\"reduction methods\"],\n\t"
+       << "\"program-name\": \"program name\",\n\t"
+       << "\"output-dir\": \"output dir\",\n"
+       << "\t\"globalize\": true\n}" << endl;
+
+    return ss.str();
 }
 
 void printPluginNames(const std::vector<String> &plugins)

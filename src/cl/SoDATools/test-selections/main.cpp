@@ -43,15 +43,18 @@ void processJsonFiles(String path);
 int loadJsonFiles(String path);
 void printPluginNames(const String &type, const std::vector<String> &plugins);
 void printHelp();
+string getJsonString();
+void createJsonFile();
 
 CKernel kernel;
 
 int main(int argc, char* argv[]) {
-    cout << "testselections (SoDA tool)" << endl;
+    cout << "test-selections (SoDA tool)" << endl;
 
     options_description desc("Options");
     desc.add_options()
             ("help,h", "Prints help message")
+            ("create-json-file,j", "Creates a sample json file")
             ("list-algorithms,l", "Lists the prioritization algorithms");
 
     variables_map vm;
@@ -75,7 +78,19 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    if (vm.count("create-json-file")) {
+        createJsonFile();
+        return 0;
+    }
+
     return loadJsonFiles(String(argv[1]));
+}
+
+void createJsonFile()
+{
+    ofstream of("sample.json");
+    of << getJsonString();
+    of.close();
 }
 
 void printHelp()
@@ -83,26 +98,33 @@ void printHelp()
     cout << "This application measures the given selection data with the specified options in a json config files."
          << endl << endl;
     cout << "USAGE:" << endl
-         << "\ttestselections [-hl]" << endl
-         << "\ttestselections json file path" << endl
-         << "\ttestselections directory which contains one or more json files" << endl << endl;
+         << "\ttest-selections [-h|l|j]" << endl
+         << "\ttest-selections json file path" << endl
+         << "\ttest-selections directory which contains one or more json files" << endl << endl;
     cout << "Json configuration file format:" << endl
-         << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
-         << "\"results-data\": \"results file path\",\n"
-         << "\t\"changeset\": \"changeset file path\",\n\t"
-         << "\"selection-sizes\": [1, 10, 100],\n\t"
-         << "\"prioritization-algorithms\": [ \"list of prioritization algorithms\" ],\n\t"
-         << "\"output-file\": \"output file name\",\n\t"
-         << "\"filter\": {\n"
-         << "\t\t\"revision\": {\n"
-         << "\t\t\t\"non-changed\": false,\n"
-         << "\t\t\t\"non-failed\": false\n"
-         << "\t\t\t\"},\n"
-         << "\t\t\"revision-range\": [ ]\n"
-         << "\t\t},\n\t"
-         << "\"globalize\": false,\n\t"
-         << "\"print-details\": false,\n"
-         << "\t\"progress-level\": 0\n}" << endl;
+         << getJsonString();
+}
+
+string getJsonString()
+{
+    stringstream ss;
+    ss << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
+       << "\"results-data\": \"results file path\",\n"
+       << "\t\"changeset\": \"changeset file path\",\n\t"
+       << "\"selection-sizes\": [1, 10, 100],\n\t"
+       << "\"prioritization-algorithms\": [ \"list of prioritization algorithms\" ],\n\t"
+       << "\"output-file\": \"output file name\",\n\t"
+       << "\"filter\": {\n"
+       << "\t\t\"revision\": {\n"
+       << "\t\t\t\"non-changed\": false,\n"
+       << "\t\t\t\"non-failed\": false\n"
+       << "\t\t\t},\n"
+       << "\t\t\"revision-range\": [ ]\n"
+       << "\t\t},\n\t"
+       << "\"globalize\": false,\n\t"
+       << "\"print-details\": false,\n"
+       << "\t\"progress-level\": 0\n}" << endl;
+    return ss.str();
 }
 
 void printPluginNames(const String &type, const std::vector<String> &plugins)

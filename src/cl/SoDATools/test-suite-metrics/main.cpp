@@ -43,10 +43,10 @@ void processJsonFiles(String path);
 int loadJsonFiles(String path);
 void printPluginNames(const String &type, const std::vector<String> &plugins);
 void printHelp();
+std::string getJsonString();
+void createJsonFile();
 
 CKernel kernel;
-
-
 IndexType revision;
 std::vector<CClusterDefinition> clusterList;
 std::string outputDir;
@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
     options_description desc("Options");
     desc.add_options()
             ("help,h", "Prints help message")
+            ("create-json-file,j", "Creates a sample json file")
             ("list-cluster-algorithms,c", "Lists the cluster algorithms")
             ("list-metric-plugins,m", "Lists the metric plugins");
 
@@ -88,27 +89,47 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    if (vm.count("create-json-file")) {
+        createJsonFile();
+        return 0;
+    }
+
     return loadJsonFiles(String(argv[1]));
+}
+
+void createJsonFile()
+{
+    std::ofstream of("sample.json");
+    of << getJsonString();
+    of.close();
 }
 
 void printHelp()
 {
     std::cout << "This application measures the given test suites with the specified options in a json config files."
-         << std::endl << std::endl;
+              << std::endl << std::endl;
     std::cout << "USAGE:" << std::endl
-         << "\ttest-suite-metrics [-hcm]" << std::endl
-         << "\ttest-suite-metrics json file path" << std::endl
-         << "\ttest-suite-metrics directory which contains one or more json files" << std::endl << std::endl;
+              << "\ttest-suite-metrics [-h|c|m|j]" << std::endl
+              << "\ttest-suite-metrics json file path" << std::endl
+              << "\ttest-suite-metrics directory which contains one or more json files" << std::endl << std::endl;
     std::cout << "Json configuration file format:" << std::endl
-         << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
-         << "\"results-data\": \"results file path\",\n\t"
-         << "\"revision\": 1,\n\t"
-         << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the metrics\",\n\t"
-         << "\"metrics\": [ \"list of metrics to calculate\" ],\n\t"
-         << "\"globalize\": true,\n\t"
-         << "\"output-dir\": \"output directory\"\n"
-         << "}"
-         << std::endl;
+              << getJsonString();
+}
+
+std::string getJsonString()
+{
+    std::stringstream ss;
+    ss << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
+       << "\"results-data\": \"results file path\",\n\t"
+       << "\"revision\": 1,\n\t"
+       << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the metrics\",\n\t"
+       << "\"metrics\": [ \"list of metrics to calculate\" ],\n\t"
+       << "\"globalize\": true,\n\t"
+       << "\"output-dir\": \"output directory\"\n"
+       << "}"
+       << std::endl;
+
+    return ss.str();
 }
 
 void printPluginNames(const String &type, const std::vector<String> &plugins)

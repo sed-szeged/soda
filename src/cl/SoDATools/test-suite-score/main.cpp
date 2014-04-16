@@ -45,6 +45,8 @@ void processJsonFiles(std::string path);
 int  loadJsonFiles(std::string path);
 void printPluginNames(const String &type, const std::vector<String> &plugins);
 void printHelp();
+std::string getJsonString();
+void createJsonFile();
 
 CKernel kernel;
 
@@ -57,6 +59,7 @@ int main(int argc, char* argv[]) {
     options_description desc("Options");
     desc.add_options()
             ("help,h", "Prints help message")
+            ("create-json-file,j", "Creates a sample json file")
             ("list-cluster-algorithms,c", "Lists the cluster algorithms")
             ("list-fault-localization-techniques,f", "Lists the fault localization technique plugins");
 
@@ -85,32 +88,52 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    if (vm.count("create-json-file")) {
+        createJsonFile();
+        return 0;
+    }
+
     return loadJsonFiles(String(argv[1]));
+}
+
+void createJsonFile()
+{
+    std::ofstream of("sample.json");
+    of << getJsonString();
+    of.close();
 }
 
 void printHelp()
 {
     std::cout << "This application calculates the score of given test suites in terms fault localization and detection with the specified options in a json config files."
-         << std::endl << std::endl;
+              << std::endl << std::endl;
     std::cout << "USAGE:" << std::endl
-         << "\ttest-suite-score [-hcf]" << std::endl
-         << "\ttest-suite-score json file path" << std::endl
-         << "\ttest-suite-score directory which contains one or more json files" << std::endl << std::endl;
+              << "\ttest-suite-score [-h|c|f|j]" << std::endl
+              << "\ttest-suite-score json file path" << std::endl
+              << "\ttest-suite-score directory which contains one or more json files" << std::endl << std::endl;
     std::cout << "Json configuration file format:" << std::endl
-         << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
-         << "\"results-data\": \"results file path\",\n\t"
-         << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the scores\",\n\t"
-         << "\"fault-localization-techniques\": [ \"list of fault localization techniques to use\" ],\n\t"
-         << "\"globalize\": true,\n\t"
-         << "\"selected-revisions\":\n\t"
-         << "[ // multiple revisions with the required parameters\n\t\t{\n\t\t\t"
-         << "\"revision\": 1,\n\t\t\t"
-         << "\"failed-code-elements\": [ \"list of code elements that casue the failure of the test cases (by their string representation)\" ],\n\t\t\t"
-         << "\"output-dir\": \"output directory\",\n\t\t\t"
-         << "\"total-failed-testcases\": 125 //The total number of failing testcases in the whole test suite (without any reduction or selection and clusterization).\n\t\t"
-         << "}\n\t]\n"
-         << "}"
-         << std::endl;
+              << getJsonString();
+}
+
+std::string getJsonString()
+{
+    std::stringstream ss;
+    ss << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
+       << "\"results-data\": \"results file path\",\n\t"
+       << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the scores\",\n\t"
+       << "\"fault-localization-techniques\": [ \"list of fault localization techniques to use\" ],\n\t"
+       << "\"globalize\": true,\n\t"
+       << "\"selected-revisions\":\n\t"
+       << "[ // multiple revisions with the required parameters\n\t\t{\n\t\t\t"
+       << "\"revision\": 1,\n\t\t\t"
+       << "\"failed-code-elements\": [ \"list of code elements that casue the failure of the test cases (by their string representation)\" ],\n\t\t\t"
+       << "\"output-dir\": \"output directory\",\n\t\t\t"
+       << "\"total-failed-testcases\": 125 //The total number of failing testcases in the whole test suite (without any reduction or selection and clusterization).\n\t\t"
+       << "}\n\t]\n"
+       << "}"
+       << std::endl;
+
+    return ss.str();
 }
 
 void printPluginNames(const String &type, const std::vector<String> &plugins)

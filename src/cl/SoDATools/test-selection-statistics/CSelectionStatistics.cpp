@@ -137,7 +137,7 @@ void CSelectionStatistics::calcFailStatistics()
     out << "Number of revisions:;" << nrOfRevisions << endl;
     out << "Number of fails:;" << failed << endl;
     out << "Average failed test cases per revision:; " << failed / nrOfRevisions << endl;
-    out << "Revision number;Number of fails";
+    out << "Revision number;Number of fails" << endl;
     writeCsv(out, revdata);
     out << "Number of failed test cases per revision;Occurrences" << endl;
     writeCsv(out, data);
