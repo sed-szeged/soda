@@ -123,11 +123,11 @@ std::string getJsonString()
        << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the scores\",\n\t"
        << "\"fault-localization-techniques\": [ \"list of fault localization techniques to use\" ],\n\t"
        << "\"globalize\": true,\n\t"
+       << "\"output-dir\": \"output directory\",\n\t"
        << "\"selected-revisions\":\n\t"
        << "[ // multiple revisions with the required parameters\n\t\t{\n\t\t\t"
        << "\"revision\": 1,\n\t\t\t"
        << "\"failed-code-elements\": [ \"list of code elements that casue the failure of the test cases (by their string representation)\" ],\n\t\t\t"
-       << "\"output-dir\": \"output directory\",\n\t\t\t"
        << "\"total-failed-testcases\": 125 //The total number of failing testcases in the whole test suite (without any reduction or selection and clusterization).\n\t\t"
        << "}\n\t]\n"
        << "}"
@@ -201,6 +201,8 @@ void processJsonFiles(std::string path)
             (std::cerr << " done" << std::endl).flush();
         }
 
+        std::string outputDir = reader.getStringFromProperty("output-dir");
+
         std::vector<CJsonReader> selectedRevs = reader.getPropertyVectorFromProperty("selected-revisions");
         for (std::vector<CJsonReader>::iterator it = selectedRevs.begin(); it != selectedRevs.end(); ++it) {
             std::vector<FLScoreValues> scoresByCluster;
@@ -209,7 +211,6 @@ void processJsonFiles(std::string path)
 
             IndexType revision = (*it).getIntFromProperty("revision");
             IndexType totalFailedTestcases = (*it).getIntFromProperty("total-failed-testcases");
-            std::string outputDir = (*it).getStringFromProperty("output-dir");
 
             std::cout << "[INFO] Calculating scores for revision: " << revision << std::endl;
 
@@ -229,9 +230,9 @@ void processJsonFiles(std::string path)
             for (IndexType i = 0; i < clusterList.size(); i++) {
                 // Prepare directory for the output.
                 std::stringstream ss;
-                ss << outputDir << "/" << i;
+                ss << outputDir << "/" << revision << "/" << i;
                 boost::filesystem::path dir(ss.str().c_str());
-                boost::filesystem::create_directory(dir);
+                boost::filesystem::create_directories(dir);
 
                 ss << "/fd.score.csv";
 
@@ -254,7 +255,7 @@ void processJsonFiles(std::string path)
                 for (IndexType j = 0; j < clusterList.size(); j++) {
                     // Calculate FL score
                     std::stringstream ss;
-                    ss << outputDir << "/" << j;
+                    ss << outputDir << "/" << revision << "/" << j;
                     technique->calculate(clusterList[j], ss.str());
 
                     IFaultLocalizationTechniquePlugin::FLValues values = technique->getValues();
@@ -269,7 +270,7 @@ void processJsonFiles(std::string path)
             // Save the score values
             for (IndexType i = 0; i < scoresByCluster.size(); i++) {
                 std::stringstream ss;
-                ss << outputDir << "/" << i << "/fl.score.csv";
+                ss << outputDir << "/" << revision << "/" << i << "/fl.score.csv";
 
                 std::ofstream flScoreStream;
                 flScoreStream.open(ss.str().c_str());
