@@ -46,6 +46,9 @@ std::string OneClusterPlugin::getDescription()
     return "Each test case and code element belong to one cluster.";
 }
 
+void OneClusterPlugin::init(io::CJsonReader &reader)
+{}
+
 void OneClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition> &clusterList)
 {    
     CClusterDefinition cluster;

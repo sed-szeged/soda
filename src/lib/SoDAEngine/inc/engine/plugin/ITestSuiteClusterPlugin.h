@@ -27,6 +27,7 @@
 
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
+#include "io/CJsonReader.h"
 
 namespace soda {
 
@@ -53,6 +54,12 @@ public:
      * @return
      */
     virtual std::string getDescription() = 0;
+
+    /**
+     * @brief Initializes the plugin.
+     * @param reader To read external options.
+     */
+    virtual void init(io::CJsonReader &reader) = 0;
 
     /**
      * @brief Runs the clustering algorithm.

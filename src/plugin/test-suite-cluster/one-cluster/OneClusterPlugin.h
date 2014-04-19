@@ -35,6 +35,7 @@ public:
 
     std::string getName();
     std::string getDescription();
+    void init(io::CJsonReader &reader);
 
     void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList);
 
