@@ -22,7 +22,8 @@
 #ifndef ICLUSTERPLUGIN_H
 #define ICLUSTERPLUGIN_H
 
-#include <vector>
+#include <map>
+#include <string>
 
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
@@ -58,7 +59,7 @@ public:
      * @param [IN] data The test suite data.
      * @param [OUT] clusterList The list of clusters.
      */
-    virtual void execute(CSelectionData &data, std::vector<CClusterDefinition>& clusterList) = 0;
+    virtual void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList) = 0;
 };
 
 } /* namespace soda */

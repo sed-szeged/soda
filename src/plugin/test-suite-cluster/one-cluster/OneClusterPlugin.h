@@ -36,7 +36,7 @@ public:
     std::string getName();
     std::string getDescription();
 
-    void execute(CSelectionData &data, std::vector<CClusterDefinition>& clusterList);
+    void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList);
 
 
 };

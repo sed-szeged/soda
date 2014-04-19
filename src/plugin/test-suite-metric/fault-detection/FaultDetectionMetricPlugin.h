@@ -49,7 +49,7 @@ public:
      * @param clusterList The clusters of test cases and code elements.
      * @param revisionList The revisions to consider.
      */
-    void init(CSelectionData *data, std::vector<CClusterDefinition> *clusterList, IndexType revision);
+    void init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision);
 
     /**
      * @brief Returns the list of plugins names that the plugin depens on.
@@ -62,11 +62,11 @@ public:
      * @param output The path to the output directory.
      * @param results Stores the results of the metric plugin for each cluster.
      */
-    void calculate(const std::string &output, std::vector<MetricResults> &results);
+    void calculate(const std::string &output, std::map<std::string, MetricResults> &results);
 
 private:
     CSelectionData *m_data;
-    std::vector<CClusterDefinition> *m_clusterList;
+    std::map<std::string, CClusterDefinition> *m_clusterList;
 };
 
 } /* namespace soda */

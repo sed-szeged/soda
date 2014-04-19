@@ -205,8 +205,8 @@ void processJsonFiles(std::string path)
 
         std::vector<CJsonReader> selectedRevs = reader.getPropertyVectorFromProperty("selected-revisions");
         for (std::vector<CJsonReader>::iterator it = selectedRevs.begin(); it != selectedRevs.end(); ++it) {
-            std::vector<FLScoreValues> scoresByCluster;
-            std::vector<CClusterDefinition> clusterList;
+            std::map<std::string, FLScoreValues> scoresByCluster;
+            std::map<std::string, CClusterDefinition> clusterList;
             std::vector<IndexType> failedCodeElements;
 
             IndexType revision = (*it).getIntFromProperty("revision");
@@ -224,13 +224,12 @@ void processJsonFiles(std::string path)
             clusterAlgorithm->execute(selectionData, clusterList);
             (std::cerr << " done." << std::endl).flush();
 
-            scoresByCluster.resize(clusterList.size());
-
             // FD score
-            for (IndexType i = 0; i < clusterList.size(); i++) {
+            std::map<std::string, CClusterDefinition>::iterator clusterIt;
+            for (clusterIt = clusterList.begin(); clusterIt != clusterList.end(); clusterIt++) {
                 // Prepare directory for the output.
                 std::stringstream ss;
-                ss << outputDir << "/" << revision << "/" << i;
+                ss << outputDir << "/" << revision << "/" << clusterIt->first;
                 boost::filesystem::path dir(ss.str().c_str());
                 boost::filesystem::create_directories(dir);
 
@@ -240,7 +239,7 @@ void processJsonFiles(std::string path)
                 fdScoreStream.open(ss.str().c_str());
                 fdScoreStream << "#fd score;" << std::endl;
 
-                double fdScore = CTestSuiteScore::fdScore(selectionData, clusterList[i], revision, totalFailedTestcases);
+                double fdScore = CTestSuiteScore::fdScore(selectionData, clusterIt->second, revision, totalFailedTestcases);
                 fdScoreStream << fdScore << std::endl;
 
                 fdScoreStream.close();
@@ -252,29 +251,30 @@ void processJsonFiles(std::string path)
                 IFaultLocalizationTechniquePlugin *technique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin(flTechniqueName);
 
                 technique->init(&selectionData, revision);
-                for (IndexType j = 0; j < clusterList.size(); j++) {
+                for (clusterIt = clusterList.begin(); clusterIt != clusterList.end(); clusterIt++) {
                     // Calculate FL score
                     std::stringstream ss;
-                    ss << outputDir << "/" << revision << "/" << j;
-                    technique->calculate(clusterList[j], ss.str());
+                    ss << outputDir << "/" << revision << "/" << clusterIt->first;
+                    technique->calculate(clusterIt->second, ss.str());
 
                     IFaultLocalizationTechniquePlugin::FLValues values = technique->getValues();
 
                     for (IndexType k = 0; k < failedCodeElements.size(); k++) {
                         IndexType cid = failedCodeElements[k];
-                        double score = CTestSuiteScore::flScore(clusterList[j], values[cid], technique->getDistribution());
-                        scoresByCluster[j][cid][flTechniqueName] = score;
+                        double score = CTestSuiteScore::flScore(clusterIt->second, values[cid], technique->getDistribution());
+                        scoresByCluster[clusterIt->first][cid][flTechniqueName] = score;
                     }
                 }
             }
             // Save the score values
-            for (IndexType i = 0; i < scoresByCluster.size(); i++) {
+            std::map<std::string, FLScoreValues>::iterator scoreIt;
+            for (scoreIt = scoresByCluster.begin(); scoreIt != scoresByCluster.end(); scoreIt++) {
                 std::stringstream ss;
-                ss << outputDir << "/" << revision << "/" << i << "/fl.score.csv";
+                ss << outputDir << "/" << revision << "/" << scoreIt->first << "/fl.score.csv";
 
                 std::ofstream flScoreStream;
                 flScoreStream.open(ss.str().c_str());
-                flScoreStream << "#cluster id;code element id;";
+                flScoreStream << "#cluster;code element id;";
                 for (IndexType j = 0; j < faultLocalizationTechniques.size(); j++) {
                     flScoreStream << faultLocalizationTechniques[j] << ";";
                 }
@@ -282,10 +282,10 @@ void processJsonFiles(std::string path)
 
                 for (IndexType j = 0; j < failedCodeElements.size(); j++) {
                     IndexType cid = failedCodeElements[j];
-                    flScoreStream << i << ";" << cid << ";";
+                    flScoreStream << scoreIt->first << ";" << cid << ";";
                     for (IndexType k = 0; k < faultLocalizationTechniques.size(); k++) {
                         std::string flTechniqueName = faultLocalizationTechniques[k];
-                        flScoreStream << scoresByCluster[i][cid][flTechniqueName] << ";";
+                        flScoreStream << scoresByCluster[scoreIt->first][cid][flTechniqueName] << ";";
                     }
                     flScoreStream << std::endl;
                 }

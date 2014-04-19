@@ -43,7 +43,7 @@ std::string FMeasureMetricPlugin::getDescription()
     return "Calculates the F-measure value of the fault detection and localization metrics.";
 }
 
-void FMeasureMetricPlugin::init(CSelectionData *data, std::vector<CClusterDefinition> *clusterList, IndexType revision)
+void FMeasureMetricPlugin::init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision)
 {
     m_data = data;
     m_clusterList = clusterList;
@@ -57,25 +57,27 @@ std::vector<std::string> FMeasureMetricPlugin::getDependency()
     return dependencies;
 }
 
-void FMeasureMetricPlugin::calculate(const std::string &output, std::vector<MetricResults> &results)
+void FMeasureMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
 {
     std::ofstream fMeasureStream;
     fMeasureStream.open((output + "/f.measure.metric.csv").c_str());
-    fMeasureStream << "# cluster id;number of testcases in cluster;number of code elements in cluster;fault detection; fault localization; f-measure" << std::endl;
+    fMeasureStream << "# cluster;number of testcases in cluster;number of code elements in cluster;fault detection; fault localization; f-measure" << std::endl;
 
-    for (IndexType i = 0; i < results.size(); i++) {
-        double faultDetection = results[i]["fault-detection"];
-        double faultLocalization = results[i]["fault-localization"];
+    std::map<std::string, MetricResults>::iterator it;
+    for (it = results.begin(); it != results.end(); it++) {
+        MetricResults result = it->second;
+        double faultDetection = result["fault-detection"];
+        double faultLocalization = result["fault-localization"];
 
         double fMeasure = 0.0;
         if ((faultDetection + faultLocalization) > 0.0) {
             fMeasure = (2 * faultDetection * faultLocalization) / (faultDetection + faultLocalization);
         }
 
-        IndexType nrOfTestCases = (*m_clusterList)[i].getTestCases().size();
-        IndexType nrOfCodeElements = (*m_clusterList)[i].getCodeElements().size();
+        IndexType nrOfTestCases = (*m_clusterList)[it->first].getTestCases().size();
+        IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
 
-        fMeasureStream << i << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << faultDetection << ";" << faultLocalization << ";" << fMeasure << std::endl;
+        fMeasureStream << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << faultDetection << ";" << faultLocalization << ";" << fMeasure << std::endl;
     }
 
     fMeasureStream.close();

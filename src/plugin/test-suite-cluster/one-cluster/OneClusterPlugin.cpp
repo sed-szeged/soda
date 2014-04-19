@@ -46,13 +46,13 @@ std::string OneClusterPlugin::getDescription()
     return "Each test case and code element belong to one cluster.";
 }
 
-void OneClusterPlugin::execute(CSelectionData &data, std::vector<CClusterDefinition> &clusterList)
+void OneClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition> &clusterList)
 {    
     CClusterDefinition cluster;
     cluster.addTestCases(data.getCoverage()->getTestcases().getIDList());
     cluster.addCodeElements(data.getCoverage()->getCodeElements().getIDList());
 
-    clusterList.push_back(cluster);
+    clusterList["full"] = cluster;
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

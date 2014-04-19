@@ -48,9 +48,9 @@ void createJsonFile();
 
 CKernel kernel;
 IndexType revision;
-std::vector<CClusterDefinition> clusterList;
+std::map<std::string, CClusterDefinition> clusterList;
 std::string outputDir;
-std::vector<ITestSuiteMetricPlugin::MetricResults> results;
+std::map<std::string, ITestSuiteMetricPlugin::MetricResults> results;
 
 std::set<std::string> metricsCalculated;
 
@@ -226,8 +226,6 @@ void processJsonFiles(String path)
         (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
         clusterAlgorithm->execute(*selectionData, clusterList);
         (std::cerr << " done" << std::endl).flush();
-
-        results.resize(clusterList.size());
 
         StringVector metrics = reader.getStringVectorFromProperty("metrics");
 

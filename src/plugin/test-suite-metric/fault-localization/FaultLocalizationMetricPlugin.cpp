@@ -54,7 +54,7 @@ std::string FaultLocalizationMetricPlugin::getDescription()
     return "Calculating fault localization metric and other statistics of the test suite.";
 }
 
-void FaultLocalizationMetricPlugin::init(CSelectionData *data, std::vector<CClusterDefinition> *clusterList, IndexType revision)
+void FaultLocalizationMetricPlugin::init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision)
 {
     m_data = data;
     m_clusterList = clusterList;
@@ -66,23 +66,24 @@ std::vector<std::string> FaultLocalizationMetricPlugin::getDependency()
     return std::vector<std::string>();
 }
 
-void FaultLocalizationMetricPlugin::calculate(const std::string &output, std::vector<MetricResults> &results)
+void FaultLocalizationMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
 {
-    for (IndexType i = 0; i < m_clusterList->size(); i++) {
+    std::map<std::string, CClusterDefinition>::iterator it;
+    for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
         CPartitionAlgorithm algorithm;
-        algorithm.compute(*m_data, (*m_clusterList)[i], m_revision);
+        algorithm.compute(*m_data, it->second, m_revision);
 
         // Prepare directory for the output.
         std::stringstream ss;
-        ss << output << "/" << i;
+        ss << output << "/" << it->first;
         boost::filesystem::path dir(ss.str().c_str());
         boost::filesystem::create_directory(dir);
 
         //writePartitions(algorithm, ss.str());
 
-        std::cerr << "[INFO] Calculating statisitcs: " << i << std::endl;
-        partitionStatistics(algorithm, (*m_clusterList)[i], ss.str(), results[i]);
-        std::cerr << "[INFO] Calculating statisitcs: " << i << " DONE." << std::endl;
+        std::cerr << "[INFO] Calculating statisitcs: " << it->first << std::endl;
+        partitionStatistics(algorithm, it->second, ss.str(), results[it->first]);
+        std::cerr << "[INFO] Calculating statisitcs: " << it->first << " DONE." << std::endl;
     }
 
 }
