@@ -195,6 +195,7 @@ void processJsonFiles(String path)
 
         std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
+        clusterAlgorithm->init(reader);
 
         CSelectionData *selectionData = new CSelectionData();
 

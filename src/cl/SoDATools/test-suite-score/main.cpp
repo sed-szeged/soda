@@ -182,6 +182,7 @@ void processJsonFiles(std::string path)
 
         std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
+        clusterAlgorithm->init(reader);
 
         if (exists(reader.getStringFromProperty("coverage-data")) &&
                 exists(reader.getStringFromProperty("results-data"))) {
