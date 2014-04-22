@@ -80,7 +80,7 @@ void CSelectionStatistics::calcCoverageRelatedStatistics()
             dataCodeElements[coveredCodeElements[ceid]]++;
         }
 
-        ofstream out((m_dataManager->getOutputDir() + "/" + "functionCoverage.csv").c_str());
+        ofstream out((m_dataManager->getOutputDir() + "/" + "codeElementCoverage.csv").c_str());
         out << "Number of code elements:;" << nrOfCodeElements << endl;
         out << "Number of test cases:;" << nrOfTestCases << endl;
         out << "Density of coverage matrix:; " << covered / (nrOfTestCases * nrOfCodeElements) << endl;
@@ -136,9 +136,12 @@ void CSelectionStatistics::calcFailStatistics()
     ofstream out((m_dataManager->getOutputDir() + "/" + "fails.csv").c_str());
     out << "Number of revisions:;" << nrOfRevisions << endl;
     out << "Number of fails:;" << failed << endl;
-    out << "Average failed test cases per revision:; " << failed / nrOfRevisions << endl;
     out << "Revision number;Number of fails" << endl;
     writeCsv(out, revdata);
+    out.close();
+
+    out.open((m_dataManager->getOutputDir() + "/" + "fails-statistics.csv").c_str());
+    out << "Average failed test cases per revision:; " << failed / nrOfRevisions << endl;
     out << "Number of failed test cases per revision;Occurrences" << endl;
     writeCsv(out, data);
     out.close();
@@ -156,7 +159,6 @@ void CSelectionStatistics::calcCovResultsSummary()
     IndexType nOfTestCases = getSelectionData()->getCoverage()->getNumOfTestcases();
     IndexType nOfRevisions = getSelectionData()->getResults()->getNumOfRevisions();
     IntVector revisions = getSelectionData()->getResults()->getRevisionNumbers();
-
 
     output << "Number of revisions:;" << nOfRevisions << endl;
     output << "Number of test cases:;" << nOfTestCases << endl;

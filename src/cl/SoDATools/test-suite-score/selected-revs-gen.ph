@@ -23,9 +23,9 @@ def readFails(path):
     with open(path) as f:
         nOfRevs = f.readline()
         nOfRevs = int(nOfRevs.split(';')[1])
-        for x in range(0, nOfRevs + 3):
+        for x in range(0, nOfRevs + 2):
             line = f.readline()
-            if x < 3:
+            if x < 2:
                 continue
             line = line.split(';')
             fail[line[0]] = int(line[1]) #revision ; fails
