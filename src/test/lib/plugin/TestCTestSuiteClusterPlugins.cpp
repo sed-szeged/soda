@@ -32,7 +32,7 @@ class CTestSuiteClusterPluginsTest : public testing::Test
 protected:
     CSelectionData data;
     ITestSuiteClusterPlugin *plugin;
-    std::vector<CClusterDefinition> clusterList;
+    std::map<std::string, CClusterDefinition> clusterList;
     CKernel kernel;
 
     virtual void SetUp() {
@@ -51,6 +51,6 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
     EXPECT_NO_THROW(plugin->execute(data, clusterList));
 
     EXPECT_EQ(1u, clusterList.size());
-    EXPECT_EQ(data.getCoverage()->getNumOfCodeElements(), clusterList[0].getCodeElements().size());
-    EXPECT_EQ(data.getCoverage()->getNumOfTestcases(), clusterList[0].getTestCases().size());
+    EXPECT_EQ(data.getCoverage()->getNumOfCodeElements(), clusterList["full"].getCodeElements().size());
+    EXPECT_EQ(data.getCoverage()->getNumOfTestcases(), clusterList["full"].getTestCases().size());
 }
