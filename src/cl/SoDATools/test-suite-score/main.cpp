@@ -217,6 +217,10 @@ void processJsonFiles(std::string path)
 
             StringVector failedCodeElementNames = (*it).getStringVectorFromProperty("failed-code-elements");
             for (IndexType i = 0; i < failedCodeElementNames.size(); i++) {
+                if (!selectionData.getCoverage()->getCodeElements().containsValue(failedCodeElementNames[i])) {
+                    std::cerr << "[ERROR] Not existing code element name in json file: " << failedCodeElementNames[i] << std::endl;
+                    continue;
+                }
                 IndexType cid = selectionData.getCoverage()->getCodeElements().getID(failedCodeElementNames[i]);
                 failedCodeElements.push_back(cid);
             }
