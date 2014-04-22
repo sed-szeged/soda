@@ -56,7 +56,7 @@ void CDataManager::loadChangesetData(String path)
 void CDataManager::calcStatistics()
 {
     if(!(boost::filesystem::exists(m_outputDir))) {
-        boost::filesystem::create_directory(m_outputDir);
+        boost::filesystem::create_directories(m_outputDir);
     }
 
     CSelectionStatistics stats = CSelectionStatistics(this);
