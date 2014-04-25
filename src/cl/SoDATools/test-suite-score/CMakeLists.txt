@@ -12,4 +12,4 @@ add_executable(test-suite-score ${test_suite_score_headers} ${test_suite_score_s
 target_link_libraries(test-suite-score SoDAEngine SoDA ${Boost_LIBRARIES} dl)
 
 # Copy selected-revs-gen.ph to build directory
-file(COPY selected-revs-gen.ph DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY test-suite-score-json-gen.ph DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

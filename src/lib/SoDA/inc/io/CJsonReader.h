@@ -42,6 +42,7 @@ public:
      * @brief Creates a new CJsonReader object.
      * @param path File path.
      */
+    CJsonReader();
     CJsonReader(ptree tr);
     CJsonReader(String path);
     ~CJsonReader();

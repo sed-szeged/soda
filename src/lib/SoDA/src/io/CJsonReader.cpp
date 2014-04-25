@@ -27,6 +27,9 @@
 
 namespace soda { namespace io {
 
+CJsonReader::CJsonReader()
+{}
+
 CJsonReader::CJsonReader(ptree tr) :
     m_data(tr)
 {}

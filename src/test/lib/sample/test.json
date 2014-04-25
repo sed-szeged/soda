@@ -1,0 +1,17 @@
+{
+    "string": "testString",
+    "integer": 132, 
+    "boolean": false,
+    "integers": [123, 321, 342, 3242],
+    "strings": ["string1", "string2"],
+    "persons": [
+        {
+            "name": "John Doe",
+            "age": 32
+        },
+        {
+            "name": "Jack Smith",
+            "age": 42
+        }
+    ]
+}
