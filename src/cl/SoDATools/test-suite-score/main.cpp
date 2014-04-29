@@ -184,6 +184,34 @@ void processJsonFiles(std::string path)
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
         clusterAlgorithm->init(reader);
 
+        std::string outputDir = reader.getStringFromProperty("output-dir");
+        if (reader.getStringFromProperty("output-dir").empty()) {
+            std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
+            return;
+        }
+
+        StringVector faultLocalizationTechniques = reader.getStringVectorFromProperty("fault-localization-techniques");
+        if (faultLocalizationTechniques.empty()) {
+            std::cerr << "[ERROR] Missing fault-localization-techniques parameter in config file " << path << "." << std::endl;
+            return;
+        } else {
+            for (StringVector::const_iterator it = faultLocalizationTechniques.begin(); it != faultLocalizationTechniques.end(); ++it) {
+                try {
+                    kernel.getFaultLocalizationTechniquePluginManager().getPlugin(*it);
+                } catch (std::out_of_range &e) {
+                    std::cerr << "[ERROR] Invalid fault localization technique name(" << *it
+                              << ") in configuration file: " << path << "." << std::endl;
+                    return;
+                }
+            }
+        }
+
+        std::vector<CJsonReader> selectedRevs = reader.getPropertyVectorFromProperty("selected-revisions");
+        if (selectedRevs.empty()) {
+            std::cerr << "[ERROR] Missing selected-revisions parameter in config file " << path << "." << std::endl;
+            return;
+        }
+
         if (exists(reader.getStringFromProperty("coverage-data")) &&
                 exists(reader.getStringFromProperty("results-data"))) {
             (std::cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
@@ -202,9 +230,6 @@ void processJsonFiles(std::string path)
             (std::cerr << " done" << std::endl).flush();
         }
 
-        std::string outputDir = reader.getStringFromProperty("output-dir");
-
-        std::vector<CJsonReader> selectedRevs = reader.getPropertyVectorFromProperty("selected-revisions");
         for (std::vector<CJsonReader>::iterator it = selectedRevs.begin(); it != selectedRevs.end(); ++it) {
             std::map<std::string, FLScoreValues> scoresByCluster;
             std::map<std::string, CClusterDefinition> clusterList;
@@ -250,7 +275,6 @@ void processJsonFiles(std::string path)
                 fdScoreStream.close();
             }
 
-            StringVector faultLocalizationTechniques = reader.getStringVectorFromProperty("fault-localization-techniques");
             for (IndexType i = 0; i < faultLocalizationTechniques.size(); i++) {
                 std::string flTechniqueName = faultLocalizationTechniques[i];
                 IFaultLocalizationTechniquePlugin *technique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin(flTechniqueName);

@@ -175,7 +175,20 @@ void processJsonFiles(String path)
             printPluginNames(kernel.getTestSuiteReductionPluginManager().getPluginNames());
             return;
         } else {
+            int iteration = reader.getIntFromProperty("iteration");
             for (StringVector::const_iterator it = reductionList.begin(); it != reductionList.end(); ++it) {
+                if (*it == "duplation" && !iteration) {
+                    std::cerr << "[ERROR] Missing iteration parameter for duplation reduction method in configuration file: "
+                              << path << "." << std::endl;
+                    return;
+                }
+
+                if (*it == "random" && !iteration && reader.getIntVectorFromProperty("reduction-sizes").empty()) {
+                    std::cerr << "[ERROR] Missing iteration or reduction-sizes parameter for random reduction method in configuration file: "
+                              << path << "." << std::endl;
+                    return;
+                }
+
                 try {
                     kernel.getTestSuiteReductionPluginManager().getPlugin(*it);
                 } catch (std::out_of_range &e) {

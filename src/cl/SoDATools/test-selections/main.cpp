@@ -170,6 +170,20 @@ void processJsonFiles(String path)
         CSelectionData selectionData;
         CJsonReader reader = CJsonReader(path);
 
+        String output = reader.getStringFromProperty("output-file");
+        if (output.empty()) {
+            std::cerr << "[ERROR] Missing output-file parameter in json file.("
+                      << path << ")." << std::endl;
+            return;
+        }
+
+        IntVector sizelist = reader.getIntVectorFromProperty("selection-sizes");
+        if (sizelist.empty()) {
+            std::cerr << "[ERROR] Missing selection-sizes parameter in json file("
+                      << path << ")." << std::endl;
+            return;
+        }
+
         StringVector priolist = reader.getStringVectorFromProperty("prioritization-algorithms");
         if (priolist.empty()) {
             std::cerr << "[ERROR] prioritization-algorithm is missing from the configuration file("
@@ -210,7 +224,6 @@ void processJsonFiles(String path)
             return;
         }
 
-        IntVector sizelist = reader.getIntVectorFromProperty("selection-sizes");
         IntVector revisionlist = selectionData.getResults()->getRevisionNumbers();
 
         revisionlist = CRevisionFilters().filterNonChangedOrNonFailed(revisionlist, &selectionData, !reader.getBoolFromProperty("filter.revision.non-changed"), !reader.getBoolFromProperty("filter.revision.non-failed"));
@@ -229,8 +242,6 @@ void processJsonFiles(String path)
             selectionData.globalize();
             (cerr << " done" << endl).flush();
         }
-
-        String output = reader.getStringFromProperty("output-file");
 
         while(!priolist.empty()) {
             string t = priolist.back();

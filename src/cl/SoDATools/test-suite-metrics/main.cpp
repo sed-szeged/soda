@@ -199,6 +199,29 @@ void processJsonFiles(String path)
 
         CSelectionData *selectionData = new CSelectionData();
 
+        StringVector metrics = reader.getStringVectorFromProperty("metrics");
+        if (metrics.empty()) {
+            std::cerr << "[ERROR] Missing metrics parameter in config file " << path << "." << std::endl;
+            return;
+        } else {
+            for (StringVector::const_iterator it = metrics.begin(); it != metrics.end(); ++it) {
+                try {
+                    kernel.getTestSuiteMetricPluginManager().getPlugin(*it);
+                } catch (std::out_of_range &e) {
+                    std::cerr << "[ERROR] Invalid metric name(" << *it
+                              << ") in configuration file: " << path << "." << std::endl;
+                    return;
+                }
+            }
+        }
+
+        revision = reader.getIntFromProperty("revision");
+        outputDir = reader.getStringFromProperty("output-dir");
+        if (outputDir.empty()) {
+            std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
+            return;
+        }
+
         if (exists(reader.getStringFromProperty("coverage-data")) &&
                 exists(reader.getStringFromProperty("results-data"))) {
             (std::cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
@@ -217,9 +240,6 @@ void processJsonFiles(String path)
             (std::cerr << " done" << std::endl).flush();
         }
 
-        revision = reader.getIntFromProperty("revision");
-        outputDir = reader.getStringFromProperty("output-dir");
-
         clusterList.clear();
         metricsCalculated.clear();
         results.clear();
@@ -227,8 +247,6 @@ void processJsonFiles(String path)
         (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
         clusterAlgorithm->execute(*selectionData, clusterList);
         (std::cerr << " done" << std::endl).flush();
-
-        StringVector metrics = reader.getStringVectorFromProperty("metrics");
 
         for (StringVector::iterator it = metrics.begin(); it != metrics.end(); it++) {
             calculateMetric(selectionData, *it);
