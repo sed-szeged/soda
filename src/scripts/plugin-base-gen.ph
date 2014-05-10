@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Plugin base gen tool generates class files for the specified new plugin
+# Plugin base gen tool generates class files of the specified plugin
 
 from string import Template
 import argparse
@@ -8,14 +8,21 @@ import os
 import re
 
 plugintype = dict()
+pluginpath = '../lib/SoDAEngine/inc/engine/plugin'
 
 def main():
-    readPluginTypes()
-    parser = argparse.ArgumentParser(description='test-suite-score-json-gen generates json file for test-suite-score')                          
-    parser.add_argument('-n', '--plugin-name', help='The name of the new plugin.')                                        
+    parser = argparse.ArgumentParser(description='plugin-base-gen generates class files of the specified plugin')
+    parser.add_argument('-n', '--plugin-name', help='The name of the new plugin.')
     parser.add_argument('-t', '--plugin-type', help='Type of the new plugin')
     parser.add_argument('-l', '--list-types', action='store_true', help='Lists type of the plugins')
+    parser.add_argument('-d', '--plugin-directory', default='', help='Path to the source plugin directory.')
     parse = parser.parse_args()
+
+    if not os.path.exists(parse.plugin_directory + pluginpath):
+        print '[ERROR] Please specifiy plugin-directory path.'
+        return
+    readPluginTypes(parse.plugin_directory)
+
     if parse.list_types:
         printPluginTypes()
         return
@@ -35,9 +42,8 @@ def createPluginBase(args):
     pluginbase['className'] = pluginname[0:1].upper() + pluginname[1:] + plugintype[type]['interfacename'][1:]
     pluginbase['directiveName'] = pluginbase['className'].upper() + '_H'
     pluginbase['projectname'] = pluginname.lower() + '_' + type.replace('-', '_')
-#    print Template(plugintype[type]['headerformat']).substitute(pluginbase)
-#    print Template(plugintype[type]['cppformat']).substitute(pluginbase)
-    pluginpath = './' + type.replace('-plugin', '') + '/'
+    pluginpath = args.plugin_directory + '../plugin/' + type.replace('-plugin', '') + '/'
+
     with open(pluginpath + 'CMakeLists.txt', 'r+') as f:
         cmakesubdir = 'add_subdirectory(' + pluginname.lower() + ')\n'
         if cmakesubdir not in f.read():
@@ -75,8 +81,8 @@ def createCmakeListsTemplate():
     return Template(cmaketemplate)
 
 # generates template string based on the actual plugin interface files
-def readPluginTypes():
-    pluginterface = '../lib/SoDAEngine/inc/engine/plugin'
+def readPluginTypes(plugindir):
+    pluginterface = plugindir + pluginpath
     for filename in os.listdir (pluginterface):
         # process filename for easier input parameters
         type = filename[1]

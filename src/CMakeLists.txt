@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8) 
+cmake_minimum_required(VERSION 2.8)
 project(SoDA)
 
 # Set the build type if it isn't already
@@ -37,6 +37,9 @@ add_subdirectory(lib/SoDA)
 add_subdirectory(lib/SoDAEngine)
 add_subdirectory(plugin)
 add_subdirectory(cl)
+
+# Copy selected-revs-gen.ph to build directory
+file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if(test)
     # Enable ExternalProject CMake module
