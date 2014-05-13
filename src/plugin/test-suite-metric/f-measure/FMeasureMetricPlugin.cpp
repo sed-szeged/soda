@@ -78,6 +78,7 @@ void FMeasureMetricPlugin::calculate(const std::string &output, std::map<std::st
         IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
 
         fMeasureStream << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << faultDetection << ";" << faultLocalization << ";" << fMeasure << std::endl;
+        results[it->first]["f-measure"] = fMeasure;
     }
 
     fMeasureStream.close();
