@@ -15,7 +15,7 @@ def main():
     parser.add_argument('-n', '--plugin-name', help='The name of the new plugin.')
     parser.add_argument('-t', '--plugin-type', help='Type of the new plugin')
     parser.add_argument('-l', '--list-types', action='store_true', help='Lists type of the plugins')
-    parser.add_argument('-d', '--plugin-directory', default='', help='Path to the source plugin directory.')
+    parser.add_argument('-d', '--plugin-directory', default='', help='Path to plugin directory in project directory.')
     parse = parser.parse_args()
 
     if not os.path.exists(parse.plugin_directory + pluginpath):
@@ -33,25 +33,36 @@ def main():
         return
 
     createPluginBase(parse)
-    print 'Done.'
 
 def createPluginBase(args):
     pluginname = args.plugin_name
     type = args.plugin_type
     pluginbase = dict()
+
     pluginbase['className'] = pluginname[0:1].upper() + pluginname[1:] + plugintype[type]['interfacename'][1:]
     pluginbase['directiveName'] = pluginbase['className'].upper() + '_H'
-    pluginbase['projectname'] = pluginname.lower() + '_' + type.replace('-', '_')
+    pluginbase['pluginName'] = pluginname[0:1].lower()
+    for i in range(1, len(pluginname)):
+        if pluginname[i].isupper():
+            pluginbase['pluginName'] += '-'
+        pluginbase['pluginName'] += pluginname[i]  
+
+    pluginbase['pluginName'] = pluginbase['pluginName'].lower()
+    pluginbase['projectName'] = pluginbase['pluginName'].replace('-', '_') + '_' + type.replace('-', '_')
+
     pluginpath = args.plugin_directory + '../plugin/' + type.replace('-plugin', '') + '/'
 
+    if os.path.exists(pluginpath + pluginbase['pluginName'] + '/'):
+        print '[ERROR] Plugin with the same name already exists'
+        return
+
     with open(pluginpath + 'CMakeLists.txt', 'r+') as f:
-        cmakesubdir = 'add_subdirectory(' + pluginname.lower() + ')\n'
+        cmakesubdir = 'add_subdirectory(' + pluginbase['pluginName'] + ')\n'
         if cmakesubdir not in f.read():
             f.write(cmakesubdir)
 
-    pluginpath += pluginname.lower() + '/'
-    if not os.path.exists(pluginpath):
-        os.makedirs(pluginpath)
+    pluginpath += pluginbase['pluginName'] + '/'
+    os.makedirs(pluginpath)
 
     with open(pluginpath + 'CMakeLists.txt', 'w') as f:
         f.write(createCmakeListsTemplate().substitute(pluginbase))
@@ -62,6 +73,8 @@ def createPluginBase(args):
     with open(pluginpath + '.h', 'w') as f:
         f.write(Template(plugintype[type]['headerformat']).substitute(pluginbase))
 
+    print '[INFO] Done.'
+
 # prints the available plugin types
 def printPluginTypes():
     print 'Available plugin types:'
@@ -70,14 +83,14 @@ def printPluginTypes():
 
 # creates cmakelists template string
 def createCmakeListsTemplate():
-    cmaketemplate = 'project(${projectname})\n\n'
-    cmaketemplate += 'include_directories($${${projectname}_SOURCE_DIR}/../../../lib/SoDA/inc\n'
-    cmaketemplate += '                    $${${projectname}_SOURCE_DIR}/../../../lib/SoDAEngine/inc\n'
+    cmaketemplate = 'project(${projectName})\n\n'
+    cmaketemplate += 'include_directories($${${projectName}_SOURCE_DIR}/../../../lib/SoDA/inc\n'
+    cmaketemplate += '                    $${${projectName}_SOURCE_DIR}/../../../lib/SoDAEngine/inc\n'
     cmaketemplate += '                    $${Boost_INCLUDE_DIRS})\n\n'
     cmaketemplate += 'file(GLOB_RECURSE headers ./*.h)\n'
-    cmaketemplate += 'aux_source_directory($${${projectname}_SOURCE_DIR} ${projectname}_src)\n\n'
-    cmaketemplate += 'add_library(${projectname} SHARED $${headers} $${${projectname}_src})\n'
-    cmaketemplate += 'target_link_libraries(${projectname} SoDAEngine SoDA $${Boost_LIBRARIES})'
+    cmaketemplate += 'aux_source_directory($${${projectName}_SOURCE_DIR} ${projectName}_src)\n\n'
+    cmaketemplate += 'add_library(${projectName} SHARED $${headers} $${${projectName}_src})\n'
+    cmaketemplate += 'target_link_libraries(${projectName} SoDAEngine SoDA $${Boost_LIBRARIES})'
     return Template(cmaketemplate)
 
 # generates template string based on the actual plugin interface files
@@ -139,7 +152,12 @@ def readPluginTypes(plugindir):
                             if v in methodname[0]:
                                 line = line.replace(methodname[0], '${className}::' + methodname[0])
                         line = line.replace(methodname[1], '${className}::' + methodname[1])
-                    line += '\n{\n}\n\n'
+                    if 'getName()' in line:
+                        line += '\n{\n    return "${pluginName}";\n}\n\n'
+                    elif 'getDescription()' in line:
+                        line += '\n{\n    return "";\n}\n\n'
+                    else:
+                        line += '\n{\n}\n\n'
                     cppformat += line
 
                 headerformat = headerformat.lstrip('\n')
