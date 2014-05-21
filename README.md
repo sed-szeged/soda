@@ -6,7 +6,7 @@ The SoDA library contains the necessary data structures to efficiently store a c
 
 We are planning to release evaluation tools that will measure the quality of the implemented algorithms. 
 
-Visit our [wiki](https://github.com/sed-szeged/soda/wiki/SoDA) page to get more information about the project.
+Visit our [wiki](https://github.com/sed-szeged/soda/wiki/) page to get more information about the project.
 
 The library is released under LGPLv3 license.
 
@@ -31,7 +31,9 @@ make
 #### Command line programs
 
 The library contains several command line programs:
-* test-suite-selection
+* instrumentserver
+ * Creates SoDA coverage matrix when you executing your instrumented code.
+* test-suite-selections
  * Runs one or more selection algorithm on the test suite an computes the precision, inclusiveness of the selected test cases according to the results of the test executions.
 * test-selection-statistics
  * Computes several statistics of the test suite like density of coverage matrix, average changes per revision, etc.
@@ -39,6 +41,12 @@ The library contains several command line programs:
  * Computes the FL and FD metric values of the test suite.
 * test-suite-score
  * Computes the fault detection score and fault localization score of a test suite based on actual faults.
+* test-suite-reduction
+ * Reduces the given coverage data with specified reduction algorithms.
+* binaryDump
+ * Reads and saves data from the binary formats in a human readable format.
+* rawDataReader
+ * Create SoDA coverage, results and changeset matrices from raw data sources.
 
 #### Sample application
 
