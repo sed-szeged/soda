@@ -15,7 +15,7 @@ add_subdirectory(utilities/test-suite-reduction)
 add_subdirectory(test-selection-statistics)
 
 # test-selections
-add_subdirectory(test-selections)
+add_subdirectory(test-suite-selections)
 
 # test-suite-metrics
 add_subdirectory(test-suite-metrics)

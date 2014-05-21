@@ -49,7 +49,7 @@ void createJsonFile();
 CKernel kernel;
 
 int main(int argc, char* argv[]) {
-    cout << "test-selections (SoDA tool)" << endl;
+    cout << "test-suite-selections (SoDA tool)" << endl;
 
     options_description desc("Options");
     desc.add_options()
@@ -95,12 +95,12 @@ void createJsonFile()
 
 void printHelp()
 {
-    cout << "This application measures the given selection data with the specified options in a json config files."
+    cout << "This application measures the given selection data with the specified options in json config files."
          << endl << endl;
     cout << "USAGE:" << endl
-         << "\ttest-selections [-h|l|j]" << endl
-         << "\ttest-selections json file path" << endl
-         << "\ttest-selections directory which contains one or more json files" << endl << endl;
+         << "\ttest-suite-selections [-h|l|j]" << endl
+         << "\ttest-suite-selections json file path" << endl
+         << "\ttest-suite-selections directory which contains one or more json files" << endl << endl;
     cout << "Json configuration file format:" << endl
          << getJsonString();
 }
