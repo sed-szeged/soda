@@ -46,7 +46,7 @@ The library contains several command line programs:
 * binaryDump
  * Reads and saves data from the binary formats in a human readable format.
 * rawDataReader
- * Create SoDA coverage, results and changeset matrices from raw data sources.
+ * Creates SoDA coverage, results and changeset matrices from raw data sources.
 
 #### Sample application
 
