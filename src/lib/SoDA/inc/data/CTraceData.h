@@ -60,12 +60,13 @@ public:
     virtual void setCoverage(const String &test, const String &codeElementName);
 
     /**
-     * @brief Returns the name of the function by its address.
+     * @brief Returns true if the code element name exists.
      * @param binaryPath  The path to the binary which contains the function.
      * @param address  The address of the function in the binary.
-     * @return The name of the function.
+     * @param function Sets the function name if it exists.
+     * @return True if the code element name exists otherwise false.
      */
-    virtual String getCodeElementName(const String &binaryPath, const int address);
+    virtual bool getCodeElementName(const String &binaryPath, const int address, String &function);
 
     /**
      * @brief Adds the function name to the cache to speed up the look up process.

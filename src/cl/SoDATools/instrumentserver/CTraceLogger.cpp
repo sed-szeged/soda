@@ -125,11 +125,9 @@ String CTraceLogger::handleFunctionMessage()
 
     String binaryPath = String(text);
 
-    try {
-        function = m_data->getCodeElementName(binaryPath, address);
-    } catch (CException &e) {
-        String output = translateAddressToFunction(binaryPath, address);
-        m_data->addCodeElementLocation(output);
+    if (!m_data->getCodeElementName(binaryPath, address, function)) {
+        function = translateAddressToFunction(binaryPath, address);
+        m_data->addCodeElementLocation(function);
         m_data->addCodeElementName(binaryPath, address, function);
     }
 
@@ -171,6 +169,7 @@ String CTraceLogger::translateAddressToFunction(const String &binaryPath, const 
         output = "[SODA]not-resolved";
     }
 
+    output.erase(output.length() - 2, output.length()); // remove line ending
     return output;
 }
 

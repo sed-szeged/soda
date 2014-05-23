@@ -58,19 +58,20 @@ void CTraceData::setCoverage(const String &test, const String &codeElementName)
     pthread_mutex_unlock(&m_coverageMutex);
 }
 
-String CTraceData::getCodeElementName(const String &binaryPath, const int address)
+bool CTraceData::getCodeElementName(const String &binaryPath, const int address, String &function)
 {
     pthread_mutex_lock(&m_addressMapMutex);
     if (m_addressMap.find(binaryPath) == m_addressMap.end()) {
         pthread_mutex_unlock(&m_addressMapMutex);
-        throw CException("soda::CtTaceData::getCodeElementName", "Address not found.");
+        return false;
     }
     if (m_addressMap[binaryPath].find(address) == m_addressMap[binaryPath].end()) {
         pthread_mutex_unlock(&m_addressMapMutex);
-        throw CException("soda::CtTaceData::getCodeElementName", "Address not found.");
+        return false;
     }
+    function = m_addressMap[binaryPath][address];
     pthread_mutex_unlock(&m_addressMapMutex);
-    return m_addressMap[binaryPath][address];
+    return true;
 }
 
 void CTraceData::addCodeElementName(const String &binaryPath, const int address, const String &codeElementName)
