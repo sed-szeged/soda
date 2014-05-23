@@ -169,7 +169,7 @@ String CTraceLogger::translateAddressToFunction(const String &binaryPath, const 
         output = "[SODA]not-resolved";
     }
 
-    output.erase(output.length() - 2, output.length()); // remove line ending
+    output.erase(output.length() - 2, 2; // remove line ending
     return output;
 }
 
