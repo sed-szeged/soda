@@ -4,4 +4,4 @@ add_subdirectory(f-measure)
 add_subdirectory(specialization)
 add_subdirectory(partition-metric)
 add_subdirectory(tpce)
-
+add_subdirectory(partition-efficiency)
