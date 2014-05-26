@@ -8,7 +8,6 @@ namespace soda {
 class PartitionMetricTestSuiteMetricPlugin : public ITestSuiteMetricPlugin
 {
 public:
-public:
 
     PartitionMetricTestSuiteMetricPlugin();
     ~PartitionMetricTestSuiteMetricPlugin();

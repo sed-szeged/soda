@@ -8,7 +8,6 @@ namespace soda {
 class TpCETestSuiteMetricPlugin : public ITestSuiteMetricPlugin
 {
 public:
-public:
 
     TpCETestSuiteMetricPlugin();
     ~TpCETestSuiteMetricPlugin();
