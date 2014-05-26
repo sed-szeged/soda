@@ -76,7 +76,7 @@ void TarantulaFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &cl
     tarantulaStreamDetailed.open((output + "/tarantula.details.csv").c_str());
 
     tarantulaStream << "#revision; code element; tarantula" << std::endl;
-    tarantulaStreamDetailed << "#revision; code element; ef; np; nf; np; tarantula" << std::endl;
+    tarantulaStreamDetailed << "#revision; code element; ef; ep; nf; np; tarantula" << std::endl;
 
     CCoverageMatrix *coverageMatrix = m_data->getCoverage();
 

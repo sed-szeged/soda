@@ -78,7 +78,7 @@ void OchiaiFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &clust
     ochiaiStreamDetailed.open((output + "/ochiai.details.csv").c_str());
 
     ochiaiStream << "#revision; code element; ochiai" << std::endl;
-    ochiaiStreamDetailed << "#revision; code element; ef; np; nf; np; ochiai" << std::endl;
+    ochiaiStreamDetailed << "#revision; code element; ef; ep; nf; np; ochiai" << std::endl;
 
     CCoverageMatrix *coverageMatrix = m_data->getCoverage();
 
