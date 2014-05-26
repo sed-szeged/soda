@@ -54,6 +54,8 @@ void PartitionMetricTestSuiteMetricPlugin::calculate(const std::string &output, 
 
         results[it->first]["partition-metric"] = partitionMetric;
     }
+
+    partitionMetricStream.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)
