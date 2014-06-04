@@ -62,7 +62,7 @@ void UniquenessTestSuiteMetricPlugin::calculate(const std::string &output, std::
         std::set<IndexType> testcasesNotInCluster;
         std::set<IndexType> testcasesInCluster;
         for (IndexType i = 0; i < nrOfTestcasesInCluster; i++) {
-            if (tcMap[i]) {
+            if (tcMap[it->second.getTestCases().at(i)]) {
                 testcasesInCluster.insert(it->second.getTestCases().at(i));
             }
         }

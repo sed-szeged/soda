@@ -89,10 +89,10 @@ void SpecializationMetric::calculate(const std::string &output, std::map<std::st
         std::set<IndexType> clusterTestCases;
         for (IndexType i = 0; i < nrOfTestcases; i++) {
             if (tcMap[i]) {
-                allTestcases.insert(i);
-                if (i < nrOfTestcasesInCluster) {
-                    clusterTestCases.insert(it->second.getTestCases().at(i));
-                }
+                allTestcases.insert(i);   
+            }
+            if (i < nrOfTestcasesInCluster && tcMap[it->second.getTestCases().at(i)]) {
+                clusterTestCases.insert(it->second.getTestCases().at(i));
             }
         }
 
