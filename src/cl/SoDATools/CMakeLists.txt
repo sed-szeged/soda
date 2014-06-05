@@ -3,7 +3,6 @@ project(SoDATools)
 include_directories(${SoDATools_SOURCE_DIR}/../../lib/SoDA/inc
                     ${SoDATools_SOURCE_DIR}/../../lib/SoDAPlugin/inc
                     ${SoDATools_SOURCE_DIR}/../../lib/SoDATools/inc
-                    ${SoDATools_SOURCE_DIR}/../../inc
                     ${Boost_INCLUDE_DIRS})
 # rawDataReader
 add_subdirectory(utilities/rawdatareader)

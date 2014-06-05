@@ -15,6 +15,7 @@ find_package(Threads REQUIRED)
 
 option(test "Build tests" OFF)
 option(coverage "Build with coverage analysis support" OFF)
+option(withoutcl "Build without command line tools" 0)
 
 add_definitions(-Wall)
 
@@ -36,10 +37,14 @@ endif(test)
 add_subdirectory(lib/SoDA)
 add_subdirectory(lib/SoDAEngine)
 add_subdirectory(plugin)
-add_subdirectory(cl)
 
-# Copy selected-revs-gen.ph to build directory
-file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+if(NOT withoutcl)
+    add_subdirectory(cl)
+
+    # Copy scripts to build directory
+    file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+endif(NOT withoutcl)
 
 if(test)
     # Enable ExternalProject CMake module
