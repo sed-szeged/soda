@@ -21,7 +21,7 @@ public:
 
     std::vector<std::string> getDependency();
 
-    void calculate(const std::string &output, std::map<std::string, MetricResults> &results);
+    void calculate(rapidjson::Document &results);
 
 private:
     CSelectionData *m_data;

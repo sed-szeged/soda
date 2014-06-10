@@ -2,6 +2,7 @@ project(gcov_coverage_reader_plugin)
 
 include_directories(${gcov_coverage_reader_plugin_SOURCE_DIR}/../../../lib/SoDA/inc
                     ${gcov_coverage_reader_plugin_SOURCE_DIR}/../../../lib/SoDAEngine/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 file(GLOB_RECURSE headers ./*.h)

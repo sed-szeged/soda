@@ -56,28 +56,37 @@ std::vector<std::string> PartitionEfficiencyTestSuiteMetricPlugin::getDependency
     return dependencies;
 }
 
-void PartitionEfficiencyTestSuiteMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void PartitionEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &results)
 {
+    /*
     std::ofstream out;
     out.open((output + "/effpart.metric.csv").c_str());
     out << "# cluster id;number of testcases in cluster;number of code elements in cluster;partition-metric;partition-efficiency" << std::endl;
+    */
 
-    std::map<std::string, MetricResults>::iterator it;
-    for (it = results.begin(); it != results.end(); it++) {
-        MetricResults result = it->second;
+    std::map<std::string, CClusterDefinition>::iterator it;
+    for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
-        IndexType nrOfTestCases = (*m_clusterList)[it->first].getTestCases().size();
-        IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+        }
 
-        double partitionMetric = result["partition-metric"];
+        IndexType nrOfTestCases = it->second.getTestCases().size();
+        //IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
+
+        double partitionMetric = results[it->first.c_str()]["partition-metric"].GetDouble();
         double partitionEfficiency = partitionMetric / nrOfTestCases;
 
-        out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << partitionMetric << ";" << partitionEfficiency << std::endl;
+        //out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << partitionMetric << ";" << partitionEfficiency << std::endl;
 
-        results[it->first]["partition-efficiency"] = partitionEfficiency;
+        rapidjson::Value v;
+        v.SetDouble(partitionEfficiency);
+        results[it->first.c_str()].AddMember("partition-efficiency", results.GetAllocator(), v, results.GetAllocator());
     }
 
-    out.close();
+    //out.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

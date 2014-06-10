@@ -2,6 +2,7 @@ project(duplation_reduction_plugin)
 
 include_directories(${duplation_reduction_plugin_SOURCE_DIR}/../../../lib/SoDA/inc
                     ${duplation_reduction_plugin_SOURCE_DIR}/../../../lib/SoDAEngine/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 file(GLOB_RECURSE headers ./*.h)

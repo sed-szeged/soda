@@ -61,11 +61,13 @@ std::vector<std::string> SpecializationMetric::getDependency()
     return std::vector<std::string>();
 }
 
-void SpecializationMetric::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void SpecializationMetric::calculate(rapidjson::Document &results)
 {
+    /*
     std::ofstream coverageStream;
     coverageStream.open((output + "/specialization.metric.csv").c_str());
     coverageStream << "# cluster id;number of testcases in cluster;number of code elements;specialization" << std::endl;
+    */
 
     CCoverageMatrix *coverage = m_data->getCoverage();
     IndexType nrOfTestcases = coverage->getNumOfTestcases();
@@ -81,6 +83,13 @@ void SpecializationMetric::calculate(const std::string &output, std::map<std::st
 
     std::map<std::string, CClusterDefinition>::iterator it;
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
+
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+        }
+
         std::cout << "Processing " << it->first << std::endl;
         IndexType nrOfCodeElementsInCluster = it->second.getCodeElements().size();
         IndexType nrOfTestcasesInCluster = it->second.getTestCases().size();
@@ -127,10 +136,13 @@ void SpecializationMetric::calculate(const std::string &output, std::map<std::st
         if (totalCoverage > 0) {
             specialization = (double)coverageInCluster / totalCoverage;
         }
-        results[it->first]["specialization"] = specialization;
-        coverageStream << it->first << ";" << nrOfTestcasesInCluster << ";" << nrOfCodeElementsInCluster << ";" << specialization  << std::endl;
+
+        rapidjson::Value v;
+        v.SetDouble(specialization);
+        results[it->first.c_str()].AddMember("specialization", results.GetAllocator(), v, results.GetAllocator());
+        //coverageStream << it->first << ";" << nrOfTestcasesInCluster << ";" << nrOfCodeElementsInCluster << ";" << specialization  << std::endl;
     }
-    coverageStream.close();
+    //coverageStream.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

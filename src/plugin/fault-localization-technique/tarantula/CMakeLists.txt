@@ -2,6 +2,7 @@ project(tarantula_fault_localization_technique_plugin)
 
 include_directories(${tarantula_fault_localization_technique_plugin_SOURCE_DIR}/../../../lib/SoDA/inc
                     ${tarantula_fault_localization_technique_plugin_SOURCE_DIR}/../../../lib/SoDAEngine/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 file(GLOB_RECURSE headers ./*.h)

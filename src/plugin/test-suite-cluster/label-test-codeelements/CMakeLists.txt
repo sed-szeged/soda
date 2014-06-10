@@ -2,6 +2,7 @@ project(label_test_codeelements_cluster_plugin)
 
 include_directories(${label_test_codeelements_cluster_plugin_SOURCE_DIR}/../../../lib/SoDA/inc
                     ${label_test_codeelements_cluster_plugin_SOURCE_DIR}/../../../lib/SoDAEngine/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 file(GLOB_RECURSE headers ./*.h)

@@ -35,28 +35,37 @@ std::vector<std::string> CoverageEfficiencyTestSuiteMetricPlugin::getDependency(
     return dependencies;
 }
 
-void CoverageEfficiencyTestSuiteMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void CoverageEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &results)
 {
+    /*
     std::ofstream out;
     out.open((output + "/coverage.efficiency.metric.csv").c_str());
     out << "# cluster id;number of testcases in cluster;number of code elements in cluster;coverage-efficiency" << std::endl;
+    */
 
-    std::map<std::string, MetricResults>::iterator it;
-    for (it = results.begin(); it != results.end(); it++) {
-        MetricResults result = it->second;
+    std::map<std::string, CClusterDefinition>::iterator it;
+    for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
-        IndexType nrOfTestCases = (*m_clusterList)[it->first].getTestCases().size();
-        IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+        }
 
-        double faultDetection = result["fault-detection"];
+        IndexType nrOfTestCases = it->second.getTestCases().size();
+        IndexType nrOfCodeElements = it->second.getCodeElements().size();
+
+        double faultDetection = results[it->first.c_str()]["fault-detection"].GetDouble();
         double coverageEfficiency = (faultDetection * nrOfCodeElements) / nrOfTestCases;
 
-        out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << coverageEfficiency << std::endl;
+        //out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << coverageEfficiency << std::endl;
 
-        results[it->first]["coverage-efficiency"] = coverageEfficiency;
+        rapidjson::Value v;
+        v.SetDouble(coverageEfficiency);
+        results[it->first.c_str()].AddMember("coverage-efficiency", results.GetAllocator(), v, results.GetAllocator());
     }
 
-    out.close();
+    //out.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

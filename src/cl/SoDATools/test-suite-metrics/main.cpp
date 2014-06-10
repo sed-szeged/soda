@@ -181,9 +181,15 @@ void calculateMetric(CSelectionData *selectionData, const std::string &name)
 
     (std::cerr << "[INFO] Calculating metrics: " << metric->getName() << " ...").flush();
     metric->init(selectionData, &clusterList, revision);
-    metric->calculate(outputDir, results);
+
+    rapidjson::Document results;
+    results.SetObject();
+
+    metric->calculate(results);
     metricsCalculated.insert(name);
     (std::cerr << " done." << std::endl).flush();
+
+    // TODO process results.
 }
 
 void processJsonFiles(String path)
