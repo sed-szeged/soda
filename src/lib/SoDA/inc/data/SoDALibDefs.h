@@ -27,6 +27,7 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <list>
 
 namespace soda {
 
@@ -41,6 +42,7 @@ typedef std::vector<IndexType> IntVector;
 typedef std::vector<String> StringVector;
 typedef std::map<IndexType, String> StringMap;
 typedef std::map<String, IndexType> IdxStrMap;
+typedef std::map<IndexType, IndexType> IdxIdxMap;
 
 } // namespace soda
 

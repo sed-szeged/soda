@@ -26,6 +26,7 @@
 
 #include "CTraceLogger.h"
 #include "exception/CException.h"
+#include "util/CAddressResolver.h"
 
 namespace soda {
 
@@ -124,12 +125,10 @@ String CTraceLogger::handleFunctionMessage()
 
     String binaryPath = String(text);
 
-    try {
-        function = m_data->getFunctionName(binaryPath, address);
-    } catch (CException &e) {
-        String output = translateAddressToFunction(binaryPath, address);
-        function = output.substr(0, output.find(" at "));
-        m_data->addFunctionName(binaryPath, address, function);
+    if (!m_data->getCodeElementName(binaryPath, address, function)) {
+        function = translateAddressToFunction(binaryPath, address);
+        m_data->addCodeElementLocation(function);
+        m_data->addCodeElementName(binaryPath, address, function);
     }
 
     /* Free the buffer. */
@@ -159,26 +158,18 @@ void CTraceLogger::handleFunctionExitMessage()
 
 String CTraceLogger::translateAddressToFunction(const String &binaryPath, const int address)
 {
-    std::ostringstream command;
-    if (access(binaryPath.c_str(), F_OK) == 0) {
-        command << "addr2line -C -f -p -e " << binaryPath << " 0x" << std::hex << address;
-    } else {
-        command << "addr2line -C -f -p -e " << m_data->getBaseDir() << "/" << binaryPath << " 0x" << std::hex << address;
+    String binaryFullPath = binaryPath;
+    if (!access(binaryPath.c_str(), F_OK) == 0) {
+        binaryFullPath = m_data->getBaseDir() + "/" + binaryPath;
     }
-    FILE *pf;
-    pf = popen(command.str().c_str(), "r");
-    if (!pf) {
-        //TODO throw exception
-    }
-    String output = "";
-    char *buf = new char[3072];
-    if (fgets(buf, 3072, pf) != NULL) {
-        output = String(buf);
+    String output;
+    try {
+        output = CAddressResolver::resolve(binaryFullPath, address);
+    } catch (CException &e) {
+        output = "[SODA]not-resolved";
     }
 
-    delete buf;
-    pclose(pf);
-
+    output.erase(output.length() - 2, 2); // remove line ending
     return output;
 }
 

@@ -23,9 +23,10 @@
 #define CTRACELOGGER_H
 
 #include <map>
+#include <set>
 
-#include "CThread.h"
-#include "CTraceData.h"
+#include "thread/CThread.h"
+#include "data/CTraceData.h"
 
 namespace soda {
 
@@ -38,7 +39,7 @@ class CTraceLogger : public CThread
 {
 public:
     /**
-     * @brief Creates a new CTraceLogger instance. The logger will listent on
+     * @brief Creates a new CTraceLogger instance. The logger will listen on
      *        the socket and saves the informations in the data.
      * @param socket  The socket identifier.
      * @param data  The CTraceData instance.
@@ -50,6 +51,11 @@ public:
      * @brief Processes the messages coming through the socket.
      */
     virtual void run();
+
+    /**
+     * @brief Returns the socket identifier.
+     * @return
+     */
     int getSocket();
 
 private:

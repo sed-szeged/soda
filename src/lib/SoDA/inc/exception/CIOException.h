@@ -35,6 +35,7 @@ class CIOException : public CException
 {
 public:
     CIOException(const String& location, const String& message) throw();
+    virtual const char* what() const throw();
 };
 
 } /* namespace io */

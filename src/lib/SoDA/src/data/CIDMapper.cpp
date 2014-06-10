@@ -22,11 +22,10 @@
 
 #include <stdexcept>
 #include <boost/lexical_cast.hpp>
+
 #include "io/CBinaryIO.h"
 #include "data/CIDMapper.h"
 #include "exception/CException.h"
-
-#include <iostream>
 
 namespace soda {
 
@@ -172,11 +171,11 @@ void CIDMapper::remove(const IndexType id)
 
 void CIDMapper::remove(const String& value)
 {
-    IndexType globalIdx = m_globalIdManager->getID(value);
     if (!m_globalIdManager->containsValue(value)) {
         return;
     }
 
+    IndexType globalIdx = m_globalIdManager->getID(value);
     maptype::iterator it = m_globalToLocal.find(globalIdx);
     if(it != m_globalToLocal.end()) {
         m_localToGlobal.erase(it->second);

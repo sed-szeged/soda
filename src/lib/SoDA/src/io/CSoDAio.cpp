@@ -20,27 +20,28 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "io/CSoDAio.h"
-#include "exception/CException.h"
 #include <fstream>
+
+#include "io/CSoDAio.h"
+#include "exception/CIOException.h"
 
 namespace soda { namespace io {
 
 const unsigned int CSoDAio::SoDA_MAGIC = 0x41446f53; // LSB: 'S', 'o', 'D', 'A'
 
-void CSoDAio::checkOpened(const char* filename, io::CBinaryIO::eOpenMode openMode)
+void CSoDAio::checkOpened(io::CBinaryIO::eOpenMode openMode)
 {
     if(openMode == io::CBinaryIO::omRead) {
         unsigned int id = readUInt4();
         if(id != SoDA_MAGIC) {
             CBinaryIO::close();
-            throw CException("soda::CSoDAio::open()","Failed to open file! This is not a standard SoDA library file!");
+            throw CIOException("soda::io::CSoDAio::open()","Failed to open file! This is not a standard SoDA library file!");
         }
     } else if(openMode == io::CBinaryIO::omWrite) {
         writeUInt4(SoDA_MAGIC);
     } else {
         CBinaryIO::close();
-        throw CException("soda::CSoDAio::open()","Not supported eOpenMode! (Use one of these: omRead, omWrite, omAppend)");
+        throw CIOException("soda::io::CSoDAio::open()","Not supported eOpenMode! (Use one of these: omRead, omWrite, omAppend)");
     }
     m_lastpos = m_file->tellg();
 }
@@ -57,7 +58,7 @@ CSoDAio::CSoDAio(const char* filename, io::CBinaryIO::eOpenMode openMode) :
     m_length(0),
     m_lastpos(0)
 {
-    checkOpened(filename, openMode);
+    checkOpened(openMode);
 }
 
 CSoDAio::CSoDAio(const String& filename, io::CBinaryIO::eOpenMode openMode) :
@@ -66,12 +67,11 @@ CSoDAio::CSoDAio(const String& filename, io::CBinaryIO::eOpenMode openMode) :
     m_length(0),
     m_lastpos(0)
 {
-    checkOpened(filename.c_str(), openMode);
+    checkOpened(openMode);
 }
 
 CSoDAio::~CSoDAio()
 {
-    close();
 }
 
 void CSoDAio::open(const char* filename, io::CBinaryIO::eOpenMode openMode)
@@ -80,7 +80,7 @@ void CSoDAio::open(const char* filename, io::CBinaryIO::eOpenMode openMode)
         CBinaryIO::close();
     }
     CBinaryIO::open(filename, openMode);
-    checkOpened(filename, openMode);
+    checkOpened(openMode);
 }
 
 void CSoDAio::open(const String& filename, io::CBinaryIO::eOpenMode openMode)
@@ -110,12 +110,12 @@ bool CSoDAio::nextChunkID()
     if(m_file->tellg() == m_lastpos) {
         for(unsigned long long int i = 0; i < m_length; ++i) {
             readByte1();
-            m_length--;
             if(eof()) {
-                throw CException("soda::CSoDAio::nextChunkID()", "Unexpected end of file!");
+                throw CIOException("soda::io::CSoDAio::nextChunkID()", "Unexpected end of file!");
             }
         }
     }
+
     /*
      * WARNING: the results are not defined if the integer value is outside the range
      * of the defined enumeration
@@ -133,9 +133,9 @@ bool CSoDAio::nextChunkID()
 bool CSoDAio::findChunkID(ChunkID chunkID)
 {
     if(!isOpen())
-        throw CException("soda::CSoDAio::findChunkID()","File is not open!");
+        throw CIOException("soda::io::CSoDAio::findChunkID()","File is not open!");
     if(m_mode != omRead)
-        throw CException("soda::CSoDAio::findChunkID()","File open mode isn't 'omRead'! You can use findChunkID only in omRead mode!");
+        throw CIOException("soda::io::CSoDAio::findChunkID()","File open mode isn't 'omRead'! You can use findChunkID only in omRead mode!");
 
     m_file->seekg(4, std::ios::beg); // SoDA_MAGIC on first 4 bytes
 

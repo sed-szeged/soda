@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8) 
+cmake_minimum_required(VERSION 2.8)
 project(SoDA)
 
 # Set the build type if it isn't already
@@ -13,11 +13,38 @@ find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
 
 find_package(Threads REQUIRED)
 
-add_subdirectory(lib/SoDA)
-add_subdirectory(lib/SoDATools)
-add_subdirectory(cl)
-
 option(test "Build tests" OFF)
+option(coverage "Build with coverage analysis support" OFF)
+option(withoutcl "Build without command line tools" 0)
+
+add_definitions(-Wall)
+
+add_definitions(-DSODA_PLUGIN_DIR="${SoDA_BINARY_DIR}/plugin")
+
+if(test)
+    if(coverage)
+        set(CMAKE_BUILD_TYPE, Debug)
+        if(CMAKE_COMPILER_IS_GNUCC)
+            set(CMAKE_C_FLAGS "-g -O0 -coverage")
+            set(CMAKE_CXX_FLAGS "-g -O0 -coverage")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -coverage")
+        endif()
+
+        include(${CMAKE_SOURCE_DIR}/cmake/lcov.cmake)
+    endif(coverage)
+endif(test)
+
+add_subdirectory(lib/SoDA)
+add_subdirectory(lib/SoDAEngine)
+add_subdirectory(plugin)
+
+if(NOT withoutcl)
+    add_subdirectory(cl)
+
+    # Copy scripts to build directory
+    file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+endif(NOT withoutcl)
 
 if(test)
     # Enable ExternalProject CMake module

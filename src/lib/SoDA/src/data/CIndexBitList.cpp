@@ -21,7 +21,6 @@
  */
 
 #include <algorithm>
-#include <iterator>
 
 #include "data/CIndexBitList.h"
 #include "exception/CException.h"
@@ -35,14 +34,15 @@ namespace soda {
 class CIndexBitList::ListIterator :
         public IBitListIterator,
         public std::iterator<std::input_iterator_tag, bool> {
-
 private:
     IndexType p;
     std::vector<IndexType>::iterator e;
     std::vector<IndexType>::iterator i;
+
 public:
     ListIterator() :
         p(0) {}
+
     ListIterator(IndexType v, std::vector<IndexType> *c) :
         p(v),
         e(c->end()),
@@ -52,10 +52,12 @@ public:
             ++i;
         }
     }
+
     ListIterator(IBitListIterator& it) :
         p(static_cast<CIndexBitList::ListIterator*>(&it)->p),
         e(static_cast<CIndexBitList::ListIterator*>(&it)->e),
         i(static_cast<CIndexBitList::ListIterator*>(&it)->i) {}
+
     ListIterator(const ListIterator& it) :
         p(it.p),
         e(it.e),
@@ -72,8 +74,7 @@ public:
 
     IBitListIterator& operator++(int)
     {
-        //TODO: make it postfix!!
-        ++p;
+        p++;
         if((i!=e) && (*i < p)) {
             ++i;
         }

@@ -155,12 +155,11 @@ private:
     static const unsigned int SoDA_MAGIC;
 
     /**
-     * @brief Checks if the specified file with the specified open mode is already opened.
-     * @param filename File name.
+     * @brief Checks if the current file with the specified open mode is a standard SoDA file.
      * @throw Exception if file magic number is not equal to SoDA magic number.
      * @throw Exception at invalid open mode.
      */
-    void checkOpened(const char* filename, io::CBinaryIO::eOpenMode);
+    void checkOpened(io::CBinaryIO::eOpenMode);
 };
 
 } /* namespace io */

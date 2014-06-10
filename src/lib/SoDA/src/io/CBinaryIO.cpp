@@ -19,9 +19,9 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
+#include <boost/filesystem.hpp>
 #include "io/CBinaryIO.h"
 #include "exception/CIOException.h"
 
@@ -76,15 +76,22 @@ void CBinaryIO::open(const char *filename, eOpenMode mode)
         }
 
         try {
+            boost::filesystem::path p(filename);
+            if(p.has_parent_path() && !(boost::filesystem::exists(p.parent_path()))) {
+                boost::filesystem::create_directory(p.parent_path());
+            }
+
             m_file = new std::fstream(filename, openMode);
             if (m_file->fail()) {
+                delete m_file;
+                m_file = NULL;
                 throw CIOException("soda::io::BinaryIO::open()", "Can not open file: " + String(filename));
             }
         } catch (std::ios_base::failure e) {
+            delete m_file;
+            m_file = NULL;
             throw CIOException("soda::io::BinaryIO::open()", e.what());
         }
-
-
     }
 }
 

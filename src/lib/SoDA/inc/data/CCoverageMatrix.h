@@ -60,7 +60,7 @@ public:
     /**
      * @brief Destroys a CCoverageMatrix object.
      */
-    ~CCoverageMatrix();
+    virtual ~CCoverageMatrix();
 
     /**
      * @brief Returns a reference to the test cases IIDManager.
@@ -195,20 +195,6 @@ public:
      * @param filename  Name of the input file.
      */
     virtual void load(const String& filename);
-
-private:
-
-    /**
-     * @brief Resizes the coverage matrix and
-     *          adds a specified test case name to the IIDManager if it's not in it.
-     */
-    void addTestcase(const String&);
-
-    /**
-     * @brief Resizes the coverage matrix and
-     *          adds a specified code element name to the IIDManager if it's not in it.
-     */
-    void addCodeElement(const String&);
 
 private:
 

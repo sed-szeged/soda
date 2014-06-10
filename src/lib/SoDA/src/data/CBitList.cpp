@@ -22,7 +22,6 @@
 
 #include "data/CBitList.h"
 #include "exception/CException.h"
-#include <iterator>
 #include "interface/IIterators.h"
 
 namespace soda {
@@ -50,8 +49,7 @@ public:
     }
     IBitListIterator& operator++(int)
     {
-        //TODO: make it postfix!!
-        ++p;
+        p++;
         return *this;
     }
     bool operator==(IBitListIterator& rhs)

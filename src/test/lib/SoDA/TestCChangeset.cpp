@@ -24,6 +24,7 @@
 #include "data/CChangeset.h"
 #include "data/CIDManager.h"
 #include "data/CBitList.h"
+#include "exception/CException.h"
 
 using namespace soda;
 
@@ -60,6 +61,17 @@ protected:
 
 };
 
+TEST_F(CChangesetTest, Constructor)
+{
+    CIDManager *idmgr = new CIDManager(strVector);
+    CRevision<IBitList*> *rev = new CRevision<IBitList*>();
+    CChangeset *change = new CChangeset(idmgr, rev);
+    EXPECT_EQ(prCount, change->getCodeElements().size());
+    delete idmgr;
+    delete rev;
+    delete change;
+}
+
 TEST_F(CChangesetTest, AddRevisions)
 {
     changeset->addRevision(1u);
@@ -81,6 +93,8 @@ TEST_F(CChangesetTest, RemoveRevisions)
     EXPECT_EQ(revCount-1, changeset->getRevisions().size());
     EXPECT_NE(r,changeset->getRevisions().at(r-1));
     EXPECT_EQ(r+1,changeset->getRevisions().at(r-1));
+
+    changeset->removeRevision(intVector);
 }
 
 TEST_F(CChangesetTest, AddCodeElements)
@@ -93,7 +107,8 @@ TEST_F(CChangesetTest, AddCodeElements)
 
 TEST_F(CChangesetTest, RemoveCodeElements)
 {
-    changeset->addCodeElement(strVector);
+    changeset->addRevision(intVector);
+    changeset->addCodeElement(CIDManager(strVector));
     changeset->removeCodeElement("codeElement1");
     EXPECT_EQ(prCount-1, changeset->getCodeElements().size());
 }
@@ -110,6 +125,14 @@ TEST_F(CChangesetTest, Toggle)
     EXPECT_EQ(revCount, changeset->getRevisions("codeElement1").size());
 }
 
+TEST_F(CChangesetTest, Exists)
+{
+    changeset->addCodeElement(strVector);
+    changeset->addRevision(intVector);
+    EXPECT_TRUE(changeset->exists(1));
+    EXPECT_FALSE(changeset->exists(20));
+}
+
 TEST_F(CChangesetTest, SaveAndLoad)
 {
     changeset->addRevision(intVector);
@@ -117,9 +140,12 @@ TEST_F(CChangesetTest, SaveAndLoad)
 
     EXPECT_NO_THROW(changeset->save("sample/changesetTest.saved"));
 
-    delete changeset;
-    changeset = new CChangeset();
+    EXPECT_ANY_THROW(changeset->load("sample/idManagerTest.saved"));
+    EXPECT_ANY_THROW(changeset->load("sample/ResultsMatrixSampleBit"));
+
     EXPECT_NO_THROW(changeset->load("sample/changesetTest.saved"));
+    EXPECT_NO_THROW(changeset->save(String("sample/changesetTest.saved")));
+    EXPECT_NO_THROW(changeset->load(String("sample/changesetTest.saved")));
 
     const IIDManager *loadedCodeElements = &(changeset->getCodeElements());
     unsigned int prCount = codeElements->size();
@@ -150,5 +176,16 @@ TEST_F(CChangesetTest, SetChange)
     changeset->addRevision(1);
     changeset->addCodeElement("codeElement1");
     changeset->setChange(1, "codeElement1",true);
+    EXPECT_ANY_THROW(changeset->setChange(2, "ezer", true));
     EXPECT_TRUE(changeset->isChanged(1, "codeElement1"));
+}
+
+TEST_F(CChangesetTest, IndexOperator)
+{
+    changeset->addRevision(intVector);
+    changeset->addCodeElement(strVector);
+    IBitList& bitList = (*changeset)[1];
+    EXPECT_EQ(prCount, bitList.size());
+    bitList = changeset->at(2);
+    EXPECT_EQ(prCount, bitList.size());
 }

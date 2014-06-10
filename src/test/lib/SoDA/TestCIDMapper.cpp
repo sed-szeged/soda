@@ -60,6 +60,12 @@ TEST_F(CIDMapperTest, AddAndRemove)
     EXPECT_NO_THROW(idMapper->remove(4));
     EXPECT_EQ(2u, idMapper->size());
     EXPECT_EQ(1u, idMapper->getLastIndex());
+    EXPECT_NO_THROW(idMapper->remove("Second"));
+    EXPECT_EQ(1u, idMapper->size());
+    EXPECT_EQ(0u, idMapper->getLastIndex());
+    EXPECT_NO_THROW(idMapper->remove("this element does not exists"));
+    EXPECT_NO_THROW(idMapper->remove(2));
+    EXPECT_NO_THROW(idMapper->remove("Fourth"));
 }
 
 TEST_F(CIDMapperTest, GetIDAndValue)
@@ -140,8 +146,8 @@ TEST_F(CIDMapperTest, SaveAndLoad)
     EXPECT_TRUE(io->findChunkID(io::CSoDAio::IDMANAGER));
     EXPECT_NO_THROW(loadedIdMapper.load(io));
     delete io;
-    EXPECT_EQ(n, loadedIdMapper.size());
 
+    EXPECT_EQ(n, loadedIdMapper.size());
     for (unsigned int i = 0; i < n; ++i) {
         sprintf(str, "%d th", i);
         EXPECT_EQ(str, loadedIdMapper.getValue(i));
@@ -171,4 +177,32 @@ TEST_F(CIDMapperTest, translateFromAnotherId)
     EXPECT_EQ(2u, anotherMapper->translateFromAnotherId(*idMapper, 1));
     EXPECT_EQ(1u, anotherMapper->translateFromAnotherId(*idMapper, 2));
     EXPECT_THROW(anotherMapper->translateFromAnotherId(*idMapper, 3), CException);
+    delete anotherMapper;
+
+    CIDManager *differentidMgr = new CIDManager();
+    anotherMapper = new CIDMapper(differentidMgr);
+    EXPECT_THROW(idMapper->translateFromAnotherId(*anotherMapper, 4), CException);
+    delete anotherMapper;
+    delete differentidMgr;
+}
+
+TEST_F(CIDMapperTest, GetIDThrowsException)
+{
+    EXPECT_THROW(idMapper->getID("this element does not exists"), std::out_of_range);
+    idMapper->add("test code element");
+    idMapper->remove("test code element");
+    EXPECT_THROW(idMapper->getID("test code element"), std::out_of_range);
+}
+
+TEST_F(CIDMapperTest, GetIDNotThrowsException)
+{
+    idMapper->add("codeElement1");
+    EXPECT_NO_THROW(idMapper->getID("codeElement1"));
+}
+
+TEST_F(CIDMapperTest, Clear)
+{
+    idMapper->clear();
+    EXPECT_EQ(0u, idMapper->getIDList().size());
+    EXPECT_EQ(0u, idMapper->getValueList().size());
 }

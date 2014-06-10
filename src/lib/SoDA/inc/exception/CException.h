@@ -23,6 +23,7 @@
 #define EXCEPTION_H
 
 #include <exception>
+
 #include "data/SoDALibDefs.h"
 
 namespace soda {

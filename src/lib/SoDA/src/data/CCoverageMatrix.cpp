@@ -21,7 +21,6 @@
  */
 
 #include <stdexcept>
-#include <iostream>
 
 #include "data/CCoverageMatrix.h"
 #include "data/CBitMatrix.h"
@@ -183,22 +182,6 @@ void CCoverageMatrix::addCodeElementName(const String& codeElementName)
     }
 }
 
-void CCoverageMatrix::addTestcase(const String& testcaseName)
-{
-    if (!m_testcases->containsValue(testcaseName)) {
-        m_data->resize(m_data->getNumOfRows()+1, m_data->getNumOfCols());
-        m_testcases->add(m_data->getNumOfRows()-1, testcaseName);
-    }
-}
-
-void CCoverageMatrix::addCodeElement(const String& codeElementName)
-{
-    if (!m_codeElements->containsValue(codeElementName)) {
-        m_data->resize(m_data->getNumOfRows(), m_data->getNumOfCols()+1);
-        m_codeElements->add(m_data->getNumOfCols()-1, codeElementName);
-    }
-}
-
 void CCoverageMatrix::save(io::CBinaryIO *out) const
 {
     m_testcases->save(out, io::CSoDAio::TCLIST);
@@ -232,18 +215,16 @@ void CCoverageMatrix::load(io::CSoDAio *in)
 
 void CCoverageMatrix::save(const char * filename) const
 {
-    io::CSoDAio *out;
-    out = new io::CSoDAio(filename, io::CBinaryIO::omWrite);
+    io::CSoDAio *out = new io::CSoDAio(filename, io::CBinaryIO::omWrite);
     save(out);
-    out->close();
+    delete out;
 }
 
 void CCoverageMatrix::load(const char * filename)
 {
-    io::CSoDAio *in;
-    in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
+    io::CSoDAio *in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
     load(in);
-    in->close();
+    delete in;
 }
 
 void CCoverageMatrix::save(const String& filename) const

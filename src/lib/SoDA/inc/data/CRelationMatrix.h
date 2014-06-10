@@ -48,7 +48,7 @@ public:
     /**
      * @brief Destroys a CRelationMatrix object.
      */
-    ~CRelationMatrix();
+    virtual ~CRelationMatrix();
 
     /**
      * @brief Sets the relation between two code elements.

@@ -32,13 +32,14 @@
 #include <csignal>
 #include <exception>
 #include <iostream>
+#include <fstream>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
 #include <vector>
 
 #include "boost/program_options.hpp"
-#include "CTraceData.h"
+#include "data/CTraceData.h"
 #include "CTraceLogger.h"
 
 using namespace soda;
@@ -53,6 +54,8 @@ CTraceData *data;
 int serverSocket;
 String coverageFilePath;
 String baseDir;
+String codeElementPath;
+bool dumpCodeElements = false;
 
 /**
  * @brief Starts the instrument server and waiting for connections.
@@ -87,11 +90,24 @@ void signalHandler(int signal)
         CTraceLogger *logger = *it;
         logger->join();
         close(logger->getSocket());
+
         delete logger;
     }
     loggers.clear();
 
     data->save();
+
+    // Dump the code elements location into the output file.
+    if (dumpCodeElements) {
+        std::ofstream out;
+        out.open(codeElementPath.c_str());
+        std::set<String> codeElements = data->getCodeElementLocations();
+        for (std::set<String>::iterator it = codeElements.begin(); it != codeElements.end(); it++) {
+            out << *it << std::endl;
+        }
+        out.close();
+    }
+
     delete data;
 
     close(serverSocket);
@@ -128,6 +144,10 @@ int processArgs(int ac, char *av[])
 
     coverageFilePath = vm["coverage-data"].as<String>();
     baseDir = vm["base-dir"].as<String>();
+    if (vm.count("dump-code-elements")) {
+        dumpCodeElements = true;
+        codeElementPath = vm["dump-code-elements"].as<String>();
+    }
 
     // Create signal handler.
     struct sigaction sigIntHandler;
@@ -167,6 +187,7 @@ int main(int argc, char *argv[])
             ("help,h", "help message")
             ("base-dir,d", po::value<String>(), "base directory of where the make check was started")
             ("coverage-data,c", po::value<String>(), "output file containing the coverage matrix")
+            ("dump-code-elements", po::value<String>(), "output file containing the code elements and their location")
     ;
 
     if (argc < 2) {

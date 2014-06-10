@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
  * Authors: László Langó <lango@inf.u-szeged.hu>
@@ -144,7 +144,7 @@ void CChangeset::addOrSetChange(const RevNumType revisionNumber, const String& c
 
 void CChangeset::addRevision(const RevNumType revisionNumber, const IndexType numberOfCodeElements)
 {
-    if(m_changes->revisionExists(revisionNumber))
+    if (m_changes->revisionExists(revisionNumber))
         return;
 
     IBitList* bitList = new CIndexBitList(numberOfCodeElements);
@@ -191,6 +191,9 @@ IntVector CChangeset::getRevisions() const
 
 void CChangeset::removeRevision(const RevNumType revNum)
 {
+    if (!m_changes->revisionExists(revNum))
+        return;
+
     delete m_changes->getRevision(revNum);
     m_changes->getRevision(revNum) = NULL;
     m_changes->removeRevision(revNum);
@@ -257,18 +260,16 @@ void CChangeset::load(io::CSoDAio *in)
 
 void CChangeset::save(const char * filename) const
 {
-    io::CSoDAio *out;
-    out = new io::CSoDAio(filename, io::CBinaryIO::omWrite);
+    io::CSoDAio *out = new io::CSoDAio(filename, io::CBinaryIO::omWrite);
     save(out);
-    out->close();
+    delete out;
 }
 
 void CChangeset::load(const char * filename)
 {
-    io::CSoDAio *in;
-    in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
+    io::CSoDAio *in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
     load(in);
-    in->close();
+    delete in;
 }
 
 void CChangeset::save(const String& filename) const
@@ -292,7 +293,7 @@ void CChangeset::saveRevisionTable(io::CBinaryIO* out, const io::CSoDAio::ChunkI
 
     out->writeUInt4(revs.size());
     out->writeUInt4(m_codeElements->size());
-    for(IntVector::const_iterator it = revs.begin(); it!=revs.end(); it++) {
+    for(IntVector::const_iterator it = revs.begin(); it != revs.end(); it++) {
         //Write revision number
         RevNumType r = *it;
         out->writeData(&r, revNumTypeLength);

@@ -24,7 +24,6 @@
 #define CINDEXBITLIST_H
 
 #include "interface/IBitList.h"
-#include <vector>
 
 namespace soda {
 

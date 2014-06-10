@@ -1,17 +1,17 @@
-project(SoDALibTest)
+project(SoDATest)
 
 include_directories(
-    ${SoDALibTest_SOURCE_DIR}/../../lib/SoDA/inc
-    ${SoDALibTest_SOURCE_DIR}/../../lib/SoDATools/inc
+    ${SoDATest_SOURCE_DIR}/../../lib/SoDA/inc
+    ${SoDATest_SOURCE_DIR}/../../lib/SoDAEngine/inc
     ${Boost_INCLUDE_DIRS})
 
-aux_source_directory(${SoDALibTest_SOURCE_DIR}/SoDA soda_src)
-aux_source_directory(${SoDALibTest_SOURCE_DIR}/SoDATools sodatools_src)
+aux_source_directory(${SoDATest_SOURCE_DIR}/SoDA soda_src)
+aux_source_directory(${SoDATest_SOURCE_DIR}/plugin plugin_src)
 
 ExternalProject_Get_Property(googletest binary_dir)
 set(SUFFIX ".a")
 
-add_executable(SoDATest SoDATest.cpp ${soda_src} ${sodatools_src})
+add_executable(SoDATest SoDATest.cpp ${soda_src} ${plugin_src})
 
 # Create dependency of MainTest on googletest
 add_dependencies(SoDATest googletest)
@@ -22,7 +22,8 @@ target_link_libraries(
     optimized ${binary_dir}/ReleaseLibs/${CMAKE_FIND_LIBRARY_PREFIXES}gtest${SUFFIX}
     ${CMAKE_THREAD_LIBS_INIT}
     SoDA
-    SoDATools
+    SoDAEngine
+    dl
     ${Boost_LIBRARIES})
 
 # Copy sample directory to the build directory

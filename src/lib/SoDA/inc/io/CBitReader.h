@@ -27,7 +27,7 @@
 namespace soda { namespace io {
 
 /**
- * @brief The CBitReader class implements a bit reader from input streams.
+ * @brief The CBitReader class implements a bit reader from input stream.
  */
 class CBitReader {
 public:

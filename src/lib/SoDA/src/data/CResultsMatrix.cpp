@@ -20,9 +20,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <fstream>
 #include <boost/lexical_cast.hpp>
+
 #include "data/CResultsMatrix.h"
 #include "data/CBitMatrix.h"
 #include "data/CIDManager.h"
@@ -203,11 +202,16 @@ void CResultsMatrix::addTestcaseName(const String& testcaseName)
 
 void CResultsMatrix::save(const char * filename) const
 {
-    io::CSoDAio *out;
-    out = new io::CSoDAio(filename, io::CBinaryIO::omWrite);
+    io::CSoDAio *out = new io::CSoDAio(filename, io::CBinaryIO::omWrite);
     save(out);
-    out->close();
     delete out;
+}
+
+void CResultsMatrix::load(const char * filename)
+{
+    io::CSoDAio *in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
+    load(in);
+    delete in;
 }
 
 void CResultsMatrix::save(io::CBinaryIO * out) const
@@ -216,15 +220,6 @@ void CResultsMatrix::save(io::CBinaryIO * out) const
     m_testcases->save(out, io::CSoDAio::TCLIST);
     m_exec->save(out, io::CSoDAio::EXECUTION);
     m_pass->save(out, io::CSoDAio::PASSED);
-}
-
-void CResultsMatrix::load(const char * filename)
-{
-    io::CSoDAio *in;
-    in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
-    load(in);
-    in->close();
-    delete in;
 }
 
 void CResultsMatrix::load(io::CSoDAio* in)

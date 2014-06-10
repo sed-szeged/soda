@@ -34,6 +34,11 @@ class IIDManager {
 public:
 
     /**
+     * @brief Virtual destructor.
+     */
+    virtual ~IIDManager() {}
+
+    /**
      * @brief Returns true if the ID is present in the Manager.
      * @return true if the ID is present in the Manager.
      */

@@ -20,7 +20,6 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "data/CBitList.h"
 #include "data/CBitMatrix.h"
 #include "exception/CException.h"
 #include "interface/IIterators.h"

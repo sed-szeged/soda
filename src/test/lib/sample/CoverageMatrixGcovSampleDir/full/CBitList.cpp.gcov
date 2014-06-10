@@ -1,0 +1,229 @@
+        -:    0:Source:github/soda/src/lib/SoDA/src/data/CBitList.cpp
+        -:    0:Programs:17
+        -:    1:/*
+        -:    2: * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+        -:    3: *
+        -:    4: * Authors: László Langó <lango@inf.u-szeged.hu>
+        -:    5: *          Tamás Gergely <gertom@inf.u-szeged.hu>
+        -:    6: *
+        -:    7: * This file is part of SoDA.
+        -:    8: *
+        -:    9: *  SoDA is free software: you can redistribute it and/or modify
+        -:   10: *  it under the terms of the GNU Lesser General Public License as published by
+        -:   11: *  the Free Software Foundation, either version 3 of the License, or
+        -:   12: *  (at your option) any later version.
+        -:   13: *
+        -:   14: *  SoDA is distributed in the hope that it will be useful,
+        -:   15: *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: *  GNU Lesser General Public License for more details.
+        -:   18: *
+        -:   19: *  You should have received a copy of the GNU Lesser General Public License
+        -:   20: *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
+        -:   21: */
+        -:   22:
+        -:   23:#include "data/CBitList.h"
+        -:   24:#include "exception/CException.h"
+        -:   25:#include "interface/IIterators.h"
+        -:   26:
+        -:   27:namespace soda {
+        -:   28:
+        -:   29:/**
+        -:   30: * @brief The CBitList::ListIterator class is an iterator for CBitList.
+        -:   31: */
+      206:   32:class CBitList::ListIterator :
+        -:   33:        public IBitListIterator,
+        -:   34:        public std::iterator<std::input_iterator_tag, bool> {
+        -:   35:
+        -:   36:private:
+        -:   37:    std::vector<bool>::iterator p;
+        -:   38:
+        -:   39:public:
+        -:   40:    ListIterator() {}
+      206:   41:    ListIterator(std::vector<bool>::iterator it) : p(it) {}
+        -:   42:    ListIterator(IBitListIterator& it) : p(static_cast<CBitList::ListIterator*>(&it)->p) {}
+        -:   43:    ListIterator(const ListIterator& it) : p(it.p) {}
+        -:   44:
+       50:   45:    IBitListIterator& operator++()
+        -:   46:    {
+       50:   47:        ++p;
+       50:   48:        return *this;
+        -:   49:    }
+       50:   50:    IBitListIterator& operator++(int)
+        -:   51:    {
+       50:   52:        p++;
+       50:   53:        return *this;
+        -:   54:    }
+        1:   55:    bool operator==(IBitListIterator& rhs)
+        -:   56:    {
+        2:   57:        return (p == static_cast<CBitList::ListIterator*>(&rhs)->p);
+        -:   58:    }
+      101:   59:    bool operator!=(IBitListIterator& rhs)
+        -:   60:    {
+      202:   61:        return (p != static_cast<CBitList::ListIterator*>(&rhs)->p);
+        -:   62:    }
+      100:   63:    bool operator*()
+        -:   64:    {
+      300:   65:        return *p;
+        -:   66:    }
+        -:   67:};
+        -:   68:
+     1638:   69:CBitList::CBitList() :
+     1638:   70:    m_data(new std::vector<bool>(0)),
+        -:   71:    m_beginIterator(0),
+        -:   72:    m_endIterator(0),
+     4914:   73:    m_count(0)
+     1638:   74:{}
+        -:   75:
+       42:   76:CBitList::CBitList(IndexType size) :
+        -:   77:    m_beginIterator(0),
+        -:   78:    m_endIterator(0),
+       84:   79:    m_count(0)
+        -:   80:{
+       42:   81:    m_data = new std::vector<bool>(size);
+       42:   82:}
+        -:   83:
+     3292:   84:CBitList::~CBitList()
+        -:   85:{
+     3292:   86:    delete m_data;
+     1646:   87:    delete m_beginIterator;
+     1646:   88:    delete m_endIterator;
+     1646:   89:}
+        -:   90:
+        4:   91:bool CBitList::front() const
+        -:   92:{
+        8:   93:    if (m_data->size() == 0)
+        3:   94:        throw CException("soda::CBitList::front()", "The list is empty!");
+        -:   95:
+        9:   96:    return m_data->front();
+        -:   97:}
+        -:   98:
+        4:   99:bool CBitList::back() const
+        -:  100:{
+        8:  101:    if (m_data->size() == 0)
+        3:  102:            throw CException("soda::CBitList::back()", "The list is empty!");
+        -:  103:
+        9:  104:    return m_data->back();
+        -:  105:}
+        -:  106:
+    36218:  107:bool CBitList::at(IndexType pos) const
+        -:  108:{
+    72436:  109:    if (pos >= m_data->size() || pos < 0)
+        9:  110:        throw CException("soda::CBitList::at()", "Index out of bound!");
+        -:  111:
+   108645:  112:    return (*m_data)[pos];
+        -:  113:}
+        -:  114:
+  1043569:  115:void CBitList::push_back(bool value){
+  1043569:  116:    m_data->push_back(value);
+  1043569:  117:    if(value) m_count++;
+  1043569:  118:}
+        -:  119:
+    54163:  120:void CBitList::set(IndexType pos, bool value)
+        -:  121:{
+   108326:  122:    if (pos >= m_data->size() || pos < 0)
+        6:  123:        throw CException("soda::CBitList::set()", "Index out of bound!");
+        -:  124:
+   108322:  125:    (*m_data)[pos] = value;
+    54161:  126:    if(value) m_count++;
+    54161:  127:}
+        -:  128:
+       22:  129:void CBitList::toggleValue(IndexType pos)
+        -:  130:{
+       44:  131:    if (pos >= m_data->size() || pos < 0) {
+        6:  132:        throw CException("soda::CBitList::toggleValue()", "Index out of bound!");
+       60:  133:    } else if ((*m_data)[pos]) {
+       20:  134:        (*m_data)[pos] = false;
+       10:  135:        m_count--;
+        -:  136:    } else {
+       20:  137:        (*m_data)[pos] = true;
+       10:  138:        m_count++;
+        -:  139:    }
+       20:  140:}
+        -:  141:
+        3:  142:void CBitList::pop_back()
+        -:  143:{
+        6:  144:    if(m_data->size() == 0) {
+        3:  145:        throw CException("soda::CBitList::pop_back()","The list is empty!");
+        -:  146:    }
+        -:  147:
+        6:  148:    if(m_data->back()) m_count--;
+        2:  149:    m_data->pop_back();
+        2:  150:}
+        -:  151:
+        2:  152:void CBitList::pop_front()
+        -:  153:{
+        4:  154:    if(m_data->size() == 0) {
+        3:  155:        throw CException("soda::CBitList::pop_front()","The list is empty!");
+        -:  156:    }
+        -:  157:
+        3:  158:    if(m_data->front()) m_count--;
+      199:  159:    for(IndexType i = 1; i < m_data->size(); i++) {
+      297:  160:        (*m_data)[i-1] = (*m_data)[i];
+        -:  161:    }
+        1:  162:    m_data->pop_back();
+        1:  163:}
+        -:  164:
+        4:  165:void CBitList::erase(IndexType pos)
+        -:  166:{
+        8:  167:    if (pos >= m_data->size() || pos < 0)
+        6:  168:        throw CException("soda::CBitList::erase()", "Index out of bound!");
+        4:  169:    else if (pos == m_data->size()-1) {
+        1:  170:        pop_back();
+        3:  171:        return;
+        -:  172:    }
+        2:  173:    if(m_data->at(pos)) m_count--;
+        -:  174:
+       98:  175:    for(IndexType i = pos+1; i < m_data->size(); i++) {
+      144:  176:        (*m_data)[i-1] = (*m_data)[i];
+        -:  177:    }
+        1:  178:    m_data->pop_back();
+        -:  179:}
+        -:  180:
+        3:  181:void CBitList::resize(IndexType newSize)
+        -:  182:{
+        3:  183:    m_data->resize(newSize, false);
+        3:  184:}
+        -:  185:
+        2:  186:void CBitList::clear()
+        -:  187:{
+        2:  188:    m_data->clear();
+        2:  189:    m_count = 0;
+        2:  190:    delete m_beginIterator;
+        2:  191:    m_beginIterator = 0;
+        2:  192:    delete m_endIterator;
+        2:  193:    m_endIterator = 0;
+        2:  194:}
+        -:  195:
+    13300:  196:IndexType CBitList::size() const
+        -:  197:{
+    26600:  198:    return m_data->size();
+        -:  199:}
+        -:  200:
+       36:  201:IndexType CBitList::count() const
+        -:  202:{
+       36:  203:    return m_count;
+        -:  204:}
+        -:  205:
+    25600:  206:bool CBitList::operator[](IndexType pos) const
+        -:  207:{
+    76800:  208:    return (*m_data)[pos];
+        -:  209:}
+        -:  210:
+        2:  211:IBitListIterator& CBitList::begin()
+        -:  212:{
+        2:  213:    delete m_beginIterator;
+        6:  214:    m_beginIterator = new CBitList::ListIterator(m_data->begin());
+        -:  215:
+        2:  216:    return *m_beginIterator;
+        -:  217:}
+        -:  218:
+      101:  219:IBitListIterator& CBitList::end()
+        -:  220:{
+      101:  221:    delete m_endIterator;
+      303:  222:    m_endIterator = new CBitList::ListIterator(m_data->end());
+        -:  223:
+      101:  224:    return *m_endIterator;
+        -:  225:}
+        -:  226:
+        -:  227:} // namespace soda

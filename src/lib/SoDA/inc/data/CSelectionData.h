@@ -34,7 +34,6 @@ namespace soda {
  * @brief The CSelectionData class stores compatible coverage, changeset and results data together.
  */
 class CSelectionData {
-    friend class CSelectionDataAlgorithms;
 public:
 
     /**
@@ -45,7 +44,7 @@ public:
     /**
      * @brief Destroys a CSelectionData object.
      */
-    ~CSelectionData();
+    virtual ~CSelectionData();
 
     /**
      * @brief Loads the content of a changeset data from the specified path.
@@ -53,9 +52,19 @@ public:
     virtual void loadChangeset(const char*);
 
     /**
+     * @brief Loads the content of a changeset data from the specified path.
+     */
+    virtual void loadChangeset(const String&);
+
+    /**
      * @brief Loads the content of a coverage data from the specified path.
      */
     virtual void loadCoverage(const char*);
+
+    /**
+     * @brief Loads the content of a coverage data from the specified path.
+     */
+    virtual void loadCoverage(const String&);
 
     /**
      * @brief Loads the content of a results data from the specified path.
@@ -63,10 +72,15 @@ public:
     virtual void loadResults(const char*);
 
     /**
+     * @brief Loads the content of a results data from the specified path.
+     */
+    virtual void loadResults(const String&);
+
+    /**
      * @brief Returns a changeset object.
      * @return Changeset object.
      */
-    inline CChangeset*      getChangeset() {return m_changeset;}
+    inline CChangeset* getChangeset() {return m_changeset;}
 
     /**
      * @brief Returns a coverage object.
@@ -78,7 +92,7 @@ public:
      * @brief Returns a results object.
      * @return Results object.
      */
-    inline CResultsMatrix*  getResults() {return m_results;}
+    inline CResultsMatrix* getResults() {return m_results;}
 
     /**
      * @brief Returns the IDManager of global code element names.
@@ -142,42 +156,47 @@ public:
      */
     virtual void globalize();
 
+    /**
+     * @brief Filters changeset and results data which are not in the coverage data.
+     */
+    virtual void filterToCoverage();
+
 protected:
 
     /**
      * @brief Stores id,name pairs of global code elements.
      */
-    CIDManager      *m_globalCodeElements;
+    CIDManager *m_globalCodeElements;
 
     /**
      * @brief Stores id,name pairs of global test cases.
      */
-    CIDManager      *m_globalTestcases;
+    CIDManager *m_globalTestcases;
 
     /**
      * @brief Stores id,name pairs of changeset code elements.
      */
-    CIDMapper       *m_changesetCodeElements;
+    CIDMapper *m_changesetCodeElements;
 
     /**
      * @brief Stores id,name pairs of coverage code elements.
      */
-    CIDMapper       *m_coverageCodeElements;
+    CIDMapper *m_coverageCodeElements;
 
     /**
      * @brief Stores id,name pairs of coverage test cases.
      */
-    CIDMapper       *m_coverageTestcases;
+    CIDMapper *m_coverageTestcases;
 
     /**
      * @brief Stores id,name pairs of results test cases.
      */
-    CIDMapper       *m_resultsTestcases;
+    CIDMapper *m_resultsTestcases;
 
     /**
      * @brief Stores changeset data.
      */
-    CChangeset      *m_changeset;
+    CChangeset *m_changeset;
 
     /**
      * @brief Stores coverage data.
@@ -187,7 +206,7 @@ protected:
     /**
      * @brief Stores results data.
      */
-    CResultsMatrix  *m_results;
+    CResultsMatrix *m_results;
 };
 
 } /* namespace soda*/

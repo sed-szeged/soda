@@ -6,4 +6,3 @@ export TEST_NAME="sample-test-1"
 ./sample
 export TEST_NAME="sample-test-2"
 ./sample 2
-rm ./sample
