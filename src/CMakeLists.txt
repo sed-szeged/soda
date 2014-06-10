@@ -3,6 +3,8 @@ project(SoDA)
 
 # Enable ExternalProject CMake module
 include(ExternalProject)
+# Set default ExternalProject root directory
+set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/ext)
 
 # Set the build type if it isn't already
 if(NOT CMAKE_BUILD_TYPE)
@@ -16,33 +18,24 @@ find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
 
 find_package(Threads REQUIRED)
 
+ExternalProject_Add(
+    rapidjson
+    SVN_REPOSITORY "http://rapidjson.googlecode.com/svn/trunk"
+    UPDATE_COMMAND "" # skip update
+    CONFIGURE_COMMAND "" # skip configure
+    BUILD_COMMAND "" # skip build
+    INSTALL_COMMAND "" # skip install
+  )
+
+set(RAPIDJSON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ext/src/rapidjson/include)
+
 option(test "Build tests" OFF)
 option(coverage "Build with coverage analysis support" OFF)
 option(withoutcl "Build without command line tools" 0)
 
-# add_definitions(-Wall)
+add_definitions(-Wall)
 
 add_definitions(-DSODA_PLUGIN_DIR="${SoDA_BINARY_DIR}/plugin")
-
-set(EXTERNALS_DIR ${PROJECT_SOURCE_DIR}/ext CACHE STRING "Directory where external projects should be downloaded to" )
-set(DOWNLOAD_DIR ${EXTERNALS_DIR}/rapidjson)
-set(RAPIDJSON_INCLUDED ON CACHE INTERNAL "" FORCE)
-
-    ExternalProject_Add(rapid_json
-        SVN_REPOSITORY "http://rapidjson.googlecode.com/svn/trunk"
-        PREFIX ${DOWNLOAD_DIR}
-        STAMP_DIR ${EXTERNALS_DIR}/stamp/rapidjson
-        SOURCE_DIR ${DOWNLOAD_DIR}
-        BINARY_DIR ${EXTERNALS_DIR}/bin/rapidjson
-        DOWNLOAD_DIR ${DOWNLOAD_DIR}
-        TMP_DIR ${EXTERNALS_DIR}/tmp/rapidjsons
-        UPDATE_COMMAND "" # skip update
-        CONFIGURE_COMMAND "" # skip configure
-        BUILD_COMMAND "" # skip build
-        INSTALL_COMMAND "" # skip install
-    )
-
-set(RAPIDJSON_INCLUDE_DIRS ${DOWNLOAD_DIR}/include)
 
 if(test)
     if(coverage)
@@ -71,8 +64,8 @@ endif(NOT withoutcl)
 
 if(test)
 
-    # Set default ExternalProject root directory
-    set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/ThirdParty)
+
+
 
     # Add gtest
     ExternalProject_Add(
