@@ -1,6 +1,7 @@
 project(SoDALib)
 
 include_directories(${SoDALib_SOURCE_DIR}/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 #Headers

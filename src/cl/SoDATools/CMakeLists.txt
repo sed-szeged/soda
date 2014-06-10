@@ -3,6 +3,7 @@ project(SoDATools)
 include_directories(${SoDATools_SOURCE_DIR}/../../lib/SoDA/inc
                     ${SoDATools_SOURCE_DIR}/../../lib/SoDAPlugin/inc
                     ${SoDATools_SOURCE_DIR}/../../lib/SoDATools/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 # rawDataReader
 add_subdirectory(utilities/rawdatareader)
@@ -18,7 +19,6 @@ add_subdirectory(test-suite-selections)
 
 # test-suite-metrics
 add_subdirectory(test-suite-metrics)
-
 
 # test-suite-score
 add_subdirectory(test-suite-score)

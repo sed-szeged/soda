@@ -28,13 +28,14 @@
 #include <set>
 #include <vector>
 #include <list>
+#include <sys/types.h>
 
 namespace soda {
 
 class CBitList;
 
-#define IndexType unsigned long long int
-#define RevNumType unsigned int
+typedef u_int64_t IndexType;
+typedef unsigned int RevNumType;
 
 typedef CBitList BitList;
 typedef std::string String;

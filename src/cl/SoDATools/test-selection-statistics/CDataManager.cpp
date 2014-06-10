@@ -20,7 +20,7 @@
  */
 
 #include <boost/filesystem.hpp>
-#include "CSelectionStatistics.h"
+#include "util/CSelectionStatistics.h"
 #include "CDataManager.h"
 
 using namespace std;
@@ -59,11 +59,11 @@ void CDataManager::calcStatistics()
         boost::filesystem::create_directories(m_outputDir);
     }
 
-    CSelectionStatistics stats = CSelectionStatistics(this);
+    CSelectionStatistics stats = CSelectionStatistics(m_selectionData);
     if (m_testMask & (tmTestcaseCoverage | tmFunctionCoverage)) {
         stats.calcCoverageRelatedStatistics();
     }
-    if (m_testMask & tmChanges) {
+    /*if (m_testMask & tmChanges) {
         stats.calcChangeRelatedStatistics();
     }
     if (m_testMask & tmFails) {
@@ -71,7 +71,7 @@ void CDataManager::calcStatistics()
     }
     if (m_testMask & tmCoverageResultSummary) {
         stats.calcCovResultsSummary();
-    }
+    }*/
 }
 
 CSelectionData* CDataManager::getSelectionData()

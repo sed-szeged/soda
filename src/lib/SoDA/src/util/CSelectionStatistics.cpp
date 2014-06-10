@@ -19,31 +19,28 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CSelectionStatistics.h"
+#include "util/CSelectionStatistics.h"
+#include <sstream>
 
 using namespace std;
 
 namespace soda {
 
-CSelectionStatistics::CSelectionStatistics(CDataManager *mgr) :
-    m_dataManager(mgr)
+CSelectionStatistics::CSelectionStatistics(CSelectionData *data) :
+    m_selectionData(data)
 {
 }
 
 CSelectionStatistics::~CSelectionStatistics()
 {}
 
-CSelectionData* CSelectionStatistics::getSelectionData()
-{
-    return m_dataManager->getSelectionData();
-}
 
-void CSelectionStatistics::calcCoverageRelatedStatistics()
+rapidjson::Document CSelectionStatistics::calcCoverageRelatedStatistics()
 {
     (cerr << "[INFO] Calculating coverage statistics ..." << endl).flush();
 
-    IndexType nrOfCodeElements = getSelectionData()->getCoverage()->getNumOfCodeElements();
-    IndexType nrOfTestCases = getSelectionData()->getCoverage()->getNumOfTestcases();
+    IndexType nrOfCodeElements = m_selectionData->getCoverage()->getNumOfCodeElements();
+    IndexType nrOfTestCases = m_selectionData->getCoverage()->getNumOfTestcases();
     IdxIdxMap dataCodeElements;
     IdxIdxMap dataTestCases;
     IntVector coveredCodeElements(nrOfCodeElements);
@@ -53,7 +50,7 @@ void CSelectionStatistics::calcCoverageRelatedStatistics()
         (cerr << "\r[INFO] Calculating coverage statistics ... " << (tcid + 1) << "/" << nrOfTestCases).flush();
         IndexType count = 0;
         for (IndexType ceid = 0; ceid < nrOfCodeElements; ceid++) {
-            if (getSelectionData()->getCoverage()->getBitMatrix().get(tcid, ceid)) {
+            if (m_selectionData->getCoverage()->getBitMatrix().get(tcid, ceid)) {
                 coveredCodeElements[ceid]++;
                 count++;
             }
@@ -62,46 +59,40 @@ void CSelectionStatistics::calcCoverageRelatedStatistics()
         dataTestCases[count]++;
     }
 
+    for (IndexType ceid = 0; ceid < nrOfCodeElements; ceid++) {
+        dataCodeElements[coveredCodeElements[ceid]]++;
+    }
+
     (cerr << endl).flush();
 
-    if (m_dataManager->getTestMask() & tmTestcaseCoverage) {
-        ofstream out((m_dataManager->getOutputDir() + "/" + "testcaseCoverage.csv").c_str());
-        out << "Number of code elements:;" << nrOfCodeElements << endl;
-        out << "Number of test cases:;" << nrOfTestCases << endl;
-        out << "Density of coverage matrix: " << covered / (nrOfTestCases * nrOfCodeElements) << endl;
-        out << "Average code elements per testcases: " << covered / nrOfTestCases << endl;
-        out << "Number of covered code elements per test case;Occurrences" << endl;
-        writeCsv(out, dataTestCases);
-        out.close();
-    }
-
-    if (m_dataManager->getTestMask() & tmFunctionCoverage) {
-        for (IndexType ceid = 0; ceid < nrOfCodeElements; ceid++) {
-            dataCodeElements[coveredCodeElements[ceid]]++;
-        }
-
-        ofstream out((m_dataManager->getOutputDir() + "/" + "codeElementCoverage.csv").c_str());
-        out << "Number of code elements:;" << nrOfCodeElements << endl;
-        out << "Number of test cases:;" << nrOfTestCases << endl;
-        out << "Density of coverage matrix:; " << covered / (nrOfTestCases * nrOfCodeElements) << endl;
-        out << "Average testcases per code elements:; " << covered / nrOfCodeElements << endl;
-        out << "Number of test cases per code element;Occurrences" << endl;
-        writeCsv(out, dataCodeElements);
-        out.close();
-    }
+    rapidjson::Document covStats;
+    covStats.SetObject();
+    covStats.AddMember("number_of_code_elements", nrOfCodeElements, covStats.GetAllocator());
+    covStats.AddMember("number_of_test_cases", nrOfTestCases, covStats.GetAllocator());
+    covStats.AddMember("density", covered / (nrOfTestCases * nrOfCodeElements), covStats.GetAllocator());
+    covStats.AddMember("average_test_cases_per_code_elements", covered / nrOfCodeElements, covStats.GetAllocator());
+    covStats.AddMember("average_code_elements_per_test_cases", covered / nrOfTestCases, covStats.GetAllocator());
+    rapidjson::Value val;
+    toJson(dataTestCases, val, covStats);
+    covStats.AddMember("test_coverage_histogram", val, covStats.GetAllocator());
+    val.Clear();
+    toJson(dataCodeElements, val, covStats);
+    covStats.AddMember("code_coverage_histogram", val, covStats.GetAllocator());
+    return covStats;
 }
 
+/*
 void CSelectionStatistics::calcChangeRelatedStatistics()
 {
     (cerr << "[INFO] Calculating calcChangeRelatedStatistics ..." << endl).flush();
 
-    const IntVector revisions = getSelectionData()->getChangeset()->getRevisions();
+    const IntVector revisions = m_selectionData->getChangeset()->getRevisions();
     IndexType nrOfRevisions = revisions.size();
     float changes = 0;
     IdxIdxMap data;
 
     for (IndexType i = 0; i < nrOfRevisions; i++) {
-        IndexType count = getSelectionData()->getChangeset()->at(revisions[i]).count();
+        IndexType count = m_selectionData->getChangeset()->at(revisions[i]).count();
         changes += count;
         data[count]++;
     }
@@ -119,15 +110,15 @@ void CSelectionStatistics::calcFailStatistics()
 {
     (cerr << "[INFO] Calculating calcFailStatistics ..." << endl).flush();
 
-    IndexType nrOfRevisions = getSelectionData()->getResults()->getNumOfRevisions();
-    IntVector revisions = getSelectionData()->getResults()->getRevisions().getRevisionNumbers();
+    IndexType nrOfRevisions = m_selectionData->getResults()->getNumOfRevisions();
+    IntVector revisions = m_selectionData->getResults()->getRevisions().getRevisionNumbers();
     float failed = 0;
     IdxIdxMap data;
     IdxIdxMap revdata;
 
     for (IndexType i = 0; i < nrOfRevisions; i++) {
         IndexType rev = revisions[i];
-        IndexType count = getSelectionData()->getResults()->getExecutionBitList(rev).count() - getSelectionData()->getResults()->getPassedBitList(rev).count();
+        IndexType count = m_selectionData->getResults()->getExecutionBitList(rev).count() - m_selectionData->getResults()->getPassedBitList(rev).count();
         failed += count;
         revdata[revisions[i]] = count;
         data[count]++;
@@ -155,24 +146,24 @@ void CSelectionStatistics::calcCovResultsSummary()
     covResultFileName.append(m_dataManager->getOutputDir()).append("/").append("cov-result.csv");
     ofstream output(covResultFileName.c_str());
 
-    const IBitMatrix& coverageMatrix = getSelectionData()->getCoverage()->getBitMatrix();
-    IndexType nOfTestCases = getSelectionData()->getCoverage()->getNumOfTestcases();
-    IndexType nOfRevisions = getSelectionData()->getResults()->getNumOfRevisions();
-    IntVector revisions = getSelectionData()->getResults()->getRevisionNumbers();
+    const IBitMatrix& coverageMatrix = m_selectionData->getCoverage()->getBitMatrix();
+    IndexType nOfTestCases = m_selectionData->getCoverage()->getNumOfTestcases();
+    IndexType nOfRevisions = m_selectionData->getResults()->getNumOfRevisions();
+    IntVector revisions = m_selectionData->getResults()->getRevisionNumbers();
 
     output << "Number of revisions:;" << nOfRevisions << endl;
     output << "Number of test cases:;" << nOfTestCases << endl;
     output << "Tcid;Coverage;Executed;Fails" << endl;
 
     for (IndexType tcid = 0; tcid < nOfTestCases; tcid++) {
-        IndexType tcidInResult = getSelectionData()->translateTestcaseIdFromCoverageToResults(tcid);
+        IndexType tcidInResult = m_selectionData->translateTestcaseIdFromCoverageToResults(tcid);
         IndexType execCnt = 0;
         IndexType failedCnt = 0;
         for (IndexType i = 0; i < nOfRevisions; i++) {
             IndexType rev = revisions[i];
-            if (getSelectionData()->getResults()->getExecutionBitList(rev).at(tcidInResult)) {
+            if (m_selectionData->getResults()->getExecutionBitList(rev).at(tcidInResult)) {
                 execCnt++;
-                if (!getSelectionData()->getResults()->getPassedBitList(rev).at(tcidInResult)) {
+                if (!m_selectionData->getResults()->getPassedBitList(rev).at(tcidInResult)) {
                     failedCnt++;
                 }
             }
@@ -182,12 +173,12 @@ void CSelectionStatistics::calcCovResultsSummary()
 
     output.close();
     (cerr << " done" << endl).flush();
-}
+}*/
 
-void CSelectionStatistics::writeCsv(ofstream& out, IdxIdxMap data)
+void CSelectionStatistics::toJson(IdxIdxMap &data, rapidjson::Value &val, rapidjson::Document &root)
 {
-    for (IdxIdxMap::iterator iterator = data.begin(); iterator != data.end(); iterator++) {
-        out << iterator->first << ";" << iterator->second << endl;
+    for (IdxIdxMap::const_iterator it = data.begin(); it != data.end(); ++it) {
+        val.AddMember(static_cast<ostringstream*>( &(ostringstream() << it->first) )->str().c_str(), it->second, root.GetAllocator());
     }
 }
 
