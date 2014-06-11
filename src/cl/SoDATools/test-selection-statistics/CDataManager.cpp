@@ -22,6 +22,8 @@
 #include <boost/filesystem.hpp>
 #include "util/CSelectionStatistics.h"
 #include "CDataManager.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/filestream.h"
 
 using namespace std;
 
@@ -61,17 +63,21 @@ void CDataManager::calcStatistics()
 
     CSelectionStatistics stats = CSelectionStatistics(m_selectionData);
     if (m_testMask & (tmTestcaseCoverage | tmFunctionCoverage)) {
-        stats.calcCoverageRelatedStatistics();
+        rapidjson::Document res = stats.calcCoverageRelatedStatistics();
+        rapidjson::FileStream f(stdout);
+        rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
+        res.Accept(writer);
+
     }
     /*if (m_testMask & tmChanges) {
         stats.calcChangeRelatedStatistics();
-    }
-    if (m_testMask & tmFails) {
-        stats.calcFailStatistics();
-    }
-    if (m_testMask & tmCoverageResultSummary) {
-        stats.calcCovResultsSummary();
     }*/
+    if (m_testMask & tmCoverageResultSummary) {
+        rapidjson::Document res = stats.calcCovResultsSummary();
+        rapidjson::FileStream f(stdout);
+        rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
+        res.Accept(writer);
+    }
 }
 
 CSelectionData* CDataManager::getSelectionData()

@@ -60,12 +60,12 @@ public:
     /**
      * @brief Calculates failed test case statistics.
      */
-    void calcFailStatistics();
+    void calcFailStatistics(rapidjson::Document &doc);
 
     /**
      * @brief Calculates results summary.
      */
-    void calcCovResultsSummary();
+    rapidjson::Document calcCovResultsSummary();
 
     /**
      * @brief Converts the given data to json array.

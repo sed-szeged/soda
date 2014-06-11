@@ -72,12 +72,12 @@ rapidjson::Document CSelectionStatistics::calcCoverageRelatedStatistics()
     covStats.AddMember("density", covered / (nrOfTestCases * nrOfCodeElements), covStats.GetAllocator());
     covStats.AddMember("average_test_cases_per_code_elements", covered / nrOfCodeElements, covStats.GetAllocator());
     covStats.AddMember("average_code_elements_per_test_cases", covered / nrOfTestCases, covStats.GetAllocator());
-    rapidjson::Value val;
-    toJson(dataTestCases, val, covStats);
-    covStats.AddMember("test_coverage_histogram", val, covStats.GetAllocator());
-    val.Clear();
-    toJson(dataCodeElements, val, covStats);
-    covStats.AddMember("code_coverage_histogram", val, covStats.GetAllocator());
+    rapidjson::Value testCov(rapidjson::kObjectType);
+    toJson(dataTestCases, testCov, covStats);
+    covStats.AddMember("test_coverage_histogram", testCov, covStats.GetAllocator());
+    rapidjson::Value codeCov(rapidjson::kObjectType);
+    toJson(dataCodeElements, codeCov, covStats);
+    covStats.AddMember("code_coverage_histogram", codeCov, covStats.GetAllocator());
     return covStats;
 }
 
@@ -104,9 +104,9 @@ void CSelectionStatistics::calcChangeRelatedStatistics()
     out << "Number of changes per revision;Occurrences" << endl;
     writeCsv(out, data);
     out.close();
-}
+}*/
 
-void CSelectionStatistics::calcFailStatistics()
+void CSelectionStatistics::calcFailStatistics(rapidjson::Document &doc)
 {
     (cerr << "[INFO] Calculating calcFailStatistics ..." << endl).flush();
 
@@ -124,37 +124,32 @@ void CSelectionStatistics::calcFailStatistics()
         data[count]++;
     }
 
-    ofstream out((m_dataManager->getOutputDir() + "/" + "fails.csv").c_str());
-    out << "Number of revisions:;" << nrOfRevisions << endl;
-    out << "Number of fails:;" << failed << endl;
-    out << "Revision number;Number of fails" << endl;
-    writeCsv(out, revdata);
-    out.close();
+    doc.AddMember("number_of_total_fails", failed, doc.GetAllocator());
+    doc.AddMember("average_failed_test_cases_per_revision", failed / nrOfRevisions, doc.GetAllocator());
 
-    out.open((m_dataManager->getOutputDir() + "/" + "fails-statistics.csv").c_str());
-    out << "Average failed test cases per revision:; " << failed / nrOfRevisions << endl;
-    out << "Number of failed test cases per revision;Occurrences" << endl;
-    writeCsv(out, data);
-    out.close();
+    rapidjson::Value revFail(rapidjson::kObjectType);
+    toJson(revdata, revFail, doc);
+    doc.AddMember("revision_fail_histogram", revFail, doc.GetAllocator());
+
+    rapidjson::Value fail(rapidjson::kObjectType);
+    toJson(data, fail, doc);
+    doc.AddMember("fail_histogram", fail, doc.GetAllocator());
 }
 
-void CSelectionStatistics::calcCovResultsSummary()
+rapidjson::Document CSelectionStatistics::calcCovResultsSummary()
 {
     (cerr << "[INFO] Calculating calcCovResultsSummary ..." << endl).flush();
-    String covResultFileName;
 
-    covResultFileName.append(m_dataManager->getOutputDir()).append("/").append("cov-result.csv");
-    ofstream output(covResultFileName.c_str());
-
-    const IBitMatrix& coverageMatrix = m_selectionData->getCoverage()->getBitMatrix();
     IndexType nOfTestCases = m_selectionData->getCoverage()->getNumOfTestcases();
     IndexType nOfRevisions = m_selectionData->getResults()->getNumOfRevisions();
     IntVector revisions = m_selectionData->getResults()->getRevisionNumbers();
 
-    output << "Number of revisions:;" << nOfRevisions << endl;
-    output << "Number of test cases:;" << nOfTestCases << endl;
-    output << "Tcid;Coverage;Executed;Fails" << endl;
+    rapidjson::Document resStats;
+    resStats.SetObject();
+    resStats.AddMember("number_of_revisions", nOfRevisions, resStats.GetAllocator());
+    resStats.AddMember("number_of_test_cases", nOfTestCases, resStats.GetAllocator());
 
+    rapidjson::Value tcInfos(rapidjson::kObjectType);
     for (IndexType tcid = 0; tcid < nOfTestCases; tcid++) {
         IndexType tcidInResult = m_selectionData->translateTestcaseIdFromCoverageToResults(tcid);
         IndexType execCnt = 0;
@@ -168,17 +163,30 @@ void CSelectionStatistics::calcCovResultsSummary()
                 }
             }
         }
-        output << tcid << ";" << coverageMatrix.getRow(tcid).count() << ";" << execCnt << ";" << failedCnt << endl;
+        rapidjson::Value tcInfo(rapidjson::kObjectType);
+        tcInfo.AddMember("executed", execCnt, resStats.GetAllocator());
+        tcInfo.AddMember("fail", failedCnt, resStats.GetAllocator());
+        rapidjson::Value key;
+        key.SetString(static_cast<ostringstream*>( &(ostringstream() << tcid) )->str().c_str(), resStats.GetAllocator());
+        tcInfos.AddMember(key, tcInfo, resStats.GetAllocator());
     }
 
-    output.close();
+    resStats.AddMember("test_case_info", tcInfos, resStats.GetAllocator());
+
     (cerr << " done" << endl).flush();
-}*/
+    calcFailStatistics(resStats);
+    return resStats;
+}
 
 void CSelectionStatistics::toJson(IdxIdxMap &data, rapidjson::Value &val, rapidjson::Document &root)
 {
+
     for (IdxIdxMap::const_iterator it = data.begin(); it != data.end(); ++it) {
-        val.AddMember(static_cast<ostringstream*>( &(ostringstream() << it->first) )->str().c_str(), it->second, root.GetAllocator());
+        rapidjson::Value key;
+        key.SetString(static_cast<ostringstream*>( &(ostringstream() << it->first) )->str().c_str(), root.GetAllocator());
+        rapidjson::Value value;
+        value.SetUint64(it->second);
+        val.AddMember(key, value, root.GetAllocator());
     }
 }
 
