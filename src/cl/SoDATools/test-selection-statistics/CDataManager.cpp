@@ -63,17 +63,23 @@ void CDataManager::calcStatistics()
 
     CSelectionStatistics stats = CSelectionStatistics(m_selectionData);
     if (m_testMask & (tmTestcaseCoverage | tmFunctionCoverage)) {
-        rapidjson::Document res = stats.calcCoverageRelatedStatistics();
+        rapidjson::Document res;
+        res.SetObject();
+        stats.calcCoverageRelatedStatistics(res);
         rapidjson::FileStream f(stdout);
         rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
         res.Accept(writer);
-
     }
+    /*if (m_testMask & tmFails) {
+        stats.calcFailStatistics();
+    }*/
     /*if (m_testMask & tmChanges) {
         stats.calcChangeRelatedStatistics();
     }*/
     if (m_testMask & tmCoverageResultSummary) {
-        rapidjson::Document res = stats.calcCovResultsSummary();
+        rapidjson::Document res;
+        res.SetObject();
+        stats.calcCovResultsSummary(res);
         rapidjson::FileStream f(stdout);
         rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
         res.Accept(writer);

@@ -35,7 +35,7 @@ CSelectionStatistics::~CSelectionStatistics()
 {}
 
 
-rapidjson::Document CSelectionStatistics::calcCoverageRelatedStatistics()
+void CSelectionStatistics::calcCoverageRelatedStatistics(rapidjson::Document &doc)
 {
     (cerr << "[INFO] Calculating coverage statistics ..." << endl).flush();
 
@@ -64,21 +64,17 @@ rapidjson::Document CSelectionStatistics::calcCoverageRelatedStatistics()
     }
 
     (cerr << endl).flush();
-
-    rapidjson::Document covStats;
-    covStats.SetObject();
-    covStats.AddMember("number_of_code_elements", nrOfCodeElements, covStats.GetAllocator());
-    covStats.AddMember("number_of_test_cases", nrOfTestCases, covStats.GetAllocator());
-    covStats.AddMember("density", covered / (nrOfTestCases * nrOfCodeElements), covStats.GetAllocator());
-    covStats.AddMember("average_test_cases_per_code_elements", covered / nrOfCodeElements, covStats.GetAllocator());
-    covStats.AddMember("average_code_elements_per_test_cases", covered / nrOfTestCases, covStats.GetAllocator());
+    doc.AddMember("number_of_code_elements", nrOfCodeElements, doc.GetAllocator());
+    doc.AddMember("number_of_test_cases", nrOfTestCases, doc.GetAllocator());
+    doc.AddMember("density", covered / (nrOfTestCases * nrOfCodeElements), doc.GetAllocator());
+    doc.AddMember("average_test_cases_per_code_elements", covered / nrOfCodeElements, doc.GetAllocator());
+    doc.AddMember("average_code_elements_per_test_cases", covered / nrOfTestCases, doc.GetAllocator());
     rapidjson::Value testCov(rapidjson::kObjectType);
-    toJson(dataTestCases, testCov, covStats);
-    covStats.AddMember("test_coverage_histogram", testCov, covStats.GetAllocator());
+    toJson(dataTestCases, testCov, doc);
+    doc.AddMember("test_coverage_histogram", testCov, doc.GetAllocator());
     rapidjson::Value codeCov(rapidjson::kObjectType);
-    toJson(dataCodeElements, codeCov, covStats);
-    covStats.AddMember("code_coverage_histogram", codeCov, covStats.GetAllocator());
-    return covStats;
+    toJson(dataCodeElements, codeCov, doc);
+    doc.AddMember("code_coverage_histogram", codeCov, doc.GetAllocator());
 }
 
 /*
@@ -136,7 +132,7 @@ void CSelectionStatistics::calcFailStatistics(rapidjson::Document &doc)
     doc.AddMember("fail_histogram", fail, doc.GetAllocator());
 }
 
-rapidjson::Document CSelectionStatistics::calcCovResultsSummary()
+void CSelectionStatistics::calcCovResultsSummary(rapidjson::Document &doc)
 {
     (cerr << "[INFO] Calculating calcCovResultsSummary ..." << endl).flush();
 
@@ -144,10 +140,8 @@ rapidjson::Document CSelectionStatistics::calcCovResultsSummary()
     IndexType nOfRevisions = m_selectionData->getResults()->getNumOfRevisions();
     IntVector revisions = m_selectionData->getResults()->getRevisionNumbers();
 
-    rapidjson::Document resStats;
-    resStats.SetObject();
-    resStats.AddMember("number_of_revisions", nOfRevisions, resStats.GetAllocator());
-    resStats.AddMember("number_of_test_cases", nOfTestCases, resStats.GetAllocator());
+    doc.AddMember("number_of_revisions", nOfRevisions, doc.GetAllocator());
+    doc.AddMember("number_of_test_cases", nOfTestCases, doc.GetAllocator());
 
     rapidjson::Value tcInfos(rapidjson::kObjectType);
     for (IndexType tcid = 0; tcid < nOfTestCases; tcid++) {
@@ -164,18 +158,16 @@ rapidjson::Document CSelectionStatistics::calcCovResultsSummary()
             }
         }
         rapidjson::Value tcInfo(rapidjson::kObjectType);
-        tcInfo.AddMember("executed", execCnt, resStats.GetAllocator());
-        tcInfo.AddMember("fail", failedCnt, resStats.GetAllocator());
+        tcInfo.AddMember("executed", execCnt, doc.GetAllocator());
+        tcInfo.AddMember("fail", failedCnt, doc.GetAllocator());
         rapidjson::Value key;
-        key.SetString(static_cast<ostringstream*>( &(ostringstream() << tcid) )->str().c_str(), resStats.GetAllocator());
-        tcInfos.AddMember(key, tcInfo, resStats.GetAllocator());
+        key.SetString(static_cast<ostringstream*>( &(ostringstream() << tcid) )->str().c_str(), doc.GetAllocator());
+        tcInfos.AddMember(key, tcInfo, doc.GetAllocator());
     }
 
-    resStats.AddMember("test_case_info", tcInfos, resStats.GetAllocator());
+    doc.AddMember("test_case_info", tcInfos, doc.GetAllocator());
 
     (cerr << " done" << endl).flush();
-    calcFailStatistics(resStats);
-    return resStats;
 }
 
 void CSelectionStatistics::toJson(IdxIdxMap &data, rapidjson::Value &val, rapidjson::Document &root)

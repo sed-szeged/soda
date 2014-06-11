@@ -50,7 +50,7 @@ public:
     /**
      * @brief Calculates coverage statistics.
      */
-    rapidjson::Document calcCoverageRelatedStatistics();
+    void calcCoverageRelatedStatistics(rapidjson::Document &doc);
 
     /**
      * @brief Calculates changeset statistics.
@@ -65,7 +65,7 @@ public:
     /**
      * @brief Calculates results summary.
      */
-    rapidjson::Document calcCovResultsSummary();
+    void calcCovResultsSummary(rapidjson::Document &doc);
 
     /**
      * @brief Converts the given data to json array.
