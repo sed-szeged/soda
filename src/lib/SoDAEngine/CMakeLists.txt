@@ -2,6 +2,7 @@ project(SoDAEngine)
 
 include_directories(${SoDAEngine_SOURCE_DIR}/../SoDA/inc
                     ${SoDAEngine_SOURCE_DIR}/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 #Headers

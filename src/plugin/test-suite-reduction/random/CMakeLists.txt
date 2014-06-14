@@ -2,6 +2,7 @@ project(random_reduction_plugin)
 
 include_directories(${random_reduction_plugin_SOURCE_DIR}/../../../lib/SoDA/inc
                     ${random_reduction_plugin_SOURCE_DIR}/../../../lib/SoDAEngine/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 file(GLOB_RECURSE headers ./*.h)

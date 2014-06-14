@@ -33,6 +33,10 @@
 #include "engine/CKernel.h"
 #include "io/CJsonReader.h"
 
+#include <cstdio>
+#include "rapidjson/filestream.h"
+#include "rapidjson/prettywriter.h"
+
 
 using namespace soda;
 using namespace soda::io;
@@ -168,22 +172,26 @@ int loadJsonFiles(String path)
     return 0;
 }
 
-void calculateMetric(CSelectionData *selectionData, const std::string &name)
+void calculateMetric(CSelectionData *selectionData, const std::string &name, rapidjson::Document &results)
 {
     ITestSuiteMetricPlugin *metric = kernel.getTestSuiteMetricPluginManager().getPlugin(name);
 
     StringVector dependencies = metric->getDependency();
     for (StringVector::iterator it = dependencies.begin(); it != dependencies.end(); it++) {
         if (metricsCalculated.find(*it) == metricsCalculated.end()) {
-            calculateMetric(selectionData, *it);
+            calculateMetric(selectionData, *it, results);
         }
     }
 
     (std::cerr << "[INFO] Calculating metrics: " << metric->getName() << " ...").flush();
     metric->init(selectionData, &clusterList, revision);
-    metric->calculate(outputDir, results);
+
+
+
+    metric->calculate(results);
     metricsCalculated.insert(name);
     (std::cerr << " done." << std::endl).flush();
+
 }
 
 void processJsonFiles(String path)
@@ -248,9 +256,18 @@ void processJsonFiles(String path)
         clusterAlgorithm->execute(*selectionData, clusterList);
         (std::cerr << " done" << std::endl).flush();
 
+        rapidjson::Document results;
+        results.SetObject();
         for (StringVector::iterator it = metrics.begin(); it != metrics.end(); it++) {
-            calculateMetric(selectionData, *it);
+            calculateMetric(selectionData, *it, results);
         }
+
+        // TODO process results.
+        FILE *out = fopen(std::string(outputDir + "/test.suite.metrics.json").c_str(), "w");
+        rapidjson::FileStream f(out); // filestream csak C szintű fájlkezelést támogat / stdout
+        rapidjson::PrettyWriter<rapidjson::FileStream> writer(f); // prettywriter formázza a jsont
+        results.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+        fclose(out);
 
         delete selectionData;
     } catch (std::exception &e) {

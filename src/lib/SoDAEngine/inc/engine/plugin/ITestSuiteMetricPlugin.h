@@ -30,6 +30,8 @@
 #include "data/CSelectionData.h"
 #include "data/SoDALibDefs.h"
 
+#include "rapidjson/document.h"
+
 namespace soda {
 
 /**
@@ -74,10 +76,9 @@ public:
 
     /**
      * @brief Calculates the metrics of a test suite.
-     * @param output The path to the output directory.
-     * @param results Stores the results of the metric plugin for each cluster.
+     * @param results Stores the results of the metric plugin for each cluster in JSON format.
      */
-    virtual void calculate(const std::string &output, std::map<std::string, MetricResults> &results) = 0;
+    virtual void calculate(rapidjson::Document& results) = 0;
 };
 
 } /* namespace soda */

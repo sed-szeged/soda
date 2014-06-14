@@ -66,31 +66,38 @@ std::vector<std::string> FaultLocalizationMetricPlugin::getDependency()
     return std::vector<std::string>();
 }
 
-void FaultLocalizationMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void FaultLocalizationMetricPlugin::calculate(rapidjson::Document &results)
 {
     std::map<std::string, CClusterDefinition>::iterator it;
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
+
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+        }
+
         CPartitionAlgorithm algorithm;
         algorithm.compute(*m_data, it->second, m_revision);
 
         // Prepare directory for the output.
-        std::stringstream ss;
-        ss << output << "/" << it->first;
-        boost::filesystem::path dir(ss.str().c_str());
-        boost::filesystem::create_directory(dir);
+        //std::stringstream ss;
+        //ss << output << "/" << it->first;
+        //boost::filesystem::path dir(ss.str().c_str());
+        //boost::filesystem::create_directory(dir);
 
         //writePartitions(algorithm, ss.str());
 
         std::cerr << "[INFO] Calculating statisitcs: " << it->first << std::endl;
-        partitionStatistics(algorithm, it->second, ss.str(), results[it->first]);
+        partitionStatistics(algorithm, it->second, it->first, results);
         std::cerr << "[INFO] Calculating statisitcs: " << it->first << " DONE." << std::endl;
     }
 
 }
 
-void FaultLocalizationMetricPlugin::writePartitions(CPartitionAlgorithm &algorithm, const std::string &output)
+void FaultLocalizationMetricPlugin::writePartitions(CPartitionAlgorithm &algorithm, rapidjson::Document &results)
 {
-    std::ofstream out;
+    /*std::ofstream out;
 
     out.open((output + "/partitions.csv").c_str());
 
@@ -107,11 +114,12 @@ void FaultLocalizationMetricPlugin::writePartitions(CPartitionAlgorithm &algorit
         }
     }
 
-    out.close();
+    out.close();*/
 }
 
-void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string &output, MetricResults &result)
+void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string& clusterId, rapidjson::Document &result)
 {
+    /*
     std::ofstream partitionStatistics;
     std::ofstream partitionDistribution;
 
@@ -120,6 +128,7 @@ void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &alg
 
     partitionStatistics << "#revision;number of testcases;number of methods; number of classes;minimum size;maximum size; AVG size; FL (absolute); FL (normalized)" << std::endl;
     partitionDistribution  << "#revision; size of partition; number of partitions" << std::endl;
+    */
 
     CPartitionAlgorithm::PartitionInfo &partitionInfo = algorithm.getPartitionInfo();
     CPartitionAlgorithm::PartitionData &partitions = algorithm.getPartitions();
@@ -153,16 +162,18 @@ void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &alg
     double flMetricAbs = flMetric;
     flMetric /= nrOfCodeElementsInPartition * (nrOfCodeElementsInPartition - 1);
 
-    result["fault-localization"] = flMetric;
+    rapidjson::Value v;
+    v.SetDouble(flMetric);
+    result[clusterId.c_str()].AddMember("fault-localization", result.GetAllocator(), v, result.GetAllocator());
 
-    partitionStatistics << m_revision << ";" << nrOfTestcases << ";" << nrOfCodeElementsInPartition << ";" << nrOfPartitions << ";" << minSize << ";" << maxSize << ";" << avgSize << ";" << flMetricAbs << ";" << flMetric << std::endl;
+    //partitionStatistics << m_revision << ";" << nrOfTestcases << ";" << nrOfCodeElementsInPartition << ";" << nrOfPartitions << ";" << minSize << ";" << maxSize << ";" << avgSize << ";" << flMetricAbs << ";" << flMetric << std::endl;
 
-    for (std::map<IndexType, IndexType>::iterator it = distribution.begin(); it != distribution.end(); it++) {
+    /*for (std::map<IndexType, IndexType>::iterator it = distribution.begin(); it != distribution.end(); it++) {
         partitionDistribution << m_revision << ";" << it->first << ";" <<  it->second << std::endl;
-    }
+    }*/
 
-    partitionStatistics.close();
-    partitionDistribution.close();
+    //partitionStatistics.close();
+    //partitionDistribution.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

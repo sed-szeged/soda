@@ -59,17 +59,26 @@ std::vector<std::string> FaultDetectionMetricPlugin::getDependency()
     return std::vector<std::string>();
 }
 
-void FaultDetectionMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void FaultDetectionMetricPlugin::calculate(rapidjson::Document &results)
 {
+    /*
     std::ofstream coverageStream;
     coverageStream.open((output + "/fault.detection.metric.csv").c_str());
     coverageStream << "# cluster id;number of testcases in cluster;number of code elements;number of code elements covered; coverage (%)" << std::endl;
+    */
 
     std::set<IndexType> coveredElementIds;
 
     CCoverageMatrix *coverage = m_data->getCoverage();
     std::map<std::string, CClusterDefinition>::iterator it;
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
+
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+        }
+
         IndexType nrOfCodeElements = it->second.getCodeElements().size();
         IndexType nrOfTestcases = it->second.getTestCases().size();
         IndexType nrOfCoveredCodeElements = 0;
@@ -94,10 +103,12 @@ void FaultDetectionMetricPlugin::calculate(const std::string &output, std::map<s
             }
         }
 
-        results[it->first]["fault-detection"] = ((double)nrOfCoveredCodeElements / nrOfCodeElements);
-        coverageStream << it->first << ";" << nrOfTestcases << ";" << nrOfCodeElements << ";" << nrOfCoveredCodeElements << ";" << ((double)nrOfCoveredCodeElements / nrOfCodeElements) << std::endl;
+        rapidjson::Value v;
+        v.SetDouble(((double)nrOfCoveredCodeElements / nrOfCodeElements));
+        results[it->first.c_str()].AddMember("fault-detection", results.GetAllocator(), v, results.GetAllocator());
+        //coverageStream << it->first << ";" << nrOfTestcases << ";" << nrOfCodeElements << ";" << nrOfCoveredCodeElements << ";" << ((double)nrOfCoveredCodeElements / nrOfCodeElements) << std::endl;
     }
-    coverageStream.close();
+    //coverageStream.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

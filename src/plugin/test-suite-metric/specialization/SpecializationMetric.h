@@ -62,7 +62,7 @@ public:
      * @param output The path to the output directory.
      * @param results Stores the results of the metric plugin for each cluster.
      */
-    void calculate(const std::string &output, std::map<std::string, MetricResults> &results);
+    void calculate(rapidjson::Document &results);
 
 private:
     CSelectionData *m_data;
