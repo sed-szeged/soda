@@ -136,6 +136,7 @@ void CSelectionStatistics::calcCovResultsSummary(rapidjson::Document &doc)
 {
     (cerr << "[INFO] Calculating calcCovResultsSummary ..." << endl).flush();
 
+    IdxIdxMap execData;
     IndexType nOfTestCases = m_selectionData->getCoverage()->getNumOfTestcases();
     IndexType nOfRevisions = m_selectionData->getResults()->getNumOfRevisions();
     IntVector revisions = m_selectionData->getResults()->getRevisionNumbers();
@@ -157,6 +158,7 @@ void CSelectionStatistics::calcCovResultsSummary(rapidjson::Document &doc)
                 }
             }
         }
+        execData[execCnt]++;
         rapidjson::Value tcInfo(rapidjson::kObjectType);
         tcInfo.AddMember("executed", execCnt, doc.GetAllocator());
         tcInfo.AddMember("fail", failedCnt, doc.GetAllocator());
@@ -166,6 +168,10 @@ void CSelectionStatistics::calcCovResultsSummary(rapidjson::Document &doc)
     }
 
     doc.AddMember("test_case_info", tcInfos, doc.GetAllocator());
+
+    rapidjson::Value exec(rapidjson::kObjectType);
+    toJson(execData, exec, doc);
+    doc.AddMember("executed_histogram", exec, doc.GetAllocator());
 
     (cerr << " done" << endl).flush();
 }
