@@ -108,7 +108,7 @@ void CSelectionStatistics::calcFailStatistics(rapidjson::Document &doc)
 
     IndexType nrOfRevisions = m_selectionData->getResults()->getNumOfRevisions();
     IntVector revisions = m_selectionData->getResults()->getRevisions().getRevisionNumbers();
-    float failed = 0;
+    IndexType failed = 0;
     IdxIdxMap data;
     IdxIdxMap revdata;
 
@@ -121,7 +121,7 @@ void CSelectionStatistics::calcFailStatistics(rapidjson::Document &doc)
     }
 
     doc.AddMember("number_of_total_fails", failed, doc.GetAllocator());
-    doc.AddMember("average_failed_test_cases_per_revision", failed / nrOfRevisions, doc.GetAllocator());
+    doc.AddMember("average_failed_test_cases_per_revision", (float)failed / nrOfRevisions, doc.GetAllocator());
 
     rapidjson::Value revFail(rapidjson::kObjectType);
     toJson(revdata, revFail, doc);
