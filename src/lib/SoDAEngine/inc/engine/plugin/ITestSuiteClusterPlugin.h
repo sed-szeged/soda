@@ -27,7 +27,7 @@
 
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
-#include "io/CJsonReader.h"
+#include "rapidjson/document.h"
 
 namespace soda {
 
@@ -59,7 +59,7 @@ public:
      * @brief Initializes the plugin.
      * @param reader To read external options.
      */
-    virtual void init(io::CJsonReader &reader) = 0;
+    virtual void init(rapidjson::Document &doc) = 0;
 
     /**
      * @brief Runs the clustering algorithm.

@@ -182,7 +182,7 @@ void processJsonFiles(std::string path)
 
         std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
-        clusterAlgorithm->init(reader);
+        //clusterAlgorithm->init(reader);
 
         std::string outputDir = reader.getStringFromProperty("output-dir");
         if (reader.getStringFromProperty("output-dir").empty()) {

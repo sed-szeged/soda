@@ -50,10 +50,10 @@ std::string LabelTestCodeElementsClusterPlugin::getDescription()
     return "Loads the clusters from files and combine them.";
 }
 
-void LabelTestCodeElementsClusterPlugin::init(io::CJsonReader &reader)
+void LabelTestCodeElementsClusterPlugin::init(rapidjson::Document &doc)
 {
-    m_testList = reader.getStringFromProperty("cluster-test-list");
-    m_codeElementList = reader.getStringFromProperty("cluster-code-elements-list");
+    m_testList = doc["cluster-test-list"].GetString();
+    m_codeElementList = doc["cluster-code-elements-list"].GetString();
 }
 
 void LabelTestCodeElementsClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition> &clusterList)

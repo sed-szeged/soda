@@ -23,6 +23,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <stdio.h>
 #include <set>
 
 #include <boost/filesystem.hpp>
@@ -199,15 +200,22 @@ void processJsonFiles(String path)
     try {
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
 
-        CJsonReader reader = CJsonReader(path);
+        FILE *in = fopen (path.c_str(), "r");
+        rapidjson::FileStream is(in); // C FILE objectum
+        rapidjson::Document reader; // json amibe beolvassuk
+        reader.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileStream>(is); // beolvassa a jsont meg kell adni, hogy a flageket kódolást, streamet
+        fclose(in);
 
-        std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
+        std::string clusterAlgorithmName = reader["cluster-algorithm"].GetString();
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
         clusterAlgorithm->init(reader);
 
         CSelectionData *selectionData = new CSelectionData();
 
-        StringVector metrics = reader.getStringVectorFromProperty("metrics");
+        StringVector metrics;
+        for (rapidjson::Value::ConstValueIterator itr = reader["metrics"].Begin(); itr != reader["metrics"].End(); ++itr)
+            metrics.push_back(itr->GetString());
+
         if (metrics.empty()) {
             std::cerr << "[ERROR] Missing metrics parameter in config file " << path << "." << std::endl;
             return;
@@ -223,26 +231,26 @@ void processJsonFiles(String path)
             }
         }
 
-        revision = reader.getIntFromProperty("revision");
-        outputDir = reader.getStringFromProperty("output-dir");
+        revision = reader["revision"].GetInt();
+        outputDir = reader["output-dir"].GetString();
         if (outputDir.empty()) {
             std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
             return;
         }
 
-        if (exists(reader.getStringFromProperty("coverage-data")) &&
-                exists(reader.getStringFromProperty("results-data"))) {
-            (std::cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
-            selectionData->loadCoverage(reader.getStringFromProperty("coverage-data"));
-            (std::cerr << " done\n[INFO] loading results from " << reader.getStringFromProperty("results-data") << " ...").flush();
-            selectionData->loadResults(reader.getStringFromProperty("results-data"));
+        if (exists(reader["coverage-data"].GetString()) &&
+                exists(reader["results-data"].GetString())) {
+            (std::cerr << "[INFO] loading coverage from " << reader["coverage-data"].GetString() << " ...").flush();
+            selectionData->loadCoverage(reader["coverage-data"].GetString());
+            (std::cerr << " done\n[INFO] loading results from " << reader["results-data"].GetString() << " ...").flush();
+            selectionData->loadResults(reader["results-data"].GetString());
             (std::cerr << " done" << std::endl).flush();
         } else {
             std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
             return;
         }
 
-        if (reader.getBoolFromProperty("globalize")) {
+        if (reader["globalize"].GetBool()) {
             (std::cerr << "[INFO] Globalizing ...").flush();
             selectionData->globalize();
             (std::cerr << " done" << std::endl).flush();
