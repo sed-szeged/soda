@@ -169,6 +169,7 @@ void processJsonFiles(String path)
         std::cout << "[INFO] Processing " << path << " configuration file." << endl;
         CSelectionData selectionData;
         CJsonReader reader = CJsonReader(path);
+        boost::filesystem::path jsonPath(path);
 
         String output = reader.getStringFromProperty("output-file");
         if (output.empty()) {
@@ -202,22 +203,40 @@ void processJsonFiles(String path)
             }
         }
 
-        if (exists(reader.getStringFromProperty("coverage-data")) &&
-                exists(reader.getStringFromProperty("results-data"))) {
-            (cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
-            selectionData.loadCoverage(reader.getStringFromProperty("coverage-data"));
-            (cerr << " done\n[INFO] loading results from " << reader.getStringFromProperty("results-data") << " ...").flush();
-            selectionData.loadResults(reader.getStringFromProperty("results-data"));
+        if (output[0] == '.')
+            output = jsonPath.parent_path().string() + "/" + output;
+
+        String covPath = reader.getStringFromProperty("coverage-data");
+        if (covPath[0] == '.') {
+            covPath = jsonPath.parent_path().string() + "/" + covPath;
+        }
+
+        String resPath = reader.getStringFromProperty("results-data");
+        if (resPath[0] == '.') {
+            resPath = jsonPath.parent_path().string() + "/" + resPath;
+        }
+
+        if (exists(covPath) &&
+                exists(resPath)) {
+            (cerr << "[INFO] loading coverage from " << covPath << " ...").flush();
+            selectionData.loadCoverage(covPath);
+            (cerr << " done\n[INFO] loading results from " << resPath << " ...").flush();
+            selectionData.loadResults(resPath);
             (cerr << " done" << endl).flush();
         } else {
             std::cerr << "[ERROR] Missing input files in config file " << path << "." << std::endl;
             return;
         }
 
+        String changPath = reader.getStringFromProperty("changeset");
+        if (changPath[0] == '.') {
+            changPath = jsonPath.parent_path().string() + "/" + changPath;
+        }
+
         if (reader.getBoolFromProperty("filter.revision.non-changed")
-                && exists(reader.getStringFromProperty("changeset"))) {
-            (cerr << "[INFO] loading changes from " << reader.getStringFromProperty("changeset") << " ...").flush();
-            selectionData.loadChangeset(reader.getStringFromProperty("changeset"));
+                && exists(changPath)) {
+            (cerr << "[INFO] loading changes from " << changPath << " ...").flush();
+            selectionData.loadChangeset(changPath);
             (cerr << " done." << endl).flush();
         } else if (reader.getBoolFromProperty("filter.revision.non-changed")) {
             std::cerr << "[ERROR] Missing changeset files in config file " << path << "." << std::endl;

@@ -62,6 +62,11 @@ bool CJsonReader::existsProperty(String property)
     return (m_data.count(property) > 0);
 }
 
+void CJsonReader::setProperty(String property, String val)
+{
+    m_data.put(property, val);
+}
+
 String CJsonReader::getStringFromProperty(String property)
 {
     return  m_data.get<String>(property, "");

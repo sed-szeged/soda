@@ -177,6 +177,7 @@ void processJsonFiles(std::string path)
     try {
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
 
+        boost::filesystem::path jsonPath(path);
         CSelectionData selectionData;
         CJsonReader reader = CJsonReader(path);
 
@@ -189,6 +190,9 @@ void processJsonFiles(std::string path)
             std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
             return;
         }
+
+        if (outputDir[0] == '.')
+            outputDir = jsonPath.parent_path().string() + "/" + outputDir;
 
         StringVector faultLocalizationTechniques = reader.getStringVectorFromProperty("fault-localization-techniques");
         if (faultLocalizationTechniques.empty()) {
@@ -212,12 +216,22 @@ void processJsonFiles(std::string path)
             return;
         }
 
-        if (exists(reader.getStringFromProperty("coverage-data")) &&
-                exists(reader.getStringFromProperty("results-data"))) {
-            (std::cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
-            selectionData.loadCoverage(reader.getStringFromProperty("coverage-data"));
-            (std::cerr << " done\n[INFO] loading results from " << reader.getStringFromProperty("results-data") << " ...").flush();
-            selectionData.loadResults(reader.getStringFromProperty("results-data"));
+        String covPath = reader.getStringFromProperty("coverage-data");
+        if (covPath[0] == '.') {
+            covPath = jsonPath.parent_path().string() + "/" + covPath;
+        }
+
+        String resPath = reader.getStringFromProperty("results-data");
+        if (resPath[0] == '.') {
+            resPath = jsonPath.parent_path().string() + "/" + resPath;
+        }
+
+        if (exists(covPath) &&
+                exists(resPath)) {
+            (std::cerr << "[INFO] loading coverage from " << covPath << " ...").flush();
+            selectionData.loadCoverage(covPath);
+            (std::cerr << " done\n[INFO] loading results from " << resPath << " ...").flush();
+            selectionData.loadResults(resPath);
             (std::cerr << " done" << std::endl).flush();
         } else {
             std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
