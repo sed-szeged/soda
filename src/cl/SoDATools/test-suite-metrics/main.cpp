@@ -209,6 +209,7 @@ void processJsonFiles(String path)
             fclose(in);
         }
 
+        boost::filesystem::path jsonPath(path);
         std::string clusterAlgorithmName = reader["cluster-algorithm"].GetString();
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
         clusterAlgorithm->init(reader);
@@ -240,13 +241,26 @@ void processJsonFiles(String path)
             std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
             return;
         }
+        if (outputDir[0] == '.')
+            outputDir = jsonPath.parent_path().string() + "/" + outputDir;
+        if (!exists(outputDir))
+            boost::filesystem::create_directory(boost::filesystem::path(outputDir));
 
-        if (exists(reader["coverage-data"].GetString()) &&
-                exists(reader["results-data"].GetString())) {
-            (std::cerr << "[INFO] loading coverage from " << reader["coverage-data"].GetString() << " ...").flush();
-            selectionData->loadCoverage(reader["coverage-data"].GetString());
-            (std::cerr << " done\n[INFO] loading results from " << reader["results-data"].GetString() << " ...").flush();
-            selectionData->loadResults(reader["results-data"].GetString());
+        String covPath = reader["coverage-data"].GetString();
+        if (covPath[0] == '.') {
+            covPath = jsonPath.parent_path().string() + "/" + covPath;
+        }
+
+        String resPath = reader["results-data"].GetString();
+        if (resPath[0] == '.') {
+            resPath = jsonPath.parent_path().string() + "/" + resPath;
+        }
+
+        if (exists(covPath) && exists(resPath)) {
+            (std::cerr << "[INFO] loading coverage from " << covPath << " ...").flush();
+            selectionData->loadCoverage(covPath);
+            (std::cerr << " done\n[INFO] loading results from " << resPath << " ...").flush();
+            selectionData->loadResults(resPath);
             (std::cerr << " done" << std::endl).flush();
         } else {
             std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;

@@ -66,6 +66,13 @@ public:
     bool existsProperty(String property);
 
     /**
+     * @brief Sets the specified value to the given property.
+     * @param property Given path in the property tree.
+     * @param val Specified value.
+     */
+    void setProperty(String property, String val);
+
+    /**
      * @brief Returns the value of the specified property from property tree as String.
      * @param property Specified path in property tree.
      * @return Value of the specified property.
