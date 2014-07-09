@@ -33,7 +33,7 @@
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
 #include "io/CJsonReader.h"
-#include "CTestSuiteScore.h"
+#include "util/CTestSuiteScore.h"
 
 
 using namespace soda;
