@@ -29,10 +29,13 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
+#include <rapidjson/document.h>
+#include <rapidjson/filereadstream.h>
+
+
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
-#include "io/CJsonReader.h"
 #include "util/CTestSuiteScore.h"
 
 
@@ -177,20 +180,32 @@ void processJsonFiles(std::string path)
     try {
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
 
+        rapidjson::Document reader;
+        {
+            FILE *in = fopen (path.c_str(), "r");
+            char readBuffer[65536];
+            rapidjson::FileReadStream is(in, readBuffer, sizeof(readBuffer));
+            reader.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
+            fclose(in);
+        }
+
         CSelectionData selectionData;
-        CJsonReader reader = CJsonReader(path);
+        std::map<std::string, CClusterDefinition> clusterList;
 
-        std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
+        std::string clusterAlgorithmName = reader["cluster-algorithm"].GetString();
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
-        //clusterAlgorithm->init(reader);
+        clusterAlgorithm->init(reader);
 
-        std::string outputDir = reader.getStringFromProperty("output-dir");
-        if (reader.getStringFromProperty("output-dir").empty()) {
+        std::string outputDir = reader["output-dir"].GetString();
+        if (outputDir.empty()) {
             std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
             return;
         }
 
-        StringVector faultLocalizationTechniques = reader.getStringVectorFromProperty("fault-localization-techniques");
+        StringVector faultLocalizationTechniques;
+        for (rapidjson::Value::ConstValueIterator itr = reader["fault-localization-techniques"].Begin(); itr != reader["fault-localization-techniques"].End(); ++itr)
+            faultLocalizationTechniques.push_back(itr->GetString());
+
         if (faultLocalizationTechniques.empty()) {
             std::cerr << "[ERROR] Missing fault-localization-techniques parameter in config file " << path << "." << std::endl;
             return;
@@ -206,53 +221,49 @@ void processJsonFiles(std::string path)
             }
         }
 
-        std::vector<CJsonReader> selectedRevs = reader.getPropertyVectorFromProperty("selected-revisions");
-        if (selectedRevs.empty()) {
+        if (!reader["selected-revisions"].Size()) {
             std::cerr << "[ERROR] Missing selected-revisions parameter in config file " << path << "." << std::endl;
             return;
         }
 
-        if (exists(reader.getStringFromProperty("coverage-data")) &&
-                exists(reader.getStringFromProperty("results-data"))) {
-            (std::cerr << "[INFO] loading coverage from " << reader.getStringFromProperty("coverage-data") << " ...").flush();
-            selectionData.loadCoverage(reader.getStringFromProperty("coverage-data"));
-            (std::cerr << " done\n[INFO] loading results from " << reader.getStringFromProperty("results-data") << " ...").flush();
-            selectionData.loadResults(reader.getStringFromProperty("results-data"));
+        if (exists(reader["coverage-data"].GetString()) &&
+                exists(reader["results-data"].GetString())) {
+            (std::cerr << "[INFO] loading coverage from " << reader["coverage-data"].GetString() << " ...").flush();
+            selectionData.loadCoverage(reader["coverage-data"].GetString());
+            (std::cerr << " done\n[INFO] loading results from " << reader["results-data"].GetString() << " ...").flush();
+            selectionData.loadResults(reader["results-data"].GetString());
             (std::cerr << " done" << std::endl).flush();
         } else {
             std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
             return;
         }
 
-        if (reader.getBoolFromProperty("globalize")) {
+        if (reader["globalize"].GetBool()) {
             (std::cerr << "[INFO] Globalizing ...").flush();
             selectionData.globalize();
             (std::cerr << " done" << std::endl).flush();
         }
 
-        for (std::vector<CJsonReader>::iterator it = selectedRevs.begin(); it != selectedRevs.end(); ++it) {
+        (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
+        clusterAlgorithm->execute(selectionData, clusterList);
+        (std::cerr << " done." << std::endl).flush();
+
+        for (rapidjson::Value::ConstValueIterator itr = reader["selected-revisions"].Begin(); itr != reader["selected-revisions"].End(); ++itr) {
             std::map<std::string, FLScoreValues> scoresByCluster;
-            std::map<std::string, CClusterDefinition> clusterList;
             std::vector<IndexType> failedCodeElements;
 
-            IndexType revision = (*it).getIntFromProperty("revision");
-            IndexType totalFailedTestcases = (*it).getIntFromProperty("total-failed-testcases");
+            IndexType revision = (*itr)["revision"].GetInt();
+            IndexType totalFailedTestcases = (*itr)["total-failed-testcases"].GetInt();
 
             std::cout << "[INFO] Calculating scores for revision: " << revision << std::endl;
-
-            StringVector failedCodeElementNames = (*it).getStringVectorFromProperty("failed-code-elements");
-            for (IndexType i = 0; i < failedCodeElementNames.size(); i++) {
-                if (!selectionData.getCoverage()->getCodeElements().containsValue(failedCodeElementNames[i])) {
-                    std::cerr << "[ERROR] Not existing code element name in json file: " << failedCodeElementNames[i] << std::endl;
+            for (rapidjson::Value::ConstValueIterator failIt = (*itr)["failed-code-elements"].Begin(); failIt != (*itr)["failed-code-elements"].End(); ++failIt) {
+                if (!selectionData.getCoverage()->getCodeElements().containsValue(failIt->GetString())) {
+                    std::cerr << "[ERROR] Not existing code element name in json file: " << failIt->GetString() << std::endl;
                     continue;
                 }
-                IndexType cid = selectionData.getCoverage()->getCodeElements().getID(failedCodeElementNames[i]);
+                IndexType cid = selectionData.getCoverage()->getCodeElements().getID(failIt->GetString());
                 failedCodeElements.push_back(cid);
             }
-
-            (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
-            clusterAlgorithm->execute(selectionData, clusterList);
-            (std::cerr << " done." << std::endl).flush();
 
             // FD score
             std::map<std::string, CClusterDefinition>::iterator clusterIt;

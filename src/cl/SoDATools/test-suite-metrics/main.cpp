@@ -32,10 +32,10 @@
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
-#include "io/CJsonReader.h"
 
 #include <cstdio>
-#include "rapidjson/filestream.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/filereadstream.h"
 #include "rapidjson/prettywriter.h"
 
 
@@ -200,11 +200,14 @@ void processJsonFiles(String path)
     try {
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
 
-        FILE *in = fopen (path.c_str(), "r");
-        rapidjson::FileStream is(in); // C FILE objectum
-        rapidjson::Document reader; // json amibe beolvassuk
-        reader.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileStream>(is); // beolvassa a jsont meg kell adni, hogy a flageket kódolást, streamet
-        fclose(in);
+        rapidjson::Document reader;
+        {
+            FILE *in = fopen (path.c_str(), "r");
+            char readBuffer[65536];
+            rapidjson::FileReadStream is(in, readBuffer, sizeof(readBuffer));
+            reader.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
+            fclose(in);
+        }
 
         std::string clusterAlgorithmName = reader["cluster-algorithm"].GetString();
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
@@ -271,11 +274,14 @@ void processJsonFiles(String path)
         }
 
         // TODO process results.
-        FILE *out = fopen(std::string(outputDir + "/test.suite.metrics.json").c_str(), "w");
-        rapidjson::FileStream f(out); // filestream csak C szintű fájlkezelést támogat / stdout
-        rapidjson::PrettyWriter<rapidjson::FileStream> writer(f); // prettywriter formázza a jsont
-        results.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-        fclose(out);
+        {
+            FILE *out = fopen(std::string(outputDir + "/test.suite.metrics.json").c_str(), "w");
+            char writeBuffer[65536];
+            rapidjson::FileWriteStream f(out, writeBuffer, sizeof(writeBuffer));
+            rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(f);
+            results.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
+            fclose(out);
+        }
 
         delete selectionData;
     } catch (std::exception &e) {
