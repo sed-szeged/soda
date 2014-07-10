@@ -62,9 +62,9 @@ def generateJson(args):
     conf["globalize"] = args.globalize
     conf["output-dir"] = args.output_dir
     conf["selected-revisions"] = list()
-    
+
     selectedrevs = list()
-    
+
     for dirpath, dirnames, filenames in os.walk(args.source_directory):
         for file in filenames:
             # name splitting
@@ -92,7 +92,7 @@ def generateJson(args):
                 continue
 
             # json format
-            conf["selected-revisions"].append({ "revision": revision ,"failed-code-elements": failedCodeElements,"total-failed-testcases": fail[revision] })
+            conf["selected-revisions"].append({ "revision": int(revision), "failed-code-elements": failedCodeElements, "total-failed-testcases": fail[revision] })
             revCount += 1
 
     of.write(json.dumps(conf, separators=(',',': '), indent=4, sort_keys=False))
