@@ -7,6 +7,8 @@ layout: default
 The repository is a a set of experimental programs with test suites and the corresponding 
 measurement data produced by the library which can be used in code coverage-related research.
 
+The provided coverage matrices were created in procedure level granularity.
+
 #### Programs from the SIR repository
 
 This repository, called [Software Infrastructure Repository (SIR)](http://sir.unl.edu/portal/index.php), has become very popular in
