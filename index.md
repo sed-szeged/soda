@@ -19,7 +19,7 @@ already made measurements, which can be used for research purposes.
 ### More information
 
 Visit our [GitHub page](https://github.com/sed-szeged/soda) or
-our [wiki](https://github.com/sed-szeged/soda/wiki/SoDA) page to get more information about the project.
+our [wiki](https://github.com/sed-szeged/soda/wiki) page to get more information about the project.
 
 The library is released under LGPLv3 license.
 
