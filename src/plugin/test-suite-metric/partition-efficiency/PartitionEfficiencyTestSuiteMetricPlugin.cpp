@@ -44,7 +44,7 @@ std::string PartitionEfficiencyTestSuiteMetricPlugin::getDescription()
 }
 
 void PartitionEfficiencyTestSuiteMetricPlugin::init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision)
-{    
+{
     m_data = data;
     m_clusterList = clusterList;
 }
@@ -68,9 +68,11 @@ void PartitionEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &re
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
         if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
             rapidjson::Value cluster;
             cluster.SetObject();
-            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+            results.AddMember(key, cluster, results.GetAllocator());
         }
 
         IndexType nrOfTestCases = it->second.getTestCases().size();
@@ -83,7 +85,7 @@ void PartitionEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &re
 
         rapidjson::Value v;
         v.SetDouble(partitionEfficiency);
-        results[it->first.c_str()].AddMember("partition-efficiency", results.GetAllocator(), v, results.GetAllocator());
+        results[it->first.c_str()].AddMember("partition-efficiency", v, results.GetAllocator());
     }
 
     //out.close();

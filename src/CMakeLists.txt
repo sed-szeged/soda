@@ -20,14 +20,14 @@ find_package(Threads REQUIRED)
 
 ExternalProject_Add(
     rapidjson
-    SVN_REPOSITORY "http://rapidjson.googlecode.com/svn/trunk"
+    SVN_REPOSITORY "https://github.com/miloyip/rapidjson"
     UPDATE_COMMAND "" # skip update
     CONFIGURE_COMMAND "" # skip configure
     BUILD_COMMAND "" # skip build
     INSTALL_COMMAND "" # skip install
   )
 
-set(RAPIDJSON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ext/src/rapidjson/include)
+set(RAPIDJSON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ext/src/rapidjson/trunk/include)
 
 option(test "Build tests" OFF)
 option(coverage "Build with coverage analysis support" OFF)

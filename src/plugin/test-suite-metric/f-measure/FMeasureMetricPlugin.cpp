@@ -69,9 +69,11 @@ void FMeasureMetricPlugin::calculate(rapidjson::Document &results)
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
         if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
             rapidjson::Value cluster;
             cluster.SetObject();
-            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+            results.AddMember(key, cluster, results.GetAllocator());
         }
 
         double faultDetection = results[it->first.c_str()]["fault-detection"].GetDouble();
@@ -90,7 +92,7 @@ void FMeasureMetricPlugin::calculate(rapidjson::Document &results)
 
         rapidjson::Value v;
         v.SetDouble(fMeasure);
-        results[it->first.c_str()].AddMember("f-measure", results.GetAllocator(), v, results.GetAllocator());
+        results[it->first.c_str()].AddMember("f-measure", v, results.GetAllocator());
     }
 
     //fMeasureStream.close();

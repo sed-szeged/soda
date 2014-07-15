@@ -59,9 +59,11 @@ void UniquenessTestSuiteMetricPlugin::calculate(rapidjson::Document &results)
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
         if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
             rapidjson::Value cluster;
             cluster.SetObject();
-            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+            results.AddMember(key, cluster, results.GetAllocator());
         }
 
         std::cout << "Processing " << it->first << std::endl;
@@ -120,7 +122,7 @@ void UniquenessTestSuiteMetricPlugin::calculate(rapidjson::Document &results)
 
         rapidjson::Value v;
         v.SetDouble(uniqueness);
-        results[it->first.c_str()].AddMember("uniqueness", results.GetAllocator(), v, results.GetAllocator());
+        results[it->first.c_str()].AddMember("uniqueness", v, results.GetAllocator());
         //out << it->first << ";" << nrOfTestcasesInCluster << ";" << nrOfCodeElementsInCluster << ";" << uniqueness  << std::endl;
     }
     //out.close();

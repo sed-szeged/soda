@@ -68,9 +68,11 @@ void PartitionMetricTestSuiteMetricPlugin::calculate(rapidjson::Document &result
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
         if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
             rapidjson::Value cluster;
             cluster.SetObject();
-            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+            results.AddMember(key, cluster, results.GetAllocator());
         }
 
         double faultLocalization = results[it->first.c_str()]["fault-localization"].GetDouble();
@@ -83,7 +85,7 @@ void PartitionMetricTestSuiteMetricPlugin::calculate(rapidjson::Document &result
 
         rapidjson::Value v;
         v.SetDouble(partitionMetric);
-        results[it->first.c_str()].AddMember("partition-metric", results.GetAllocator(), v, results.GetAllocator());
+        results[it->first.c_str()].AddMember("partition-metric", v, results.GetAllocator());
     }
 
     //partitionMetricStream.close();

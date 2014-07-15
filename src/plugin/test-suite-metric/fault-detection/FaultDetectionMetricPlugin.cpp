@@ -74,9 +74,11 @@ void FaultDetectionMetricPlugin::calculate(rapidjson::Document &results)
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
         if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
             rapidjson::Value cluster;
             cluster.SetObject();
-            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+            results.AddMember(key, cluster, results.GetAllocator());
         }
 
         IndexType nrOfCodeElements = it->second.getCodeElements().size();
@@ -105,7 +107,7 @@ void FaultDetectionMetricPlugin::calculate(rapidjson::Document &results)
 
         rapidjson::Value v;
         v.SetDouble(((double)nrOfCoveredCodeElements / nrOfCodeElements));
-        results[it->first.c_str()].AddMember("fault-detection", results.GetAllocator(), v, results.GetAllocator());
+        results[it->first.c_str()].AddMember("fault-detection", v, results.GetAllocator());
         //coverageStream << it->first << ";" << nrOfTestcases << ";" << nrOfCodeElements << ";" << nrOfCoveredCodeElements << ";" << ((double)nrOfCoveredCodeElements / nrOfCodeElements) << std::endl;
     }
     //coverageStream.close();

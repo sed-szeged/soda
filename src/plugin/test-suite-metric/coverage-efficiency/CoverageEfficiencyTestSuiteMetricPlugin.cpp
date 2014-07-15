@@ -47,9 +47,11 @@ void CoverageEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &res
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
         if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
             rapidjson::Value cluster;
             cluster.SetObject();
-            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+            results.AddMember(key, cluster, results.GetAllocator());
         }
 
         IndexType nrOfTestCases = it->second.getTestCases().size();
@@ -62,7 +64,7 @@ void CoverageEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &res
 
         rapidjson::Value v;
         v.SetDouble(coverageEfficiency);
-        results[it->first.c_str()].AddMember("coverage-efficiency", results.GetAllocator(), v, results.GetAllocator());
+        results[it->first.c_str()].AddMember("coverage-efficiency", v, results.GetAllocator());
     }
 
     //out.close();

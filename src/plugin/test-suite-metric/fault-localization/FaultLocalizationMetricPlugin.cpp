@@ -72,9 +72,11 @@ void FaultLocalizationMetricPlugin::calculate(rapidjson::Document &results)
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
         if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
             rapidjson::Value cluster;
             cluster.SetObject();
-            results.AddMember(it->first.c_str(), results.GetAllocator(), cluster, results.GetAllocator());
+            results.AddMember(key, cluster, results.GetAllocator());
         }
 
         CPartitionAlgorithm algorithm;
@@ -135,7 +137,7 @@ void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &alg
 
     IndexType nrOfPartitions = partitions.size();
     IndexType nrOfCodeElementsInPartition = partitionInfo.size();
-    IndexType nrOfTestcases = cluster.getTestCases().size();
+    //IndexType nrOfTestcases = cluster.getTestCases().size();
     IndexType minSize = nrOfCodeElementsInPartition;
     IndexType maxSize = 0;
 
@@ -159,12 +161,12 @@ void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &alg
     }
     avgSize /= nrOfPartitions;
 
-    double flMetricAbs = flMetric;
+    //double flMetricAbs = flMetric;
     flMetric /= nrOfCodeElementsInPartition * (nrOfCodeElementsInPartition - 1);
 
     rapidjson::Value v;
     v.SetDouble(flMetric);
-    result[clusterId.c_str()].AddMember("fault-localization", result.GetAllocator(), v, result.GetAllocator());
+    result[clusterId.c_str()].AddMember("fault-localization", v, result.GetAllocator());
 
     //partitionStatistics << m_revision << ";" << nrOfTestcases << ";" << nrOfCodeElementsInPartition << ";" << nrOfPartitions << ";" << minSize << ";" << maxSize << ";" << avgSize << ";" << flMetricAbs << ";" << flMetric << std::endl;
 
