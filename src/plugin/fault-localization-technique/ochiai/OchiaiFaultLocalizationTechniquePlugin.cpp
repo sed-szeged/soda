@@ -20,6 +20,7 @@
  */
 
 #include <cmath>
+
 #include "OchiaiFaultLocalizationTechniquePlugin.h"
 
 namespace soda {
@@ -68,17 +69,17 @@ void OchiaiFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &clust
 {
     (std::cerr << "[INFO] Ochiai ... ").flush();
 
-    m_values->clear();
+    delete m_values;
+    m_values = new FLValues();
+    m_values->SetObject();
     m_distribution->clear();
 
-    std::ofstream ochiaiStream;
+    bool writeDetails = !output.empty();
     std::ofstream ochiaiStreamDetailed;
-
-    ochiaiStream.open((output + "/ochiai.csv").c_str());
-    ochiaiStreamDetailed.open((output + "/ochiai.details.csv").c_str());
-
-    ochiaiStream << "#revision; code element; ochiai" << std::endl;
-    ochiaiStreamDetailed << "#revision; code element; ef; ep; nf; np; ochiai" << std::endl;
+    if (writeDetails) {
+        ochiaiStreamDetailed.open((output + "/ochiai.details.csv").c_str());
+        ochiaiStreamDetailed << "#revision; code element; ef; ep; nf; np; ochiai" << std::endl;
+    }
 
     CCoverageMatrix *coverageMatrix = m_data->getCoverage();
 
@@ -127,15 +128,22 @@ void OchiaiFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &clust
             }
         }
 
-        (*m_values)[cid] = ochiai;
+        {
+            rapidjson::Value key;
+            key.SetString(static_cast<std::ostringstream*>( &(std::ostringstream() << cid) )->str().c_str(), m_values->GetAllocator());
+            rapidjson::Value val;
+            val.SetDouble(ochiai);
+            m_values->AddMember(key, val, m_values->GetAllocator());
+        }
+
         (*m_distribution)[ochiai]++;
 
-        ochiaiStream << m_revision << ";" << cid << ";" << ochiai << std::endl;
-        ochiaiStreamDetailed << m_revision << ";" << cid << ";" << failedCovered << ";" << passedCovered << ";" << failedNotCovered << ";" << passedNotCovered << ";" << ochiai << std::endl;
+        if (writeDetails)
+            ochiaiStreamDetailed << m_revision << ";" << cid << ";" << failedCovered << ";" << passedCovered << ";" << failedNotCovered << ";" << passedNotCovered << ";" << ochiai << std::endl;
     }
 
-    ochiaiStream.close();
-    ochiaiStreamDetailed.close();
+    if (writeDetails)
+        ochiaiStreamDetailed.close();
 
     (std::cerr << "done." << std::endl).flush();
 }

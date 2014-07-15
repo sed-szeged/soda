@@ -66,17 +66,18 @@ void TarantulaFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &cl
 {
     (std::cerr << "[INFO] Tarantula ... ").flush();
 
-    m_values->clear();
+    delete m_values;
+    m_values = new FLValues();
+    m_values->SetObject();
     m_distribution->clear();
 
-    std::ofstream tarantulaStream;
+    bool writeDetails = !output.empty();
     std::ofstream tarantulaStreamDetailed;
 
-    tarantulaStream.open((output + "/tarantula.csv").c_str());
-    tarantulaStreamDetailed.open((output + "/tarantula.details.csv").c_str());
-
-    tarantulaStream << "#revision; code element; tarantula" << std::endl;
-    tarantulaStreamDetailed << "#revision; code element; ef; ep; nf; np; tarantula" << std::endl;
+    if (writeDetails) {
+        tarantulaStreamDetailed.open((output + "/tarantula.details.csv").c_str());
+        tarantulaStreamDetailed << "#revision; code element; ef; ep; nf; np; tarantula" << std::endl;
+    }
 
     CCoverageMatrix *coverageMatrix = m_data->getCoverage();
 
@@ -126,15 +127,22 @@ void TarantulaFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &cl
             }
         }
 
-        (*m_values)[cid] = tarantula;
+        {
+            rapidjson::Value key;
+            key.SetString(static_cast<std::ostringstream*>( &(std::ostringstream() << cid) )->str().c_str(), m_values->GetAllocator());
+            rapidjson::Value val;
+            val.SetDouble(tarantula);
+            m_values->AddMember(key, val, m_values->GetAllocator());
+        }
+
         (*m_distribution)[tarantula]++;
 
-        tarantulaStream << m_revision << ";" << cid << ";" << tarantula << std::endl;
-        tarantulaStreamDetailed << m_revision << ";" << cid << ";" << failedCovered << ";" << passedCovered << ";" << failedNotCovered << ";" << passedNotCovered << ";" << tarantula << std::endl;
+        if (writeDetails)
+            tarantulaStreamDetailed << m_revision << ";" << cid << ";" << failedCovered << ";" << passedCovered << ";" << failedNotCovered << ";" << passedNotCovered << ";" << tarantula << std::endl;
     }
 
-    tarantulaStream.close();
-    tarantulaStreamDetailed.close();
+    if (writeDetails)
+        tarantulaStreamDetailed.close();
 
     (std::cerr << "done." << std::endl).flush();
 }

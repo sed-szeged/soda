@@ -29,6 +29,7 @@
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
 #include "data/SoDALibDefs.h"
+#include "rapidjson/document.h"
 
 namespace soda {
 
@@ -42,7 +43,7 @@ public:
      * @brief The value of fault localization technique for each code element.
      *        The key is the id of the code element.
      */
-    typedef std::map<IndexType, double> FLValues;
+    typedef rapidjson::Document FLValues;
     /**
      * @brief The distribution of the fault localization technique values.
      *        The key is the value and the value is the number of the

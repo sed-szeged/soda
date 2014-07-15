@@ -309,13 +309,20 @@ void processJsonFiles(std::string path)
                     ss << outputDir << "/" << revision << "/" << clusterIt->first;
                     technique->calculate(clusterIt->second, ss.str());
 
-                    IFaultLocalizationTechniquePlugin::FLValues values = technique->getValues();
-
+                    IFaultLocalizationTechniquePlugin::FLValues *values = &technique->getValues();
                     for (IndexType k = 0; k < failedCodeElements.size(); k++) {
                         IndexType cid = failedCodeElements[k];
-                        double score = CTestSuiteScore::flScore(clusterIt->second, values[cid], technique->getDistribution());
+                        double value = (*values)[static_cast<std::ostringstream*>( &(std::ostringstream() << cid) )->str().c_str()].GetDouble();
+                        double score = CTestSuiteScore::flScore(clusterIt->second, value, technique->getDistribution());
                         scoresByCluster[clusterIt->first][cid][flTechniqueName] = score;
                     }
+
+                    std::ofstream flScoreStream;
+                    flScoreStream.open((ss.str() + "/" + flTechniqueName + ".csv").c_str());
+                    flScoreStream << "#revision; code element;" << flTechniqueName << std::endl;
+                    for (IFaultLocalizationTechniquePlugin::FLValues::ConstMemberIterator it = values->MemberBegin(); it != values->MemberEnd(); ++it)
+                        flScoreStream << revision << ";" << it->name.GetString() << ";" << it->value.GetDouble() << std::endl;
+                    flScoreStream.close();
                 }
             }
             // Save the score values
