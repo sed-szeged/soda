@@ -186,13 +186,9 @@ void calculateMetric(CSelectionData *selectionData, const std::string &name, rap
 
     (std::cerr << "[INFO] Calculating metrics: " << metric->getName() << " ...").flush();
     metric->init(selectionData, &clusterList, revision);
-
-
-
     metric->calculate(results);
     metricsCalculated.insert(name);
     (std::cerr << " done." << std::endl).flush();
-
 }
 
 void processJsonFiles(String path)
@@ -284,7 +280,9 @@ void processJsonFiles(String path)
         rapidjson::Document results;
         results.SetObject();
         for (StringVector::iterator it = metrics.begin(); it != metrics.end(); it++) {
-            calculateMetric(selectionData, *it, results);
+            if (metricsCalculated.find(*it) == metricsCalculated.end()) {
+                calculateMetric(selectionData, *it, results);
+            }
         }
 
         // TODO process results.
