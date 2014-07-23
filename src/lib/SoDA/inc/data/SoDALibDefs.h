@@ -33,6 +33,7 @@
 namespace soda {
 
 class CBitList;
+class CClusterDefinition;
 
 typedef u_int64_t IndexType;
 typedef unsigned int RevNumType;
@@ -44,6 +45,7 @@ typedef std::vector<String> StringVector;
 typedef std::map<IndexType, String> StringMap;
 typedef std::map<String, IndexType> IdxStrMap;
 typedef std::map<IndexType, IndexType> IdxIdxMap;
+typedef std::map<std::string, CClusterDefinition> ClusterMap;
 
 } // namespace soda
 
