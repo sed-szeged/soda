@@ -80,9 +80,13 @@ void TpCETestSuiteMetricPlugin::calculate(rapidjson::Document &results)
 
         //out << it->first << ";" << nrOfTestcases << ";" << nrOfCodeElements << ";" << tpce << std::endl;
 
-        rapidjson::Value v;
-        v.SetDouble(tpce);
-        results[it->first.c_str()].AddMember("tpce", v, results.GetAllocator());
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("tpce");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(tpce);
+            results[it->first.c_str()].AddMember("tpce", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(tpce);
     }
 
     //out.close();

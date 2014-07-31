@@ -90,9 +90,13 @@ void FMeasureMetricPlugin::calculate(rapidjson::Document &results)
 
         //fMeasureStream << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << faultDetection << ";" << faultLocalization << ";" << partitionMetric << ";" << fMeasure << std::endl;
 
-        rapidjson::Value v;
-        v.SetDouble(fMeasure);
-        results[it->first.c_str()].AddMember("f-measure", v, results.GetAllocator());
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("f-measure");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(fMeasure);
+            results[it->first.c_str()].AddMember("f-measure", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(fMeasure);
     }
 
     //fMeasureStream.close();

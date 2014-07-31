@@ -120,9 +120,13 @@ void UniquenessTestSuiteMetricPlugin::calculate(rapidjson::Document &results)
             uniqueness = (double)nrOfCoveredUniq / nrOfCoveredElements;
         }
 
-        rapidjson::Value v;
-        v.SetDouble(uniqueness);
-        results[it->first.c_str()].AddMember("uniqueness", v, results.GetAllocator());
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("uniqueness");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(uniqueness);
+            results[it->first.c_str()].AddMember("uniqueness", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(uniqueness);
         //out << it->first << ";" << nrOfTestcasesInCluster << ";" << nrOfCodeElementsInCluster << ";" << uniqueness  << std::endl;
     }
     //out.close();

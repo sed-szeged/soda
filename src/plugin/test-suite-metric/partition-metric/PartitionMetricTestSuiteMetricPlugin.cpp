@@ -83,9 +83,13 @@ void PartitionMetricTestSuiteMetricPlugin::calculate(rapidjson::Document &result
 
         //partitionMetricStream << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << partitionMetric << std::endl;
 
-        rapidjson::Value v;
-        v.SetDouble(partitionMetric);
-        results[it->first.c_str()].AddMember("partition-metric", v, results.GetAllocator());
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("partition-metric");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(partitionMetric);
+            results[it->first.c_str()].AddMember("partition-metric", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(partitionMetric);
     }
 
     //partitionMetricStream.close();

@@ -62,9 +62,13 @@ void CoverageEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &res
 
         //out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << coverageEfficiency << std::endl;
 
-        rapidjson::Value v;
-        v.SetDouble(coverageEfficiency);
-        results[it->first.c_str()].AddMember("coverage-efficiency", v, results.GetAllocator());
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("coverage-efficiency");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(coverageEfficiency);
+            results[it->first.c_str()].AddMember("coverage-efficiency", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(coverageEfficiency);
     }
 
     //out.close();

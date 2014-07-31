@@ -83,9 +83,13 @@ void PartitionEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &re
 
         //out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << partitionMetric << ";" << partitionEfficiency << std::endl;
 
-        rapidjson::Value v;
-        v.SetDouble(partitionEfficiency);
-        results[it->first.c_str()].AddMember("partition-efficiency", v, results.GetAllocator());
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("partition-efficiency");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(partitionEfficiency);
+            results[it->first.c_str()].AddMember("partition-efficiency", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(partitionEfficiency);
     }
 
     //out.close();

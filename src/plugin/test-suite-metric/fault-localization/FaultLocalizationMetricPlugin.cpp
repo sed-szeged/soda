@@ -164,9 +164,13 @@ void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &alg
     //double flMetricAbs = flMetric;
     flMetric /= nrOfCodeElementsInPartition * (nrOfCodeElementsInPartition - 1);
 
-    rapidjson::Value v;
-    v.SetDouble(flMetric);
-    result[clusterId.c_str()].AddMember("fault-localization", v, result.GetAllocator());
+    rapidjson::Value::MemberIterator metricIt = result[clusterId.c_str()].FindMember("fault-localization");
+    if (metricIt == result[clusterId.c_str()].MemberEnd()) {
+        rapidjson::Value v;
+        v.SetDouble(flMetric);
+        result[clusterId.c_str()].AddMember("fault-localization", v, result.GetAllocator());
+    } else
+        metricIt->value.SetDouble(flMetric);
 
     //partitionStatistics << m_revision << ";" << nrOfTestcases << ";" << nrOfCodeElementsInPartition << ";" << nrOfPartitions << ";" << minSize << ";" << maxSize << ";" << avgSize << ";" << flMetricAbs << ";" << flMetric << std::endl;
 

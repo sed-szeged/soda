@@ -139,9 +139,14 @@ void SpecializationMetric::calculate(rapidjson::Document &results)
             specialization = (double)coverageInCluster / totalCoverage;
         }
 
-        rapidjson::Value v;
-        v.SetDouble(specialization);
-        results[it->first.c_str()].AddMember("specialization", v, results.GetAllocator());
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("specialization");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(specialization);
+            results[it->first.c_str()].AddMember("specialization", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(specialization);
+
         //coverageStream << it->first << ";" << nrOfTestcasesInCluster << ";" << nrOfCodeElementsInCluster << ";" << specialization  << std::endl;
     }
     //coverageStream.close();
