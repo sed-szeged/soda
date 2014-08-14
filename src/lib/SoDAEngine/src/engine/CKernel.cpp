@@ -158,7 +158,7 @@ void CKernel::loadPluginsFromDirectory(const std::string &pluginDir)
             if (!fs::is_regular_file(it->status())) {
                 continue;
             }
-            if (it->path().extension() != ".so") {
+            if (it->path().extension() != ".so" && it->path().extension() != ".dylib") {
                 continue;
             }
             std::string pluginPath = it->path().string();
