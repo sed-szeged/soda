@@ -34,6 +34,7 @@
 #include "engine/CKernel.h"
 
 #include <cstdio>
+#include "rapidjson/document.h"
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/prettywriter.h"
@@ -55,7 +56,6 @@ CKernel kernel;
 IndexType revision;
 std::map<std::string, CClusterDefinition> clusterList;
 std::string outputDir;
-std::map<std::string, ITestSuiteMetricPlugin::MetricResults> results;
 
 std::set<std::string> metricsCalculated;
 
@@ -191,6 +191,28 @@ void calculateMetric(CSelectionData *selectionData, const std::string &name, rap
     (std::cerr << " done." << std::endl).flush();
 }
 
+void saveResults(rapidjson::Document &results)
+{
+    std::ofstream out;
+    out.open(std::string(outputDir + "/test.suite.metrics.csv").c_str());
+    out << ";";
+    for (std::set<std::string>::iterator it = metricsCalculated.begin(); it != metricsCalculated.end(); it++) {
+        out << *it << ";";
+    }
+    out << std::endl;
+
+    std::map<std::string, CClusterDefinition>::iterator clusterIt;
+    for (clusterIt = clusterList.begin(); clusterIt != clusterList.end(); clusterIt++) {
+        std::string clusterName = clusterIt->first;
+        out << clusterName << ";";
+        for (std::set<std::string>::iterator it = metricsCalculated.begin(); it != metricsCalculated.end(); it++) {
+            out << results[clusterName.c_str()][(*it).c_str()].GetDouble() << ";";
+        }
+        out << std::endl;
+    }
+    out.close();
+}
+
 void processJsonFiles(String path)
 {
     try {
@@ -271,7 +293,6 @@ void processJsonFiles(String path)
 
         clusterList.clear();
         metricsCalculated.clear();
-        results.clear();
 
         (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
         clusterAlgorithm->execute(*selectionData, clusterList);
@@ -285,15 +306,8 @@ void processJsonFiles(String path)
             }
         }
 
-        // TODO process results.
-        {
-            FILE *out = fopen(std::string(outputDir + "/test.suite.metrics.json").c_str(), "w");
-            char writeBuffer[65536];
-            rapidjson::FileWriteStream f(out, writeBuffer, sizeof(writeBuffer));
-            rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(f);
-            results.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
-            fclose(out);
-        }
+
+        saveResults(results);
 
         delete selectionData;
     } catch (std::exception &e) {
