@@ -86,6 +86,7 @@ def createCmakeListsTemplate():
     cmaketemplate = 'project(${projectName})\n\n'
     cmaketemplate += 'include_directories($${${projectName}_SOURCE_DIR}/../../../lib/SoDA/inc\n'
     cmaketemplate += '                    $${${projectName}_SOURCE_DIR}/../../../lib/SoDAEngine/inc\n'
+    cmaketemplate += '                    $${RAPIDJSON_INCLUDE_DIRS}\n'
     cmaketemplate += '                    $${Boost_INCLUDE_DIRS})\n\n'
     cmaketemplate += 'file(GLOB_RECURSE headers ./*.h)\n'
     cmaketemplate += 'aux_source_directory($${${projectName}_SOURCE_DIR} ${projectName}_src)\n\n'
