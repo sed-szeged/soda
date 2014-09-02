@@ -61,7 +61,7 @@ private:
      */
     typedef void registerPluginFunctionSignature(CKernel &);
 
-    void   *m_sharedLibraryHandle;
+    SharedLibraryHandle m_sharedLibraryHandle;
     size_t *m_reference_count;
 
     registerPluginFunctionSignature *m_registerFunction;
