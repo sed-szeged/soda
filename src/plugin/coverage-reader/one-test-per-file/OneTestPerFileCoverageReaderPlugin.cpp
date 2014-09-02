@@ -122,7 +122,7 @@ void OneTestPerFileCoverageReaderPlugin::readFromDirectory1stPass(fs::path p, si
             cutExtension(tcname);
             m_coverage->addTestcaseName(tcname);
 
-            std::ifstream in(it->c_str());
+            std::ifstream in(it->string().c_str());
             std::string line;
             boost::char_separator<char> sep(",");
             StringVector data;
@@ -172,7 +172,7 @@ void OneTestPerFileCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cu
             cutPassFailInfo(tcname);
             cutExtension(tcname);
 
-            std::ifstream in(it->c_str());
+            std::ifstream in(it->string().c_str());
             std::string line;
             boost::char_separator<char> sep(",");
             StringVector data;

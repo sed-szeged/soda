@@ -119,7 +119,7 @@ void GcovCoverageReaderPlugin::readCoverage(fs::path p)
 
 void GcovCoverageReaderPlugin::readCoverageDataFromFile(fs::path p)
 {
-    std::ifstream in(p.c_str());
+    std::ifstream in(p.string().c_str());
     std::string line;
     std::string sourcePath;
     bool firstLine = true;
