@@ -19,6 +19,7 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 
 #include "boost/lexical_cast.hpp"
@@ -26,6 +27,8 @@
 #include "RandomTestSuiteClusterPlugin.h"
 
 namespace soda {
+
+int randomCluster (int i) { return std::rand()%i;}
 
 RandomTestSuiteClusterPlugin::RandomTestSuiteClusterPlugin() :
     m_sizes(std::vector<IndexType>())
@@ -56,7 +59,10 @@ void RandomTestSuiteClusterPlugin::init(rapidjson::Document &doc)
 
 void RandomTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList)
 {
+    std::srand (unsigned(std::time(NULL)));
+
     std::vector<IndexType> testCaseIds(data.getCoverage()->getTestcases().getIDList());
+
     for (std::vector<IndexType>::iterator it = m_sizes.begin(); it != m_sizes.end(); it++) {
         IndexType size = std::floor(testCaseIds.size() * ((double)*it / 100));
         if (size > testCaseIds.size()) {
@@ -64,14 +70,15 @@ void RandomTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::s
             std::cerr << "Invalid size." << std::endl;
             continue;
         }
-        std::random_shuffle(testCaseIds.begin(), testCaseIds.end());
+        std::random_shuffle(testCaseIds.begin(), testCaseIds.end(), randomCluster);
         std::string clusterName = boost::lexical_cast<std::string>(*it);
         for (IndexType i = 0; i < size; i++) {
             clusterList[clusterName].addTestCase(testCaseIds[i]);
         }
-
         clusterList[clusterName].addCodeElements(data.getCoverage()->getCodeElements().getIDList());
     }
+
+
 }
 
 extern "C" void registerPlugin(CKernel &kernel)
