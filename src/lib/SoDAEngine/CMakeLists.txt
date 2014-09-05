@@ -14,8 +14,6 @@ add_library(SoDAEngine SHARED ${headers} ${engine_src})
 
 if (UNIX)
 	set(LINK_LIBRARIES dl)
-else()
-	
 endif()
 
 target_link_libraries(SoDAEngine SoDA ${Boost_LIBRARIES} ${LINK_LIBRARIES})
