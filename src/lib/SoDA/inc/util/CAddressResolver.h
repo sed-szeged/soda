@@ -23,7 +23,7 @@
 #define CADDRESSRESOLVER_H
 
 #include <cstdio>
-#include <unistd.h>
+//#include <unistd.h>
 #include <string>
 
 #include "exception/CException.h"
