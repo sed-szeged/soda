@@ -39,6 +39,8 @@
 #include <vector>
 
 #include "boost/program_options.hpp"
+#include "boost/thread.hpp"
+
 #include "data/CTraceData.h"
 #include "CTraceLogger.h"
 
@@ -49,7 +51,8 @@ namespace po = boost::program_options;
 po::options_description desc("Allowed options");
 
 const char* const socketName = "/tmp/instrument-server";
-std::vector<CTraceLogger *> loggers;
+std::vector<int> sockets;
+std::vector<boost::thread *> threads;
 CTraceData *data;
 int serverSocket;
 String coverageFilePath;
@@ -84,16 +87,19 @@ void startServer()
  */
 void signalHandler(int signal)
 {
-    std::cout << std::endl << "CTRL+c was pressed. Stopping server... ";
-    std::vector<CTraceLogger *>::iterator it;
-    for (it = loggers.begin(); it != loggers.end(); it++) {
-        CTraceLogger *logger = *it;
-        logger->join();
-        close(logger->getSocket());
+    (std::cout << std::endl << "CTRL+c was pressed. Stopping server... ").flush();
+    for (std::vector<boost::thread *>::iterator it = threads.begin(); it != threads.end(); it++) {
+        boost::thread *thread = *it;
+        thread->join();
 
-        delete logger;
+        delete thread;
     }
-    loggers.clear();
+    std::cerr << std::endl;
+    threads.clear();
+
+    for (std::vector<int>::iterator it = sockets.begin(); it != sockets.end(); it++) {
+        close(*it);
+    }
 
     data->save();
 
@@ -114,7 +120,7 @@ void signalHandler(int signal)
     unlink(socketName);
 
     std::cout << "done." << std::endl;
-    pthread_exit(NULL);
+    exit(0);
 }
 
 /**
@@ -170,9 +176,12 @@ int processArgs(int ac, char *av[])
         /* Accept a connection. */
         clientSocket = accept(serverSocket, (struct sockaddr*)&clientName, &clientNameLength);
         /* Handle the connection. */
-        CTraceLogger *logger = new CTraceLogger(clientSocket, data);
-        loggers.push_back(logger);
-        logger->start();
+        CTraceLogger logger = CTraceLogger(clientSocket, data);
+        // Start a thread.
+        boost::thread *thread = new boost::thread(logger);
+        // Save it for later use.
+        threads.push_back(thread);
+        sockets.push_back(clientSocket);
     }
     while (true);
 

@@ -31,7 +31,7 @@ target_link_libraries(binaryDump SoDA ${Boost_LIBRARIES})
 # instrumentServer
 aux_source_directory(${SoDATools_SOURCE_DIR}/instrumentserver instrumentServer_src)
 add_executable(instrumentServer ${instrumentServer_src})
-target_link_libraries(instrumentServer SoDA ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(instrumentServer SoDA ${Boost_LIBRARIES})
 
 # sample
 aux_source_directory(${SoDATools_SOURCE_DIR}/sample sample_src)

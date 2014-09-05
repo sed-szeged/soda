@@ -24,6 +24,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "boost/filesystem.hpp"
+
 #include "CTraceLogger.h"
 #include "exception/CException.h"
 #include "util/CAddressResolver.h"
@@ -36,11 +38,18 @@ CTraceLogger::CTraceLogger(int socket, CTraceData *data) :
 {
 }
 
+CTraceLogger::CTraceLogger(const CTraceLogger &obj)
+{
+    m_testcaseName = std::string(obj.m_testcaseName);
+    m_socket = obj.m_socket;
+    m_data = obj.m_data;
+}
+
 CTraceLogger::~CTraceLogger()
 {
 }
 
-void CTraceLogger::run()
+void CTraceLogger::operator()()
 {
     bool isOpen = true;
     while (isOpen) {
@@ -159,7 +168,7 @@ void CTraceLogger::handleFunctionExitMessage()
 String CTraceLogger::translateAddressToFunction(const String &binaryPath, const int address)
 {
     String binaryFullPath = binaryPath;
-    if (!access(binaryPath.c_str(), F_OK) == 0) {
+    if (!boost::filesystem::exists(binaryPath.c_str()) || boost::filesystem::is_directory(binaryPath.c_str())) {
         binaryFullPath = m_data->getBaseDir() + "/" + binaryPath;
     }
     String output;

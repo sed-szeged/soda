@@ -14,9 +14,7 @@ endif()
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
-
-find_package(Threads REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options thread)
 
 ExternalProject_Add(
     rapidjson
