@@ -20,7 +20,7 @@
  */
 
 
-/**  
+/**
   * @file Main program of the instrumen server.
   *       The instrument server communicating with the instrumented code through
   *       sockets and saves the trace informations in SoDA binary format.
@@ -171,10 +171,13 @@ int processArgs(int ac, char *av[])
     do {
         struct sockaddr_un clientName;
         socklen_t clientNameLength;
-        int clientSocket;
 
         /* Accept a connection. */
-        clientSocket = accept(serverSocket, (struct sockaddr*)&clientName, &clientNameLength);
+        int clientSocket = accept(serverSocket, (struct sockaddr*)&clientName, &clientNameLength);
+        // no new connection
+        if (clientSocket < 0)
+            continue;
+
         /* Handle the connection. */
         CTraceLogger logger = CTraceLogger(clientSocket, data);
         // Start a thread.

@@ -120,7 +120,7 @@ String CTraceLogger::handleFunctionMessage()
     }
 
     text = new char[length];
-    // Read the test name.
+    // Read path.
     len = read(m_socket, text, length);
     if (len < 0) {
         return function;
@@ -178,7 +178,8 @@ String CTraceLogger::translateAddressToFunction(const String &binaryPath, const 
         output = "[SODA]not-resolved";
     }
 
-    output.erase(output.length() - 2, 2); // remove line ending
+    if (!output.empty())
+        output.erase(output.length() - 2, 2); // remove line ending
     return output;
 }
 
