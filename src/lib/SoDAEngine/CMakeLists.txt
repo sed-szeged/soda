@@ -13,7 +13,7 @@ aux_source_directory(${SoDAEngine_SOURCE_DIR}/src/engine engine_src)
 add_library(SoDAEngine SHARED ${headers} ${engine_src})
 
 if (UNIX)
-	set(LINK_LIBRARIES dl)
+    set(LINK_LIBRARIES dl)
 endif()
 
 target_link_libraries(SoDAEngine SoDA ${Boost_LIBRARIES} ${LINK_LIBRARIES})

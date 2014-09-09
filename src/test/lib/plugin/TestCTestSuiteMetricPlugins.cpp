@@ -32,7 +32,7 @@ class CTestSuiteMetricPluginsTest : public testing::Test
 {
 protected:
     std::map<std::string, CClusterDefinition> clusterList;
-    std::map<std::string, ITestSuiteMetricPlugin::MetricResults> results;
+    rapidjson::Document results;
     CSelectionData selection;
     ITestSuiteMetricPlugin *plugin;
     ITestSuiteClusterPlugin *clusterAlg;
@@ -56,18 +56,18 @@ TEST_F(CTestSuiteMetricPluginsTest, FaultDetection)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("fault-detection"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
-    EXPECT_NO_THROW(plugin->calculate("sample", results));
+    EXPECT_NO_THROW(plugin->calculate(results));
 
-    EXPECT_DOUBLE_EQ(0.99, results["full"]["fault-detection"]);
+    EXPECT_DOUBLE_EQ(0.99, results["full"]["fault-detection"].GetDouble());
 }
 
 TEST_F(CTestSuiteMetricPluginsTest, FaultLocalization)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("fault-localization"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
-    EXPECT_NO_THROW(plugin->calculate("sample", results));
+    EXPECT_NO_THROW(plugin->calculate(results));
 
-    EXPECT_DOUBLE_EQ(0.15252525252525254, results["full"]["fault-localization"]);
+    EXPECT_DOUBLE_EQ(0.15252525252525254, results["full"]["fault-localization"].GetDouble());
 }
 
 TEST_F(CTestSuiteMetricPluginsTest, FMeasure)
@@ -77,10 +77,10 @@ TEST_F(CTestSuiteMetricPluginsTest, FMeasure)
     for (StringVector::iterator it = dependencies.begin(); it != dependencies.end(); it++) {
         ITestSuiteMetricPlugin *dep = kernel.getTestSuiteMetricPluginManager().getPlugin(*it);
         dep->init(&selection, &clusterList, 12345);
-        dep->calculate("sample", results);
+        dep->calculate(results);
     }
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
-    EXPECT_NO_THROW(plugin->calculate("sample", results));
+    EXPECT_NO_THROW(plugin->calculate(results));
 
-    EXPECT_DOUBLE_EQ(0.26432676155954388, results["full"]["f-measure"]);
+    EXPECT_DOUBLE_EQ(0.26432676155954388, results["full"]["f-measure"].GetDouble());
 }

@@ -60,10 +60,10 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, Ochiai)
     EXPECT_NO_THROW(plugin->init(&selection, 12345));
     EXPECT_NO_THROW(plugin->calculate(clusterList["full"], "sample"));
 
-    EXPECT_EQ(100u, plugin->getValues().size());
-    EXPECT_DOUBLE_EQ(0.57735026918962584, plugin->getValues()[0]);
-    EXPECT_DOUBLE_EQ(0.57735026918962584, plugin->getValues()[1]);
-    EXPECT_DOUBLE_EQ(0.40824829046386307, plugin->getValues()[2]);
+    EXPECT_EQ(100u, plugin->getValues().MemberCount());
+    EXPECT_DOUBLE_EQ(0.57735026918962584, plugin->getValues()["0"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.57735026918962584, plugin->getValues()["1"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.40824829046386307, plugin->getValues()["2"].GetDouble());
 }
 
 TEST_F(CFaultLocalizationTechniquePluginsTest, Tarantula)
@@ -72,8 +72,8 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, Tarantula)
     EXPECT_NO_THROW(plugin->init(&selection, 12345));
     EXPECT_NO_THROW(plugin->calculate(clusterList["full"], "sample"));
 
-    EXPECT_EQ(100u, plugin->getValues().size());
-    EXPECT_DOUBLE_EQ(1, plugin->getValues()[0]);
-    EXPECT_DOUBLE_EQ(1, plugin->getValues()[1]);
-    EXPECT_DOUBLE_EQ(0.25, plugin->getValues()[2]);
+    EXPECT_EQ(100u, plugin->getValues().MemberCount());
+    EXPECT_DOUBLE_EQ(1, plugin->getValues()["0"].GetDouble());
+    EXPECT_DOUBLE_EQ(1, plugin->getValues()["1"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.25, plugin->getValues()["2"].GetDouble());
 }
