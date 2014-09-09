@@ -19,7 +19,6 @@ find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options t
 ExternalProject_Add(
     rapidjson
     SVN_REPOSITORY "https://github.com/miloyip/rapidjson"
-    UPDATE_COMMAND "" # skip update
     CONFIGURE_COMMAND "" # skip configure
     BUILD_COMMAND "" # skip build
     INSTALL_COMMAND "" # skip install
