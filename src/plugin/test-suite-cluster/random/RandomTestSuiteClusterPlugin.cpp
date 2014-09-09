@@ -49,6 +49,13 @@ std::string RandomTestSuiteClusterPlugin::getDescription()
     return "Generates random test groups with different sizes given in the percentage of test cases.";
 }
 
+std::map<String, String> RandomTestSuiteClusterPlugin::getRequiredParameters()
+{
+    std::map<String, String> requiredParams;
+    requiredParams["cluster-sizes"] = "ARRAY";
+    return requiredParams;
+}
+
 void RandomTestSuiteClusterPlugin::init(rapidjson::Document &doc)
 {
     m_sizes.clear();

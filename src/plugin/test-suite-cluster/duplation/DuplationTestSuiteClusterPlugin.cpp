@@ -21,6 +21,13 @@ std::string DuplationTestSuiteClusterPlugin::getDescription()
     return "Orders the test cases by how well they differentiate the test suite and creates the groups based on this order with the given size.";
 }
 
+std::map<String, String> DuplationTestSuiteClusterPlugin::getRequiredParameters()
+{
+    std::map<String, String> requiredParams;
+    requiredParams["cluster-sizes"] = "ARRAY";
+    return requiredParams;
+}
+
 void DuplationTestSuiteClusterPlugin::init(rapidjson::Document &doc)
 {
     m_sizes.clear();

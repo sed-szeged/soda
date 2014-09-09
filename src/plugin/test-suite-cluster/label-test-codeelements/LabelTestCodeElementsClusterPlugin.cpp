@@ -50,6 +50,14 @@ std::string LabelTestCodeElementsClusterPlugin::getDescription()
     return "Loads the clusters from files and combine them.";
 }
 
+std::map<String, String> LabelTestCodeElementsClusterPlugin::getRequiredParameters()
+{
+    std::map<String, String> requiredParams;
+    requiredParams["cluster-test-list"] = "PATH";
+    requiredParams["cluster-code-elements-list"] = "PATH";
+    return requiredParams;
+}
+
 void LabelTestCodeElementsClusterPlugin::init(rapidjson::Document &doc)
 {
     m_testList = doc["cluster-test-list"].GetString();

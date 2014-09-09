@@ -26,6 +26,13 @@ std::string CoverageTestSuiteClusterPlugin::getDescription()
     return "Generates test groups ordered by their coverage with different sizes given in the percentage of test cases.";
 }
 
+std::map<String, String> CoverageTestSuiteClusterPlugin::getRequiredParameters()
+{
+    std::map<String, String> requiredParams;
+    requiredParams["cluster-sizes"] = "ARRAY";
+    return requiredParams;
+}
+
 void CoverageTestSuiteClusterPlugin::init(rapidjson::Document &doc)
 {
     m_sizes.clear();

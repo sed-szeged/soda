@@ -22,6 +22,8 @@ public:
 
     std::string getDescription();
 
+    std::map<String, String> getRequiredParameters();
+
     void init(rapidjson::Document &doc);
 
     void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList);

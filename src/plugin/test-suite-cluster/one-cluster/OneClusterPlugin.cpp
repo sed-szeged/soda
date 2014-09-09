@@ -46,6 +46,11 @@ std::string OneClusterPlugin::getDescription()
     return "Each test case and code element belong to one cluster.";
 }
 
+std::map<String, String> OneClusterPlugin::getRequiredParameters()
+{
+    return std::map<String, String>();
+}
+
 void OneClusterPlugin::init(rapidjson::Document &doc)
 {}
 
