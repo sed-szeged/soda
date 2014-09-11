@@ -59,7 +59,7 @@ public:
      * @brief Returns the required parameters for the plugin.
      * @return Map of name and type pairs.
      */
-    std::map<String, String> getRequiredParameters() = 0;
+    virtual std::map<String, String> getRequiredParameters() = 0;
 
     /**
      * @brief Initializes the plugin.
