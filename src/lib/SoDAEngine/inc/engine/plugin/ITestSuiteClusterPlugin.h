@@ -56,6 +56,12 @@ public:
     virtual std::string getDescription() = 0;
 
     /**
+     * @brief Returns the required parameters for the plugin.
+     * @return Map of name and type pairs.
+     */
+    std::map<String, String> getRequiredParameters();
+
+    /**
      * @brief Initializes the plugin.
      * @param reader To read external options.
      */
