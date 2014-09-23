@@ -29,7 +29,7 @@ std::string CoverageTestSuiteClusterPlugin::getDescription()
 std::map<String, String> CoverageTestSuiteClusterPlugin::getRequiredParameters()
 {
     std::map<String, String> requiredParams;
-    requiredParams["cluster-sizes"] = "ARRAY";
+    requiredParams["cluster-sizes"] = TYPE_INTARRAY;
     return requiredParams;
 }
 

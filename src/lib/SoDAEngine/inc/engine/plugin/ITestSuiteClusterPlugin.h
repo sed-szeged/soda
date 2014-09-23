@@ -31,6 +31,9 @@
 
 namespace soda {
 
+#define TYPE_INTARRAY "INTARRAY"
+#define TYPE_PATH "PATH"
+
 /**
  * @brief Interface of the cluster plugins.
  */

@@ -52,7 +52,7 @@ std::string RandomTestSuiteClusterPlugin::getDescription()
 std::map<String, String> RandomTestSuiteClusterPlugin::getRequiredParameters()
 {
     std::map<String, String> requiredParams;
-    requiredParams["cluster-sizes"] = "ARRAY";
+    requiredParams["cluster-sizes"] = TYPE_INTARRAY;
     return requiredParams;
 }
 

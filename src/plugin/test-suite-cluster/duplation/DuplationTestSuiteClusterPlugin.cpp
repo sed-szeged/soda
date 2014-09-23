@@ -24,7 +24,7 @@ std::string DuplationTestSuiteClusterPlugin::getDescription()
 std::map<String, String> DuplationTestSuiteClusterPlugin::getRequiredParameters()
 {
     std::map<String, String> requiredParams;
-    requiredParams["cluster-sizes"] = "ARRAY";
+    requiredParams["cluster-sizes"] = TYPE_INTARRAY;
     return requiredParams;
 }
 
