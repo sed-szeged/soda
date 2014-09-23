@@ -20,7 +20,7 @@
  */
 #include <iostream>
 #include <sstream>
-#include "util/CAddressResolver.h"
+#include "CAddressResolver.h"
 
 
 namespace soda {

@@ -28,7 +28,7 @@
 
 #include "CTraceLogger.h"
 #include "exception/CException.h"
-#include "util/CAddressResolver.h"
+#include "CAddressResolver.h"
 
 namespace soda {
 
