@@ -123,25 +123,39 @@ String CTraceLogger::handleFunctionMessage()
     // Read path.
     len = read(m_socket, text, length);
     if (len < 0) {
+        delete text;
         return function;
     }
 
     // Read the address.
     len = read(m_socket, &address, sizeof(address));
     if (len < 0) {
+        delete text;
         return function;
     }
 
     String binaryPath = String(text);
 
     if (!m_data->getCodeElementName(binaryPath, address, function)) {
-        function = translateAddressToFunction(binaryPath, address);
-        m_data->addCodeElementLocation(function);
+        String resolved = translateAddressToFunction(binaryPath, address);
+
+        // The address can not be resolved.
+        if (resolved.find("??") != std::string::npos) {
+            delete text;
+            return function;
+        }
+
+
+        function = resolved.substr(0, resolved.find(" at "));
+
+        std::cerr << "Function: " << function << std::endl;
+
+        m_data->addCodeElementLocation(resolved);
         m_data->addCodeElementName(binaryPath, address, function);
     }
 
     /* Free the buffer. */
-    delete text;
+    delete text;    
 
     return function;
 }

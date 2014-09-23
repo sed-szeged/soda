@@ -50,7 +50,7 @@ namespace po = boost::program_options;
 
 po::options_description desc("Allowed options");
 
-const char* const socketName = "/tmp/instrument-server";
+std::string socketName;
 std::vector<int> sockets;
 std::vector<boost::thread *> threads;
 CTraceData *data;
@@ -72,7 +72,7 @@ void startServer()
 
     /* Indicate that this is a server. */
     name.sun_family = AF_LOCAL;
-    strcpy(name.sun_path, socketName);
+    strcpy(name.sun_path, socketName.c_str());
     bind(serverSocket, (struct sockaddr*)&name, SUN_LEN (&name));
 
     /* Listen for connections. */
@@ -117,7 +117,7 @@ void signalHandler(int signal)
     delete data;
 
     close(serverSocket);
-    unlink(socketName);
+    unlink(socketName.c_str());
 
     std::cout << "done." << std::endl;
     exit(0);
@@ -154,6 +154,7 @@ int processArgs(int ac, char *av[])
         dumpCodeElements = true;
         codeElementPath = vm["dump-code-elements"].as<String>();
     }
+    socketName = vm["socket-file"].as<String>();
 
     // Create signal handler.
     struct sigaction sigIntHandler;
@@ -199,6 +200,7 @@ int main(int argc, char *argv[])
             ("help,h", "help message")
             ("base-dir,d", po::value<String>(), "base directory of where the make check was started")
             ("coverage-data,c", po::value<String>(), "output file containing the coverage matrix")
+            ("socket-file,s", po::value<String>()->default_value("/tmp/instrument-server"), "the temporary file that can be used for communication")
             ("dump-code-elements", po::value<String>(), "output file containing the code elements and their location")
     ;
 
