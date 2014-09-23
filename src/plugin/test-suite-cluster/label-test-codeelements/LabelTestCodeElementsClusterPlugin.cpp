@@ -53,8 +53,8 @@ std::string LabelTestCodeElementsClusterPlugin::getDescription()
 std::map<String, String> LabelTestCodeElementsClusterPlugin::getRequiredParameters()
 {
     std::map<String, String> requiredParams;
-    requiredParams["cluster-test-list"] = "PATH";
-    requiredParams["cluster-code-elements-list"] = "PATH";
+    requiredParams["cluster-test-list"] = TYPE_PATH;
+    requiredParams["cluster-code-elements-list"] = TYPE_PATH;
     return requiredParams;
 }
 
