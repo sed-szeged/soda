@@ -41,7 +41,7 @@
 #include "boost/program_options.hpp"
 #include "boost/thread.hpp"
 
-#include "data/CTraceData.h"
+#include "CTraceData.h"
 #include "CTraceLogger.h"
 
 using namespace soda;

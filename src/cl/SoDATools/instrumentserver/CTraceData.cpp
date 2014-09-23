@@ -19,7 +19,7 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "data/CTraceData.h"
+#include "CTraceData.h"
 #include "exception/CException.h"
 
 namespace soda {

@@ -25,7 +25,7 @@
 #include <map>
 #include <set>
 
-#include "data/CTraceData.h"
+#include "CTraceData.h"
 
 namespace soda {
 
