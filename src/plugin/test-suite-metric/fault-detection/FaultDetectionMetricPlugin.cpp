@@ -39,12 +39,12 @@ FaultDetectionMetricPlugin::~FaultDetectionMetricPlugin()
 
 std::string FaultDetectionMetricPlugin::getName()
 {
-    return "fault-detection";
+    return "coverage";
 }
 
 std::string FaultDetectionMetricPlugin::getDescription()
 {
-    return "Calculating fault detection metric of the test suite.";
+    return "Calculating coverage ratio of the test suite.";
 }
 
 void FaultDetectionMetricPlugin::init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision)
