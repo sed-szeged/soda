@@ -154,7 +154,7 @@ void DuplationTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std
             continue;
         }
 
-        std::string clusterName = boost::lexical_cast<std::string>(*it);
+        std::string clusterName = "duplation-" + boost::lexical_cast<std::string>(*it);
         for (IndexType i = 0; i < size; i++) {
             clusterList[clusterName].addTestCase(Tv[i]);
         }
