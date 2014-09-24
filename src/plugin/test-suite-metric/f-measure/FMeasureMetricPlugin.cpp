@@ -40,7 +40,7 @@ std::string FMeasureMetricPlugin::getName()
 
 std::string FMeasureMetricPlugin::getDescription()
 {
-    return "Calculates the F-measure value of the fault detection and localization metrics.";
+    return "Calculates the F-measure value of the coverage and partition metrics.";
 }
 
 void FMeasureMetricPlugin::init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision)
@@ -52,7 +52,7 @@ void FMeasureMetricPlugin::init(CSelectionData *data, std::map<std::string, CClu
 std::vector<std::string> FMeasureMetricPlugin::getDependency()
 {
     std::vector<std::string> dependencies;
-    dependencies.push_back("fault-detection");
+    dependencies.push_back("coverage");
     dependencies.push_back("partition-metric");
     return dependencies;
 }
@@ -76,8 +76,7 @@ void FMeasureMetricPlugin::calculate(rapidjson::Document &results)
             results.AddMember(key, cluster, results.GetAllocator());
         }
 
-        double faultDetection = results[it->first.c_str()]["fault-detection"].GetDouble();
-        //double faultLocalization = result["fault-localization"];
+        double faultDetection = results[it->first.c_str()]["coverage"].GetDouble();
         double partitionMetric = results[it->first.c_str()]["partition-metric"].GetDouble();
 
         double fMeasure = 0.0;

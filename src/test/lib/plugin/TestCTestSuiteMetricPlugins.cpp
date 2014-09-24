@@ -54,11 +54,11 @@ protected:
 
 TEST_F(CTestSuiteMetricPluginsTest, FaultDetection)
 {
-    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("fault-detection"));
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("coverage"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
     EXPECT_NO_THROW(plugin->calculate(results));
 
-    EXPECT_DOUBLE_EQ(0.99, results["full"]["fault-detection"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.99, results["full"]["coverage"].GetDouble());
 }
 
 TEST_F(CTestSuiteMetricPluginsTest, FaultLocalization)

@@ -31,7 +31,7 @@ void CoverageEfficiencyTestSuiteMetricPlugin::init(CSelectionData *data, std::ma
 std::vector<std::string> CoverageEfficiencyTestSuiteMetricPlugin::getDependency()
 {
     std::vector<std::string> dependencies;
-    dependencies.push_back("fault-detection");
+    dependencies.push_back("coverage");
     return dependencies;
 }
 
@@ -57,7 +57,7 @@ void CoverageEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &res
         IndexType nrOfTestCases = it->second.getTestCases().size();
         IndexType nrOfCodeElements = it->second.getCodeElements().size();
 
-        double faultDetection = results[it->first.c_str()]["fault-detection"].GetDouble();
+        double faultDetection = results[it->first.c_str()]["coverage"].GetDouble();
         double coverageEfficiency = (faultDetection * nrOfCodeElements) / nrOfTestCases;
 
         //out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << coverageEfficiency << std::endl;

@@ -105,11 +105,11 @@ void FaultDetectionMetricPlugin::calculate(rapidjson::Document &results)
             }
         }
 
-        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("fault-detection");
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("coverage");
         if (metricIt == results[it->first.c_str()].MemberEnd()) {
             rapidjson::Value v;
             v.SetDouble(((double)nrOfCoveredCodeElements / nrOfCodeElements));
-            results[it->first.c_str()].AddMember("fault-detection", v, results.GetAllocator());
+            results[it->first.c_str()].AddMember("coverage", v, results.GetAllocator());
         } else
             metricIt->value.SetDouble(((double)nrOfCoveredCodeElements / nrOfCodeElements));
         //coverageStream << it->first << ";" << nrOfTestcases << ";" << nrOfCodeElements << ";" << nrOfCoveredCodeElements << ";" << ((double)nrOfCoveredCodeElements / nrOfCodeElements) << std::endl;
