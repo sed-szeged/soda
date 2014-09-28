@@ -46,11 +46,16 @@ std::string OneClusterPlugin::getDescription()
     return "Each test case and code element belong to one cluster.";
 }
 
-void OneClusterPlugin::init(io::CJsonReader &reader)
+std::map<String, String> OneClusterPlugin::getRequiredParameters()
+{
+    return std::map<String, String>();
+}
+
+void OneClusterPlugin::init(rapidjson::Document &doc)
 {}
 
 void OneClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition> &clusterList)
-{    
+{
     CClusterDefinition cluster;
     cluster.addTestCases(data.getCoverage()->getTestcases().getIDList());
     cluster.addCodeElements(data.getCoverage()->getCodeElements().getIDList());

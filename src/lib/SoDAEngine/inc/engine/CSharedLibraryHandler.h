@@ -23,66 +23,130 @@
 #define CSHAREDLIBRARYHANDLER_H
 
 #include <stdexcept>
-#include <dlfcn.h>
 #include <string>
 #include <iostream>
+
+#ifdef _WIN32
+	#include <Windows.h>
+
+	typedef HMODULE SharedLibraryHandle;
+#else
+	#include <dlfcn.h>
+
+	typedef void* SharedLibraryHandle;
+#endif
 
 
 namespace soda {
 
-/**
- * @brief Class to Load shared libraries from the filesystem.
- */
-class CSharedLibraryHandler {
+#ifdef _WIN32
+	/**
+	* @brief Class to Load shared libraries from the filesystem.
+	*/
+	class CSharedLibraryHandler {
 
-public:
+	public:
 
-    /**
-     * @brief Loads a shared library from the given path.
-     * @param path The path to the library.
-     * @return
-     */
-    static void *loadLibrary(const std::string &path)
-    {
-        void *sharedLibraryHandle = dlopen(path.c_str(), RTLD_NOW);
-        if (sharedLibraryHandle == NULL) {
-            throw std::runtime_error("Can not load the shared library.\n\t" + std::string(dlerror()));
-        }
+		/**
+		* @brief Loads a shared library from the given path.
+		* @param path The path to the library.
+		* @return
+		*/
+		static SharedLibraryHandle loadLibrary(const std::string &path)
+		{
+			SharedLibraryHandle sharedLibraryHandle = LoadLibrary(path.c_str());
+			if (sharedLibraryHandle == NULL) {
+				throw std::runtime_error("Can not load the shared library.\n\t" + path);
+			}
 
-        return sharedLibraryHandle;
-    }
+			return sharedLibraryHandle;
+		}
 
-    /**
-     * @brief Unloads a shared library.
-     * @param sharedLibraryHandle The handle of the loaded library.
-     */
-    static void  unloadLibrary(void *sharedLibraryHandle)
-    {
-        int result = dlclose(sharedLibraryHandle);
-        if (result != 0) {
-            throw std::runtime_error("Can not unload the shared library.");
-        }
-    }
+		/**
+		* @brief Unloads a shared library.
+		* @param sharedLibraryHandle The handle of the loaded library.
+		*/
+		static void  unloadLibrary(SharedLibraryHandle sharedLibraryHandle)
+		{
+			int result = FreeLibrary(sharedLibraryHandle);
+			if (result == 0) {
+				throw std::runtime_error("Can not unload the shared library.");
+			}
+		}
 
-    /**
-     * @brief Returns a pointer to a function.
-     * @param sharedLibraryHandle The handle of the loaded library.
-     * @param functionName The name of the function.
-     */
-    template<typename TFunctionSignature>
-    static TFunctionSignature *getFunctionPointer(void *sharedLibraryHandle, const std::string &functionName)
-    {
-        dlerror();
+		/**
+		* @brief Returns a pointer to a function.
+		* @param sharedLibraryHandle The handle of the loaded library.
+		* @param functionName The name of the function.
+		*/
+		template<typename TFunctionSignature>
+		static TFunctionSignature *getFunctionPointer(SharedLibraryHandle sharedLibraryHandle, const std::string &functionName)
+		{
+			FARPROC functionPtr = GetProcAddress(sharedLibraryHandle, functionName.c_str());
 
-        void *functionAddress = dlsym(sharedLibraryHandle, functionName.c_str());
+			if (functionPtr == NULL) {
+				throw std::runtime_error("Can not find the function: " + functionName);
+			}
+			return reinterpret_cast<TFunctionSignature *>(functionPtr);
+		}
+	};
+#else
+	/**
+	* @brief Class to Load shared libraries from the filesystem.
+	*/
+	class CSharedLibraryHandler {
 
-        char *error = dlerror();
-        if (error != NULL) {
-            throw std::runtime_error("Can not find the function: " + functionName);
-        }
-        return reinterpret_cast<TFunctionSignature *>(functionAddress);
-    }
-};
+	public:
+
+		/**
+		* @brief Loads a shared library from the given path.
+		* @param path The path to the library.
+		* @return
+		*/
+		static SharedLibraryHandle loadLibrary(const std::string &path)
+		{
+			SharedLibraryHandle sharedLibraryHandle = dlopen(path.c_str(), RTLD_NOW);
+			if (sharedLibraryHandle == NULL) {
+				throw std::runtime_error("Can not load the shared library.\n\t" + std::string(dlerror()));
+			}
+
+			return sharedLibraryHandle;
+		}
+
+		/**
+		* @brief Unloads a shared library.
+		* @param sharedLibraryHandle The handle of the loaded library.
+		*/
+		static void  unloadLibrary(SharedLibraryHandle sharedLibraryHandle)
+		{
+			int result = dlclose(sharedLibraryHandle);
+			if (result != 0) {
+				throw std::runtime_error("Can not unload the shared library.");
+			}
+		}
+
+		/**
+		* @brief Returns a pointer to a function.
+		* @param sharedLibraryHandle The handle of the loaded library.
+		* @param functionName The name of the function.
+		*/
+		template<typename TFunctionSignature>
+		static TFunctionSignature *getFunctionPointer(SharedLibraryHandle sharedLibraryHandle, const std::string &functionName)
+		{
+			dlerror();
+
+			void *functionAddress = dlsym(sharedLibraryHandle, functionName.c_str());
+
+			char *error = dlerror();
+			if (error != NULL) {
+				throw std::runtime_error("Can not find the function: " + functionName);
+			}
+			return reinterpret_cast<TFunctionSignature *>(functionAddress);
+		}
+	};
+#endif
+
+
 
 }
 

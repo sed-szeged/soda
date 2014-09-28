@@ -35,11 +35,13 @@ std::vector<std::string> UniquenessTestSuiteMetricPlugin::getDependency()
     return std::vector<std::string>();
 }
 
-void UniquenessTestSuiteMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void UniquenessTestSuiteMetricPlugin::calculate(rapidjson::Document &results)
 {
+    /*
     std::ofstream out;
     out.open((output + "/uniqueness.metric.csv").c_str());
     out << "# cluster id;number of testcases in cluster;number of code elements;uniqueness" << std::endl;
+    */
 
     CCoverageMatrix *coverage = m_data->getCoverage();
     IndexType nrOfTestcases = coverage->getNumOfTestcases();
@@ -55,6 +57,15 @@ void UniquenessTestSuiteMetricPlugin::calculate(const std::string &output, std::
 
     std::map<std::string, CClusterDefinition>::iterator it;
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
+
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(key, cluster, results.GetAllocator());
+        }
+
         std::cout << "Processing " << it->first << std::endl;
         IndexType nrOfCodeElementsInCluster = it->second.getCodeElements().size();
         IndexType nrOfTestcasesInCluster = it->second.getTestCases().size();
@@ -108,10 +119,17 @@ void UniquenessTestSuiteMetricPlugin::calculate(const std::string &output, std::
         if (nrOfCoveredElements > 0) {
             uniqueness = (double)nrOfCoveredUniq / nrOfCoveredElements;
         }
-        results[it->first]["uniqueness"] = uniqueness;
-        out << it->first << ";" << nrOfTestcasesInCluster << ";" << nrOfCodeElementsInCluster << ";" << uniqueness  << std::endl;
+
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("uniqueness");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(uniqueness);
+            results[it->first.c_str()].AddMember("uniqueness", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(uniqueness);
+        //out << it->first << ";" << nrOfTestcasesInCluster << ";" << nrOfCodeElementsInCluster << ";" << uniqueness  << std::endl;
     }
-    out.close();
+    //out.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

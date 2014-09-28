@@ -3,6 +3,7 @@ project(SoDATest)
 include_directories(
     ${SoDATest_SOURCE_DIR}/../../lib/SoDA/inc
     ${SoDATest_SOURCE_DIR}/../../lib/SoDAEngine/inc
+    ${RAPIDJSON_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS})
 
 aux_source_directory(${SoDATest_SOURCE_DIR}/SoDA soda_src)

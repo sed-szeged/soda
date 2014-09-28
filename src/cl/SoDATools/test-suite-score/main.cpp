@@ -29,11 +29,14 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
+#include <rapidjson/document.h>
+#include <rapidjson/filereadstream.h>
+
+
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
-#include "io/CJsonReader.h"
-#include "CTestSuiteScore.h"
+#include "util/CTestSuiteScore.h"
 
 
 using namespace soda;
@@ -177,24 +180,36 @@ void processJsonFiles(std::string path)
     try {
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
 
+        rapidjson::Document reader;
+        {
+            FILE *in = fopen (path.c_str(), "r");
+            char readBuffer[65536];
+            rapidjson::FileReadStream is(in, readBuffer, sizeof(readBuffer));
+            reader.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
+            fclose(in);
+        }
+
         boost::filesystem::path jsonPath(path);
         CSelectionData selectionData;
-        CJsonReader reader = CJsonReader(path);
+        std::map<std::string, CClusterDefinition> clusterList;
 
-        std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
+        std::string clusterAlgorithmName = reader["cluster-algorithm"].GetString();
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
         clusterAlgorithm->init(reader);
 
-        std::string outputDir = reader.getStringFromProperty("output-dir");
-        if (reader.getStringFromProperty("output-dir").empty()) {
+        std::string outputDir = reader["output-dir"].GetString();
+        if (outputDir.empty()) {
             std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
             return;
         }
-
         if (outputDir[0] == '.')
             outputDir = jsonPath.parent_path().string() + "/" + outputDir;
 
-        StringVector faultLocalizationTechniques = reader.getStringVectorFromProperty("fault-localization-techniques");
+        StringVector faultLocalizationTechniques;
+        for (rapidjson::Value::ConstValueIterator itr = reader["fault-localization-techniques"].Begin(); itr != reader["fault-localization-techniques"].End(); ++itr)
+            faultLocalizationTechniques.push_back(itr->GetString());
+
+
         if (faultLocalizationTechniques.empty()) {
             std::cerr << "[ERROR] Missing fault-localization-techniques parameter in config file " << path << "." << std::endl;
             return;
@@ -210,24 +225,24 @@ void processJsonFiles(std::string path)
             }
         }
 
-        std::vector<CJsonReader> selectedRevs = reader.getPropertyVectorFromProperty("selected-revisions");
-        if (selectedRevs.empty()) {
+        if (!reader["selected-revisions"].Size()) {
             std::cerr << "[ERROR] Missing selected-revisions parameter in config file " << path << "." << std::endl;
             return;
         }
 
-        String covPath = reader.getStringFromProperty("coverage-data");
+        String covPath = reader["coverage-data"].GetString();
+
         if (covPath[0] == '.') {
             covPath = jsonPath.parent_path().string() + "/" + covPath;
         }
 
-        String resPath = reader.getStringFromProperty("results-data");
+        String resPath = reader["results-data"].GetString();
+
         if (resPath[0] == '.') {
             resPath = jsonPath.parent_path().string() + "/" + resPath;
         }
 
-        if (exists(covPath) &&
-                exists(resPath)) {
+        if (exists(covPath) && exists(resPath)) {
             (std::cerr << "[INFO] loading coverage from " << covPath << " ...").flush();
             selectionData.loadCoverage(covPath);
             (std::cerr << " done\n[INFO] loading results from " << resPath << " ...").flush();
@@ -238,35 +253,32 @@ void processJsonFiles(std::string path)
             return;
         }
 
-        if (reader.getBoolFromProperty("globalize")) {
+        if (reader["globalize"].GetBool()) {
             (std::cerr << "[INFO] Globalizing ...").flush();
             selectionData.globalize();
             (std::cerr << " done" << std::endl).flush();
         }
 
-        for (std::vector<CJsonReader>::iterator it = selectedRevs.begin(); it != selectedRevs.end(); ++it) {
+        (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
+        clusterAlgorithm->execute(selectionData, clusterList);
+        (std::cerr << " done." << std::endl).flush();
+
+        for (rapidjson::Value::ConstValueIterator itr = reader["selected-revisions"].Begin(); itr != reader["selected-revisions"].End(); ++itr) {
             std::map<std::string, FLScoreValues> scoresByCluster;
-            std::map<std::string, CClusterDefinition> clusterList;
             std::vector<IndexType> failedCodeElements;
 
-            IndexType revision = (*it).getIntFromProperty("revision");
-            IndexType totalFailedTestcases = (*it).getIntFromProperty("total-failed-testcases");
+            IndexType revision = (*itr)["revision"].GetInt();
+            IndexType totalFailedTestcases = (*itr)["total-failed-testcases"].GetInt();
 
             std::cout << "[INFO] Calculating scores for revision: " << revision << std::endl;
-
-            StringVector failedCodeElementNames = (*it).getStringVectorFromProperty("failed-code-elements");
-            for (IndexType i = 0; i < failedCodeElementNames.size(); i++) {
-                if (!selectionData.getCoverage()->getCodeElements().containsValue(failedCodeElementNames[i])) {
-                    std::cerr << "[ERROR] Not existing code element name in json file: " << failedCodeElementNames[i] << std::endl;
+            for (rapidjson::Value::ConstValueIterator failIt = (*itr)["failed-code-elements"].Begin(); failIt != (*itr)["failed-code-elements"].End(); ++failIt) {
+                if (!selectionData.getCoverage()->getCodeElements().containsValue(failIt->GetString())) {
+                    std::cerr << "[ERROR] Not existing code element name in json file: " << failIt->GetString() << std::endl;
                     continue;
                 }
-                IndexType cid = selectionData.getCoverage()->getCodeElements().getID(failedCodeElementNames[i]);
+                IndexType cid = selectionData.getCoverage()->getCodeElements().getID(failIt->GetString());
                 failedCodeElements.push_back(cid);
             }
-
-            (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
-            clusterAlgorithm->execute(selectionData, clusterList);
-            (std::cerr << " done." << std::endl).flush();
 
             // FD score
             std::map<std::string, CClusterDefinition>::iterator clusterIt;
@@ -300,13 +312,20 @@ void processJsonFiles(std::string path)
                     ss << outputDir << "/" << revision << "/" << clusterIt->first;
                     technique->calculate(clusterIt->second, ss.str());
 
-                    IFaultLocalizationTechniquePlugin::FLValues values = technique->getValues();
-
+                    IFaultLocalizationTechniquePlugin::FLValues *values = &technique->getValues();
                     for (IndexType k = 0; k < failedCodeElements.size(); k++) {
                         IndexType cid = failedCodeElements[k];
-                        double score = CTestSuiteScore::flScore(clusterIt->second, values[cid], technique->getDistribution());
+                        double value = (*values)[static_cast<std::ostringstream*>( &(std::ostringstream() << cid) )->str().c_str()].GetDouble();
+                        double score = CTestSuiteScore::flScore(clusterIt->second, value, technique->getDistribution());
                         scoresByCluster[clusterIt->first][cid][flTechniqueName] = score;
                     }
+
+                    std::ofstream flScoreStream;
+                    flScoreStream.open((ss.str() + "/" + flTechniqueName + ".csv").c_str());
+                    flScoreStream << "#revision; code element;" << flTechniqueName << std::endl;
+                    for (IFaultLocalizationTechniquePlugin::FLValues::ConstMemberIterator it = values->MemberBegin(); it != values->MemberEnd(); ++it)
+                        flScoreStream << revision << ";" << it->name.GetString() << ";" << it->value.GetDouble() << std::endl;
+                    flScoreStream.close();
                 }
             }
             // Save the score values

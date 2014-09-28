@@ -25,7 +25,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "CDataManager.h"
+#include "data/CSelectionData.h"
+#include "rapidjson/document.h"
 
 namespace soda {
 /**
@@ -39,7 +40,7 @@ public:
      * @brief Constructor, creates a CSelectionStatistics object.
      * @param mgr CDataManager object.
      */
-    CSelectionStatistics(CDataManager *mgr);
+    CSelectionStatistics(CSelectionData *data);
 
     /**
      * @brief Destroys a CSelectionStatistics object.
@@ -49,7 +50,7 @@ public:
     /**
      * @brief Calculates coverage statistics.
      */
-    void calcCoverageRelatedStatistics();
+    void calcCoverageRelatedStatistics(rapidjson::Document &doc);
 
     /**
      * @brief Calculates changeset statistics.
@@ -59,32 +60,26 @@ public:
     /**
      * @brief Calculates failed test case statistics.
      */
-    void calcFailStatistics();
+    void calcFailStatistics(rapidjson::Document &doc);
 
     /**
      * @brief Calculates results summary.
      */
-    void calcCovResultsSummary();
+    void calcCovResultsSummary(rapidjson::Document &doc);
 
     /**
-     * @brief Writes the given data into a csv file.
-     * @param out Output stream.
-     * @param data Data to write.
+     * @brief Converts the given data to json array.
+     * @param data Data to convert.
+     * @return Returns the converted json file.
      */
-    void writeCsv(std::ofstream& out, IdxIdxMap data);
-
-    /**
-     * @brief Returns a pointer to selection data in m_dataManager.
-     * @return Pointer to selection data in m_dataManager.
-     */
-    CSelectionData* getSelectionData();
+    void toJson(IdxIdxMap &data, rapidjson::Value& val, rapidjson::Document &root);
 
 private:
 
     /**
-     * @brief CDataManager object which contains selection data and other test selection statistics parameters.
+     * @brief Stores selection data.
      */
-    CDataManager *m_dataManager;
+    CSelectionData *m_selectionData;
 };
 
 } // namespace soda

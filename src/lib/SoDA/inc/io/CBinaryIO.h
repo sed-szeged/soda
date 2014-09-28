@@ -22,6 +22,7 @@
 #ifndef CBINARYIO_H
 #define CBINARYIO_H
 
+#include <ios>
 #include "data/SoDALibDefs.h"
 
 namespace soda { namespace io {

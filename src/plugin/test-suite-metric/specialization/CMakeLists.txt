@@ -2,6 +2,7 @@ project(specialization_metric_plugin)
 
 include_directories(${specialization_metric_plugin_SOURCE_DIR}/../../../lib/SoDA/inc
                     ${specialization_metric_plugin_SOURCE_DIR}/../../../lib/SoDAEngine/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 file(GLOB_RECURSE headers ./*.h)

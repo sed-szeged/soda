@@ -2,6 +2,7 @@ project(one_test_per_file_coverage_reader_plugin)
 
 include_directories(${one_test_per_file_coverage_reader_plugin_SOURCE_DIR}/../../../lib/SoDA/inc
                     ${one_test_per_file_coverage_reader_plugin_SOURCE_DIR}/../../../lib/SoDAEngine/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 file(GLOB_RECURSE headers ./*.h)

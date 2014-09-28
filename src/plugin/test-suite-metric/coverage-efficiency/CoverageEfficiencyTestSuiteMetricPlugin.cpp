@@ -31,32 +31,47 @@ void CoverageEfficiencyTestSuiteMetricPlugin::init(CSelectionData *data, std::ma
 std::vector<std::string> CoverageEfficiencyTestSuiteMetricPlugin::getDependency()
 {
     std::vector<std::string> dependencies;
-    dependencies.push_back("fault-detection");
+    dependencies.push_back("coverage");
     return dependencies;
 }
 
-void CoverageEfficiencyTestSuiteMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void CoverageEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &results)
 {
+    /*
     std::ofstream out;
     out.open((output + "/coverage.efficiency.metric.csv").c_str());
     out << "# cluster id;number of testcases in cluster;number of code elements in cluster;coverage-efficiency" << std::endl;
+    */
 
-    std::map<std::string, MetricResults>::iterator it;
-    for (it = results.begin(); it != results.end(); it++) {
-        MetricResults result = it->second;
+    std::map<std::string, CClusterDefinition>::iterator it;
+    for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
-        IndexType nrOfTestCases = (*m_clusterList)[it->first].getTestCases().size();
-        IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(key, cluster, results.GetAllocator());
+        }
 
-        double faultDetection = result["fault-detection"];
+        IndexType nrOfTestCases = it->second.getTestCases().size();
+        IndexType nrOfCodeElements = it->second.getCodeElements().size();
+
+        double faultDetection = results[it->first.c_str()]["coverage"].GetDouble();
         double coverageEfficiency = (faultDetection * nrOfCodeElements) / nrOfTestCases;
 
-        out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << coverageEfficiency << std::endl;
+        //out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << coverageEfficiency << std::endl;
 
-        results[it->first]["coverage-efficiency"] = coverageEfficiency;
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("coverage-efficiency");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(coverageEfficiency);
+            results[it->first.c_str()].AddMember("coverage-efficiency", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(coverageEfficiency);
     }
 
-    out.close();
+    //out.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

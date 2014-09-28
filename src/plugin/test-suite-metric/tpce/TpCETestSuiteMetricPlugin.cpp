@@ -54,26 +54,42 @@ std::vector<std::string> TpCETestSuiteMetricPlugin::getDependency()
     return std::vector<std::string>();
 }
 
-void TpCETestSuiteMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void TpCETestSuiteMetricPlugin::calculate(rapidjson::Document &results)
 {
+    /*
     std::ofstream out;
     out.open((output + "/tpce.metric.csv").c_str());
     out << "# cluster id;number of testcases in cluster;number of code elements;tpce" << std::endl;
-
+    */
 
     std::map<std::string, CClusterDefinition>::iterator it;
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
+
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(key, cluster, results.GetAllocator());
+        }
+
         IndexType nrOfCodeElements = it->second.getCodeElements().size();
         IndexType nrOfTestcases = it->second.getTestCases().size();
 
         double tpce = (double)nrOfTestcases / nrOfCodeElements;
 
-        out << it->first << ";" << nrOfTestcases << ";" << nrOfCodeElements << ";" << tpce << std::endl;
+        //out << it->first << ";" << nrOfTestcases << ";" << nrOfCodeElements << ";" << tpce << std::endl;
 
-        results[it->first]["tpce"] = tpce;
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("tpce");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(tpce);
+            results[it->first.c_str()].AddMember("tpce", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(tpce);
     }
 
-    out.close();
+    //out.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

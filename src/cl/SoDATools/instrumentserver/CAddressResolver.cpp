@@ -18,24 +18,33 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <iostream>
+#include <sstream>
+#include "CAddressResolver.h"
 
-#ifndef CADDRESSRESOLVER_H
-#define CADDRESSRESOLVER_H
-
-#include <cstdio>
-#include <unistd.h>
-#include <string>
-
-#include "exception/CException.h"
 
 namespace soda {
 
-class CAddressResolver
-{
-public:
-    static std::string resolve(const std::string &binaryFullPath, const int address);
-};
+std::string CAddressResolver::resolve(const std::string &binaryFullPath, const int address)
+    {
+        std::ostringstream command;
+        command << "addr2line -C -f -p -e " << binaryFullPath << " 0x" << std::hex << address;
+
+        FILE *pf;
+        pf = popen(command.str().c_str(), "r");
+        if (!pf) {
+            throw CException("soda::CAddressResolver::resolve", "Can not run addr2line");
+        }
+        String output = "";
+        char *buf = new char[3072];
+        if (fgets(buf, 3072, pf) != NULL) {
+            output = String(buf);
+        }
+
+        delete buf;
+        pclose(pf);
+
+        return output;
+    }
 
 } /* namespace soda */
-
-#endif /* CADDRESSRESOLVER_H */

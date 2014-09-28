@@ -60,14 +60,13 @@ public:
 
     /**
      * @brief Calculates the metrics of a test suite.
-     * @param output The path to the output directory.
-     * @param results Stores the results of the metric plugin for each cluster.
+     * @param results Stores the results of the metric plugin for each cluster in JSON format.
      */
-    void calculate(const std::string &output, std::map<std::string, MetricResults> &results);
+    void calculate(rapidjson::Document &results);
 
 private:
-    void writePartitions(CPartitionAlgorithm &algorithm, const std::string &output);
-    void partitionStatistics(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string &output, MetricResults &result);
+    void writePartitions(CPartitionAlgorithm &algorithm, rapidjson::Document &results);
+    void partitionStatistics(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string& clusterId, rapidjson::Document &results);
 
 private:
     CSelectionData *m_data;

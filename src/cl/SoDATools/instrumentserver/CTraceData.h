@@ -22,7 +22,7 @@
 #ifndef CTRACEDATA_H
 #define CTRACEDATA_H
 
-#include <pthread.h>
+#include "boost/thread.hpp"
 #include "data/CCoverageMatrix.h"
 
 namespace soda {
@@ -100,7 +100,7 @@ private:
     /**
      * @brief A mutex to prevent parallel access to the coverage matrix.
      */
-    pthread_mutex_t  m_coverageMutex;
+    boost::mutex  m_coverageMutex;
 
     /**
      * @brief The output path of the coverage matrix.
@@ -116,7 +116,7 @@ private:
     /**
      * @brief A mutex to prevent parallel access to the address map.
      */
-    pthread_mutex_t  m_addressMapMutex;
+    boost::mutex  m_addressMapMutex;
 
     /**
      * @brief Stores the location of code elements in the source files.
@@ -126,7 +126,7 @@ private:
     /**
      * @brief A mutex to prevent parallel access to the code element locations vector.
      */
-    pthread_mutex_t  m_codeElementLocationsMutex;
+    boost::mutex  m_codeElementLocationsMutex;
 
     String m_baseDir;
 };

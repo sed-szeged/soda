@@ -56,27 +56,43 @@ std::vector<std::string> PartitionMetricTestSuiteMetricPlugin::getDependency()
     return dependencies;
 }
 
-void PartitionMetricTestSuiteMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void PartitionMetricTestSuiteMetricPlugin::calculate(rapidjson::Document &results)
 {
+    /*
     std::ofstream partitionMetricStream;
     partitionMetricStream.open((output + "/partition.metric.csv").c_str());
     partitionMetricStream << "# cluster id;number of testcases in cluster;number of code elements in cluster;partition-metric" << std::endl;
+    */
 
-    std::map<std::string, MetricResults>::iterator it;
-    for (it = results.begin(); it != results.end(); it++) {
-        MetricResults result = it->second;
-        double faultLocalization = result["fault-localization"];
+    std::map<std::string, CClusterDefinition>::iterator it;
+    for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
+
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(key, cluster, results.GetAllocator());
+        }
+
+        double faultLocalization = results[it->first.c_str()]["fault-localization"].GetDouble();
         double partitionMetric = 1.0 - faultLocalization;
 
-        IndexType nrOfTestCases = (*m_clusterList)[it->first].getTestCases().size();
-        IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
+        //IndexType nrOfTestCases = it->second.getTestCases().size();
+        //IndexType nrOfCodeElements = it->second.getCodeElements().size();
 
-        partitionMetricStream << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << partitionMetric << std::endl;
+        //partitionMetricStream << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << partitionMetric << std::endl;
 
-        results[it->first]["partition-metric"] = partitionMetric;
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("partition-metric");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(partitionMetric);
+            results[it->first.c_str()].AddMember("partition-metric", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(partitionMetric);
     }
 
-    partitionMetricStream.close();
+    //partitionMetricStream.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

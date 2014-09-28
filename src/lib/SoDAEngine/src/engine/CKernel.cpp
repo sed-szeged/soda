@@ -23,6 +23,14 @@
 
 #include "engine/CKernel.h"
 
+#ifdef _WIN32
+    #define LIB_EXTENSION ".dll"
+#elif __linux__
+    #define LIB_EXTENSION ".so"
+#else
+    #define LIB_EXTENSION ".dylib"
+#endif
+
 namespace soda {
 
 CKernel::CKernel() :
@@ -158,7 +166,7 @@ void CKernel::loadPluginsFromDirectory(const std::string &pluginDir)
             if (!fs::is_regular_file(it->status())) {
                 continue;
             }
-            if (it->path().extension() != ".so") {
+            if (it->path().extension() != LIB_EXTENSION) {
                 continue;
             }
             std::string pluginPath = it->path().string();

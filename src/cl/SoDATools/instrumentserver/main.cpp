@@ -20,7 +20,7 @@
  */
 
 
-/**  
+/**
   * @file Main program of the instrumen server.
   *       The instrument server communicating with the instrumented code through
   *       sockets and saves the trace informations in SoDA binary format.
@@ -39,7 +39,9 @@
 #include <vector>
 
 #include "boost/program_options.hpp"
-#include "data/CTraceData.h"
+#include "boost/thread.hpp"
+
+#include "CTraceData.h"
 #include "CTraceLogger.h"
 
 using namespace soda;
@@ -48,8 +50,9 @@ namespace po = boost::program_options;
 
 po::options_description desc("Allowed options");
 
-const char* const socketName = "/tmp/instrument-server";
-std::vector<CTraceLogger *> loggers;
+std::string socketName;
+std::vector<int> sockets;
+std::vector<boost::thread *> threads;
 CTraceData *data;
 int serverSocket;
 String coverageFilePath;
@@ -69,7 +72,7 @@ void startServer()
 
     /* Indicate that this is a server. */
     name.sun_family = AF_LOCAL;
-    strcpy(name.sun_path, socketName);
+    strcpy(name.sun_path, socketName.c_str());
     bind(serverSocket, (struct sockaddr*)&name, SUN_LEN (&name));
 
     /* Listen for connections. */
@@ -84,16 +87,19 @@ void startServer()
  */
 void signalHandler(int signal)
 {
-    std::cout << std::endl << "CTRL+c was pressed. Stopping server... ";
-    std::vector<CTraceLogger *>::iterator it;
-    for (it = loggers.begin(); it != loggers.end(); it++) {
-        CTraceLogger *logger = *it;
-        logger->join();
-        close(logger->getSocket());
+    (std::cout << std::endl << "CTRL+c was pressed. Stopping server... ").flush();
+    for (std::vector<boost::thread *>::iterator it = threads.begin(); it != threads.end(); it++) {
+        boost::thread *thread = *it;
+        thread->join();
 
-        delete logger;
+        delete thread;
     }
-    loggers.clear();
+    std::cerr << std::endl;
+    threads.clear();
+
+    for (std::vector<int>::iterator it = sockets.begin(); it != sockets.end(); it++) {
+        close(*it);
+    }
 
     data->save();
 
@@ -111,10 +117,10 @@ void signalHandler(int signal)
     delete data;
 
     close(serverSocket);
-    unlink(socketName);
+    unlink(socketName.c_str());
 
     std::cout << "done." << std::endl;
-    pthread_exit(NULL);
+    exit(0);
 }
 
 /**
@@ -148,6 +154,7 @@ int processArgs(int ac, char *av[])
         dumpCodeElements = true;
         codeElementPath = vm["dump-code-elements"].as<String>();
     }
+    socketName = vm["socket-file"].as<String>();
 
     // Create signal handler.
     struct sigaction sigIntHandler;
@@ -165,14 +172,20 @@ int processArgs(int ac, char *av[])
     do {
         struct sockaddr_un clientName;
         socklen_t clientNameLength;
-        int clientSocket;
 
         /* Accept a connection. */
-        clientSocket = accept(serverSocket, (struct sockaddr*)&clientName, &clientNameLength);
+        int clientSocket = accept(serverSocket, (struct sockaddr*)&clientName, &clientNameLength);
+        // no new connection
+        if (clientSocket < 0)
+            continue;
+
         /* Handle the connection. */
-        CTraceLogger *logger = new CTraceLogger(clientSocket, data);
-        loggers.push_back(logger);
-        logger->start();
+        CTraceLogger logger = CTraceLogger(clientSocket, data);
+        // Start a thread.
+        boost::thread *thread = new boost::thread(logger);
+        // Save it for later use.
+        threads.push_back(thread);
+        sockets.push_back(clientSocket);
     }
     while (true);
 
@@ -187,6 +200,7 @@ int main(int argc, char *argv[])
             ("help,h", "help message")
             ("base-dir,d", po::value<String>(), "base directory of where the make check was started")
             ("coverage-data,c", po::value<String>(), "output file containing the coverage matrix")
+            ("socket-file,s", po::value<String>()->default_value("/tmp/instrument-server"), "the temporary file that can be used for communication")
             ("dump-code-elements", po::value<String>(), "output file containing the code elements and their location")
     ;
 

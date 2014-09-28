@@ -97,8 +97,7 @@ void OneRevisionPerFileChangesetReaderPlugin::readFromDirectory1stPass(fs::path 
         } else {
             std::cout << info_cnt++ << "/" << info_max << ' ' << info_Tcnt++ << "/" << info_Tmax << '\r';
             std::cout.flush();
-
-            std::ifstream in(it->c_str());
+            std::ifstream in(it->string().c_str());
             std::string line;
             boost::char_separator<char> sep(",");
             StringVector data;
@@ -143,7 +142,7 @@ void OneRevisionPerFileChangesetReaderPlugin::readFromDirectory(fs::path p)
             RevNumType revision = boost::lexical_cast<RevNumType>(basename(*it));
             m_changeset->addRevision(revision);
 
-            std::ifstream in(it->c_str());
+            std::ifstream in(it->string().c_str());
             std::string line;
             boost::char_separator<char> sep(",");
             StringVector data;

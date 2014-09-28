@@ -16,7 +16,6 @@ The library is released under LGPLv3 license.
 
 * cmake 2.8.0 or higher
 * Boost 1.49 or higher
-* pthread
 * googletest (for unit tests)
  
 #### Compile

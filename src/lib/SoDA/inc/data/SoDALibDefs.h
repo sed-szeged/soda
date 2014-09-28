@@ -28,13 +28,20 @@
 #include <set>
 #include <vector>
 #include <list>
+#include <sys/types.h>
+
 
 namespace soda {
 
 class CBitList;
+class CClusterDefinition;
 
-#define IndexType unsigned long long int
-#define RevNumType unsigned int
+#ifdef _WIN32
+	typedef unsigned long long u_int64_t;
+#endif
+
+typedef u_int64_t IndexType;
+typedef unsigned int RevNumType;
 
 typedef CBitList BitList;
 typedef std::string String;
@@ -43,6 +50,7 @@ typedef std::vector<String> StringVector;
 typedef std::map<IndexType, String> StringMap;
 typedef std::map<String, IndexType> IdxStrMap;
 typedef std::map<IndexType, IndexType> IdxIdxMap;
+typedef std::map<std::string, CClusterDefinition> ClusterMap;
 
 } // namespace soda
 

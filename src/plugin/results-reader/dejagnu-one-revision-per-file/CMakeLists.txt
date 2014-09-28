@@ -2,6 +2,7 @@ project(dejagnu_one_revision_per_file_results_reader_plugin)
 
 include_directories(${dejagnu_one_revision_per_file_results_reader_plugin_SOURCE_DIR}/../../../lib/SoDA/inc
                     ${dejagnu_one_revision_per_file_results_reader_plugin_SOURCE_DIR}/../../../lib/SoDAEngine/inc
+                    ${RAPIDJSON_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS})
 
 file(GLOB_RECURSE headers ./*.h)

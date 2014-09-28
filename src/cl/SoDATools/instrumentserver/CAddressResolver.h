@@ -19,35 +19,23 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "thread/CThread.h"
+#ifndef CADDRESSRESOLVER_H
+#define CADDRESSRESOLVER_H
+
+#include <cstdio>
+//#include <unistd.h>
+#include <string>
+
+#include "exception/CException.h"
 
 namespace soda {
 
-CThread::CThread()
+class CAddressResolver
 {
-    pthread_attr_init(&m_threadAttr);
-    pthread_attr_setdetachstate(&m_threadAttr, PTHREAD_CREATE_JOINABLE);
-}
+public:
+    static std::string resolve(const std::string &binaryFullPath, const int address);
+};
 
-CThread::~CThread()
-{
-    pthread_attr_destroy(&m_threadAttr);
-}
+} /* namespace soda */
 
-void* CThread::startThread(void *object)
-{
-    reinterpret_cast<CThread *>(object)->run();
-    pthread_exit(NULL);
-}
-
-void CThread::start()
-{
-    pthread_create(&m_pthread, &m_threadAttr, &CThread::startThread, this);
-}
-
-void CThread::join()
-{
-    pthread_join(m_pthread, 0);
-}
-
-}
+#endif /* CADDRESSRESOLVER_H */

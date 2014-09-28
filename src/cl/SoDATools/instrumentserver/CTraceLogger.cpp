@@ -24,9 +24,11 @@
 #include <iostream>
 #include <sstream>
 
+#include "boost/filesystem.hpp"
+
 #include "CTraceLogger.h"
 #include "exception/CException.h"
-#include "util/CAddressResolver.h"
+#include "CAddressResolver.h"
 
 namespace soda {
 
@@ -36,11 +38,18 @@ CTraceLogger::CTraceLogger(int socket, CTraceData *data) :
 {
 }
 
+CTraceLogger::CTraceLogger(const CTraceLogger &obj)
+{
+    m_testcaseName = std::string(obj.m_testcaseName);
+    m_socket = obj.m_socket;
+    m_data = obj.m_data;
+}
+
 CTraceLogger::~CTraceLogger()
 {
 }
 
-void CTraceLogger::run()
+void CTraceLogger::operator()()
 {
     bool isOpen = true;
     while (isOpen) {
@@ -111,28 +120,42 @@ String CTraceLogger::handleFunctionMessage()
     }
 
     text = new char[length];
-    // Read the test name.
+    // Read path.
     len = read(m_socket, text, length);
     if (len < 0) {
+        delete text;
         return function;
     }
 
     // Read the address.
     len = read(m_socket, &address, sizeof(address));
     if (len < 0) {
+        delete text;
         return function;
     }
 
     String binaryPath = String(text);
 
     if (!m_data->getCodeElementName(binaryPath, address, function)) {
-        function = translateAddressToFunction(binaryPath, address);
-        m_data->addCodeElementLocation(function);
+        String resolved = translateAddressToFunction(binaryPath, address);
+
+        // The address can not be resolved.
+        if (resolved.find("??") != std::string::npos) {
+            delete text;
+            return function;
+        }
+
+
+        function = resolved.substr(0, resolved.find(" at "));
+
+        std::cerr << "Function: " << function << std::endl;
+
+        m_data->addCodeElementLocation(resolved);
         m_data->addCodeElementName(binaryPath, address, function);
     }
 
     /* Free the buffer. */
-    delete text;
+    delete text;    
 
     return function;
 }
@@ -159,7 +182,7 @@ void CTraceLogger::handleFunctionExitMessage()
 String CTraceLogger::translateAddressToFunction(const String &binaryPath, const int address)
 {
     String binaryFullPath = binaryPath;
-    if (!access(binaryPath.c_str(), F_OK) == 0) {
+    if (!boost::filesystem::exists(binaryPath.c_str()) || boost::filesystem::is_directory(binaryPath.c_str())) {
         binaryFullPath = m_data->getBaseDir() + "/" + binaryPath;
     }
     String output;
@@ -169,7 +192,8 @@ String CTraceLogger::translateAddressToFunction(const String &binaryPath, const 
         output = "[SODA]not-resolved";
     }
 
-    output.erase(output.length() - 2, 2); // remove line ending
+    if (!output.empty())
+        output.erase(output.length() - 2, 2); // remove line ending
     return output;
 }
 

@@ -23,6 +23,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <stdio.h>
 #include <set>
 
 #include <boost/filesystem.hpp>
@@ -31,7 +32,12 @@
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
-#include "io/CJsonReader.h"
+
+#include <cstdio>
+#include "rapidjson/document.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/filereadstream.h"
+#include "rapidjson/prettywriter.h"
 
 
 using namespace soda;
@@ -50,7 +56,6 @@ CKernel kernel;
 IndexType revision;
 std::map<std::string, CClusterDefinition> clusterList;
 std::string outputDir;
-std::map<std::string, ITestSuiteMetricPlugin::MetricResults> results;
 
 std::set<std::string> metricsCalculated;
 
@@ -168,22 +173,44 @@ int loadJsonFiles(String path)
     return 0;
 }
 
-void calculateMetric(CSelectionData *selectionData, const std::string &name)
+void calculateMetric(CSelectionData *selectionData, const std::string &name, rapidjson::Document &results)
 {
     ITestSuiteMetricPlugin *metric = kernel.getTestSuiteMetricPluginManager().getPlugin(name);
 
     StringVector dependencies = metric->getDependency();
     for (StringVector::iterator it = dependencies.begin(); it != dependencies.end(); it++) {
         if (metricsCalculated.find(*it) == metricsCalculated.end()) {
-            calculateMetric(selectionData, *it);
+            calculateMetric(selectionData, *it, results);
         }
     }
 
     (std::cerr << "[INFO] Calculating metrics: " << metric->getName() << " ...").flush();
     metric->init(selectionData, &clusterList, revision);
-    metric->calculate(outputDir, results);
+    metric->calculate(results);
     metricsCalculated.insert(name);
     (std::cerr << " done." << std::endl).flush();
+}
+
+void saveResults(rapidjson::Document &results)
+{
+    std::ofstream out;
+    out.open(std::string(outputDir + "/test.suite.metrics.csv").c_str());
+    out << ";";
+    for (std::set<std::string>::iterator it = metricsCalculated.begin(); it != metricsCalculated.end(); it++) {
+        out << *it << ";";
+    }
+    out << std::endl;
+
+    std::map<std::string, CClusterDefinition>::iterator clusterIt;
+    for (clusterIt = clusterList.begin(); clusterIt != clusterList.end(); clusterIt++) {
+        std::string clusterName = clusterIt->first;
+        out << clusterName << ";";
+        for (std::set<std::string>::iterator it = metricsCalculated.begin(); it != metricsCalculated.end(); it++) {
+            out << results[clusterName.c_str()][(*it).c_str()].GetDouble() << ";";
+        }
+        out << std::endl;
+    }
+    out.close();
 }
 
 void processJsonFiles(String path)
@@ -191,16 +218,26 @@ void processJsonFiles(String path)
     try {
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
 
-        boost::filesystem::path jsonPath(path);
-        CJsonReader reader = CJsonReader(path);
+        rapidjson::Document reader;
+        {
+            FILE *in = fopen (path.c_str(), "r");
+            char readBuffer[65536];
+            rapidjson::FileReadStream is(in, readBuffer, sizeof(readBuffer));
+            reader.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
+            fclose(in);
+        }
 
-        std::string clusterAlgorithmName = reader.getStringFromProperty("cluster-algorithm");
+        boost::filesystem::path jsonPath(path);
+        std::string clusterAlgorithmName = reader["cluster-algorithm"].GetString();
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
         clusterAlgorithm->init(reader);
 
         CSelectionData *selectionData = new CSelectionData();
 
-        StringVector metrics = reader.getStringVectorFromProperty("metrics");
+        StringVector metrics;
+        for (rapidjson::Value::ConstValueIterator itr = reader["metrics"].Begin(); itr != reader["metrics"].End(); ++itr)
+            metrics.push_back(itr->GetString());
+
         if (metrics.empty()) {
             std::cerr << "[ERROR] Missing metrics parameter in config file " << path << "." << std::endl;
             return;
@@ -216,9 +253,8 @@ void processJsonFiles(String path)
             }
         }
 
-        revision = reader.getIntFromProperty("revision");
-
-        outputDir = reader.getStringFromProperty("output-dir");
+        revision = reader["revision"].GetInt();
+        outputDir = reader["output-dir"].GetString();
         if (outputDir.empty()) {
             std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
             return;
@@ -228,12 +264,12 @@ void processJsonFiles(String path)
         if (!exists(outputDir))
             boost::filesystem::create_directory(boost::filesystem::path(outputDir));
 
-        String covPath = reader.getStringFromProperty("coverage-data");
+        String covPath = reader["coverage-data"].GetString();
         if (covPath[0] == '.') {
             covPath = jsonPath.parent_path().string() + "/" + covPath;
         }
 
-        String resPath = reader.getStringFromProperty("results-data");
+        String resPath = reader["results-data"].GetString();
         if (resPath[0] == '.') {
             resPath = jsonPath.parent_path().string() + "/" + resPath;
         }
@@ -249,7 +285,7 @@ void processJsonFiles(String path)
             return;
         }
 
-        if (reader.getBoolFromProperty("globalize")) {
+        if (reader["globalize"].GetBool()) {
             (std::cerr << "[INFO] Globalizing ...").flush();
             selectionData->globalize();
             (std::cerr << " done" << std::endl).flush();
@@ -257,15 +293,21 @@ void processJsonFiles(String path)
 
         clusterList.clear();
         metricsCalculated.clear();
-        results.clear();
 
         (std::cerr << "[INFO] Running cluster algorithm: " << clusterAlgorithm->getName() << " ...").flush();
         clusterAlgorithm->execute(*selectionData, clusterList);
         (std::cerr << " done" << std::endl).flush();
 
+        rapidjson::Document results;
+        results.SetObject();
         for (StringVector::iterator it = metrics.begin(); it != metrics.end(); it++) {
-            calculateMetric(selectionData, *it);
+            if (metricsCalculated.find(*it) == metricsCalculated.end()) {
+                calculateMetric(selectionData, *it, results);
+            }
         }
+
+
+        saveResults(results);
 
         delete selectionData;
     } catch (std::exception &e) {

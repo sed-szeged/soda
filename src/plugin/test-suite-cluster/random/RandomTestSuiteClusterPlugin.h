@@ -18,33 +18,36 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <iostream>
-#include <sstream>
-#include "util/CAddressResolver.h"
+#ifndef RANDOMTESTSUITECLUSTERPLUGIN_H
+#define RANDOMTESTSUITECLUSTERPLUGIN_H
 
+#include <vector>
+
+#include "engine/CKernel.h"
 
 namespace soda {
 
-std::string CAddressResolver::resolve(const std::string &binaryFullPath, const int address)
-    {
-        std::ostringstream command;
-        command << "addr2line -C -f -p -e " << binaryFullPath << " 0x" << std::hex << address;
+class RandomTestSuiteClusterPlugin : public ITestSuiteClusterPlugin
+{
+public:
 
-        FILE *pf;
-        pf = popen(command.str().c_str(), "r");
-        if (!pf) {
-            throw CException("soda::CAddressResolver::resolve", "Can not run addr2line");
-        }
-        String output = "";
-        char *buf = new char[3072];
-        if (fgets(buf, 3072, pf) != NULL) {
-            output = String(buf);
-        }
+    RandomTestSuiteClusterPlugin();
+    ~RandomTestSuiteClusterPlugin();
 
-        delete buf;
-        pclose(pf);
+    std::string getName();
 
-        return output;
-    }
+    std::string getDescription();
+
+    std::map<String, String> getRequiredParameters();
+
+    void init(rapidjson::Document &doc);
+
+    void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList);
+
+private:
+    std::vector<IndexType> m_sizes;
+};
 
 } /* namespace soda */
+
+#endif /* RANDOMTESTSUITECLUSTERPLUGIN_H */

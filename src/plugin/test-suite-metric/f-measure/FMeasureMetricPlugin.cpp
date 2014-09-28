@@ -40,7 +40,7 @@ std::string FMeasureMetricPlugin::getName()
 
 std::string FMeasureMetricPlugin::getDescription()
 {
-    return "Calculates the F-measure value of the fault detection and localization metrics.";
+    return "Calculates the F-measure value of the coverage and partition metrics.";
 }
 
 void FMeasureMetricPlugin::init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision)
@@ -52,38 +52,53 @@ void FMeasureMetricPlugin::init(CSelectionData *data, std::map<std::string, CClu
 std::vector<std::string> FMeasureMetricPlugin::getDependency()
 {
     std::vector<std::string> dependencies;
-    dependencies.push_back("fault-detection");
+    dependencies.push_back("coverage");
     dependencies.push_back("partition-metric");
     return dependencies;
 }
 
-void FMeasureMetricPlugin::calculate(const std::string &output, std::map<std::string, MetricResults> &results)
+void FMeasureMetricPlugin::calculate(rapidjson::Document &results)
 {
+    /*
     std::ofstream fMeasureStream;
     fMeasureStream.open((output + "/f.measure.metric.csv").c_str());
     fMeasureStream << "# cluster;number of testcases in cluster;number of code elements in cluster;fault detection; fault localization; partition metric; f-measure" << std::endl;
+    */
 
-    std::map<std::string, MetricResults>::iterator it;
-    for (it = results.begin(); it != results.end(); it++) {
-        MetricResults result = it->second;
-        double faultDetection = result["fault-detection"];
-        double faultLocalization = result["fault-localization"];
-        double partitionMetric = result["partition-metric"];
+    std::map<std::string, CClusterDefinition>::iterator it;
+    for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
+
+        if (!results.HasMember(it->first.c_str())) {
+            rapidjson::Value key;
+            key.SetString(it->first.c_str(), results.GetAllocator());
+            rapidjson::Value cluster;
+            cluster.SetObject();
+            results.AddMember(key, cluster, results.GetAllocator());
+        }
+
+        double faultDetection = results[it->first.c_str()]["coverage"].GetDouble();
+        double partitionMetric = results[it->first.c_str()]["partition-metric"].GetDouble();
 
         double fMeasure = 0.0;
         if ((faultDetection + partitionMetric) > 0.0) {
             fMeasure = (2 * faultDetection * partitionMetric) / (faultDetection + partitionMetric);
         }
 
-        IndexType nrOfTestCases = (*m_clusterList)[it->first].getTestCases().size();
-        IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
+        //IndexType nrOfTestCases = (*m_clusterList)[it->first].getTestCases().size();
+        //IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
 
-        fMeasureStream << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << faultDetection << ";" << faultLocalization << ";" << partitionMetric << ";" << fMeasure << std::endl;
+        //fMeasureStream << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << faultDetection << ";" << faultLocalization << ";" << partitionMetric << ";" << fMeasure << std::endl;
 
-        results[it->first]["f-measure"] = fMeasure;
+        rapidjson::Value::MemberIterator metricIt = results[it->first.c_str()].FindMember("f-measure");
+        if (metricIt == results[it->first.c_str()].MemberEnd()) {
+            rapidjson::Value v;
+            v.SetDouble(fMeasure);
+            results[it->first.c_str()].AddMember("f-measure", v, results.GetAllocator());
+        } else
+            metricIt->value.SetDouble(fMeasure);
     }
 
-    fMeasureStream.close();
+    //fMeasureStream.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)

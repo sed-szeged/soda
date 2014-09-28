@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 project(SoDA)
 
+# Enable ExternalProject CMake module
+include(ExternalProject)
+# Set default ExternalProject root directory
+set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/ext)
+
 # Set the build type if it isn't already
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -9,9 +14,17 @@ endif()
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options)
+find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options thread)
 
-find_package(Threads REQUIRED)
+ExternalProject_Add(
+    rapidjson
+    SVN_REPOSITORY "https://github.com/miloyip/rapidjson"
+    CONFIGURE_COMMAND "" # skip configure
+    BUILD_COMMAND "" # skip build
+    INSTALL_COMMAND "" # skip install
+  )
+
+set(RAPIDJSON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ext/src/rapidjson/trunk/include)
 
 option(test "Build tests" OFF)
 option(coverage "Build with coverage analysis support" OFF)
@@ -47,11 +60,9 @@ if(NOT withoutcl)
 endif(NOT withoutcl)
 
 if(test)
-    # Enable ExternalProject CMake module
-    include(ExternalProject)
 
-    # Set default ExternalProject root directory
-    set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/ThirdParty)
+
+
 
     # Add gtest
     ExternalProject_Add(

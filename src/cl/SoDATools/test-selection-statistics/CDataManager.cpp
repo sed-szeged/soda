@@ -20,8 +20,10 @@
  */
 
 #include <boost/filesystem.hpp>
-#include "CSelectionStatistics.h"
+#include "util/CSelectionStatistics.h"
 #include "CDataManager.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/filestream.h"
 
 using namespace std;
 
@@ -59,18 +61,28 @@ void CDataManager::calcStatistics()
         boost::filesystem::create_directories(m_outputDir);
     }
 
-    CSelectionStatistics stats = CSelectionStatistics(this);
+    CSelectionStatistics stats = CSelectionStatistics(m_selectionData);
     if (m_testMask & (tmTestcaseCoverage | tmFunctionCoverage)) {
-        stats.calcCoverageRelatedStatistics();
+        rapidjson::Document res;
+        res.SetObject();
+        stats.calcCoverageRelatedStatistics(res);
+        rapidjson::FileStream f(stdout);
+        rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
+        res.Accept(writer);
     }
-    if (m_testMask & tmChanges) {
-        stats.calcChangeRelatedStatistics();
-    }
-    if (m_testMask & tmFails) {
+    /*if (m_testMask & tmFails) {
         stats.calcFailStatistics();
-    }
+    }*/
+    /*if (m_testMask & tmChanges) {
+        stats.calcChangeRelatedStatistics();
+    }*/
     if (m_testMask & tmCoverageResultSummary) {
-        stats.calcCovResultsSummary();
+        rapidjson::Document res;
+        res.SetObject();
+        stats.calcCovResultsSummary(res);
+        rapidjson::FileStream f(stdout);
+        rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
+        res.Accept(writer);
     }
 }
 

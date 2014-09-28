@@ -8,5 +8,9 @@ file(GLOB test_suite_selections_headers ./*.h)
 
 aux_source_directory(${test_suite_selections_SOURCE_DIR} test_suite_selections_src)
 
+if (UNIX)
+	set(LINK_LIBRARIES dl)
+endif()
+
 add_executable(test-suite-selections ${test_suite_selections_headers} ${test_suite_selections_src})
-target_link_libraries(test-suite-selections SoDAEngine SoDA ${Boost_LIBRARIES} dl)
+target_link_libraries(test-suite-selections SoDAEngine SoDA ${Boost_LIBRARIES} ${LINK_LIBRARIES})

@@ -104,7 +104,7 @@ void DejaGNUOneRevisionPerFileResultsReaderPlugin::readFromDirectory1stPass(fs::
 
             m_results->addRevisionNumber(boost::lexical_cast<int>(it->parent_path().filename().string()));
 
-            std::ifstream in(it->c_str());
+            std::ifstream in(it->string().c_str());
             String buffer;
             while (std::getline(in, buffer)) {
                 const char *i = buffer.c_str();
@@ -148,7 +148,7 @@ void DejaGNUOneRevisionPerFileResultsReaderPlugin::readFromDirectory(fs::path p)
             std::cout.flush();
 
             int revision = boost::lexical_cast<int>(it->parent_path().filename().string());
-            std::ifstream in(it->c_str());
+            std::ifstream in(it->string().c_str());
             std::string buffer;
             while (std::getline(in, buffer)) {
                 const char *i = buffer.c_str();

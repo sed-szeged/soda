@@ -25,8 +25,7 @@
 #include <map>
 #include <set>
 
-#include "thread/CThread.h"
-#include "data/CTraceData.h"
+#include "CTraceData.h"
 
 namespace soda {
 
@@ -35,7 +34,7 @@ namespace soda {
  *        through a socket, translates the code function address to its name and
  *        stores the information into the coverage matrix.
  */
-class CTraceLogger : public CThread
+class CTraceLogger
 {
 public:
     /**
@@ -45,12 +44,13 @@ public:
      * @param data  The CTraceData instance.
      */
     CTraceLogger(int socket, CTraceData *data);
+    CTraceLogger(const CTraceLogger &obj);
     ~CTraceLogger();
 
     /**
      * @brief Processes the messages coming through the socket.
      */
-    virtual void run();
+    void operator()();
 
     /**
      * @brief Returns the socket identifier.

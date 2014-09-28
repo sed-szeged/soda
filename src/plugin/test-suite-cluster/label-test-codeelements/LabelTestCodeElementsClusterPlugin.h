@@ -33,7 +33,8 @@ public:
 
     std::string getName();
     std::string getDescription();
-    void init(io::CJsonReader &reader);
+    std::map<String, String> getRequiredParameters();
+    void init(rapidjson::Document &doc);
 
     void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList);
 
