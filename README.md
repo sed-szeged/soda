@@ -10,6 +10,11 @@ Visit our [wiki](https://github.com/sed-szeged/soda/wiki/) page to get more info
 
 The library is released under LGPLv3 license.
 
+### TAM
+
+We have created a graphical user interface, called Test suite Analysis and Manipulation, to provide easy access to the features of SoDA library. 
+You can find its repository at: https://github.com/sed-szeged/tam
+
 ### Getting started
 
 #### Dependencies
