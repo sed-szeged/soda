@@ -18,6 +18,13 @@ The library is released under LGPLv3 license.
 * Boost 1.49 or higher
 * googletest (for unit tests)
  
+#### Suuported platforms
+
+* Linux
+* Mac OSX
+* Windows (with MinGW 32bit)
+
+
 #### Compile
 
 ```bash
