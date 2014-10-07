@@ -20,6 +20,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "rapidjson/document.h"
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
 #include "engine/plugin/ITestSuiteClusterPlugin.h"
@@ -32,13 +33,18 @@ class CTestSuiteClusterPluginsTest : public testing::Test
 protected:
     CSelectionData data;
     ITestSuiteClusterPlugin *plugin;
-    std::map<std::string, CClusterDefinition> clusterList;
+    ClusterMap clusterList;
     CKernel kernel;
 
     virtual void SetUp() {
         plugin = NULL;
         clusterList.clear();
-        data.loadCoverage("sample/CoverageMatrixOneTestPerFileTestSelectionBit");
+        std::srand(std::time(0));
+        for (int i = 0; i < 100; ++i) {
+            for (int j = 0; j < 100; ++j) {
+                data.getCoverage()->addOrSetRelation("test-" + std::to_string(i), "ce-" + std::to_string(j), (j <= i) ? true : false);
+            }
+        }
     }
 
     virtual void TearDown() {
@@ -53,4 +59,61 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
     EXPECT_EQ(1u, clusterList.size());
     EXPECT_EQ(data.getCoverage()->getNumOfCodeElements(), clusterList["full"].getCodeElements().size());
     EXPECT_EQ(data.getCoverage()->getNumOfTestcases(), clusterList["full"].getTestCases().size());
+}
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPlugin)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("coverage"));
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Value val(rapidjson::kArrayType);
+    for (int i = 10; i <= 50; i += 10)
+        val.PushBack(i, doc.GetAllocator());
+    doc.AddMember("cluster-sizes", val, doc.GetAllocator());
+
+    EXPECT_NO_THROW(plugin->init(doc));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
+
+    EXPECT_EQ(5u, clusterList.size());
+    EXPECT_EQ(10u, clusterList["coverage-10"].getTestCases().size());
+    EXPECT_EQ(99u, clusterList["coverage-10"].getTestCases()[0]);
+    EXPECT_EQ(50u, clusterList["coverage-50"].getTestCases()[49]);
+}
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPlugin)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("duplation"));
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Value val(rapidjson::kArrayType);
+    for (int i = 10; i <= 50; i += 10)
+        val.PushBack(i, doc.GetAllocator());
+    doc.AddMember("cluster-sizes", val, doc.GetAllocator());
+
+    EXPECT_NO_THROW(plugin->init(doc));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
+
+    EXPECT_EQ(5u, clusterList.size());
+    EXPECT_EQ(10u, clusterList["duplation-10"].getTestCases().size());
+    EXPECT_EQ(49u, clusterList["duplation-10"].getTestCases()[0]);
+    EXPECT_EQ(40u, clusterList["duplation-50"].getTestCases()[49]);
+}
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPlugin)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("random"));
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Value val(rapidjson::kArrayType);
+    for (int i = 10; i <= 50; i += 10)
+        val.PushBack(i, doc.GetAllocator());
+    doc.AddMember("cluster-sizes", val, doc.GetAllocator());
+
+    EXPECT_NO_THROW(plugin->init(doc));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
+
+    EXPECT_EQ(5u, clusterList.size());
+    EXPECT_EQ(10u, clusterList["random-10"].getTestCases().size());
+    EXPECT_EQ(100u, clusterList["random-10"].getCodeElements().size());
+    EXPECT_EQ(50u, clusterList["random-50"].getTestCases().size());
 }

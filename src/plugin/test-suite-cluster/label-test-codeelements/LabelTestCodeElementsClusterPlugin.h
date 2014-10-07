@@ -39,9 +39,6 @@ public:
     void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList);
 
 private:
-    void dumpClusters(std::map<std::string, CClusterDefinition>& clusterList);
-
-private:
     std::string m_testList;
     std::string m_codeElementList;
 };

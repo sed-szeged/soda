@@ -60,10 +60,6 @@ if(NOT withoutcl)
 endif(NOT withoutcl)
 
 if(test)
-
-
-
-
     # Add gtest
     ExternalProject_Add(
         googletest

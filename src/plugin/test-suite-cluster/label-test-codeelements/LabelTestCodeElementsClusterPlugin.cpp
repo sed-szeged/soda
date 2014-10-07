@@ -123,31 +123,6 @@ void LabelTestCodeElementsClusterPlugin::execute(CSelectionData &data, std::map<
             clusterList[cluster] = def;
         }
     }
-
-    //dumpClusters(clusterList);
-}
-
-void LabelTestCodeElementsClusterPlugin::dumpClusters(std::map<std::string, CClusterDefinition> &clusterList)
-{
-    std::ofstream out;
-    out.open("./clusters.csv");
-
-    std::map<std::string, CClusterDefinition>::iterator it;
-    for (it = clusterList.begin(); it != clusterList.end(); it++) {
-        out << it->first << ";";
-        std::vector<IndexType> testCases = it->second.getTestCases();
-        for (IndexType i = 0; i < testCases.size(); i++) {
-            out << testCases[i] << ";";
-        }
-        out << "|";
-        std::vector<IndexType> codeElements = it->second.getCodeElements();
-        for (IndexType i = 0; i < codeElements.size(); i++) {
-            out << codeElements[i] << ";";
-        }
-        out << std::endl;
-    }
-
-    out.close();
 }
 
 extern "C" void registerPlugin(CKernel &kernel)
