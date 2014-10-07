@@ -35,6 +35,7 @@ protected:
     ITestSuiteClusterPlugin *plugin;
     ClusterMap clusterList;
     CKernel kernel;
+    rapidjson::Document doc;
 
     virtual void SetUp() {
         plugin = NULL;
@@ -45,6 +46,11 @@ protected:
                 data.getCoverage()->addOrSetRelation("test-" + std::to_string(i), "ce-" + std::to_string(j), (j <= i) ? true : false);
             }
         }
+        doc.SetObject();
+        rapidjson::Value val(rapidjson::kArrayType);
+        for (int i = 10; i <= 50; i += 10)
+            val.PushBack(i, doc.GetAllocator());
+        doc.AddMember("cluster-sizes", val, doc.GetAllocator());
     }
 
     virtual void TearDown() {
@@ -54,6 +60,7 @@ protected:
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("one-cluster"));
+    EXPECT_NO_THROW(plugin->init(doc));
     EXPECT_NO_THROW(plugin->execute(data, clusterList));
 
     EXPECT_EQ(1u, clusterList.size());
@@ -64,13 +71,6 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("coverage"));
-    rapidjson::Document doc;
-    doc.SetObject();
-    rapidjson::Value val(rapidjson::kArrayType);
-    for (int i = 10; i <= 50; i += 10)
-        val.PushBack(i, doc.GetAllocator());
-    doc.AddMember("cluster-sizes", val, doc.GetAllocator());
-
     EXPECT_NO_THROW(plugin->init(doc));
     EXPECT_NO_THROW(plugin->execute(data, clusterList));
 
@@ -83,13 +83,6 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPlugin)
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("duplation"));
-    rapidjson::Document doc;
-    doc.SetObject();
-    rapidjson::Value val(rapidjson::kArrayType);
-    for (int i = 10; i <= 50; i += 10)
-        val.PushBack(i, doc.GetAllocator());
-    doc.AddMember("cluster-sizes", val, doc.GetAllocator());
-
     EXPECT_NO_THROW(plugin->init(doc));
     EXPECT_NO_THROW(plugin->execute(data, clusterList));
 
@@ -102,13 +95,6 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPlugin)
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("random"));
-    rapidjson::Document doc;
-    doc.SetObject();
-    rapidjson::Value val(rapidjson::kArrayType);
-    for (int i = 10; i <= 50; i += 10)
-        val.PushBack(i, doc.GetAllocator());
-    doc.AddMember("cluster-sizes", val, doc.GetAllocator());
-
     EXPECT_NO_THROW(plugin->init(doc));
     EXPECT_NO_THROW(plugin->execute(data, clusterList));
 
