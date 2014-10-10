@@ -51,6 +51,8 @@ protected:
         for (int i = 10; i <= 50; i += 10)
             val.PushBack(i, doc.GetAllocator());
         doc.AddMember("cluster-sizes", val, doc.GetAllocator());
+        doc.AddMember("cluster-test-list", "sample/ClusterPluginSampleDir/label-test-codeelement-test.txt", doc.GetAllocator());
+        doc.AddMember("cluster-code-elements-list", "sample/ClusterPluginSampleDir/label-test-codeelement-method.txt", doc.GetAllocator());
     }
 
     virtual void TearDown() {
@@ -102,4 +104,17 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPlugin)
     EXPECT_EQ(10u, clusterList["random-10"].getTestCases().size());
     EXPECT_EQ(100u, clusterList["random-10"].getCodeElements().size());
     EXPECT_EQ(50u, clusterList["random-50"].getTestCases().size());
+}
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteLabelTestCodeElementClusterPlugin)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("label-test-codeelements"));
+    EXPECT_NO_THROW(plugin->init(doc));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
+
+    EXPECT_EQ(4u, clusterList.size());
+    EXPECT_EQ(3u, clusterList["sample - sample"].getTestCases().size());
+    EXPECT_EQ(9u, clusterList["sample - sample"].getCodeElements().size());
+    EXPECT_EQ(3u, clusterList["sample2 - sample"].getTestCases().size());
+    EXPECT_EQ(6u, clusterList["sample - sample2"].getCodeElements().size());
 }
