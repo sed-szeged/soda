@@ -40,8 +40,6 @@ namespace soda {
 class ITestSuiteMetricPlugin
 {
 public:
-    typedef std::map<std::string, double> MetricResults;
-public:
 
     /**
      * @brief Virtual destructor.

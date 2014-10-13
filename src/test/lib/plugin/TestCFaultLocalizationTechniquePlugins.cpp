@@ -20,6 +20,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "util/CTestSuiteScore.h"
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
 #include "engine/plugin/IFaultLocalizationTechniquePlugin.h"
@@ -64,6 +65,7 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, Ochiai)
     EXPECT_DOUBLE_EQ(0.57735026918962584, plugin->getValues()["0"].GetDouble());
     EXPECT_DOUBLE_EQ(0.57735026918962584, plugin->getValues()["1"].GetDouble());
     EXPECT_DOUBLE_EQ(0.40824829046386307, plugin->getValues()["2"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.67171717171717171, CTestSuiteScore::flScore(clusterList["full"], plugin->getValues()["0"].GetDouble(), plugin->getDistribution()));
 }
 
 TEST_F(CFaultLocalizationTechniquePluginsTest, Tarantula)
@@ -76,4 +78,5 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, Tarantula)
     EXPECT_DOUBLE_EQ(1, plugin->getValues()["0"].GetDouble());
     EXPECT_DOUBLE_EQ(1, plugin->getValues()["1"].GetDouble());
     EXPECT_DOUBLE_EQ(0.25, plugin->getValues()["2"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.78787878787878785, CTestSuiteScore::flScore(clusterList["full"], plugin->getValues()["0"].GetDouble(), plugin->getDistribution()));
 }

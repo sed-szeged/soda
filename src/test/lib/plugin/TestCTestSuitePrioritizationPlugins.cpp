@@ -51,6 +51,7 @@ protected:
 TEST_F(CTestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("general-ignore"));
+    EXPECT_NO_THROW(plugin->reset(1));
     EXPECT_NO_THROW(plugin->init(data));
     EXPECT_NO_THROW(plugin->fillSelection(result, 100));
 
@@ -64,6 +65,7 @@ TEST_F(CTestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPlugin)
 TEST_F(CTestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizationPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("additional-general-ignore"));
+    EXPECT_NO_THROW(plugin->reset(1));
     EXPECT_NO_THROW(plugin->init(data));
     EXPECT_NO_THROW(plugin->fillSelection(result, 100));
 
@@ -72,4 +74,13 @@ TEST_F(CTestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizatio
     EXPECT_EQ(4u, result[2]);
     EXPECT_EQ(0u, result[3]);
     EXPECT_EQ(2u, result[4]);
+}
+
+TEST_F(CTestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPlugin)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("random-ignore"));
+    EXPECT_NO_THROW(plugin->reset(1));
+    EXPECT_NO_THROW(plugin->init(data));
+    EXPECT_NO_THROW(plugin->fillSelection(result, 100));
+    EXPECT_EQ(5u, result.size());
 }
