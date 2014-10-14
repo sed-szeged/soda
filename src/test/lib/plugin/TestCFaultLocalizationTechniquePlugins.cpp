@@ -36,7 +36,6 @@ protected:
     std::map<std::string, CClusterDefinition> clusterList;
     CSelectionData selection;
     IFaultLocalizationTechniquePlugin *plugin;
-    ITestSuiteClusterPlugin *clusterAlg;
     CKernel kernel;
 
     virtual void SetUp() {
@@ -46,7 +45,7 @@ protected:
         selection.getResults()->setResult(12345, 0, CResultsMatrix::trtFailed);
         selection.getResults()->setResult(12345, 2, CResultsMatrix::trtFailed);
         selection.getResults()->setResult(12345, 1, CResultsMatrix::trtFailed);
-        clusterAlg = kernel.getTestSuiteClusterPluginManager().getPlugin("one-cluster");
+        ITestSuiteClusterPlugin *clusterAlg = kernel.getTestSuiteClusterPluginManager().getPlugin("one-cluster");
         clusterAlg->execute(selection, clusterList);
         plugin = NULL;
     }

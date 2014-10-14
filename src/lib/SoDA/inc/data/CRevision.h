@@ -33,295 +33,85 @@ namespace soda {
  *        where Type is a specified data structure. At special data types you might need to override template
  *        implementation of class methods.
  */
-template <class Type>
+template <typename T>
 class CRevision {
 public:
 
     /**
      * @brief Constructor, creates an empty CRevision.
      */
-    CRevision() :
-        m_data(new std::map<RevNumType, Type>())
-    {}
+    CRevision();
 
     /**
      * @brief Destroys a CRevision object.
      */
-    ~CRevision()
-    {
-        delete m_data;
-    }
+    ~CRevision();
 
     /**
      * @brief Returns true if the given revision number is in the revision map.
      * @param rev  Specified revision number.
      * @return True if the given revision is in the revision map otherwise false.
      */
-    inline bool revisionExists(const RevNumType rev) const
-    {
-        return m_data->count(rev) > 0;
-    }
+    bool revisionExists(const RevNumType rev) const;
 
     /**
      * @brief Returns a reference to the value of the specified revision number.
      * @param rev  Specified revision number.
      * @return Reference to the value of the specified revision number.
      */
-    inline Type& getRevision(const RevNumType rev)
-    {
-        return m_data->at(rev);
-    }
+    T& getRevision(const RevNumType rev);
 
     /**
      * @brief Adds a new element to the revision map with a specified revision number and data structure pair.
      * @param revNum  Specified revision number.
      * @param datastructure  Specified data structure.
      */
-    inline void addRevision(const RevNumType revNum, Type& datastructure)
-    {
-        (*m_data)[revNum] = datastructure;
-    }
+    void addRevision(const RevNumType revNum, T& datastructure);
 
     /**
      * @brief Removes the specified revision number from the revision map.
      * @param revNum  Specified revision number.
      */
-    inline void removeRevision(const RevNumType revNum)
-    {
-        m_data->erase(revNum);
-    }
+    void removeRevision(const RevNumType revNum);
 
     /**
      * @brief Returns the revision numbers stored in the revision map as a vector
      * @return The revision numbers stored in the revision map as a vector.
      */
-    inline IntVector getRevisionNumbers() const
-    {
-        IntVector tmp(0);
-
-        for(typename std::map<RevNumType, Type>::iterator it = m_data->begin(); it != m_data->end(); ++it) {
-            tmp.push_back(it->first);
-        }
-
-        return tmp;
-    }
+    IntVector getRevisionNumbers() const;
 
     /**
      * @brief Returns a reference to the value of the specified revision number.
      * @param rev  Specified revision number.
      * @return Reference to the value of the specified revision number.
      */
-    inline Type& operator[](const int rev)
-    {
-        return getRevision(rev);
-    }
+    T& operator[](const int rev);
 
     /**
      * @brief Returns the number of elements in the revision map.
      * @return Number of elements in the revision map.
      */
-    inline typename std::map<RevNumType, Type>::size_type size() const
-    {
-        return m_data->size();
-    }
+    typename std::map<RevNumType, T>::size_type size() const;
 
     /**
      * @brief Saves the content of a manager to the out.
      * @param out  Output stream.
      * @param chunk  Type of the data.
      */
-    inline void save(io::CBinaryIO * out, const io::CSoDAio::ChunkID chunk = io::CSoDAio::REVISIONS) const
-    {
-        out->writeInt4(chunk);
-        out->writeULongLong8(size()*(4+sizeof(Type)));
-
-        out->writeUInt4(size());
-        for(typename std::map<RevNumType, Type>::iterator it = m_data->begin(); it != m_data->end(); ++it) {
-            out->writeUInt4(it->first);
-            out->writeData(&(it->second), sizeof(Type));
-        }
-    }
+    void save(io::CBinaryIO *out, const io::CSoDAio::ChunkID chunk = io::CSoDAio::REVISIONS) const;
 
     /**
      * @brief Loads the content of a revision map from the in.
      * @param in  Input stream.
      */
-    inline void load(io::CBinaryIO * in) const
-    {
-        m_data->clear();
-
-        for(RevNumType size = in->readUInt4(); size > 0; size--) {
-            RevNumType key = in->readUInt4();
-            Type value;
-            in->readData(&value, sizeof(Type));
-            (*m_data)[key] = value;
-        }
-    }
+    void load(io::CBinaryIO *in) const;
 
 private:
 
     /**
      * @brief Stores revision number, type pairs.
      */
-    std::map<RevNumType, Type>* m_data;
-
-private:
-
-    /**
-     * @brief NIY Copy constructor.
-     */
-    CRevision(const CRevision&);
-
-    /**
-     * @brief NIY operator =.
-     * @return Reference to a CRevision object.
-     */
-    CRevision& operator=(const CRevision&);
-};
-
-/**
- * @brief Template specialization of CRevision class.
- */
-template <>
-class CRevision<String> {
-public:
-
-    /**
-     * @brief Constructor, creates an empty CRevision.
-     */
-    CRevision() :
-        m_data(new std::map<RevNumType, String>())
-    {}
-
-    /**
-     * @brief Destroys a CRevision object.
-     */
-    ~CRevision()
-    {
-        delete m_data;
-    }
-
-    /**
-     * @brief Returns true if the given revision number is in the revision map.
-     * @param rev  Specified revision number.
-     * @return True if the given revision is in the revision map otherwise false.
-     */
-    inline bool revisionExists(const RevNumType rev) const
-    {
-        return m_data->count(rev) > 0;
-    }
-
-    /**
-     * @brief Returns a reference to the value of the specified revision number.
-     * @param rev  Specified revision number.
-     * @return Reference to the value of the specified revision number.
-     */
-    inline String& getRevision(const RevNumType rev)
-    {
-        return m_data->at(rev);
-    }
-
-    /**
-     * @brief Adds a new element to the revision map with a specified revision number and data structure pair.
-     * @param revNum  Specified revision number.
-     * @param datastructure  Specified data structure.
-     */
-    inline void addRevision(const RevNumType revNum, String& datastructure)
-    {
-        (*m_data)[revNum] = datastructure;
-    }
-
-    /**
-     * @brief Removes the specified revision number from the revision map.
-     * @param revNum  Specified revision number.
-     */
-    inline void removeRevision(const RevNumType revNum)
-    {
-        m_data->erase(revNum);
-    }
-
-    /**
-     * @brief Returns the revision numbers stored in the revision map as a vector
-     * @return The revision numbers stored in the revision map as a vector.
-     */
-    inline IntVector getRevisionNumbers() const
-    {
-        IntVector tmp(0);
-
-        for(typename std::map<RevNumType, String>::iterator it = m_data->begin(); it != m_data->end(); ++it) {
-            tmp.push_back(it->first);
-        }
-
-        return tmp;
-    }
-
-    /**
-     * @brief Returns a reference to the value of the specified revision number.
-     * @param rev  Specified revision number.
-     * @return Reference to the value of the specified revision number.
-     */
-    inline String& operator[](const int rev)
-    {
-        return getRevision(rev);
-    }
-
-    /**
-     * @brief Returns the number of elements in the revision map.
-     * @return Number of elements in the revision map.
-     */
-    inline typename std::map<RevNumType, String>::size_type size() const
-    {
-        return m_data->size();
-    }
-
-    /**
-     * @brief Saves the content of a manager to the out.
-     * @param out  Output stream.
-     * @param chunk  Type of the data.
-     */
-    inline void save(io::CBinaryIO * out, const io::CSoDAio::ChunkID chunk = io::CSoDAio::REVISIONS) const
-    {
-        RevNumType length = sizeof(RevNumType);
-        for(typename std::map<RevNumType, String>::iterator it = m_data->begin(); it != m_data->end(); ++it) {
-            length += sizeof(RevNumType);
-            length += it->second.length() + 1;
-        }
-
-        // write chunk
-        out->writeInt4(chunk);
-        // write length of chunk
-        out->writeULongLong8(length);
-        // number of elements
-        out->writeUInt4(size());
-
-        for(typename std::map<RevNumType, String>::iterator it = m_data->begin(); it != m_data->end(); ++it) {
-            out->writeUInt4(it->first);
-            out->writeString(it->second);
-        }
-    }
-
-    /**
-     * @brief Loads the content of a revision map from the in.
-     * @param in  Input stream.
-     */
-    inline void load(io::CBinaryIO * in) const
-    {
-        m_data->clear();
-
-        RevNumType size = in->readUInt4();
-        for(RevNumType i = 0; i < size; ++i) {
-            RevNumType key = in->readUInt4();
-            String value = in->readString();
-            (*m_data)[key] = value;
-        }
-    }
-
-private:
-
-    /**
-     * @brief Stores revision number, type pairs.
-     */
-    std::map<RevNumType, String>* m_data;
+    std::map<RevNumType, T>* m_data;
 
 private:
 

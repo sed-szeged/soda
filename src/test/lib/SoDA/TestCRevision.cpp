@@ -53,9 +53,9 @@ TEST(CRevision, BasicOperations)
 
 TEST(CRevision, SaveAndLoad)
 {
-    CRevision<int> intRevisions;
+    CRevision<IndexType> intRevisions;
     RevNumType keys[7] = {1u,  5u,  10u, 50u, 100u, 500u, 1000u};
-    int vals[7] = {50, 70, 20, 110, 5221, 67000, 213123 };
+    IndexType vals[7] = {50, 70, 20, 110, 5221, 67000, 213123 };
 
     for (int i = 0; i < 7; ++i)
         intRevisions.addRevision(keys[i], vals[i]);
