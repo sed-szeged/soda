@@ -76,10 +76,10 @@ void PartitionEfficiencyTestSuiteMetricPlugin::calculate(rapidjson::Document &re
         }
 
         IndexType nrOfTestCases = it->second.getTestCases().size();
-        //IndexType nrOfCodeElements = (*m_clusterList)[it->first].getCodeElements().size();
+        IndexType nrOfCodeElements = it->second.getCodeElements().size();
 
         double partitionMetric = results[it->first.c_str()]["partition-metric"].GetDouble();
-        double partitionEfficiency = partitionMetric / nrOfTestCases;
+        double partitionEfficiency = (partitionMetric * nrOfCodeElements) / nrOfTestCases;
 
         //out << it->first << ";" << nrOfTestCases << ";" << nrOfCodeElements << ";" << partitionMetric << ";" << partitionEfficiency << std::endl;
 
