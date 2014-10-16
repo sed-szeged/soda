@@ -78,6 +78,11 @@ void LabelTestCodeElementsClusterPlugin::execute(CSelectionData &data, std::map<
     while (std::getline(testList, line)) {
         std::vector<std::string> parts;
         boost::algorithm::split(parts, line, boost::algorithm::is_any_of(";"));
+        if (!data.getCoverage()->getTestcases().containsValue(parts[0])) {
+            (std::cerr << "ERROR: LabelTestCodeElementsClusterPlugin not existing test case: " << parts[0] << std::endl).flush();
+            continue;
+        }
+
         IndexType tcid = data.getCoverage()->getTestcases().getID(parts[0]);
         tests.insert(std::pair<std::string, IndexType>(parts[1], tcid));
     }
@@ -89,6 +94,11 @@ void LabelTestCodeElementsClusterPlugin::execute(CSelectionData &data, std::map<
     while (std::getline(codeElementList, line)) {
         std::vector<std::string> parts;
         boost::algorithm::split(parts, line, boost::algorithm::is_any_of(";"));
+        if (!data.getCoverage()->getCodeElements().containsValue(parts[0])) {
+            (std::cerr << "ERROR: LabelTestCodeElementsClusterPlugin not existing code element: " << parts[0] << std::endl).flush();
+            continue;
+        }
+
         IndexType cid = data.getCoverage()->getCodeElements().getID(parts[0]);
         codeElements.insert(std::pair<std::string, IndexType>(parts[2], cid));
     }

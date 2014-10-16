@@ -147,8 +147,8 @@ void CRevision<String>::load(io::CBinaryIO *in) const
     }
 }
 
-template class CRevision<IndexType>;
-template class CRevision<IBitList*>;
 template class CRevision<String>;
-}
+template class CRevision<IBitList*>;
+template class CRevision<IndexType>;
 
+}
