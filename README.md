@@ -13,6 +13,15 @@ The library is released under LGPLv3 license.
 We have created a graphical user interface, called Test suite Analysis and Manipulation, to provide easy access to the features of SoDA library. 
 You can find its repository at: https://github.com/sed-szeged/tam
 
+### What's next?
+
+* Java + JUnit integration
+ * Create a tool or toolset that can help in creating coverage and result binaries of programs written in Java and tested with JUnit. Make it as automatic as possible.
+* Integrate the location of the code elements in the source code into the coverage binaries
+ * To be able to connect the measurements with the source code.
+ 
+Send us your improvement ideas or help us to implement these features. Open an issue to start a discussion or send your pull request.
+
 ### Getting started
 
 #### Dependencies
