@@ -75,3 +75,10 @@ TEST_F(CJsonReaderTest, Open)
     EXPECT_NO_THROW(reader->load("sample/test.json"));
     EXPECT_TRUE(reader->existsProperty("string"));
 }
+
+TEST_F(CJsonReaderTest, SetProperty)
+{
+    EXPECT_EQ("", reader->getStringFromProperty("tmp"));
+    EXPECT_NO_THROW(reader->setProperty("tmp", "val"));
+    EXPECT_EQ("val", reader->getStringFromProperty("tmp"));
+}

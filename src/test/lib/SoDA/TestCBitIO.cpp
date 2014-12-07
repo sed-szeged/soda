@@ -34,7 +34,17 @@ TEST(CBitWriter, BasicOperations)
     EXPECT_NO_THROW(writer.writeBit(false));
     EXPECT_NO_THROW(writer.writeBit(true));
     EXPECT_NO_THROW(writer.flush());
+    EXPECT_NO_THROW(writer.writeBit(false));
+    EXPECT_NO_THROW(writer.writeBit(false));
+    EXPECT_NO_THROW(writer.writeBit(true));
+    EXPECT_NO_THROW(writer.flush());
     EXPECT_NO_THROW(delete io);
+}
+
+TEST(CBitWriter, PredictSize)
+{
+    EXPECT_EQ(10000, CBitWriter::predictSize(200*400));
+    EXPECT_EQ(157500000, CBitWriter::predictSize(21000*60000));
 }
 
 TEST(CBitReader, BasicOperators)
@@ -42,6 +52,10 @@ TEST(CBitReader, BasicOperators)
     CBinaryIO *io = new CBinaryIO("sample/bitio.saved", CBinaryIO::omRead);
     CBitReader reader(io);
     EXPECT_EQ(true, reader.readBit());
+    EXPECT_EQ(0u, reader.readBit());
+    EXPECT_EQ(true, reader.readBit());
+    EXPECT_NO_THROW(reader.reset());
+    EXPECT_EQ(0u, reader.readBit());
     EXPECT_EQ(0u, reader.readBit());
     EXPECT_EQ(true, reader.readBit());
     EXPECT_NO_THROW(delete io);
