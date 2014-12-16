@@ -82,7 +82,8 @@ TEST_F(CSelectionDataTest, translations)
     }
 }
 
-TEST_F(CSelectionDataTest, globalize) {
+TEST_F(CSelectionDataTest, globalize)
+{
     EXPECT_NO_THROW(data->loadChangeset("sample/ChangesetSampleBit"));
     EXPECT_NO_THROW(data->loadCoverage("sample/CoverageMatrixSampleBit"));
     EXPECT_NO_THROW(data->loadResults("sample/ResultsMatrixSampleBit"));

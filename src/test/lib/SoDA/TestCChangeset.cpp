@@ -63,6 +63,7 @@ protected:
 
 TEST_F(CChangesetTest, Constructor)
 {
+    EXPECT_NO_THROW(CChangeset tmp);
     CIDManager *idmgr = new CIDManager(strVector);
     CRevision<IBitList*> *rev = new CRevision<IBitList*>();
     CChangeset *change = new CChangeset(idmgr, rev);

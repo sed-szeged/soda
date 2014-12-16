@@ -20,34 +20,25 @@
  */
 
 #include "gtest/gtest.h"
-#include "data/CClusterDefinition.h"
-
+#include "data/CReductionData.h"
+#include <iostream>
 using namespace soda;
 
-TEST(CClusterDefinition, BasicOperations)
+TEST(CReductionData, BasicOperations)
 {
-    CClusterDefinition cluster;
-    EXPECT_EQ(0u, cluster.getTestCases().size());
-    EXPECT_EQ(0u, cluster.getCodeElements().size());
-
-    EXPECT_NO_THROW(cluster.addCodeElement(25));
-    EXPECT_EQ(25u, cluster.getCodeElements().front());
-
-    EXPECT_NO_THROW(cluster.addTestCase(32));
-    EXPECT_EQ(32u, cluster.getTestCases().front());
+    CCoverageMatrix base;
+    EXPECT_NO_THROW(base.load("sample/MetricPluginSampleDir/SoDA.extended.cov.SoDA"));
+    CReductionData data(&base, "SoDA", "sample/");
+    std::set<IndexType> tests = { 1, 10, 20, 50 };
+    EXPECT_NO_THROW(data.add(tests));
+    EXPECT_NO_THROW(data.save(0));
 }
 
-TEST(CClusterDefinition, BasicOperationsWithVectors)
+TEST(CReductionData, Validate)
 {
-    CClusterDefinition cluster;
-    std::vector<IndexType> numbers = { 10, 30, 42 };
-
-    EXPECT_EQ(0u, cluster.getCodeElements().size());
-    EXPECT_EQ(0u, cluster.getTestCases().size());
-
-    EXPECT_NO_THROW(cluster.addCodeElements(numbers));
-    EXPECT_NO_THROW(cluster.addTestCases(numbers));
-
-    EXPECT_EQ(3u, cluster.getCodeElements().size());
-    EXPECT_EQ(3u, cluster.getTestCases().size());
+    CCoverageMatrix base;
+    EXPECT_NO_THROW(base.load("sample/SoDA.cov.000.SoDA"));
+    EXPECT_EQ(4u, base.getTestcases().size());
+    EXPECT_EQ("CBitList.Iterators", base.getTestcases().getValue(1));
+    EXPECT_EQ("CBitMatrix.Extend", base.getTestcases().getValue(2));
 }
