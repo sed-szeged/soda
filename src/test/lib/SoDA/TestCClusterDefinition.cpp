@@ -51,3 +51,16 @@ TEST(CClusterDefinition, BasicOperationsWithVectors)
     EXPECT_EQ(3u, cluster.getCodeElements().size());
     EXPECT_EQ(3u, cluster.getTestCases().size());
 }
+
+TEST(CClusterDefinition, Operator)
+{
+    CClusterDefinition cluster;
+
+    EXPECT_NO_THROW(cluster.addCodeElement(25));
+    EXPECT_NO_THROW(cluster.addTestCase(32));
+
+    CClusterDefinition cluster2 = cluster;
+    EXPECT_EQ(25u, cluster2.getCodeElements().front());
+
+    EXPECT_EQ(32u, cluster2.getTestCases().front());
+}

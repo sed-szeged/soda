@@ -206,3 +206,10 @@ TEST_F(CIDMapperTest, Clear)
     EXPECT_EQ(0u, idMapper->getIDList().size());
     EXPECT_EQ(0u, idMapper->getValueList().size());
 }
+
+TEST_F(CIDMapperTest, ContainsValue)
+{
+    idMapper->add("codeElement1");
+    EXPECT_TRUE(idMapper->containsValue("codeElement1"));
+    EXPECT_FALSE(idMapper->containsValue("codeElement2"));
+}

@@ -47,6 +47,7 @@ protected:
                 data.getCoverage()->addOrSetRelation("test-" + std::to_string(i), "ce-" + std::to_string(j), (j <= i) ? true : false);
             }
         }
+        data.getCoverage()->setRelation(98,99,true);
         boost::property_tree::ptree pt, reductionSizes, size;
         pt.put("iteration", "4");
         size.put("", 1);
@@ -62,6 +63,13 @@ protected:
     virtual void TearDown() {
     }
 };
+
+TEST_F(CTestSuiteReductionPluginsTest, CoverageReductionPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("coverage"));
+    EXPECT_EQ("coverage", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
 
 TEST_F(CTestSuiteReductionPluginsTest, CoverageReductionPlugin)
 {
@@ -85,6 +93,13 @@ TEST_F(CTestSuiteReductionPluginsTest, CoverageReductionPlugin)
     EXPECT_EQ(7u, coverage.getNumOfTestcases());
 }
 
+TEST_F(CTestSuiteReductionPluginsTest, AdditionalCoverageReductionPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("additional-coverage"));
+    EXPECT_EQ("additional-coverage", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
 TEST_F(CTestSuiteReductionPluginsTest, AdditionalCoverageReductionPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("additional-coverage"));
@@ -105,6 +120,13 @@ TEST_F(CTestSuiteReductionPluginsTest, AdditionalCoverageReductionPlugin)
 
     EXPECT_NO_THROW(coverage.load("sample/test-ADD-GEN-ITER.cov.003.SoDA"));
     EXPECT_EQ(7u, coverage.getNumOfTestcases());
+}
+
+TEST_F(CTestSuiteReductionPluginsTest, DuplationReductionPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("duplation"));
+    EXPECT_EQ("duplation", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
 TEST_F(CTestSuiteReductionPluginsTest, DuplationReductionPlugin)

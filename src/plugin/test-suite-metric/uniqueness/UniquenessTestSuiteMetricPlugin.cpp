@@ -20,7 +20,7 @@ std::string UniquenessTestSuiteMetricPlugin::getName()
 
 std::string UniquenessTestSuiteMetricPlugin::getDescription()
 {
-    return "";
+    return "Calculating uniqueness metric of the test suite.";
 }
 
 void UniquenessTestSuiteMetricPlugin::init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision)

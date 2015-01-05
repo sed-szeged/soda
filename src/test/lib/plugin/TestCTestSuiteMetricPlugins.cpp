@@ -56,6 +56,13 @@ protected:
     }
 };
 
+TEST_F(CTestSuiteMetricPluginsTest, FaultDetectionMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("coverage"));
+    EXPECT_EQ("coverage", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
 TEST_F(CTestSuiteMetricPluginsTest, FaultDetection)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("coverage"));
@@ -63,6 +70,13 @@ TEST_F(CTestSuiteMetricPluginsTest, FaultDetection)
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_DOUBLE_EQ(0.80952380952380953, results["cluster - cluster"]["coverage"].GetDouble());
+}
+
+TEST_F(CTestSuiteMetricPluginsTest, CoverageEfficiencyMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("coverage-efficiency"));
+    EXPECT_EQ("coverage-efficiency", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
 TEST_F(CTestSuiteMetricPluginsTest, CoverageEfficiency)
@@ -80,6 +94,13 @@ TEST_F(CTestSuiteMetricPluginsTest, CoverageEfficiency)
     EXPECT_DOUBLE_EQ(3.3999999999999999, results["cluster - cluster"]["coverage-efficiency"].GetDouble());
 }
 
+TEST_F(CTestSuiteMetricPluginsTest, FaultLocalizationMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("fault-localization"));
+    EXPECT_EQ("fault-localization", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
 TEST_F(CTestSuiteMetricPluginsTest, FaultLocalization)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("fault-localization"));
@@ -87,6 +108,13 @@ TEST_F(CTestSuiteMetricPluginsTest, FaultLocalization)
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_DOUBLE_EQ(0.13333333333333333, results["cluster - cluster"]["fault-localization"].GetDouble());
+}
+
+TEST_F(CTestSuiteMetricPluginsTest, FMeasureMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("f-measure"));
+    EXPECT_EQ("f-measure", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
 TEST_F(CTestSuiteMetricPluginsTest, FMeasure)
@@ -104,6 +132,13 @@ TEST_F(CTestSuiteMetricPluginsTest, FMeasure)
     EXPECT_DOUBLE_EQ(0.26432676155954388, results["cluster - cluster"]["f-measure"].GetDouble());
 }
 
+TEST_F(CTestSuiteMetricPluginsTest, TpceMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("tpce"));
+    EXPECT_EQ("tpce", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
 TEST_F(CTestSuiteMetricPluginsTest, Tpce)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("tpce"));
@@ -111,6 +146,13 @@ TEST_F(CTestSuiteMetricPluginsTest, Tpce)
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_DOUBLE_EQ(0.23809523809523808, results["cluster - cluster"]["tpce"].GetDouble());
+}
+
+TEST_F(CTestSuiteMetricPluginsTest, SpecializationMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("specialization"));
+    EXPECT_EQ("specialization", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
 TEST_F(CTestSuiteMetricPluginsTest, Specialization)
@@ -122,6 +164,13 @@ TEST_F(CTestSuiteMetricPluginsTest, Specialization)
     EXPECT_DOUBLE_EQ(0.5, results["cluster - cluster"]["specialization"].GetDouble());
 }
 
+TEST_F(CTestSuiteMetricPluginsTest, UniquenessMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("uniqueness"));
+    EXPECT_EQ("uniqueness", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
 TEST_F(CTestSuiteMetricPluginsTest, Uniqueness)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("uniqueness"));
@@ -129,6 +178,13 @@ TEST_F(CTestSuiteMetricPluginsTest, Uniqueness)
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_DOUBLE_EQ(0.58823529411764708, results["cluster - cluster"]["uniqueness"].GetDouble());
+}
+
+TEST_F(CTestSuiteMetricPluginsTest, PartitionMetricMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("partition-metric"));
+    EXPECT_EQ("partition-metric", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
 TEST_F(CTestSuiteMetricPluginsTest, PartitionMetric)
@@ -144,6 +200,13 @@ TEST_F(CTestSuiteMetricPluginsTest, PartitionMetric)
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_DOUBLE_EQ(0.8666666666666667, results["cluster - cluster"]["partition-metric"].GetDouble());
+}
+
+TEST_F(CTestSuiteMetricPluginsTest, PartitionEfficiencyMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("partition-efficiency"));
+    EXPECT_EQ("partition-efficiency", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
 TEST_F(CTestSuiteMetricPluginsTest, PartitionEfficiency)
