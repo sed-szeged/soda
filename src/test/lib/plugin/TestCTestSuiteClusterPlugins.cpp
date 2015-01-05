@@ -50,6 +50,8 @@ protected:
         rapidjson::Value val(rapidjson::kArrayType);
         for (int i = 10; i <= 50; i += 10)
             val.PushBack(i, doc.GetAllocator());
+
+        val.PushBack(1000, doc.GetAllocator());
         doc.AddMember("cluster-sizes", val, doc.GetAllocator());
         doc.AddMember("cluster-test-list", "sample/ClusterPluginSampleDir/label-test-codeelement-test.txt", doc.GetAllocator());
         doc.AddMember("cluster-code-elements-list", "sample/ClusterPluginSampleDir/label-test-codeelement-method.txt", doc.GetAllocator());
@@ -58,6 +60,16 @@ protected:
     virtual void TearDown() {
     }
 };
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("one-cluster"));
+    EXPECT_NO_THROW(plugin->init(doc));
+
+    EXPECT_EQ("one-cluster", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+    EXPECT_EQ(0, plugin->getRequiredParameters().size());
+}
 
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
 {
@@ -68,6 +80,16 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
     EXPECT_EQ(1u, clusterList.size());
     EXPECT_EQ(data.getCoverage()->getNumOfCodeElements(), clusterList["full"].getCodeElements().size());
     EXPECT_EQ(data.getCoverage()->getNumOfTestcases(), clusterList["full"].getTestCases().size());
+}
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("coverage"));
+    EXPECT_NO_THROW(plugin->init(doc));
+
+    EXPECT_EQ("coverage", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+    EXPECT_EQ(1, plugin->getRequiredParameters().count("cluster-sizes"));
 }
 
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPlugin)
@@ -82,6 +104,16 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPlugin)
     EXPECT_EQ(50u, clusterList["coverage-50"].getTestCases()[49]);
 }
 
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("duplation"));
+    EXPECT_NO_THROW(plugin->init(doc));
+
+    EXPECT_EQ("duplation", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+    EXPECT_EQ(1, plugin->getRequiredParameters().count("cluster-sizes"));
+}
+
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("duplation"));
@@ -94,6 +126,16 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPlugin)
     EXPECT_EQ(40u, clusterList["duplation-50"].getTestCases()[49]);
 }
 
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("random"));
+    EXPECT_NO_THROW(plugin->init(doc));
+
+    EXPECT_EQ("random", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+    EXPECT_EQ(1, plugin->getRequiredParameters().count("cluster-sizes"));
+}
+
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("random"));
@@ -104,6 +146,17 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPlugin)
     EXPECT_EQ(10u, clusterList["random-10"].getTestCases().size());
     EXPECT_EQ(100u, clusterList["random-10"].getCodeElements().size());
     EXPECT_EQ(50u, clusterList["random-50"].getTestCases().size());
+}
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteLabelTestCodeElementClusterPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("label-test-codeelements"));
+    EXPECT_NO_THROW(plugin->init(doc));
+
+    EXPECT_EQ("label-test-codeelements", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+    EXPECT_EQ(1, plugin->getRequiredParameters().count("cluster-test-list"));
+    EXPECT_EQ(1, plugin->getRequiredParameters().count("cluster-code-elements-list"));
 }
 
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteLabelTestCodeElementClusterPlugin)

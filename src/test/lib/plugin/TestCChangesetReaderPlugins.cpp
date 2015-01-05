@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "engine/CKernel.h"
 #include "engine/plugin/IChangesetReaderPlugin.h"
+#include "exception/CException.h"
 
 using namespace soda;
 
@@ -43,6 +44,25 @@ protected:
     }
 
 };
+
+TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getChangesetReaderPluginManager().getPlugin("one-revision-per-file"));
+    EXPECT_EQ("one-revision-per-file", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPluginUnknownPath)
+{
+    EXPECT_NO_THROW(plugin = kernel.getChangesetReaderPluginManager().getPlugin("one-revision-per-file"));
+    EXPECT_THROW(changeset = plugin->read("sample/this_dir_does_not_exists"), CException);
+}
+
+TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPluginUnknownCodeElement)
+{
+    EXPECT_NO_THROW(plugin = kernel.getChangesetReaderPluginManager().getPlugin("one-revision-per-file"));
+    EXPECT_THROW(changeset = plugin->read("sample/ChangesetOneRevisionPerFileSampleDirInvalid"), CException);
+}
 
 TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPlugin)
 {

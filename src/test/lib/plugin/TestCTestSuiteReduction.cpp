@@ -47,9 +47,11 @@ protected:
                 data.getCoverage()->addOrSetRelation("test-" + std::to_string(i), "ce-" + std::to_string(j), (j <= i) ? true : false);
             }
         }
-        boost::property_tree::ptree pt;
+        boost::property_tree::ptree pt, reductionSizes, size;
         pt.put("iteration", "4");
-        pt.put("reduction-sizes", "1");
+        size.put("", 1);
+        reductionSizes.push_back(std::make_pair("", size));
+        pt.add_child("reduction-sizes", reductionSizes);
         pt.put("program-name", "test");
         pt.put("output-dir", "sample/");
         params = io::CJsonReader(pt);
@@ -119,6 +121,13 @@ TEST_F(CTestSuiteReductionPluginsTest, DuplationReductionPlugin)
     EXPECT_EQ("test-24", res[1]);
     EXPECT_EQ("test-74", res[2]);
     EXPECT_EQ("test-11", res[3]);
+}
+
+TEST_F(CTestSuiteReductionPluginsTest, RandomReductionPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("random"));
+    EXPECT_EQ("random", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
 TEST_F(CTestSuiteReductionPluginsTest, RandomReductionPlugin)

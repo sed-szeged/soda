@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "engine/CKernel.h"
 #include "engine/plugin/IResultsReaderPlugin.h"
+#include "exception/CException.h"
 
 using namespace soda;
 
@@ -42,6 +43,19 @@ protected:
         resultsMatrix = 0;
     }
 };
+
+TEST_F(CResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getResultsReaderPluginManager().getPlugin("dejagnu-one-revision-per-file"));
+    EXPECT_EQ("dejagnu-one-revision-per-file", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+TEST_F(CResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPluginUnknownPath)
+{
+    EXPECT_NO_THROW(plugin = kernel.getResultsReaderPluginManager().getPlugin("dejagnu-one-revision-per-file"));
+    EXPECT_THROW(plugin->read("sample/this_dir_does_not_exists"), CException);
+}
 
 TEST_F(CResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPlugin)
 {

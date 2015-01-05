@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 #include "engine/CKernel.h"
 #include "engine/plugin/ICoverageReaderPlugin.h"
+#include "exception/CException.h"
 
 using namespace boost::program_options;
 using namespace soda;
@@ -46,6 +47,22 @@ protected:
     }
 };
 
+TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("one-test-per-file"));
+    EXPECT_EQ("one-test-per-file", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPluginUnknownPath)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("one-test-per-file"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/this_dir_does_not_exists"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_THROW(coverageMatrix = plugin->read(vm), CException);
+}
+
 TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("one-test-per-file"));
@@ -56,6 +73,13 @@ TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPlugin)
 
     EXPECT_EQ(3u, coverageMatrix->getNumOfTestcases());
     EXPECT_EQ(824u, coverageMatrix->getNumOfCodeElements());
+}
+
+TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("gcov"));
+    EXPECT_EQ("gcov", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
 TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPlugin)
@@ -71,5 +95,22 @@ TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPlugin)
     EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
     EXPECT_EQ("full", coverageMatrix->getTestcases().getValue(0));
     EXPECT_EQ("/src/lib/SoDA/src/io/CBinaryIO.cpp:28", coverageMatrix->getCodeElements().getValue(0));
+    EXPECT_NO_THROW(coverageMatrix->getCodeElements().getID("/src/lib/SoDA/src/io/filtered.cpp:28"));
+    EXPECT_EQ(542, coverageMatrix->getNumOfCodeElements());
+}
+
+TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPluginFilter)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("gcov"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/CoverageMatrixGcovSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("cut-source-path", variable_value(String("github/soda"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("filter-input-files", variable_value(String(".*filtered.cpp.*"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ("full", coverageMatrix->getTestcases().getValue(0));
+    EXPECT_THROW(coverageMatrix->getCodeElements().getID("/src/lib/SoDA/src/io/filtered.cpp:28"), std::out_of_range);
     EXPECT_EQ(328, coverageMatrix->getNumOfCodeElements());
 }

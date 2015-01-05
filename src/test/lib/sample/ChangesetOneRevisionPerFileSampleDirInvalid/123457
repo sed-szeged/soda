@@ -1,0 +1,5 @@
+gimple_boolify,gcc/gimplify.c
+gimplify_expr,gcc/gimplify.c
+vect_vfa_segment_size,gcc/tree-vect-loop-manip.c
+vect_create_cond_for_alias_checks,gcc/tree-vect-loop-manip.c
+this_code_element_does_not_exists,test/path.c

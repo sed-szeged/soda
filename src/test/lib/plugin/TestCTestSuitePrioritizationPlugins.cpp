@@ -48,6 +48,14 @@ protected:
     }
 };
 
+TEST_F(CTestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("general-ignore"));
+
+    EXPECT_EQ("general-ignore", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
 TEST_F(CTestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("general-ignore"));
@@ -62,6 +70,14 @@ TEST_F(CTestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPlugin)
     EXPECT_EQ(0u, result[4]);
 }
 
+TEST_F(CTestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizationPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("additional-general-ignore"));
+
+    EXPECT_EQ("additional-general-ignore", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
 TEST_F(CTestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizationPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("additional-general-ignore"));
@@ -74,6 +90,14 @@ TEST_F(CTestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizatio
     EXPECT_EQ(4u, result[2]);
     EXPECT_EQ(0u, result[3]);
     EXPECT_EQ(2u, result[4]);
+}
+
+TEST_F(CTestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("random-ignore"));
+
+    EXPECT_EQ("random-ignore", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
 TEST_F(CTestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPlugin)
