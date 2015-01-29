@@ -30,7 +30,7 @@ Send us your improvement ideas or help us to implement these features. Open an i
 * Boost 1.49 or higher
 * googletest (for unit tests)
  
-#### Suuported platforms
+#### Suported platforms
 
 * Linux
 * Mac OSX
