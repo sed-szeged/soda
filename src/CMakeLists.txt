@@ -3,6 +3,7 @@ project(SoDA)
 
 # Enable ExternalProject CMake module
 include(ExternalProject)
+include(GenerateExportHeader)
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/ext)
 
@@ -15,6 +16,7 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options thread)
+link_directories(${Boost_LIBRARY_DIRS})
 
 ExternalProject_Add(
     rapidjson
@@ -30,7 +32,9 @@ option(test "Build tests" OFF)
 option(coverage "Build with coverage analysis support" OFF)
 option(withoutcl "Build without command line tools" 0)
 
-add_definitions(-Wall)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK)
+endif()
 
 add_definitions(-DSODA_PLUGIN_DIR="${SoDA_BINARY_DIR}/plugin")
 
