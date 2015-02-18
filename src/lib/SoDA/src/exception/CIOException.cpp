@@ -24,13 +24,16 @@
 namespace soda { namespace io {
 
 CIOException::CIOException(const String &location, const String &message) throw() :
-    CException(location, message)
+    message("soda::io::CIOException@" + location + ": " + message)
 {}
+
+CIOException::~CIOException() throw()
+{}
+
 
 const char* CIOException::what() const throw()
 {
-    String exceptionMessage = "soda::io::CIOException@" + location + ": " + message;
-    return exceptionMessage.c_str();
+    return message.c_str();
 }
 
 } /* namespace io */

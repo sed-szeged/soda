@@ -24,18 +24,21 @@
 
 #include <exception>
 
-#include "exception/CException.h"
+#include "data/SoDALibDefs.h"
 
 namespace soda { namespace io {
 
 /**
  * @brief Throwed when a problem occurs during an IO operation.
  */
-class CIOException : public CException
+class CIOException : public std::exception
 {
 public:
     CIOException(const String& location, const String& message) throw();
+    virtual ~CIOException() throw();
     virtual const char* what() const throw();
+private:
+    String message;
 };
 
 } /* namespace io */

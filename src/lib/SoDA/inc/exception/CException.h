@@ -38,10 +38,9 @@ public:
     virtual ~CException() throw();
     virtual const char* what() const throw();
 public:
-    String location;
     String message;
 };
 
-} /* namespace colubmus */
+} /* namespace soda */
 
 #endif /* EXCEPTION_H */

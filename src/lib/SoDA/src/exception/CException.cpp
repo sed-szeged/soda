@@ -20,12 +20,12 @@
  */
 
 #include "exception/CException.h"
+#include <iostream>
 
 namespace soda {
 
 CException::CException(const String &location, const String &message) throw() :
-    location(location),
-    message(message)
+    message("soda::CException@" + location + ": " + message)
 {}
 
 CException::~CException() throw()
@@ -33,8 +33,7 @@ CException::~CException() throw()
 
 const char* CException::what() const throw()
 {
-    String exceptionMessage = "soda::CException@" + location + ": " + message;
-    return exceptionMessage.c_str();
+    return message.c_str();
 }
 
 } /* namespace soda */

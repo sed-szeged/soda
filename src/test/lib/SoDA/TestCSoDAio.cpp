@@ -31,18 +31,18 @@ TEST(CSoDAio, Open)
     CSoDAio io;
     EXPECT_NO_THROW(io.open(String("sample/ResultsMatrixSampleBit"), io::CBinaryIO::omRead));
     EXPECT_NO_THROW(io.open("sample/ResultsMatrixSampleBit", io::CBinaryIO::omRead));
-    EXPECT_THROW(io.open("sample/ChangesetOneTestPerFileSampleDir/123456", CBinaryIO::omRead), CException);
-    EXPECT_THROW(io.open("sample/ResultsMatrixSampleBit", CBinaryIO::eOpenMode(4)), CException);
+    EXPECT_THROW(io.open("sample/ChangesetOneTestPerFileSampleDir/123456", CBinaryIO::omRead), CIOException);
+    EXPECT_THROW(io.open("sample/ResultsMatrixSampleBit", CBinaryIO::eOpenMode(4)), CIOException);
 }
 
 TEST(CSoDAio, ChunkOperations)
 {
     CSoDAio *io = new CSoDAio(String("sample/ioTest"), CBinaryIO::omWrite);
 
-    EXPECT_THROW(io->findChunkID(CSoDAio::EXECUTION), CException);
+    EXPECT_THROW(io->findChunkID(CSoDAio::EXECUTION), CIOException);
     EXPECT_NO_THROW(io->close());
 
-    EXPECT_THROW(io->findChunkID(CSoDAio::EXECUTION), CException);
+    EXPECT_THROW(io->findChunkID(CSoDAio::EXECUTION), CIOException);
 
     EXPECT_NO_THROW(io->open("sample/CoverageMatrixSampleBit", CBinaryIO::omRead));
     EXPECT_EQ(CSoDAio::UNKNOWN_TYPE, io->getChunkID());

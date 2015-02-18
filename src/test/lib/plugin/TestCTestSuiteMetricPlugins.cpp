@@ -49,6 +49,7 @@ protected:
         doc.AddMember("cluster-code-elements-list", "sample/MetricPluginSampleDir/method-cluster.txt", doc.GetAllocator());
         clusterAlg->init(doc);
         clusterAlg->execute(selection, clusterList);
+        results.SetObject();
         plugin = NULL;
     }
 
@@ -120,11 +121,17 @@ TEST_F(CTestSuiteMetricPluginsTest, FMeasureMetaInfo)
 TEST_F(CTestSuiteMetricPluginsTest, FMeasure)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("f-measure"));
-    StringVector dependencies = plugin->getDependency();
-    for (StringVector::iterator it = dependencies.begin(); it != dependencies.end(); it++) {
-        ITestSuiteMetricPlugin *dep = kernel.getTestSuiteMetricPluginManager().getPlugin(*it);
-        dep->init(&selection, &clusterList, 1);
-        dep->calculate(results);
+    StringVector dep = plugin->getDependency();
+    for (StringVector::iterator it = dep.begin(); it != dep.end(); it++) {
+        ITestSuiteMetricPlugin *depPlugin = kernel.getTestSuiteMetricPluginManager().getPlugin(*it);
+        StringVector dep2 = depPlugin->getDependency();
+        for (StringVector::iterator it2 = dep2.begin(); it2 != dep2.end(); it2++) {
+            ITestSuiteMetricPlugin *dep2Plugin = kernel.getTestSuiteMetricPluginManager().getPlugin(*it2);
+            dep2Plugin->init(&selection, &clusterList, 1);
+            dep2Plugin->calculate(results);
+        }
+        depPlugin->init(&selection, &clusterList, 1);
+        depPlugin->calculate(results);
     }
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 1));
     EXPECT_NO_THROW(plugin->calculate(results));
