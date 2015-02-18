@@ -21,7 +21,7 @@
 
 #include "data/CRelationMatrix.h"
 #include "data/CBitMatrix.h"
-#include "exception/CException.h"
+#include "exception/CIOException.h"
 #include "gtest/gtest.h"
 #include "io/CBinaryIO.h"
 #include "data/CIDManager.h"
@@ -120,7 +120,7 @@ TEST_F(CRelationMatrixTest, SaveAndLoad)
 
     CRelationMatrix otherRelMatrix;
     EXPECT_NO_THROW(RMatrix->save("sample/relationMatrixTest.saved"));
-    EXPECT_THROW(otherRelMatrix.load("sample/ioTest.saved"), CException);
+    EXPECT_THROW(otherRelMatrix.load("sample/ioTest.saved"), io::CIOException);
     EXPECT_NO_THROW(otherRelMatrix.load("sample/relationMatrixTest.saved"));
     EXPECT_NO_THROW(RMatrix->save(String("sample/relationMatrixTest.saved")));
     EXPECT_NO_THROW(otherRelMatrix.load(String("sample/relationMatrixTest.saved")));

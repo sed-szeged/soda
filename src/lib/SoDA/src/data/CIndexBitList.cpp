@@ -227,7 +227,7 @@ void CIndexBitList::erase(IndexType pos)
 
     for(std::vector<IndexType>::iterator it = m_data->begin(); it != m_data->end(); ++it) {
         if(*it == pos) {
-            m_data->erase(it);
+            it = m_data->erase(it);
         } else if(*it > pos) {
             (*it)--;
         }

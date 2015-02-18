@@ -58,12 +58,6 @@ TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPluginUnkno
     EXPECT_THROW(changeset = plugin->read("sample/this_dir_does_not_exists"), CException);
 }
 
-TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPluginUnknownCodeElement)
-{
-    EXPECT_NO_THROW(plugin = kernel.getChangesetReaderPluginManager().getPlugin("one-revision-per-file"));
-    EXPECT_THROW(changeset = plugin->read("sample/ChangesetOneRevisionPerFileSampleDirInvalid"), CException);
-}
-
 TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getChangesetReaderPluginManager().getPlugin("one-revision-per-file"));
