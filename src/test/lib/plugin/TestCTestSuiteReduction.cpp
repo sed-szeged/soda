@@ -20,10 +20,9 @@
  */
 
 #include "gtest/gtest.h"
-#include <iostream>
-#include <boost/property_tree/ptree.hpp>
-#include "engine/CKernel.h"
+#include "boost/lexical_cast.hpp"
 #include "io/CJsonReader.h"
+#include "engine/CKernel.h"
 #include "engine/plugin/ITestSuiteReductionPlugin.h"
 #include "data/CSelectionData.h"
 
@@ -44,7 +43,7 @@ protected:
         std::srand(std::time(0));
         for (int i = 0; i < 100; ++i) {
             for (int j = 0; j < 100; ++j) {
-                data.getCoverage()->addOrSetRelation("test-" + std::to_string(i), "ce-" + std::to_string(j), (j <= i) ? true : false);
+                data.getCoverage()->addOrSetRelation("test-" + boost::lexical_cast<String>(i), "ce-" + boost::lexical_cast<String>(j), (j <= i) ? true : false);
             }
         }
         data.getCoverage()->setRelation(98,99,true);

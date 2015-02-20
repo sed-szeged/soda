@@ -136,7 +136,7 @@ TEST_F(CTestSuiteMetricPluginsTest, FMeasure)
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 1));
     EXPECT_NO_THROW(plugin->calculate(results));
 
-    EXPECT_DOUBLE_EQ(0.26432676155954388, results["cluster - cluster"]["f-measure"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.83712121212121215, results["cluster - cluster"]["f-measure"].GetDouble());
 }
 
 TEST_F(CTestSuiteMetricPluginsTest, TpceMetaInfo)
@@ -228,5 +228,5 @@ TEST_F(CTestSuiteMetricPluginsTest, PartitionEfficiency)
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 1));
     EXPECT_NO_THROW(plugin->calculate(results));
 
-    EXPECT_DOUBLE_EQ(0.17333333333333334, results["cluster - cluster"]["partition-efficiency"].GetDouble());
+    EXPECT_DOUBLE_EQ(3.6399999999999997, results["cluster - cluster"]["partition-efficiency"].GetDouble());
 }
