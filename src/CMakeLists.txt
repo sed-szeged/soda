@@ -20,13 +20,14 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 ExternalProject_Add(
     rapidjson
-    SVN_REPOSITORY "https://github.com/miloyip/rapidjson"
+    SVN_REPOSITORY "https://github.com/miloyip/rapidjson/trunk/include"
+    SVN_REVISION -r 1510
     CONFIGURE_COMMAND "" # skip configure
     BUILD_COMMAND "" # skip build
     INSTALL_COMMAND "" # skip install
   )
 
-set(RAPIDJSON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ext/src/rapidjson/trunk/include)
+set(RAPIDJSON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ext/src/rapidjson)
 
 option(test "Build tests" OFF)
 option(coverage "Build with coverage analysis support" OFF)
