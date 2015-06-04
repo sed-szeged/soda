@@ -16,5 +16,6 @@ aux_source_directory(${SoDALib_SOURCE_DIR}/src/io io_src)
 aux_source_directory(${SoDALib_SOURCE_DIR}/src/util util_src)
 aux_source_directory(${SoDALib_SOURCE_DIR}/src src)
 
-add_library(SoDA SHARED ${headers} ${data_src} ${exception_src} ${interface_src} ${io_src} ${util_src} ${src})
+add_library(SoDA ${LINKING_METHOD} ${headers} ${data_src} ${exception_src} ${interface_src} ${io_src} ${util_src} ${src})
+add_dependencies(SoDA rapidjson)
 target_link_libraries(SoDA ${Boost_LIBRARIES})

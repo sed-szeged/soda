@@ -10,7 +10,7 @@ file(GLOB_RECURSE headers ./inc/*.h)
 
 aux_source_directory(${SoDAEngine_SOURCE_DIR}/src/engine engine_src)
 
-add_library(SoDAEngine SHARED ${headers} ${engine_src})
+add_library(SoDAEngine ${LINKING_METHOD} ${headers} ${engine_src})
 
 if (UNIX)
     set(LINK_LIBRARIES dl)

@@ -33,8 +33,10 @@ option(test "Build tests" OFF)
 option(coverage "Build with coverage analysis support" OFF)
 option(withoutcl "Build without command line tools" 0)
 
+set(LINKING_METHOD SHARED)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK)
+    set(LINKING_METHOD STATIC)
 endif()
 
 add_definitions(-DSODA_PLUGIN_DIR="${SoDA_BINARY_DIR}/plugin")
