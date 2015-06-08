@@ -63,9 +63,14 @@ int main(int argc, char* argv[]) {
 void printHelp()
 {
 
-    cout << "Json file:" << endl;
+    cout << "Json file:" << endl<<endl;
     cout<<"{ \"coverage-data\":\"/home/../sample.coverage.SoDA\","<<endl<<"\"algorithm\":\"hamming\","<<endl<<
-          "\"hamming_dist_row\":10,"<<endl<<"\"hamming_dist_cols\":10,"<<endl<<"\"0cluster\":90 }"<<endl;
+          "\"hamming_dist_row(%)\":10,"<<endl<<"\"hamming_dist_cols(%)\":10,"<<endl<<"\"0cluster(%)\":90 }"<<endl<<endl<<"or"<<endl<<endl;
+
+
+    cout<<"{ \"coverage-data\":\"/home/.../sample.coverage.SoDA\","<<endl<<"\"algorithm\":\"ochiai-dice-jaccard\","<<endl<<
+          "\"alg.index\":2,"<<endl<<"\"limit\":0.3,"<<endl<<"\"cluster-number\":3}"<<endl<<endl;
+    cout<<"index: 0 - ochiai ; 1 - dice ; 2 - jaccard and limit=-1.0 == nincs limit"<<endl<<endl;
 }
 
 
@@ -101,18 +106,6 @@ int loadJsonFiles(String path)
 
 void processJsonFiles(String path){
 
-    /*CSelectionData selectionData;
-    selectionData.loadCoverage(String(argv[1]));
-
-    std::map<std::string, CClusterDefinition> clusterList;
-
-    rapidjson::Document json_file;
-
-    kernel.getTestSuiteClusterPluginManager().getPlugin("hamming")->init(json_file);
-    kernel.getTestSuiteClusterPluginManager().getPlugin("hamming")->execute(selectionData,clusterList);*/
-
-
-
     std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
 
     rapidjson::Document reader;
@@ -127,6 +120,9 @@ void processJsonFiles(String path){
     boost::filesystem::path jsonPath(path);
 
     std::string clusterAlgorithmName = reader["algorithm"].GetString();
+
+    std::cout<<clusterAlgorithmName<<std::endl;
+
     ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
 
     String covPath = reader["coverage-data"].GetString();

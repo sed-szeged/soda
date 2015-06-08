@@ -31,9 +31,9 @@ std::map<String, String> HammingTestSuiteClusterPlugin::getRequiredParameters()
 void HammingTestSuiteClusterPlugin::init(rapidjson::Document &doc)
 {
     // ezek lesznek majd a parameterek
-    m_hamm_diff_row = doc["hamming_dist_row"].GetInt();
-    m_hamm_diff_cols = doc["hamming_dist_cols"].GetInt();
-    _0cluster_limit = doc["0cluster"].GetInt();
+    m_hamm_diff_row = doc["hamming_dist_row(%)"].GetInt();
+    m_hamm_diff_cols = doc["hamming_dist_cols(%)"].GetInt();
+    _0cluster_limit = doc["0cluster(%)"].GetInt();
 }
 
 void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList)
