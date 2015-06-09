@@ -23,6 +23,9 @@ add_subdirectory(test-suite-metrics)
 # test-suite-score
 add_subdirectory(test-suite-score)
 
+# clustering
+add_subdirectory(clustering)
+
 # binaryDump
 aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/binarydump binaryDump_src)
 add_executable(binaryDump ${binaryDump_src})
