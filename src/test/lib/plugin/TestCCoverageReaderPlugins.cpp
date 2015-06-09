@@ -114,3 +114,84 @@ TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPluginFilter)
     EXPECT_THROW(coverageMatrix->getCodeElements().getID("/src/lib/SoDA/src/io/filtered.cpp:28"), std::out_of_range);
     EXPECT_EQ(328, coverageMatrix->getNumOfCodeElements());
 }
+
+TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
+    EXPECT_EQ("emma-java", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+/*TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginUnknownPath)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/this_dir_does_not_exists"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_THROW(coverageMatrix = plugin->read(vm), CException);
+}*/
+
+TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginPackage)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/EmmaCoverageSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("granularity", variable_value(String("package"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ(8u, coverageMatrix->getNumOfCodeElements());
+
+    EXPECT_TRUE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources"));
+}
+
+TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginSrc)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/EmmaCoverageSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("granularity", variable_value(String("src"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ(62u, coverageMatrix->getNumOfCodeElements());
+
+    EXPECT_FALSE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.compiler_ja.java"));
+    EXPECT_TRUE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.compiler.java"));
+}
+
+TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginClass)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/EmmaCoverageSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("granularity", variable_value(String("class"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ(185u, coverageMatrix->getNumOfCodeElements());
+
+    EXPECT_FALSE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.compiler_ja"));
+    EXPECT_TRUE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.compiler"));
+}
+
+TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginMethod)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/EmmaCoverageSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("granularity", variable_value(String("method"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ(2061u, coverageMatrix->getNumOfCodeElements());
+
+    EXPECT_FALSE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.javac_ja.getContents (): Object [][]"));
+    EXPECT_TRUE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.compiler.compiler (): void"));
+}
+
+

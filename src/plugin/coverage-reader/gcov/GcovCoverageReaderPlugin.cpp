@@ -76,7 +76,7 @@ void GcovCoverageReaderPlugin::readFromDirectoryStructure(const char * dirname)
 {
     fs::path coverage_path(dirname);
     if (!(exists(coverage_path) || !is_directory(coverage_path))) {
-        throw CException("OneTestPerFileCoverageReaderPlugin::readFromDirectoryStructure()", "Specified path does not exists or is not a directory.");
+        throw CException("GcovCoverageReaderPlugin::readFromDirectoryStructure()", "Specified path does not exists or is not a directory.");
     }
 
     readTestcaseNames(coverage_path);
