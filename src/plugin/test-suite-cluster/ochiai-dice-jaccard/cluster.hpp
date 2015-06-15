@@ -1,3 +1,9 @@
+/*
+ *
+ *Algorithm source code: http://codingplayground.blogspot.hu/2009/03/k-means-in-c.html
+ *
+ * */
+
 #ifndef CLUSTER_H
 #define CLUSTER_H 1
 

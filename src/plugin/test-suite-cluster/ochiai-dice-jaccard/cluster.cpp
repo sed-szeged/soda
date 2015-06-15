@@ -1,3 +1,11 @@
+/*
+ *
+ *Algorithm source code: http://codingplayground.blogspot.hu/2009/03/k-means-in-c.html
+ *
+ * */
+
+
+
 #include "cluster.hpp"
 #include "Ochiai_Dice_JaccardTestSuiteClusterPlugin.h"
 
