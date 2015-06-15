@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
             ("list,l",                    "list the available reading modes")
             ("output,o", value<String>(), "output file")
             ("path,p",   value<String>(), "path to input directory")
+            ("granularity,g",   value<String>(), "granularity to read")
             ("cut-source-path,c", value<String>()->default_value(""), "removes the matched part from the code element names used by gcov reader plugin")
             ("filter-input-files,f", value<String>()->default_value(""), "regex, skips the matched input files. Multiple expressions are separated with commas. Used by gcov reader plugin")
     ;

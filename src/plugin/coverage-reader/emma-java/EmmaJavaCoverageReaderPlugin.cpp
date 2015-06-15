@@ -65,21 +65,10 @@ CCoverageMatrix* EmmaJavaCoverageReaderPlugin::read(const variables_map &vm)
         m_granularity = METHOD;
     }
 
+    std::cerr << "Granularity: " << m_granularity << std::endl << std::endl;
     m_coverage = new CCoverageMatrix();
     readFromDirectoryStructure(vm["path"].as<String>());
     return m_coverage;
-}
-
-static void cutPassFailInfo(String& str)
-{
-    size_t b = str.find("PASS: ");
-    size_t l = 6;
-    if (b == std::string::npos) {
-        b = str.find("FAIL: ");
-    }
-    if (b != std::string::npos) {
-        str.erase(b, l);
-    }
 }
 
 static void cutExtension(std::string& str)
@@ -123,6 +112,8 @@ void EmmaJavaCoverageReaderPlugin::readFromDirectory1stPass(fs::path p, size_t c
     std::sort(pathVector.begin(), pathVector.end());
     info_tmax += info_max = pathVector.size();
 
+    bool readXML = true;
+
     for (std::vector<fs::path>::iterator it = pathVector.begin(); it != pathVector.end(); it++) {
         if (is_directory(*it)) { // recurse into subdirs
             if (basename(*it) != "") {
@@ -138,6 +129,11 @@ void EmmaJavaCoverageReaderPlugin::readFromDirectory1stPass(fs::path p, size_t c
             std::string tcname = it->generic_string().substr(cut);
             cutExtension(tcname);
             m_coverage->addTestcaseName(tcname);
+
+            // The EMMA xml report contains all code elements, we do not need to read all files in the 1st pass.
+            if (!readXML) {
+                continue;
+            }
 
             std::ifstream in(it->string().c_str());
             std::string line;
@@ -213,6 +209,7 @@ void EmmaJavaCoverageReaderPlugin::readFromDirectory1stPass(fs::path p, size_t c
                 }
             }
             in.close();
+            readXML = false;
         }
     }
 }
@@ -224,7 +221,7 @@ void EmmaJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
     int info_cnt = 0; //INFO
     int info_max;
 
-    std::cout << "Directory: " << p << " 1st pass" << std::endl;
+    std::cout << "Directory: " << p << std::endl;
     std::cout.flush();
 
     std::vector<fs::path> pathVector;
@@ -272,7 +269,6 @@ void EmmaJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
                 pt::read_xml(xmlString, xml);
 
                 String packageName = xml.get<String>("package.<xmlattr>.name");
-                std::cout << packageName << std::endl;
 
                 std::stringstream codeElement;
                 codeElement << packageName;
@@ -334,7 +330,6 @@ void EmmaJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
                         }
                     }
                 }
-                break;
             }
             in.close();
         }
