@@ -91,7 +91,12 @@ void printHelp()
 
     cout<<"{ \"coverage-data\":\"/home/.../sample.coverage.SoDA\","<<endl<<"\"algorithm\":\"ochiai-dice-jaccard\","<<endl<<
           "\"alg.index\":2,"<<endl<<"\"limit\":0.3,"<<endl<<"\"cluster-number\":3}"<<endl<<endl;
-    cout<<"index: 0 - ochiai ; 1 - dice ; 2 - jaccard and limit=-1.0 == nincs limit"<<endl<<endl;
+    cout<<"index: 0 - ochiai ; 1 - dice ; 2 - jaccard and limit=-1.0 == no limit"<<endl<<endl<<"or"<<endl<<endl;
+
+
+    cout<<"{ \"coverage-data\":\"/home/../output.coverage.SoDA\","<<endl<<"\"algorithm\":\"matrix-generator\","<<endl<<
+          "\"row-size\":100,"<<endl<<"\"cols-size\":200,"<<endl<<"\"cluster-number\":5,"<<endl<<"\"in(%)\":95,"<<endl<<
+          "\"out(%)\":10 }"<<endl<<endl;
 }
 
 
@@ -155,7 +160,9 @@ void processJsonFiles(String path){
 
     CSelectionData *selectionData = new CSelectionData();
 
-    selectionData->loadCoverage(covPath);
+
+    if( clusterAlgorithmName != "matrix-generator" )
+        selectionData->loadCoverage(covPath);
 
     std::map<std::string, CClusterDefinition> clusterList;
     clusterAlgorithm->execute(*selectionData, clusterList);
