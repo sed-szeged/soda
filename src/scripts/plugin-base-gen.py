@@ -19,7 +19,7 @@ def main():
     parse = parser.parse_args()
 
     if not os.path.exists(parse.plugin_directory + pluginpath):
-        print '[ERROR] Please specifiy plugin-directory path.'
+        print('[ERROR] Please specifiy plugin-directory path.')
         return
     readPluginTypes(parse.plugin_directory)
 
@@ -28,7 +28,7 @@ def main():
         return
 
     if not parse.plugin_name and not parse.plugin_type:
-        print '[ERROR] Missing plugin name or plugin type argument.'
+        print('[ERROR] Missing plugin name or plugin type argument.')
         parser.print_help()
         return
 
@@ -53,7 +53,7 @@ def createPluginBase(args):
     pluginpath = args.plugin_directory + '../plugin/' + type.replace('-plugin', '') + '/'
 
     if os.path.exists(pluginpath + pluginbase['pluginName'] + '/'):
-        print '[ERROR] Plugin with the same name already exists'
+        print('[ERROR] Plugin with the same name already exists')
         return
 
     with open(pluginpath + 'CMakeLists.txt', 'r+') as f:
@@ -73,13 +73,13 @@ def createPluginBase(args):
     with open(pluginpath + '.h', 'w') as f:
         f.write(Template(plugintype[type]['headerformat']).substitute(pluginbase))
 
-    print '[INFO] Done.'
+    print('[INFO] Done.')
 
 # prints the available plugin types
 def printPluginTypes():
-    print 'Available plugin types:'
+    print('Available plugin types:')
     for key in plugintype:
-        print ' * ' + key
+        print(' * ' + key)
 
 # creates cmakelists template string
 def createCmakeListsTemplate():
@@ -152,11 +152,22 @@ def readPluginTypes(plugindir):
                         for v in typedefs:
                             if v in methodname[0]:
                                 line = line.replace(methodname[0], '${className}::' + methodname[0])
-                        line = line.replace(methodname[1], '${className}::' + methodname[1])
+
+                        #elif 'getRequiredParameters()' in line:
+                        #line = line.replace('getRequiredParameters()', '${className}::getRequiredParameters()')
+                        method = ''
+                        for num in range(line.find('('), 0, -1):
+                            if ' ' in line[num]:
+                                method = line[num + 1:]
+                                break
+
+                        line = line.replace(method, '${className}::' + method)
                     if 'getName()' in line:
                         line += '\n{\n    return "${pluginName}";\n}\n\n'
                     elif 'getDescription()' in line:
                         line += '\n{\n    return "";\n}\n\n'
+                    elif 'getRequiredParameters()' in line:
+                        line += '\n{\n    return std::map<String, String>();\n}\n\n'
                     else:
                         line += '\n{\n}\n\n'
                     cppformat += line
