@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2015 Department of Software Engineering, University of Szeged
  *
  * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
  *
@@ -60,14 +60,33 @@ void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::
     int numTC = int(data.getCoverage()->getNumOfTestcases());
     int numCE = int(data.getCoverage()->getNumOfCodeElements());
 
-    std::cout<< "TC: "<< numTC << " ; CE: " << numCE << std::endl;
+    std::cout<<std::endl<< "TC: "<< numTC << " ; CE: " << numCE << std::endl;
 
     row_cluster_index = clustering_row(data,numTC);
 
     cols_cluster_index = clustering_cols(data,numCE);
 
+
+    HammingTestSuiteClusterPlugin::setClusterList(numTC, numCE, clusterList);
+
 }
 
+
+void HammingTestSuiteClusterPlugin::setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList){
+
+    CClusterDefinition def;
+
+    std::vector<int>::iterator biggest = std::max_element(row_cluster_index.begin(),row_cluster_index.end());
+
+    for(int a= 0 ; a <= *biggest ; a++)
+        clusterList[ boost::lexical_cast<std::string>(a) ] = CClusterDefinition();
+
+    for(int i = 0 ; i < numTC ; i++)
+        clusterList[ boost::lexical_cast<std::string>( row_cluster_index[i]) ].addTestCase(IndexType(i));
+    
+    for(int i = 0 ; i < numCE ; i++)
+        clusterList[ boost::lexical_cast<std::string>( cols_cluster_index[i]) ].addCodeElement(IndexType(i));
+}
 
 
 std::vector<int> HammingTestSuiteClusterPlugin::clustering_row(CSelectionData &data, int size ){

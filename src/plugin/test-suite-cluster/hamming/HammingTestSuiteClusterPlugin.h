@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2015 Department of Software Engineering, University of Szeged
  *
  * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
  *
@@ -51,6 +51,8 @@ public:
     bool hamming_row(CSelectionData &data, int index1, int index2, int tolerance, int size);
 
     bool hamming_cols(CSelectionData &data, int index1, int index2, int tolerance, int size);
+
+    void setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList);
 
 
 private:

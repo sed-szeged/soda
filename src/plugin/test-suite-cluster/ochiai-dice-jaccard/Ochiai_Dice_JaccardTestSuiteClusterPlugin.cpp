@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2015 Department of Software Engineering, University of Szeged
  *
  * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
  *
@@ -68,9 +68,16 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
     // CodeElements X CodeElements matrix calc.
     cols_results(data, algorithm_index);
 
+    // k-means alg. on (row) x (row) matrix
     kMeans_row();
 
+    // k-means alg. on (cols) x (cols) matrix
     kMeans_cols();
+
+    int numTC = int(data.getCoverage()->getNumOfTestcases());
+    int numCE = int(data.getCoverage()->getNumOfCodeElements());
+
+    setClusterList( numTC, numCE, clusterList);
 
 }
 
@@ -82,7 +89,6 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::row_results(CSelectionData &data
     int numCE = int(data.getCoverage()->getNumOfCodeElements());
 
     //std::cout<<"row (size: "<<numTC<<" "<<numCE<<")"<<std::endl;
-
 
     floatRowVectors.resize(numTC, std::vector<float>(numTC));
 
@@ -144,8 +150,9 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::cols_results(CSelectionData &dat
 
         for(int index_2 = 0 ; index_2 < numCE ; index_2++ )
             set_cols_results(data, index_1, index_2, element_1, numTC, alg_index);
-
+        
     }
+
 }
 
 
@@ -153,7 +160,7 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::set_cols_results(CSelectionData 
 
     int element_2 = int(data.getCoverage()->getBitMatrix().getCol(IndexType(index_2)).count());
     float results=0.0;
-    float* v_pointer = floatRowVectors[index_2].data();
+    float* v_pointer = floatColsVectors[index_2].data();
 
     if(alg_index==0){   // ochiai calc.
         if( element_1*element_2 != 0 )
@@ -181,9 +188,9 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::set_cols_results(CSelectionData 
 
 
 float Ochiai_Dice_JaccardTestSuiteClusterPlugin::results_vs_limit( float results, float limit ){
-    if ( limit != -1.0 ){
+    if ( limit != -1.0 )
         return results > limit ? 1.0 : 0.0;
-    }
+
     return results;
 }
 
@@ -239,20 +246,22 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_row(){
     Clustering::PointsSpace ps_row(num_points, num_dimensions, Ochiai_Dice_JaccardTestSuiteClusterPlugin::floatRowVectors );
     Clustering::Clusters clusters_row(num_clusters, ps_row);
 
-    //std::cout<<floatRowVectors[0].size()<<std::endl;
 
     clusters_row.k_means();
 
     Ochiai_Dice_JaccardTestSuiteClusterPlugin::RowIndexVector = clusters_row.points_to_clusters__;
 
-    /*
-    int a = 0;
+    // alg. results (index) start: 0
+    for (std::vector<ClusterId>::iterator it = RowIndexVector.begin() ; it != RowIndexVector.end(); ++it)
+        *it = (*it)+1;
+
+
+    /*int a = 0;
     for (std::vector<ClusterId>::iterator it = RowIndexVector.begin() ; it != RowIndexVector.end(); ++it){
         std::cout<<a<<" - "<<*it<<std::endl;
         a++;
-    }
-    std::cout<<std::endl;
-    */
+    } std::cout<<std::endl;*/
+
 
 
 }
@@ -265,22 +274,38 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_cols(){
     Clustering::PointsSpace ps_cols(num_points, num_dimensions, Ochiai_Dice_JaccardTestSuiteClusterPlugin::floatColsVectors );
     Clustering::Clusters clusters_cols(num_clusters, ps_cols);
 
-    //std::cout<<floatColsVectors[0].size()<<std::endl;
-
     clusters_cols.k_means();
 
     Ochiai_Dice_JaccardTestSuiteClusterPlugin::ColsIndexVector = clusters_cols.points_to_clusters__;
 
+    // alg. results (index) start: 0
+    for (std::vector<ClusterId>::iterator it = ColsIndexVector.begin() ; it != ColsIndexVector.end(); ++it)
+        *it = (*it)+1;
 
-    /*
-    int a = 0;
+    /*int a = 0;
     for (std::vector<ClusterId>::iterator it = ColsIndexVector.begin() ; it != ColsIndexVector.end(); ++it){
         std::cout<<a<<" - "<<*it<<std::endl;
         a++;
-    }
-    std::cout<<std::endl;
-    */
+    } std::cout<<std::endl;*/
 
+
+}
+
+
+
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList){
+
+    CClusterDefinition def;
+    std::vector<ClusterId>::iterator maxIndex = std::max_element(RowIndexVector.begin(),RowIndexVector.end());
+
+    for(int a= 0 ; a <= int(*maxIndex)+1 ; a++)
+        clusterList[ boost::lexical_cast<std::string>(a) ] = CClusterDefinition();
+
+    for(int i = 0 ; i < numTC ; i++)
+        clusterList[ boost::lexical_cast<std::string>( int(RowIndexVector[i])) ].addTestCase(IndexType(i));
+
+    for(int i = 0 ; i < numCE ; i++)
+        clusterList[ boost::lexical_cast<std::string>( int(ColsIndexVector[i])) ].addCodeElement(IndexType(i));
 }
 
 

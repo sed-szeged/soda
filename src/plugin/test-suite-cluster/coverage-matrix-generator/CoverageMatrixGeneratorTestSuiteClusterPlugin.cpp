@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2015-2016 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2015 Department of Software Engineering, University of Szeged
  *
  * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
  *
@@ -21,6 +21,8 @@
 
 #include "CoverageMatrixGeneratorTestSuiteClusterPlugin.h"
 #include "data/CBitMatrix.h"
+#include "boost/lexical_cast.hpp"
+
 
 namespace soda {
 
@@ -82,8 +84,8 @@ void CoverageMatrixGeneratorTestSuiteClusterPlugin::execute(CSelectionData &data
     // matrix value settings
     CoverageMatrixGeneratorTestSuiteClusterPlugin::matrix_set(bitMatrix);
 
-
     coverageMatrix->save(matrix_name);
+
 
     /*****
     for(int i = 0 ; i < row_size ; i++){
@@ -111,22 +113,15 @@ void CoverageMatrixGeneratorTestSuiteClusterPlugin::execute(CSelectionData &data
 void CoverageMatrixGeneratorTestSuiteClusterPlugin::addTestCases(CCoverageMatrix* coverageMatrix){
     for(int i = 0 ; i < row_size ; i++){
         std::string tests="test_";
-        std::ostringstream oss;
-        oss<<i;
-        std::string tmp=oss.str();
-        std::string name = tests.append(tmp);
+        std::string name = tests.append( boost::lexical_cast<std::string>(i) );
         coverageMatrix->addTestcaseName(name);
     }
-
 }
 
 void CoverageMatrixGeneratorTestSuiteClusterPlugin::addMethods(CCoverageMatrix *coverageMatrix){
     for(int i = 0 ; i < cols_size ; i++){
         std::string methods="methods_";
-        std::ostringstream oss;
-        oss<<i;
-        std::string tmp=oss.str();
-        std::string name = methods.append(tmp);
+        std::string name = methods.append( boost::lexical_cast<std::string>(i) );
         coverageMatrix->addCodeElementName(name);
     }
 
@@ -135,7 +130,7 @@ void CoverageMatrixGeneratorTestSuiteClusterPlugin::addMethods(CCoverageMatrix *
 
 void CoverageMatrixGeneratorTestSuiteClusterPlugin::row_index_generate(){
     for(int i = 0 ; i < row_size ; i++){
-        int tmp=std::rand()%cluster_number;
+        int tmp=std::rand()%(cluster_number+1);
         if(tmp>=2){
             row_cluster_index.push_back( std::rand() % tmp );
         } else {
@@ -146,7 +141,7 @@ void CoverageMatrixGeneratorTestSuiteClusterPlugin::row_index_generate(){
 
 void CoverageMatrixGeneratorTestSuiteClusterPlugin::cols_index_generate(){
     for(int i = 0 ; i < cols_size ; i++){
-        int tmp=std::rand()%cluster_number;
+        int tmp=std::rand()%(cluster_number+1);
         if(tmp>=2){
             cols_cluster_index.push_back( std::rand() % tmp );
         } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2015 Department of Software Engineering, University of Szeged
  *
  * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
  *
@@ -70,12 +70,17 @@ public:
 
     void kMeans_cols();
 
+    void setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList);
+
 public:
     std::vector< std::vector<float> > floatRowVectors;
     std::vector< std::vector<float> > floatColsVectors;
 
     std::vector<ClusterId> RowIndexVector;
     std::vector<ClusterId>  ColsIndexVector;
+
+    std::vector<int> row_cluster_index;
+    std::vector<int> cols_cluster_index;
 
  private:
     int algorithm_index; // 0 - ochiai, 1-dice, 2-jaccard

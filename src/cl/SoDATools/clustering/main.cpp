@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2015 Department of Software Engineering, University of Szeged
  *
  * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
  *
@@ -31,6 +31,7 @@
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
 #include "io/CJsonReader.h"
+#include "data/CClusterDefinition.h"
 
 #include "rapidjson/document.h"
 #include "rapidjson/filewritestream.h"
@@ -49,8 +50,7 @@ void printPluginNames(const String &type, const std::vector<String> &plugins);
 void printHelp();
 
 CKernel kernel;
-
-
+std::map<std::string, CClusterDefinition> clusterList;
 
 
 
@@ -165,7 +165,23 @@ void processJsonFiles(String path){
         selectionData->loadCoverage(covPath);
 
     std::map<std::string, CClusterDefinition> clusterList;
+
     clusterAlgorithm->execute(*selectionData, clusterList);
+
+
+    /* metrics calc. */
+
+    if( clusterAlgorithmName != "matrix-generator" ){
+
+        IndexType revision = 1;
+        rapidjson::Document ures_doc;
+
+        ITestSuiteMetricPlugin *metric = kernel.getTestSuiteMetricPluginManager().getPlugin("clustering-metrics");
+        metric->init(selectionData, &clusterList, revision);
+
+        metric->calculate(ures_doc);
+
+    }
 
 
 }
