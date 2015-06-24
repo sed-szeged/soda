@@ -132,7 +132,7 @@ void EmmaJavaCoverageReaderPlugin::readFromDirectory1stPass(fs::path p, size_t c
 
             // The EMMA xml report contains all code elements, we do not need to read all files in the 1st pass.
             if (!readXML) {
-                continue;
+                //continue;
             }
 
             std::ifstream in(it->string().c_str());
