@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2015 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2015-2016 Department of Software Engineering, University of Szeged
  *
  * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
  *
@@ -19,20 +19,21 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HAMMINGTESTSUITECLUSTERPLUGIN_H
-#define HAMMINGTESTSUITECLUSTERPLUGIN_H
+#ifndef COVERAGEMATRIXGENERATORTESTSUITECLUSTERPLUGIN_H
+#define COVERAGEMATRIXGENERATORTESTSUITECLUSTERPLUGIN_H
 
 #include "engine/CKernel.h"
+#include "data/CBitMatrix.h"
 
 namespace soda {
 
 
-class HammingTestSuiteClusterPlugin : public ITestSuiteClusterPlugin
+class CoverageMatrixGeneratorTestSuiteClusterPlugin : public ITestSuiteClusterPlugin
 {
 public:
 
-    HammingTestSuiteClusterPlugin();
-    ~HammingTestSuiteClusterPlugin();
+    CoverageMatrixGeneratorTestSuiteClusterPlugin();
+    ~CoverageMatrixGeneratorTestSuiteClusterPlugin();
 
     std::string getName();
 
@@ -44,21 +45,25 @@ public:
 
     void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList);
 
-    std::vector<int> clustering_row(CSelectionData &data, int size1, int size2 );
+    void addTestCases(CCoverageMatrix* coverageMatrix);
 
-    std::vector<int> clustering_cols(CSelectionData &data, int size1, int size2 );
+    void addMethods(CCoverageMatrix* coverageMatrix);
 
-    bool hamming_row(CSelectionData &data, int index1, int index2, int tolerance, int size);
+    void row_index_generate();
 
-    bool hamming_cols(CSelectionData &data, int index1, int index2, int tolerance, int size);
+    void cols_index_generate();
 
-    void setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList);
+    void matrix_set( CBitMatrix* bitMatrix );
 
 
-private:
-    int m_hamm_diff_row;    // row tolerance (%)
-    int m_hamm_diff_cols;   // cols tolerance (%)
-    int _0cluster_limit;    // 0cluster tolerance
+public:
+    std::string matrix_name;
+    int row_size;
+    int cols_size;
+    int cluster_number;
+    int in_count;
+    int out_count;
+
     std::vector<int> row_cluster_index;
     std::vector<int> cols_cluster_index;
 
@@ -66,4 +71,4 @@ private:
 
 } /* namespace soda */
 
-#endif /* HAMMINGTESTSUITECLUSTERPLUGIN_H */
+#endif /* COVERAGEMATRIXGENERATORTESTSUITECLUSTERPLUGIN_H */

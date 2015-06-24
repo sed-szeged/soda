@@ -1,3 +1,25 @@
+/*
+ * Copyright (C): 2015 Department of Software Engineering, University of Szeged
+ *
+ * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
+ *
+ * This file is part of SoDA.
+ *
+ *  SoDA is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  SoDA is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "Ochiai_Dice_JaccardTestSuiteClusterPlugin.h"
 #include "cluster.hpp"
 
@@ -23,7 +45,6 @@ std::string Ochiai_Dice_JaccardTestSuiteClusterPlugin::getDescription()
 
 std::map<String, String> Ochiai_Dice_JaccardTestSuiteClusterPlugin::getRequiredParameters()
 {
-    // TODO: TAM-hoz kell majd
     return std::map<String, String>();
 }
 
@@ -41,15 +62,22 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
     if( algorithm_index == 1 ) std::cout<<std::endl<<"Running Dice..."<<std::endl;
     if( algorithm_index == 2 ) std::cout<<std::endl<<"Running Jaccard..."<<std::endl;
 
-    // N X N -es matrix letrehozasa
+    // TestCase X TestCase matrix calc.
     row_results(data, algorithm_index);
 
-    // M X M -es matrix letrehozasa
+    // CodeElements X CodeElements matrix calc.
     cols_results(data, algorithm_index);
 
+    // k-means alg. on (row) x (row) matrix
     kMeans_row();
 
+    // k-means alg. on (cols) x (cols) matrix
     kMeans_cols();
+
+    int numTC = int(data.getCoverage()->getNumOfTestcases());
+    int numCE = int(data.getCoverage()->getNumOfCodeElements());
+
+    setClusterList( numTC, numCE, clusterList);
 
 }
 
@@ -57,11 +85,10 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
 
 void Ochiai_Dice_JaccardTestSuiteClusterPlugin::row_results(CSelectionData &data, int alg_index){
 
-    int numTC = int(data.getCoverage()->getNumOfTestcases());      // a tesztek szama
-    int numCE = int(data.getCoverage()->getNumOfCodeElements());      // a code elemenetek szama
+    int numTC = int(data.getCoverage()->getNumOfTestcases());
+    int numCE = int(data.getCoverage()->getNumOfCodeElements());
 
     //std::cout<<"row (size: "<<numTC<<" "<<numCE<<")"<<std::endl;
-
 
     floatRowVectors.resize(numTC, std::vector<float>(numTC));
 
@@ -84,21 +111,21 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::set_row_results(CSelectionData &
     float* v_pointer = floatRowVectors[index_1].data();
     float results=0.0;
 
-    if(alg_index==0){   // ochiai szamitas
+    if(alg_index==0){   // ochiai calc.
         if( element_1*element_2 != 0 )
-            results = metszet_row(data, index_1, index_2, numCE) / (std::sqrt( element_1*element_2));
+            results = intersections_row(data, index_1, index_2, numCE) / (std::sqrt( element_1*element_2));
 
-    } else if(alg_index==1){    // dice szamitas
+    } else if(alg_index==1){    // dice calc.
         if( element_1+element_2 != 0 )
-            results = 2*metszet_row(data, index_1, index_2, numCE) / float(element_1+element_2);
+            results = 2*intersections_row(data, index_1, index_2, numCE) / float(element_1+element_2);
 
-    } else if(alg_index==2){    // jaccard
-        int unio = unio_row(data, index_1, index_2, numCE);
-        if( unio != 0 )
-            results = metszet_row(data, index_1, index_2, numCE) / float(unio);
+    } else if(alg_index==2){    // jaccard calc.
+        int unions = unions_row(data, index_1, index_2, numCE);
+        if( unions != 0 )
+            results = intersections_row(data, index_1, index_2, numCE) / float(unions);
 
     } else {
-        std::cout<<"HIBAS ALG. INDEX"<<std::endl;
+        std::cout<<"Error"<<std::endl;
         return;
     }
     *(v_pointer+index_2) = results_vs_limit(results,float(limit)) ;
@@ -111,8 +138,8 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::set_row_results(CSelectionData &
 
 void Ochiai_Dice_JaccardTestSuiteClusterPlugin::cols_results(CSelectionData &data, int alg_index){
 
-    int numTC = int(data.getCoverage()->getNumOfTestcases());      // a tesztek szama
-    int numCE = int(data.getCoverage()->getNumOfCodeElements());      // a code elemenetek szama
+    int numTC = int(data.getCoverage()->getNumOfTestcases());
+    int numCE = int(data.getCoverage()->getNumOfCodeElements());
 
     //std::cout<<"cols (size: "<<numTC<<" "<<numCE<<")"<<std::endl;
 
@@ -123,8 +150,9 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::cols_results(CSelectionData &dat
 
         for(int index_2 = 0 ; index_2 < numCE ; index_2++ )
             set_cols_results(data, index_1, index_2, element_1, numTC, alg_index);
-
+        
     }
+
 }
 
 
@@ -132,23 +160,23 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::set_cols_results(CSelectionData 
 
     int element_2 = int(data.getCoverage()->getBitMatrix().getCol(IndexType(index_2)).count());
     float results=0.0;
-    float* v_pointer = floatRowVectors[index_2].data();
+    float* v_pointer = floatColsVectors[index_2].data();
 
-    if(alg_index==0){   // ochiai szamitas
+    if(alg_index==0){   // ochiai calc.
         if( element_1*element_2 != 0 )
-            results = metszet_cols(data, index_1, index_2, numTC) / (std::sqrt( element_1*element_2));
+            results = intersections_cols(data, index_1, index_2, numTC) / (std::sqrt( element_1*element_2));
 
-    } else if(alg_index==1){    // dice szamitas
+    } else if(alg_index==1){    // dice calc.
         if( element_1+element_2 != 0 )
-            results = 2*metszet_cols(data, index_1, index_2, numTC) / float(element_1+element_2);
+            results = 2*intersections_cols(data, index_1, index_2, numTC) / float(element_1+element_2);
 
-    } else if(alg_index==2){    // jaccard
-        int unio = unio_cols(data, index_1, index_2, numTC);
-        if( unio != 0 )
-            results = metszet_cols(data, index_1, index_2, numTC) / float(unio);
+    } else if(alg_index==2){    // jaccard calc.
+        int unions = unions_cols(data, index_1, index_2, numTC);
+        if( unions != 0 )
+            results = intersections_cols(data, index_1, index_2, numTC) / float(unions);
 
     } else {
-        std::cout<<"HIBAS ALG. INDEX"<<std::endl;
+        std::cout<<"Error"<<std::endl;
         return;
     }
 
@@ -159,13 +187,10 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::set_cols_results(CSelectionData 
 
 
 
-
-
-// ha a json-ben "limit":-1.0 van akkor a tenyleges ertek kerul bele, kulonben 0 vagy 1 -a limittol fuggoen
 float Ochiai_Dice_JaccardTestSuiteClusterPlugin::results_vs_limit( float results, float limit ){
-    if ( limit != -1.0 ){
+    if ( limit != -1.0 )
         return results > limit ? 1.0 : 0.0;
-    }
+
     return results;
 }
 
@@ -173,42 +198,42 @@ float Ochiai_Dice_JaccardTestSuiteClusterPlugin::results_vs_limit( float results
 
 
 
-int Ochiai_Dice_JaccardTestSuiteClusterPlugin::metszet_row(CSelectionData &data, int index_1, int index_2, int size){
-    int metszet = 0;
+int Ochiai_Dice_JaccardTestSuiteClusterPlugin::intersections_row(CSelectionData &data, int index_1, int index_2, int size){
+    int intersections = 0;
     for(int a = 0 ; a < size ; a++)
-        metszet += int( int(data.getCoverage()->getBitMatrix().getRow(index_1)[a]) && int(data.getCoverage()->getBitMatrix().getRow(index_2)[a]) );
+        intersections += int( int(data.getCoverage()->getBitMatrix().getRow(index_1)[a]) && int(data.getCoverage()->getBitMatrix().getRow(index_2)[a]) );
 
-    return metszet;
+    return intersections;
 }
 
 
-int Ochiai_Dice_JaccardTestSuiteClusterPlugin::metszet_cols(CSelectionData &data, int index_1, int index_2, int size){
-    int metszet = 0;
+int Ochiai_Dice_JaccardTestSuiteClusterPlugin::intersections_cols(CSelectionData &data, int index_1, int index_2, int size){
+    int intersections = 0;
     for(int a = 0 ; a < size ; a++)
-        metszet += int( int(data.getCoverage()->getBitMatrix().getCol(index_1)[a]) && int(data.getCoverage()->getBitMatrix().getCol(index_2)[a]) );
+        intersections += int( int(data.getCoverage()->getBitMatrix().getCol(index_1)[a]) && int(data.getCoverage()->getBitMatrix().getCol(index_2)[a]) );
 
-    return metszet;
+    return intersections;
 }
 
 
 
 
 
-int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unio_row(CSelectionData &data, int index_1, int index_2, int size){
-    int unio = 0;
+int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unions_row(CSelectionData &data, int index_1, int index_2, int size){
+    int unions = 0;
     for(int a = 0 ; a < size ; a++)
-        unio += int( int(data.getCoverage()->getBitMatrix().getRow(index_1)[a]) || int(data.getCoverage()->getBitMatrix().getRow(index_2)[a]) );
+        unions += int( int(data.getCoverage()->getBitMatrix().getRow(index_1)[a]) || int(data.getCoverage()->getBitMatrix().getRow(index_2)[a]) );
 
-    return unio;
+    return unions;
 }
 
 
-int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unio_cols(CSelectionData &data, int index_1, int index_2, int size){
-    int unio = 0;
+int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unions_cols(CSelectionData &data, int index_1, int index_2, int size){
+    int unions = 0;
     for(int a = 0 ; a < size ; a++)
-        unio += int( int(data.getCoverage()->getBitMatrix().getCol(index_1)[a]) || int(data.getCoverage()->getBitMatrix().getCol(index_2)[a]) );
+        unions += int( int(data.getCoverage()->getBitMatrix().getCol(index_1)[a]) || int(data.getCoverage()->getBitMatrix().getCol(index_2)[a]) );
 
-    return unio;
+    return unions;
 }
 
 
@@ -221,20 +246,22 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_row(){
     Clustering::PointsSpace ps_row(num_points, num_dimensions, Ochiai_Dice_JaccardTestSuiteClusterPlugin::floatRowVectors );
     Clustering::Clusters clusters_row(num_clusters, ps_row);
 
-    //std::cout<<floatRowVectors[0].size()<<std::endl;
 
     clusters_row.k_means();
 
     Ochiai_Dice_JaccardTestSuiteClusterPlugin::RowIndexVector = clusters_row.points_to_clusters__;
 
-    /*
-    int a = 0;
+    // alg. results (index) start: 0
+    for (std::vector<ClusterId>::iterator it = RowIndexVector.begin() ; it != RowIndexVector.end(); ++it)
+        *it = (*it)+1;
+
+
+    /*int a = 0;
     for (std::vector<ClusterId>::iterator it = RowIndexVector.begin() ; it != RowIndexVector.end(); ++it){
         std::cout<<a<<" - "<<*it<<std::endl;
         a++;
-    }
-    std::cout<<std::endl;
-    */
+    } std::cout<<std::endl;*/
+
 
 
 }
@@ -247,22 +274,38 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_cols(){
     Clustering::PointsSpace ps_cols(num_points, num_dimensions, Ochiai_Dice_JaccardTestSuiteClusterPlugin::floatColsVectors );
     Clustering::Clusters clusters_cols(num_clusters, ps_cols);
 
-    //std::cout<<floatColsVectors[0].size()<<std::endl;
-
     clusters_cols.k_means();
 
     Ochiai_Dice_JaccardTestSuiteClusterPlugin::ColsIndexVector = clusters_cols.points_to_clusters__;
 
+    // alg. results (index) start: 0
+    for (std::vector<ClusterId>::iterator it = ColsIndexVector.begin() ; it != ColsIndexVector.end(); ++it)
+        *it = (*it)+1;
 
-    /*
-    int a = 0;
+    /*int a = 0;
     for (std::vector<ClusterId>::iterator it = ColsIndexVector.begin() ; it != ColsIndexVector.end(); ++it){
         std::cout<<a<<" - "<<*it<<std::endl;
         a++;
-    }
-    std::cout<<std::endl;
-    */
+    } std::cout<<std::endl;*/
 
+
+}
+
+
+
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList){
+
+    CClusterDefinition def;
+    std::vector<ClusterId>::iterator maxIndex = std::max_element(RowIndexVector.begin(),RowIndexVector.end());
+
+    for(int a= 0 ; a <= int(*maxIndex)+1 ; a++)
+        clusterList[ boost::lexical_cast<std::string>(a) ] = CClusterDefinition();
+
+    for(int i = 0 ; i < numTC ; i++)
+        clusterList[ boost::lexical_cast<std::string>( int(RowIndexVector[i])) ].addTestCase(IndexType(i));
+
+    for(int i = 0 ; i < numCE ; i++)
+        clusterList[ boost::lexical_cast<std::string>( int(ColsIndexVector[i])) ].addCodeElement(IndexType(i));
 }
 
 

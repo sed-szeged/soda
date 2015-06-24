@@ -1,3 +1,24 @@
+/*
+ * Copyright (C): 2015 Department of Software Engineering, University of Szeged
+ *
+ * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
+ *
+ * This file is part of SoDA.
+ *
+ *  SoDA is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  SoDA is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 
 #define BOOST_FILESYSTEM_VERSION 3
 
@@ -10,6 +31,7 @@
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
 #include "io/CJsonReader.h"
+#include "data/CClusterDefinition.h"
 
 #include "rapidjson/document.h"
 #include "rapidjson/filewritestream.h"
@@ -28,8 +50,7 @@ void printPluginNames(const String &type, const std::vector<String> &plugins);
 void printHelp();
 
 CKernel kernel;
-
-
+std::map<std::string, CClusterDefinition> clusterList;
 
 
 
@@ -70,7 +91,12 @@ void printHelp()
 
     cout<<"{ \"coverage-data\":\"/home/.../sample.coverage.SoDA\","<<endl<<"\"algorithm\":\"ochiai-dice-jaccard\","<<endl<<
           "\"alg.index\":2,"<<endl<<"\"limit\":0.3,"<<endl<<"\"cluster-number\":3}"<<endl<<endl;
-    cout<<"index: 0 - ochiai ; 1 - dice ; 2 - jaccard and limit=-1.0 == nincs limit"<<endl<<endl;
+    cout<<"index: 0 - ochiai ; 1 - dice ; 2 - jaccard and limit=-1.0 == no limit"<<endl<<endl<<"or"<<endl<<endl;
+
+
+    cout<<"{ \"coverage-data\":\"/home/../output.coverage.SoDA\","<<endl<<"\"algorithm\":\"matrix-generator\","<<endl<<
+          "\"row-size\":100,"<<endl<<"\"cols-size\":200,"<<endl<<"\"cluster-number\":5,"<<endl<<"\"in(%)\":95,"<<endl<<
+          "\"out(%)\":10 }"<<endl<<endl;
 }
 
 
@@ -134,10 +160,28 @@ void processJsonFiles(String path){
 
     CSelectionData *selectionData = new CSelectionData();
 
-    selectionData->loadCoverage(covPath);
+
+    if( clusterAlgorithmName != "matrix-generator" )
+        selectionData->loadCoverage(covPath);
 
     std::map<std::string, CClusterDefinition> clusterList;
+
     clusterAlgorithm->execute(*selectionData, clusterList);
+
+
+    /* metrics calc. */
+
+    if( clusterAlgorithmName != "matrix-generator" ){
+
+        IndexType revision = 1;
+        rapidjson::Document ures_doc;
+
+        ITestSuiteMetricPlugin *metric = kernel.getTestSuiteMetricPluginManager().getPlugin("clustering-metrics");
+        metric->init(selectionData, &clusterList, revision);
+
+        metric->calculate(ures_doc);
+
+    }
 
 
 }

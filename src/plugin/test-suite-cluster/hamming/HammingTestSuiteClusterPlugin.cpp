@@ -1,3 +1,25 @@
+/*
+ * Copyright (C): 2015 Department of Software Engineering, University of Szeged
+ *
+ * Authors: Bela Vancsics <vancsics@inf.u-szeged.hu>
+ *
+ * This file is part of SoDA.
+ *
+ *  SoDA is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  SoDA is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #include "HammingTestSuiteClusterPlugin.h"
 
 namespace soda {
@@ -22,15 +44,12 @@ std::string HammingTestSuiteClusterPlugin::getDescription()
 
 std::map<String, String> HammingTestSuiteClusterPlugin::getRequiredParameters()
 {
-    // TODO: TAM-hoz kell majd
     return std::map<String, String>();
 }
 
 
-// Json-bol valo "parameter-inicializalas"
 void HammingTestSuiteClusterPlugin::init(rapidjson::Document &doc)
 {
-    // ezek lesznek majd a parameterek
     m_hamm_diff_row = doc["hamming_dist_row(%)"].GetInt();
     m_hamm_diff_cols = doc["hamming_dist_cols(%)"].GetInt();
     _0cluster_limit = doc["0cluster(%)"].GetInt();
@@ -38,83 +57,112 @@ void HammingTestSuiteClusterPlugin::init(rapidjson::Document &doc)
 
 void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList)
 {
-    int numTC = int(data.getCoverage()->getNumOfTestcases());      // a tesztek szama
-    int numCE = int(data.getCoverage()->getNumOfCodeElements());      // a code elemenetek szama
+    int numTC = int(data.getCoverage()->getNumOfTestcases());
+    int numCE = int(data.getCoverage()->getNumOfCodeElements());
 
-    std::cout<< "TC: "<< numTC << " ; CE: " << numCE << std::endl;
+    std::cout<<std::endl<< "TC: "<< numTC << " ; CE: " << numCE << std::endl<< std::endl;
 
-    row_cluster_index = clustering_row(data,numTC);
+    row_cluster_index = clustering_row(data,numTC,numCE);
 
-    cols_cluster_index = clustering_cols(data,numCE);
+    cols_cluster_index = clustering_cols(data,numTC,numCE);
+
+
+    HammingTestSuiteClusterPlugin::setClusterList(numTC, numCE, clusterList);
 
 }
 
 
+void HammingTestSuiteClusterPlugin::setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList){
 
-std::vector<int> HammingTestSuiteClusterPlugin::clustering_row(CSelectionData &data, int size ){
+    CClusterDefinition def;
 
-    int actual_index = 0;  // az aktualis klasztercimket mutatja
-    int tolerance = ( size * m_hamm_diff_row ) / 100 ; // a Hamming toleranciat mutatja
+    std::vector<int>::iterator biggest = std::max_element(row_cluster_index.begin(),row_cluster_index.end());
+
+    for(int a= 0 ; a <= *biggest ; a++)
+        clusterList[ boost::lexical_cast<std::string>(a) ] = CClusterDefinition();
+
+    for(int i = 0 ; i < numTC ; i++)
+        clusterList[ boost::lexical_cast<std::string>( row_cluster_index[i]) ].addTestCase(IndexType(i));
+    
+    for(int i = 0 ; i < numCE ; i++)
+        clusterList[ boost::lexical_cast<std::string>( cols_cluster_index[i]) ].addCodeElement(IndexType(i));
+}
+
+
+std::vector<int> HammingTestSuiteClusterPlugin::clustering_row(CSelectionData &data, int size1, int size2 ){
+
+    int actual_index = 0;
+    int tolerance = ( size2 * m_hamm_diff_row ) / 100 ; // Hamming tolerance
     int _0cluster_count = 0;
-    std::vector<int> clusterindex_vector(size,-1);   // seged-cimke-vektor
+    int _0cluster_tolerance = (size2 * _0cluster_limit ) / 100;
+
+    std::vector<int> clusterindex_vector(size1,-1);
 
     std::cout<<"Hamm row tol.: "<<tolerance<<std::endl;
+    std::cout<<"0cluster row tol.: "<<_0cluster_tolerance <<std::endl;
 
-    for(int index_1 = 0 ; index_1 < size ; index_1++ ){
+    for(int index_1 = 0 ; index_1 < size1 ; index_1++ ){
 
         int element_1 = data.getCoverage()->getBitMatrix().getRow(IndexType(index_1)).count();
 
-        if( element_1 > _0cluster_limit ){  // ha sok elem van benne akkor ...
+        // 0cluster
+        if( element_1 > _0cluster_tolerance ){
             _0cluster_count++;
-            clusterindex_vector[index_1] = 0; // ... a 0klaszterbe kerul
+            clusterindex_vector[index_1] = 0;
 
-        } else if ( clusterindex_vector[index_1] == -1 ) {    // ha meg cimkezetlen ...
+        } else if ( clusterindex_vector[index_1] == -1 ) {
 
             actual_index++;
-            clusterindex_vector[index_1] = actual_index; // ... megcimkezzuk az egyiket ...
-            for(int index_2 = index_1 ; index_2 < size ; index_2++ ){
+            clusterindex_vector[index_1] = actual_index;
+            for(int index_2 = index_1 ; index_2 < size1 ; index_2++ ){
 
                 int element_2 = data.getCoverage()->getBitMatrix().getRow(IndexType(index_2)).count();
 
-                // ... es ha kelloen kozel van egy masik elemhez ...
                 if( index_1 != index_2 && clusterindex_vector[index_2] == -1 && abs(element_1-element_2) < tolerance )
-                    if( hamming_row(data, index_1, index_2, tolerance, size) ) clusterindex_vector[index_2] = actual_index; // ... akkor azonos lesz a cimkejuk
+                    if( hamming_row(data, index_1, index_2, tolerance, size2) ) clusterindex_vector[index_2] = actual_index;
 
             }
         }
     }
 
-    std::cout<<"cluster count: "<< actual_index << " ; 0cluster count: "<<_0cluster_count<<std::endl;
+    std::cout<<"cluster count: "<< actual_index << " ; 0cluster count: "<<_0cluster_count<<std::endl<< std::endl;
     return clusterindex_vector;
 
 }
 
-std::vector<int> HammingTestSuiteClusterPlugin::clustering_cols(CSelectionData &data, int size ){
+std::vector<int> HammingTestSuiteClusterPlugin::clustering_cols(CSelectionData &data, int size1, int size2 ){
 
-    int actual_index = 0;  // az aktualis klasztercimket mutatja
-    int tolerance = ( size * m_hamm_diff_cols ) / 100 ;
+    int actual_index = 0;
+    int tolerance = ( size1 * m_hamm_diff_cols ) / 100 ;
     int _0cluster_count = 0;
-    std::vector<int> clusterindex_vector(size,-1);   // seged-cimke-vektor
+    int _0cluster_tolerance = (size1 * _0cluster_limit ) / 100;
+
+    std::vector<int> clusterindex_vector(size2,-1);
 
     std::cout<<"Hamm cols tol.: "<<tolerance<<std::endl;
+    std::cout<<"0cluster cols tol.: "<<_0cluster_tolerance <<std::endl;
 
-    for(int index_1 = 0 ; index_1 < size ; index_1++ ){
+    for(int index_1 = 0 ; index_1 < size2 ; index_1++ ){
 
+        //std::cout<<index_1<<std::endl;
         int element_1 = data.getCoverage()->getBitMatrix().getCol(IndexType(index_1)).count();
-        if( element_1 > _0cluster_limit ){  // ha sok elem van benne akkor ...
-            clusterindex_vector[index_1] = 0; // ... a 0klaszterbe kerul
+
+        // 0cluster
+        if( element_1 > _0cluster_tolerance ){
+            clusterindex_vector[index_1] = 0;
             _0cluster_count++;
-        } else if ( clusterindex_vector[index_1] == -1 ) {    // ha meg cimkezetlen ...
+
+        } else if ( clusterindex_vector[index_1] == -1 ) {
 
             actual_index++;
-            clusterindex_vector[index_1] = actual_index; // ... megcimkezzuk az egyiket ...
+            clusterindex_vector[index_1] = actual_index;
 
-            for(int index_2 = index_1 ; index_2 < size ; index_2++ ){
+            for(int index_2 = index_1 ; index_2 < size2 ; index_2++ ){
                 int element_2 = data.getCoverage()->getBitMatrix().getCol(IndexType(index_2)).count();
-                // ... es ha kelloen kozel van egy masik elemhez ...
-                if( index_1 != index_2 && clusterindex_vector[index_2] == -1 && abs(element_1-element_2) < tolerance )
-                    if( hamming_cols(data, index_1, index_2, tolerance, size) ) clusterindex_vector[index_2] = actual_index; // ... akkor azonos lesz a cimkejuk
 
+                if( index_1 != index_2 && clusterindex_vector[index_2] == -1 && abs(element_1-element_2) < tolerance )
+                    if( hamming_cols(data, index_1, index_2, tolerance, size1) )
+                        clusterindex_vector[index_2] = actual_index;
             }
         }
     }
