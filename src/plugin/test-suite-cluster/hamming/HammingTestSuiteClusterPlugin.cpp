@@ -21,6 +21,7 @@
 
 
 #include "HammingTestSuiteClusterPlugin.h"
+#include "data/CBitMatrix.h"
 
 namespace soda {
 
@@ -59,17 +60,29 @@ void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::
 {
     int numTC = int(data.getCoverage()->getNumOfTestcases());
     int numCE = int(data.getCoverage()->getNumOfCodeElements());
-
     std::cout<<std::endl<< "TC: "<< numTC << " ; CE: " << numCE << std::endl<< std::endl;
+
 
     row_cluster_index = clustering_row(data,numTC,numCE);
 
-    cols_cluster_index = clustering_cols(data,numTC,numCE);
+
+    // matrix transpose
+    CIDManager idManagerTest, idManagerMethod;
+    CBitMatrix* bitMatrix = new CBitMatrix();
+    CCoverageMatrix* coverageTramspseMatrix = new CCoverageMatrix( &idManagerTest, &idManagerMethod, bitMatrix);
+
+
+    // original matrix transpose
+    matrixTranspose(data, coverageTramspseMatrix, bitMatrix, numTC, numCE);
+
+
+    cols_cluster_index = clustering_cols(coverageTramspseMatrix);
 
 
     HammingTestSuiteClusterPlugin::setClusterList(numTC, numCE, clusterList);
 
 }
+
 
 
 void HammingTestSuiteClusterPlugin::setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList){
@@ -87,6 +100,7 @@ void HammingTestSuiteClusterPlugin::setClusterList(int numTC, int numCE, std::ma
     for(int i = 0 ; i < numCE ; i++)
         clusterList[ boost::lexical_cast<std::string>( cols_cluster_index[i]) ].addCodeElement(IndexType(i));
 }
+
 
 
 std::vector<int> HammingTestSuiteClusterPlugin::clustering_row(CSelectionData &data, int size1, int size2 ){
@@ -130,7 +144,12 @@ std::vector<int> HammingTestSuiteClusterPlugin::clustering_row(CSelectionData &d
 
 }
 
-std::vector<int> HammingTestSuiteClusterPlugin::clustering_cols(CSelectionData &data, int size1, int size2 ){
+
+
+std::vector<int> HammingTestSuiteClusterPlugin::clustering_cols(CCoverageMatrix* data){
+
+    int size1 = data->getBitMatrix().getNumOfCols();
+    int size2 = data->getBitMatrix().getNumOfRows();
 
     int actual_index = 0;
     int tolerance = ( size1 * m_hamm_diff_cols ) / 100 ;
@@ -144,8 +163,7 @@ std::vector<int> HammingTestSuiteClusterPlugin::clustering_cols(CSelectionData &
 
     for(int index_1 = 0 ; index_1 < size2 ; index_1++ ){
 
-        //std::cout<<index_1<<std::endl;
-        int element_1 = data.getCoverage()->getBitMatrix().getCol(IndexType(index_1)).count();
+        int element_1 = data->getBitMatrix().getRow(IndexType(index_1)).count();
 
         // 0cluster
         if( element_1 > _0cluster_tolerance ){
@@ -158,11 +176,12 @@ std::vector<int> HammingTestSuiteClusterPlugin::clustering_cols(CSelectionData &
             clusterindex_vector[index_1] = actual_index;
 
             for(int index_2 = index_1 ; index_2 < size2 ; index_2++ ){
-                int element_2 = data.getCoverage()->getBitMatrix().getCol(IndexType(index_2)).count();
+
+                int element_2 = data->getBitMatrix().getRow(IndexType(index_2)).count();
 
                 if( index_1 != index_2 && clusterindex_vector[index_2] == -1 && abs(element_1-element_2) < tolerance )
-                    if( hamming_cols(data, index_1, index_2, tolerance, size1) )
-                        clusterindex_vector[index_2] = actual_index;
+                    if( hamming_cols(data, index_1, index_2, tolerance, size2) )  clusterindex_vector[index_2] = actual_index;
+
             }
         }
     }
@@ -186,15 +205,34 @@ bool HammingTestSuiteClusterPlugin::hamming_row(CSelectionData &data, int index1
 }
 
 
-bool HammingTestSuiteClusterPlugin::hamming_cols(CSelectionData &data, int index1, int index2, int tolerance, int size){
+
+bool HammingTestSuiteClusterPlugin::hamming_cols(CCoverageMatrix* data, int index1, int index2, int tolerance, int size){
 
     int distance = 0;
     for(int a = 0 ; a < size ; a++)
-        distance += int( (data.getCoverage()->getBitMatrix().getCol(index1)[a]) ^ (data.getCoverage()->getBitMatrix().getCol(index2)[a]) );
+        distance += int( data->getBitMatrix().getRow(index1)[a] ^ data->getBitMatrix().getRow(index2)[a]);
 
     if( distance < tolerance )return true;
 
     return false;
+}
+
+
+
+void HammingTestSuiteClusterPlugin::matrixTranspose(CSelectionData &data, CCoverageMatrix* coverageMatrix, CBitMatrix* bitMatrix, int numTC, int numCE){
+
+    for(int i = 0 ; i < numCE ; i++)
+        coverageMatrix->addTestcaseName( boost::lexical_cast<std::string>(i) );
+
+    for(int i = 0 ; i < numTC ; i++)
+        coverageMatrix->addCodeElementName( boost::lexical_cast<std::string>(i) );
+
+    coverageMatrix->refitMatrixSize();
+
+    for(int i = 0 ; i < numCE ; i++)
+        for(int j = 0 ; j < numTC ; j++)
+            bitMatrix->set(i,j, data.getCoverage()->getBitMatrix().get(IndexType(j),IndexType(i)));
+
 }
 
 

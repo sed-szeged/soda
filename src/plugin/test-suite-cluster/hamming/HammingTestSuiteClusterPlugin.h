@@ -23,6 +23,7 @@
 #define HAMMINGTESTSUITECLUSTERPLUGIN_H
 
 #include "engine/CKernel.h"
+#include "data/CBitMatrix.h"
 
 namespace soda {
 
@@ -46,11 +47,13 @@ public:
 
     std::vector<int> clustering_row(CSelectionData &data, int size1, int size2 );
 
-    std::vector<int> clustering_cols(CSelectionData &data, int size1, int size2 );
+    std::vector<int> clustering_cols(CCoverageMatrix* data);
 
     bool hamming_row(CSelectionData &data, int index1, int index2, int tolerance, int size);
 
-    bool hamming_cols(CSelectionData &data, int index1, int index2, int tolerance, int size);
+    bool hamming_cols(CCoverageMatrix* data, int index1, int index2, int tolerance, int size);
+
+    void matrixTranspose(CSelectionData &data, CCoverageMatrix* newMatrix, CBitMatrix* bitMatrix, int numTC, int numCE);
 
     void setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList);
 

@@ -66,6 +66,10 @@ public:
 
     void printVector(std::vector<float> metric);
 
+    void clusterInfo();
+
+    void imageWrite(CSelectionData *data);
+
 private:
     CSelectionData *m_data;
     std::map<std::string, CClusterDefinition> *m_clusterList;

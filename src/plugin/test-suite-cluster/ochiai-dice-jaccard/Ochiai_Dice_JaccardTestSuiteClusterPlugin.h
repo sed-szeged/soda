@@ -25,11 +25,13 @@
 
 #include "engine/CKernel.h"
 #include "cluster.hpp"
+#include "data/CBitMatrix.h"
 
 
 namespace soda {
 
 typedef unsigned int ClusterId;
+
 
 class Ochiai_Dice_JaccardTestSuiteClusterPlugin : public ITestSuiteClusterPlugin
 {
@@ -50,19 +52,23 @@ public:
 
     void row_results(CSelectionData &data, int algorithm_index);
 
-    void cols_results(CSelectionData &data, int algorithm_index);
+    //void cols_results(CSelectionData &data, int algorithm_index);
+    void cols_results(CCoverageMatrix* matrix, int algorithm_index);
 
     void set_row_results(CSelectionData &data, int index_1, int index_2, int count_1, int element, int algorithm_index);
 
-    void set_cols_results(CSelectionData &data, int index_1, int index_2, int count_1, int element, int algorithm_index);
+    //void set_cols_results(CSelectionData &data, int index_1, int index_2, int count_1, int element, int algorithm_index);
+    void set_cols_results(CCoverageMatrix* matrix, int index_1, int index_2, int count_1, int element, int algorithm_index);
 
     int intersections_row(CSelectionData &data, int index_1, int index_2, int size);
 
-    int intersections_cols(CSelectionData &data, int index_1, int index_2, int size);
+    //int intersections_cols(CSelectionData &data, int index_1, int index_2, int size);
+    int intersections_cols(CCoverageMatrix* matrix, int index_1, int index_2, int size);
 
     int unions_row(CSelectionData &data, int index_1, int index_2, int size);
 
-    int unions_cols(CSelectionData &data, int index_1, int index_2, int size);
+    //int unions_cols(CSelectionData &data, int index_1, int index_2, int size);
+    int unions_cols(CCoverageMatrix* matrix, int index_1, int index_2, int size);
 
     float results_vs_limit( float results, float limit );
 
@@ -71,6 +77,10 @@ public:
     void kMeans_cols();
 
     void setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList);
+
+    void matrixTranspose(CSelectionData &data, CCoverageMatrix* newMatrix, CBitMatrix* bitMatrix, int numTC, int numCE);
+
+    int colsCount(CSelectionData &data, int index , int numTC);
 
 public:
     std::vector< std::vector<float> > floatRowVectors;
@@ -81,6 +91,8 @@ public:
 
     std::vector<int> row_cluster_index;
     std::vector<int> cols_cluster_index;
+
+    std::vector<int> colsCountVector;
 
  private:
     int algorithm_index; // 0 - ochiai, 1-dice, 2-jaccard

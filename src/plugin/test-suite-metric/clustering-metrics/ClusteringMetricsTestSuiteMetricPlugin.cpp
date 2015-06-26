@@ -60,29 +60,23 @@ void ClusteringMetricsTestSuiteMetricPlugin::calculate(rapidjson::Document& resu
     std::cout<<std::endl<<"Cluster count: rows - "<<row_clusters<<" , cols - "<<cols_clusters<<std::endl<<std::endl;
 
 
-    ones.resize( m_clusterList->size(), std::vector<int>(m_clusterList->size()));
-    zeros.resize( m_clusterList->size(), std::vector<int>(m_clusterList->size()));
+    ones.resize( row_clusters+1, std::vector<int>(cols_clusters+1));
+    zeros.resize( row_clusters+1, std::vector<int>(cols_clusters+1));
 
-
+    // ones and zeros vectors init
     vectorInit();
 
 
-    /* clusters size */
-    for(int i = 0 ; i < m_clusterList->size() ; i++ ){
-        std::cout<<i<<". cluster : "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size()<<" test cases and ";
-        std::cout<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size()<<" code elements"<<std::endl;
-    }std::cout<<std::endl<<std::endl;
-
+    // write cluster-information
+    clusterInfo();
 
 
     /* 1 and 0 in clusterpairs */
     clusterIntersection();
 
 
-
     /* defining clusterpairs */
     row_clusters >= cols_clusters ? clusterPairsRow( row_clusters, cols_clusters) : clusterPairsCols(row_clusters,cols_clusters);
-    std::cout<<std::endl<<std::endl;
 
 
     /*
@@ -91,7 +85,6 @@ void ClusteringMetricsTestSuiteMetricPlugin::calculate(rapidjson::Document& resu
      **************************************
      */
     metrika1Calc();
-
 
 
     /*
@@ -109,6 +102,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::calculate(rapidjson::Document& resu
      */
     metrika3Calc();
 
+
     /*
      ************* metrics4 *************
      * ("good points") / ("bad points") *
@@ -117,11 +111,16 @@ void ClusteringMetricsTestSuiteMetricPlugin::calculate(rapidjson::Document& resu
     metrika4Calc();
 
 
+    // origin and sort matrix convert to image
+    //imageWrite(m_data);
+
 }
 
+
+
 void ClusteringMetricsTestSuiteMetricPlugin::vectorInit(){
-    for(int i = 0 ; i < m_clusterList->size() ; i++ ){
-        for(int j = 0 ; j < m_clusterList->size() ; j++){
+    for(int i = 0 ; i <= row_clusters ; i++ ){
+        for(int j = 0 ; j <= cols_clusters ; j++){
             ones[i][j]=0;
             zeros[i][j]=0;
         }
@@ -129,9 +128,15 @@ void ClusteringMetricsTestSuiteMetricPlugin::vectorInit(){
 }
 
 
+
+/*
+ ************* metrics4 *************
+ * ("good points") / ("bad points") *
+ ************************************
+ */
 void ClusteringMetricsTestSuiteMetricPlugin::metrika4Calc(){
 
-    metrics4.resize(m_clusterList->size());
+    metrics4.resize(row_clusters+1);
 
     int global_good = 0, global_bad = 0;
     for(int i = 1 ; i <= row_clusters ; i++ ){
@@ -150,16 +155,22 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika4Calc(){
         metrics4[i] = float(local_good)/float(local_bad);
     }
 
-    std::cout<<"Global metrics4: "<<float(global_good)/float(global_bad)<<std::endl;
+    std::cout<<"Global metrics4 ((\"good points\") / (\"bad points\")) : "<<float(global_good)/float(global_bad)<<std::endl;
 
-    printVector(metrics4);  // print m4 metrics-vector
+    printVector(metrics4);
     std::cout<<std::endl;
 }
 
 
+
+/*
+ ************ metrics3 ************
+ * ("good points") / (sum points) *
+ **********************************
+ */
 void ClusteringMetricsTestSuiteMetricPlugin::metrika3Calc(){
 
-    metrics3.resize(m_clusterList->size());
+    metrics3.resize(row_clusters+1);
 
     int global_good = 0, global_all = 0;
     for(int i = 1 ; i <= row_clusters ; i++ ){
@@ -177,16 +188,22 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika3Calc(){
         global_all += all;
         metrics3[i] = float(good)/float(all);
     }
-    std::cout<<"Global metrics3: "<<float(global_good)/float(global_all)<<std::endl;
+    std::cout<<"Global metrics3 ((\"good points\") / (sum points)) : "<<float(global_good)/float(global_all)<<std::endl;
 
-    printVector(metrics3);  // print m3 metrics-vector
+    printVector(metrics3);
     std::cout<<std::endl;
 }
 
 
+
+/*
+ ********************* metrics2 ********************
+ * [("good points")-("bad points")] / (sum points) *
+ ***************************************************
+ */
 void ClusteringMetricsTestSuiteMetricPlugin::metrika2Calc(){
 
-    metrics2.resize(m_clusterList->size());
+    metrics2.resize(row_clusters+1);
 
     int global_good = 0, global_all = 0;
     for(int i = 1 ; i <= row_clusters ; i++ ){
@@ -206,33 +223,40 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika2Calc(){
         global_all += all;
         metrics2[i] = float(good)/float(all);
     }
-    std::cout<<"Global metrics2: "<<float(global_good)/float(global_all)<<std::endl;
+    std::cout<<"Global metrics2 ([(\"good points\")-(\"bad points\")] / (sum points)) : "<<float(global_good)/float(global_all)<<std::endl;
 
-    printVector(metrics2);  // print m2 metrics-vector
+    printVector(metrics2);
     std::cout<<std::endl;
 }
 
 
 
+/*
+ ************** metrics1 **************
+ * ("good 1 points") / (sum 1 points) *
+ **************************************
+ */
 void ClusteringMetricsTestSuiteMetricPlugin::metrika1Calc(){
 
-    metrics1.resize(m_clusterList->size());
+    metrics1.resize(row_clusters+1);
 
     int global_good = 0, global_all = 0 ;
     for(int i = 1 ; i <= row_clusters ; i++ ){
         int all = 0, good = 0;
         for(int j = 1 ; j <= cols_clusters ; j++ ){
-            if( pairs[i].count(j)!=0 )
-               good += ones[i][j] ;
-            all += ones[i][j];
+                if( pairs[i].count(j)!=0 )
+                    good += ones[i][j] ;
+                all += ones[i][j];
+
         }
         global_good += good;
         global_all += all;
         metrics1[i] = float(good)/float(all);
     }
-    std::cout<<"Global metrics1: "<<float(global_good)/float(global_all)<<std::endl;
 
-    printVector(metrics1);  // print m1 metrics-vector
+    std::cout<<"Global metrics1 ((\"good 1 points\") / (|1 points|)) : "<<float(global_good)/float(global_all)<<std::endl;
+
+    printVector(metrics1);
     std::cout<<std::endl;
 }
 
@@ -240,7 +264,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika1Calc(){
 
 void ClusteringMetricsTestSuiteMetricPlugin::clusterPairsRow(int size_row, int size_cols){
 
-    //std::cout<<"row-cols"<<std::endl;
+    std::cout<<std::endl<<"row-cols pairs:"<<std::endl;
     std::set<int> not_excluded_1, not_excluded_2;
 
     for(int i = 1 ; i <= size_row  ; i++ ){
@@ -271,29 +295,20 @@ void ClusteringMetricsTestSuiteMetricPlugin::clusterPairsRow(int size_row, int s
             }
         }
 
-        //std::cout<<max_index_i<<"-"<<max_index_j<<" : "<<max_count<<std::endl;
+        std::cout<<max_index_i<<"-"<<max_index_j<<" : "<<max_count<<std::endl;
         not_excluded_2.erase(max_index_j);
         not_excluded_1.erase(max_index_i);
 
         pairs[max_index_i].insert(max_index_j);
     }
-
-    std::cout<<std::endl;
-    for(int i = 1 ; i <= size_row ; i++ ){
-        std::cout<<"The pair: "<<i<<". rowcluster - ";
-        for (std::set<int>::iterator it=pairs[i].begin(); it!=pairs[i].end(); ++it){
-            std::cout<<*it<<" ";
-        } std::cout<<"colscluster(s)"<<std::endl;
-    }
+    std::cout<<std::endl<<std::endl;
 }
-
-
 
 
 
 void ClusteringMetricsTestSuiteMetricPlugin::clusterPairsCols(int size_row, int size_cols){
 
-    //std::cout<<"row-cols"<<std::endl;
+    std::cout<<std::endl<<"row-cols pairs:"<<std::endl;
     std::set<int> not_excluded_1, not_excluded_2;
 
     for(int i = 1 ; i <= size_row  ; i++ ){
@@ -323,29 +338,35 @@ void ClusteringMetricsTestSuiteMetricPlugin::clusterPairsCols(int size_row, int 
             }
         }
 
-        //std::cout<<max_index_i<<"-"<<max_index_j<<" : "<<max_count<<std::endl;
+        std::cout<<max_index_i<<"-"<<max_index_j<<" : "<<max_count<<std::endl;
         not_excluded_2.erase(max_index_j);
         not_excluded_1.erase(max_index_i);
         pairs[max_index_i].insert(max_index_j);
     }
-
-    std::cout<<std::endl;
-    for(int i = 1 ; i <= size_row ; i++ ){
-        std::cout<<"The pair: "<<i<<". rowcluster - ";
-        for (std::set<int>::iterator it=pairs[i].begin(); it!=pairs[i].end(); ++it){
-            std::cout<<*it<<" ";
-        } std::cout<<"colsclusters(s)"<<std::endl;
-    }
+    std::cout<<std::endl<<std::endl;
 }
 
 
 
-
-
-
 void ClusteringMetricsTestSuiteMetricPlugin::clusterIntersection(){
-    int row = int(m_data->getCoverage()->getNumOfTestcases());
-    int cols = int(m_data->getCoverage()->getNumOfCodeElements());
+
+    std::map<int, int> newRowIndexMap, newColsIndexMap;
+    int index_row = 1, index_cols = 1;
+
+    for(int i = 0 ; i < m_clusterList->size() ; i++ ){
+        if( m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size() > 0 ){
+            newRowIndexMap[i]=index_row;
+            index_row++;
+        }
+    }
+
+    for(int i = 0 ; i < m_clusterList->size() ; i++ ){
+        if( m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size() > 0 ){
+            newColsIndexMap[i]=index_cols;
+            index_cols++;
+        }
+    }
+
 
     for(int i = 0 ; i < m_clusterList->size() ; i++ ){
         std::vector<IndexType> test = m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases();
@@ -356,29 +377,26 @@ void ClusteringMetricsTestSuiteMetricPlugin::clusterIntersection(){
                 std::vector<IndexType> fn = m_clusterList->operator [](boost::lexical_cast<std::string>(j)).getCodeElements();
 
                 for ( std::vector<IndexType>::iterator it_f = fn.begin() ; it_f != fn.end(); ++it_f)
-                    int(m_data->getCoverage()->getBitMatrix().getRow(*it_t)[int(*it_f)]) > 0 ? ones[i][j]++ : zeros[i][j]++;
-
+                    int(m_data->getCoverage()->getBitMatrix().getRow(int(*it_t))[int(*it_f)] ) > 0 ? ones[newRowIndexMap[i]][newColsIndexMap[j]]++ : zeros[newRowIndexMap[i]][newColsIndexMap[j]]++ ;
             }
         }
     }
 
     std::cout<<"|1| : "<<std::endl;
-    for(int i = 0 ; i <= rowClusterCount() ; i++ ){
-        for(int j = 0 ; j <= colsClusterCount() ; j++ ){
+    for(int i = 0 ; i <= row_clusters ; i++ ){
+        for(int j = 0 ; j <= cols_clusters ; j++){
             std::cout<<ones[i][j]<<"\t";
-        }std::cout<<std::endl;
+        } std::cout<<std::endl;
     }
+    std::cout<<std::endl;
 
-    std::cout<<std::endl<<std::endl;
 
     std::cout<<"|0| : "<<std::endl;
-    for(int i = 0 ; i <= rowClusterCount() ; i++ ){
-        for(int j = 0 ; j <= colsClusterCount() ; j++ ){
+    for(int i = 0 ; i <= row_clusters ; i++ ){
+        for(int j = 0 ; j <= cols_clusters ; j++){
             std::cout<<zeros[i][j]<<"\t";
-        }std::cout<<std::endl;
+        } std::cout<<std::endl;
     }
-    std::cout<<std::endl<<std::endl;
-
 }
 
 
@@ -391,6 +409,8 @@ int ClusteringMetricsTestSuiteMetricPlugin::rowClusterCount(){
     return count;
 }
 
+
+
 int ClusteringMetricsTestSuiteMetricPlugin::colsClusterCount(){
     int count = 0;
     for(int i = 0 ; i < m_clusterList->size() ; i++ )
@@ -399,16 +419,93 @@ int ClusteringMetricsTestSuiteMetricPlugin::colsClusterCount(){
     return count;
 }
 
+
+
 void ClusteringMetricsTestSuiteMetricPlugin::printVector( std::vector<float> metrika ){
 
-    int i=0;
-    for(std::vector<float>::iterator it = metrika.begin() ; it!=metrika.end();++it){
-        if( *it > 0.0 ) std::cout<<i<<". value: "<<*it<<std::endl;
-        i++;
+    for(int i = 0 ; i<= row_clusters ; i++)
+        std::cout<<i<<". value: "<<metrika[i]<<std::endl;
+}
+
+
+
+void ClusteringMetricsTestSuiteMetricPlugin::imageWrite(CSelectionData *data){
+
+    int sor = int(data->getCoverage()->getNumOfTestcases());
+    int oszlop = int(data->getCoverage()->getNumOfCodeElements());
+
+    std::ofstream eredeti;
+    eredeti.open ("/home/user/Asztal/image_original.pgm");
+    eredeti<<"P2"<<std::endl;
+    eredeti<<oszlop<<" "<<sor<<std::endl<<"255"<<std::endl;
+    for (int i = 0; i < sor; i++){
+        for(int j=0;j<oszlop;j++){
+            if( data->getCoverage()->getBitMatrix().get(i,j) ){
+                eredeti<<"0"<<std::endl;
+            } else {
+                eredeti<<"255"<<std::endl;
+            }
+        }
     }
-    std::cout<<std::endl;
+
+    std::ofstream rendezett;
+    rendezett.open ("/home/user/Asztal/image_sort.pgm");
+    rendezett<<"P2"<<std::endl;
+    rendezett<<oszlop<<" "<<sor<<std::endl<<"255"<<std::endl;
+
+    std::vector<IndexType> tmp_row(sor);
+    std::vector<IndexType> tmp_cols(oszlop);
+
+    int sorindex=0;
+    for(int a=0 ; a <= row_clusters ; a++){
+        std::vector<IndexType> tc = m_clusterList->operator [](boost::lexical_cast<std::string>(a)).getTestCases();
+        for( std::vector<IndexType>::iterator it = tc.begin() ; it != tc.end() ; ++it){
+            tmp_row[sorindex]=*it;
+            sorindex++;
+        }
+    }
+
+    int oszlopindex=0;
+    for(int a=0 ; a <= cols_clusters ; a++){
+        std::vector<IndexType> ce = m_clusterList->operator [](boost::lexical_cast<std::string>(a)).getCodeElements();
+        for( std::vector<IndexType>::iterator it = ce.begin() ; it != ce.end() ; ++it){
+            tmp_cols[oszlopindex]=*it;
+            oszlopindex++;
+        }
+    }
+
+    for(std::vector<IndexType>::iterator it_sor=tmp_row.begin() ; it_sor!=tmp_row.end() ; ++it_sor){
+        for(std::vector<IndexType>::iterator it_oszlop=tmp_cols.begin() ; it_oszlop!=tmp_cols.end() ; ++it_oszlop){
+            if( data->getCoverage()->getBitMatrix().get(*it_sor,*it_oszlop) ){
+                rendezett<<"0"<<std::endl;
+            } else {
+                rendezett<<"255"<<std::endl;
+            }
+        }
+    }
 
 }
+
+
+
+void ClusteringMetricsTestSuiteMetricPlugin::clusterInfo(){
+    int _write_local_row_index = 1, _write_local_cols_index = 1;
+    for(int i = 0 ; i < m_clusterList->size() ; i++ ){
+        if(m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size() > 0){
+            std::cout<<_write_local_row_index<<". cluster : "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size()<<" test cases"<<std::endl;
+            _write_local_row_index++;
+        }
+    }std::cout<<std::endl<<std::endl;
+
+    for(int i = 0 ; i < m_clusterList->size() ; i++ ){
+        if(m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size() > 0){
+            std::cout<<_write_local_cols_index<<". cluster : "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size()<<" test cases"<<std::endl;
+            _write_local_cols_index++;
+        }
+    }std::cout<<std::endl<<std::endl;
+
+}
+
 
 
 extern "C" void registerPlugin(CKernel &kernel)
