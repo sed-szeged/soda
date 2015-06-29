@@ -81,6 +81,8 @@ void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::
 
     HammingTestSuiteClusterPlugin::setClusterList(numTC, numCE, clusterList);
 
+
+
 }
 
 
@@ -117,6 +119,8 @@ std::vector<int> HammingTestSuiteClusterPlugin::clustering_row(CSelectionData &d
 
     for(int index_1 = 0 ; index_1 < size1 ; index_1++ ){
 
+        //if(index_1%1000==0) std::cout<<index_1<<". ("<<size1<<")"<<std::endl;
+
         int element_1 = data.getCoverage()->getBitMatrix().getRow(IndexType(index_1)).count();
 
         // 0cluster
@@ -133,7 +137,7 @@ std::vector<int> HammingTestSuiteClusterPlugin::clustering_row(CSelectionData &d
                 int element_2 = data.getCoverage()->getBitMatrix().getRow(IndexType(index_2)).count();
 
                 if( index_1 != index_2 && clusterindex_vector[index_2] == -1 && abs(element_1-element_2) < tolerance )
-                    if( hamming_row(data, index_1, index_2, tolerance, size2) ) clusterindex_vector[index_2] = actual_index;
+                    if( hamming_distance(data.getCoverage(), index_1, index_2, tolerance, size2) )  clusterindex_vector[index_2] = actual_index;
 
             }
         }
@@ -163,6 +167,8 @@ std::vector<int> HammingTestSuiteClusterPlugin::clustering_cols(CCoverageMatrix*
 
     for(int index_1 = 0 ; index_1 < size2 ; index_1++ ){
 
+        //if(index_1%1000==0) std::cout<<index_1<<". ("<<size2<<")"<<std::endl;
+
         int element_1 = data->getBitMatrix().getRow(IndexType(index_1)).count();
 
         // 0cluster
@@ -180,7 +186,7 @@ std::vector<int> HammingTestSuiteClusterPlugin::clustering_cols(CCoverageMatrix*
                 int element_2 = data->getBitMatrix().getRow(IndexType(index_2)).count();
 
                 if( index_1 != index_2 && clusterindex_vector[index_2] == -1 && abs(element_1-element_2) < tolerance )
-                    if( hamming_cols(data, index_1, index_2, tolerance, size2) )  clusterindex_vector[index_2] = actual_index;
+                    if( hamming_distance(data, index_1, index_2, tolerance, size1) )  clusterindex_vector[index_2] = actual_index;
 
             }
         }
@@ -193,24 +199,11 @@ std::vector<int> HammingTestSuiteClusterPlugin::clustering_cols(CCoverageMatrix*
 
 
 
-bool HammingTestSuiteClusterPlugin::hamming_row(CSelectionData &data, int index1, int index2, int tolerance, int size){
-
+bool HammingTestSuiteClusterPlugin::hamming_distance(CCoverageMatrix* data, int index1, int index2, int tolerance, int size){
     int distance = 0;
     for(int a = 0 ; a < size ; a++)
-        distance += int( (data.getCoverage()->getBitMatrix().getRow(index1)[a]) ^ (data.getCoverage()->getBitMatrix().getRow(index2)[a]) );
+        distance += ( data->getBitMatrix().get(IndexType(index1),IndexType(a)) ^ data->getBitMatrix().get(IndexType(index2),IndexType(a)) );
 
-    if( distance < tolerance )return true;
-
-    return false;
-}
-
-
-
-bool HammingTestSuiteClusterPlugin::hamming_cols(CCoverageMatrix* data, int index1, int index2, int tolerance, int size){
-
-    int distance = 0;
-    for(int a = 0 ; a < size ; a++)
-        distance += int( data->getBitMatrix().getRow(index1)[a] ^ data->getBitMatrix().getRow(index2)[a]);
 
     if( distance < tolerance )return true;
 

@@ -55,6 +55,18 @@ public:
 
     void matrix_set( CBitMatrix* bitMatrix );
 
+    void vectorInit();
+
+    void clusterIntersection(CCoverageMatrix* coverageMatrix);
+
+    void metrika1Calc();
+
+    void metrika2Calc();
+
+    void metrika3Calc();
+
+    void metrika4Calc();
+
 
 public:
     std::string matrix_name;
@@ -66,6 +78,8 @@ public:
 
     std::vector<int> row_cluster_index;
     std::vector<int> cols_cluster_index;
+    std::vector< std::vector<int> > ones;
+    std::vector< std::vector<int> > zeros;
 
 };
 

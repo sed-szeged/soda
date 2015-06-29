@@ -104,6 +104,23 @@ void CoverageMatrixGeneratorTestSuiteClusterPlugin::execute(CSelectionData &data
         std::cout<<coverageMatrix->getCodeElements().getValue(j)<<std::endl;
     }
     ******************/
+    ones.resize( cluster_number+1, std::vector<int>(cluster_number+1));
+    zeros.resize( cluster_number+1, std::vector<int>(cluster_number+1));
+
+    vectorInit();
+
+    std::cout<<std::endl;
+    clusterIntersection(coverageMatrix);
+
+    metrika1Calc();
+
+    metrika2Calc();
+
+    metrika3Calc();
+
+    metrika4Calc();
+
+
 
 
 }
@@ -177,6 +194,144 @@ void CoverageMatrixGeneratorTestSuiteClusterPlugin::matrix_set( CBitMatrix* bitM
     }
 }
 
+void CoverageMatrixGeneratorTestSuiteClusterPlugin::vectorInit(){
+
+    for(int i = 0 ; i <= cluster_number ; i++){
+        for(int j = 0 ; j <= cluster_number ; j++){
+            ones[i][j]=0;
+            zeros[i][j]=0;
+        }
+    }
+}
+
+void CoverageMatrixGeneratorTestSuiteClusterPlugin::clusterIntersection(CCoverageMatrix* coverageMatrix){
+
+    for(int i = 0; i < row_size ; i++){
+        for(int j = 0 ; j < cols_size ; j++){
+            if( coverageMatrix->getBitMatrix().get(IndexType(i),IndexType(j)) ){
+                ones[row_cluster_index[i]][cols_cluster_index[j]]++;
+            } else {
+                zeros[row_cluster_index[i]][cols_cluster_index[j]]++;
+            }
+
+        }
+    }
+}
+
+
+/************* metrics4 *************
+* ("good points") / ("bad points") *
+************************************
+*/
+void CoverageMatrixGeneratorTestSuiteClusterPlugin::metrika4Calc(){
+
+
+   int global_good = 0, global_bad = 0;
+   for(int i = 0 ; i < cluster_number ; i++ ){
+       int local_bad = 0, local_good = 0;
+       for(int j = 0 ; j < cluster_number ; j++ ){
+           if( i==j ){
+               local_good += ones[i][j] ;
+               local_bad += zeros[i][j];
+           } else {
+               local_bad += ones[i][j];
+               local_good += zeros[i][j];
+           }
+       }
+       global_good += local_good;
+       global_bad += local_bad;
+       std::cout<<i+1<<". "<<float(local_good)/float(local_bad)<<std::endl;
+   }
+
+   std::cout<<"Global metrics4 ((\"good points\") / (\"bad points\")) : "<<float(global_good)/float(global_bad)<<std::endl<<std::endl;
+}
+
+
+
+/*
+************ metrics3 ************
+* ("good points") / (sum points) *
+**********************************
+*/
+void CoverageMatrixGeneratorTestSuiteClusterPlugin::metrika3Calc(){
+
+
+   int global_good = 0, global_all = 0;
+   for(int i = 0 ; i < cluster_number ; i++ ){
+       int all = 0, good = 0;
+       for(int j = 0 ; j < cluster_number ; j++ ){
+           if( i==j ){
+               good += ones[i][j] ;
+           } else {
+               good += zeros[i][j];
+           }
+           all += ones[i][j];
+           all += zeros[i][j];
+       }
+       global_good += good;
+       global_all += all;
+       std::cout<<i+1<<". "<<float(good)/float(all)<<std::endl;
+   }
+   std::cout<<"Global metrics3 ((\"good points\") / (sum points)) : "<<float(global_good)/float(global_all)<<std::endl<<std::endl;
+}
+
+
+
+/*
+********************* metrics2 ********************
+* [("good points")-("bad points")] / (sum points) *
+***************************************************
+*/
+void CoverageMatrixGeneratorTestSuiteClusterPlugin::metrika2Calc(){
+
+
+   int global_good = 0, global_all = 0;
+   for(int i = 0 ; i < cluster_number ; i++ ){
+       int all = 0, good = 0;
+       for(int j = 0 ; j < cluster_number ; j++ ){
+           if( i==j ){
+               good += ones[i][j] ;
+               good -= zeros[i][j];
+           } else {
+               good += zeros[i][j];
+               good -= ones[i][j];
+           }
+           all += ones[i][j];
+           all += zeros[i][j];
+       }
+       global_good += good;
+       global_all += all;
+       std::cout<<i+1<<". "<<float(good)/float(all)<<std::endl;
+   }
+   std::cout<<"Global metrics2 ([(\"good points\")-(\"bad points\")] / (sum points)) : "<<float(global_good)/float(global_all)<<std::endl<<std::endl;
+}
+
+
+
+/*
+************** metrics1 **************
+* ("good 1 points") / (sum 1 points) *
+**************************************
+*/
+void CoverageMatrixGeneratorTestSuiteClusterPlugin::metrika1Calc(){
+
+
+   int global_good = 0, global_all = 0 ;
+   for(int i = 0 ; i < cluster_number ; i++ ){
+       int all = 0, good = 0;
+       for(int j = 0 ; j < cluster_number ; j++ ){
+               if( i==j )
+                   good += ones[i][j] ;
+               all += ones[i][j];
+
+       }
+       global_good += good;
+       global_all += all;
+       std::cout<<i+1<<". "<<float(good)/float(all)<<std::endl;
+   }
+
+   std::cout<<"Global metrics1 ((\"good 1 points\") / (|1 points|)) : "<<float(global_good)/float(global_all)<<std::endl<<std::endl;
+}
 
 
 extern "C" void registerPlugin(CKernel &kernel)

@@ -492,14 +492,14 @@ void ClusteringMetricsTestSuiteMetricPlugin::clusterInfo(){
     int _write_local_row_index = 1, _write_local_cols_index = 1;
     for(int i = 0 ; i < m_clusterList->size() ; i++ ){
         if(m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size() > 0){
-            std::cout<<_write_local_row_index<<". cluster : "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size()<<" test cases"<<std::endl;
+            std::cout<<_write_local_row_index<<". row-cluster : "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size()<<" test cases"<<std::endl;
             _write_local_row_index++;
         }
     }std::cout<<std::endl<<std::endl;
 
     for(int i = 0 ; i < m_clusterList->size() ; i++ ){
         if(m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size() > 0){
-            std::cout<<_write_local_cols_index<<". cluster : "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size()<<" test cases"<<std::endl;
+            std::cout<<_write_local_cols_index<<". cols-cluster : "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size()<<" test cases"<<std::endl;
             _write_local_cols_index++;
         }
     }std::cout<<std::endl<<std::endl;

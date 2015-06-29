@@ -80,7 +80,6 @@ public:
 
     void matrixTranspose(CSelectionData &data, CCoverageMatrix* newMatrix, CBitMatrix* bitMatrix, int numTC, int numCE);
 
-    int colsCount(CSelectionData &data, int index , int numTC);
 
 public:
     std::vector< std::vector<float> > floatRowVectors;
@@ -92,7 +91,6 @@ public:
     std::vector<int> row_cluster_index;
     std::vector<int> cols_cluster_index;
 
-    std::vector<int> colsCountVector;
 
  private:
     int algorithm_index; // 0 - ochiai, 1-dice, 2-jaccard

@@ -223,7 +223,7 @@ float Ochiai_Dice_JaccardTestSuiteClusterPlugin::results_vs_limit( float results
 int Ochiai_Dice_JaccardTestSuiteClusterPlugin::intersections_row(CSelectionData &data, int index_1, int index_2, int size){
     int intersections = 0;
     for(int a = 0 ; a < size ; a++)
-        intersections += int( int(data.getCoverage()->getBitMatrix().getRow(index_1)[a]) && int(data.getCoverage()->getBitMatrix().getRow(index_2)[a]) );
+        intersections += int( data.getCoverage()->getBitMatrix().get(IndexType(index_1),IndexType(a)) &&  data.getCoverage()->getBitMatrix().get(IndexType(index_2),IndexType(a)) ) ;
 
     return intersections;
 }
@@ -234,7 +234,7 @@ int Ochiai_Dice_JaccardTestSuiteClusterPlugin::intersections_cols(CCoverageMatri
     int intersections = 0;
 
     for(int a = 0 ; a < size ; a++)
-        intersections += int( matrix->getBitMatrix().getRow(index_1)[a] && matrix->getBitMatrix().getRow(index_2)[a] );
+        intersections += int( matrix->getBitMatrix().get(IndexType(index_1),IndexType(a)) && matrix->getBitMatrix().get(IndexType(index_2),IndexType(a)) );
 
     return intersections;
 }
@@ -245,7 +245,7 @@ int Ochiai_Dice_JaccardTestSuiteClusterPlugin::intersections_cols(CCoverageMatri
 int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unions_row(CSelectionData &data, int index_1, int index_2, int size){
     int unions = 0;
     for(int a = 0 ; a < size ; a++)
-        unions += int( int(data.getCoverage()->getBitMatrix().getRow(index_1)[a]) || int(data.getCoverage()->getBitMatrix().getRow(index_2)[a]) );
+        unions += int( data.getCoverage()->getBitMatrix().get(IndexType(index_1),IndexType(a)) || data.getCoverage()->getBitMatrix().get(IndexType(index_2),IndexType(a)) );
 
     return unions;
 }
@@ -255,7 +255,7 @@ int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unions_row(CSelectionData &data, 
 int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unions_cols(CCoverageMatrix* matrix, int index_1, int index_2, int size){
     int unions = 0;
     for(int a = 0 ; a < size ; a++)
-        unions += int( matrix->getBitMatrix().getRow(index_1)[a] || matrix->getBitMatrix().getRow(index_2)[a] );
+        unions += int( matrix->getBitMatrix().get(IndexType(index_1),IndexType(a)) || matrix->getBitMatrix().get(IndexType(index_2),IndexType(a)) );
 
     return unions;
 }
@@ -330,15 +330,6 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::setClusterList(int numTC, int nu
         clusterList[ boost::lexical_cast<std::string>( int(ColsIndexVector[i])) ].addCodeElement(IndexType(i));
 }
 
-
-int Ochiai_Dice_JaccardTestSuiteClusterPlugin::colsCount(CSelectionData &data, int index, int numTC){
-
-    int sum = 0;
-    for(int i = 0 ; i < numTC ; i++)
-         sum += int(data.getCoverage()->getBitMatrix().getRow(IndexType(index))[i]);
-
-    return sum;
-}
 
 
 void Ochiai_Dice_JaccardTestSuiteClusterPlugin::matrixTranspose(CSelectionData &data, CCoverageMatrix* coverageMatrix, CBitMatrix* bitMatrix, int numTC, int numCE){

@@ -49,9 +49,7 @@ public:
 
     std::vector<int> clustering_cols(CCoverageMatrix* data);
 
-    bool hamming_row(CSelectionData &data, int index1, int index2, int tolerance, int size);
-
-    bool hamming_cols(CCoverageMatrix* data, int index1, int index2, int tolerance, int size);
+    bool hamming_distance(CCoverageMatrix* data, int index1, int index2, int tolerance, int size);
 
     void matrixTranspose(CSelectionData &data, CCoverageMatrix* newMatrix, CBitMatrix* bitMatrix, int numTC, int numCE);
 
