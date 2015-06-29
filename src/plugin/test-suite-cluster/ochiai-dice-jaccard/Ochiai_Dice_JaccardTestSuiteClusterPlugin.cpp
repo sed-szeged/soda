@@ -54,6 +54,7 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::init(rapidjson::Document &doc)
     algorithm_index = doc["alg.index"].GetInt();
     limit = doc["limit"].GetDouble();
     cluster_number = doc["cluster-number"].GetInt();
+    _0cluster_limit = doc["0cluster(%)"].GetInt();
 }
 
 void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList)
@@ -74,32 +75,28 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
     row_results(data, algorithm_index);
 
 
-
     // matrix transpose
     CIDManager idManagerTest, idManagerMethod;
     CBitMatrix* bitMatrix = new CBitMatrix();
-    CCoverageMatrix* coverageTramspseMatrix = new CCoverageMatrix( &idManagerTest, &idManagerMethod, bitMatrix);
-    matrixTranspose(data, coverageTramspseMatrix, bitMatrix, numTC, numCE);
-    //std::cout<<"Transpose matrix: "<<coverageTramspseMatrix->getNumOfTestcases()<<" X "<<coverageTramspseMatrix->getNumOfCodeElements();
-
+    CCoverageMatrix* coverageTransposeMatrix = new CCoverageMatrix( &idManagerTest, &idManagerMethod, bitMatrix);
+    matrixTranspose(data, coverageTransposeMatrix, bitMatrix, numTC, numCE);
 
 
     // CodeElements X CodeElements matrix calc.
     std::cout<<"... on cols..."<<std::endl;
-    cols_results(coverageTramspseMatrix, algorithm_index);
+    cols_results(coverageTransposeMatrix, algorithm_index);
+
 
 
 
     // k-means alg. on (row) x (row) matrix
     std::cout<<std::endl<<"k-means running on row..."<<std::endl;
-    kMeans_row();
-
+    kMeans_row(data.getCoverage());
 
 
     // k-means alg. on (cols) x (cols) matrix
     std::cout<<"... and on cols"<<std::endl;
-    kMeans_cols();
-
+    kMeans_cols(coverageTransposeMatrix);
 
 
     std::cout<<std::endl<<"Set clusterlist"<<std::endl;
@@ -262,7 +259,7 @@ int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unions_cols(CCoverageMatrix* matr
 
 
 
-void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_row(){
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_row(CCoverageMatrix* matrix){
 
     Clustering::ClusterId num_clusters = cluster_number;
     Clustering::PointId num_points = floatRowVectors[0].size();
@@ -276,18 +273,21 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_row(){
     Ochiai_Dice_JaccardTestSuiteClusterPlugin::RowIndexVector = clusters_row.points_to_clusters__;
 
     // alg. results (index) start: 0
-    std::map<int,int> reIndex;
-    int newIndex=1;
-    for (std::vector<ClusterId>::iterator it = RowIndexVector.begin() ; it != RowIndexVector.end(); ++it)
-        *it = (*it)+1;
+    int size = matrix->getBitMatrix().getNumOfCols();
+    int position = 0;
 
-    /*
-     * TODO: 0cluster calculate and set in vectors
-     */
+    for (std::vector<ClusterId>::iterator it = RowIndexVector.begin() ; it != RowIndexVector.end(); ++it){
+        if( matrix->getBitMatrix().getRow(IndexType(position)).count() > (size*_0cluster_limit/100) ){
+            *it = ClusterId(0); // add to 0cluster
+        } else {
+            *it = (*it)+1;
+        }
+        position++;
+    }
 
 }
 
-void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_cols(){
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_cols(CCoverageMatrix* matrix){
 
     Clustering::ClusterId num_clusters = cluster_number;
     Clustering::PointId num_points = floatColsVectors[0].size();
@@ -300,16 +300,17 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_cols(){
     Ochiai_Dice_JaccardTestSuiteClusterPlugin::ColsIndexVector = clusters_cols.points_to_clusters__;
 
     // alg. results (index) start: 0   
-    for (std::vector<ClusterId>::iterator it = ColsIndexVector.begin() ; it != ColsIndexVector.end(); ++it)
-        *it = (*it)+1;
+    int size = matrix->getBitMatrix().getNumOfCols();
+    int position = 0;
 
-
-    /*int a = 0;
     for (std::vector<ClusterId>::iterator it = ColsIndexVector.begin() ; it != ColsIndexVector.end(); ++it){
-        std::cout<<a<<" - "<<*it<<std::endl;
-        a++;
-    } std::cout<<std::endl;*/
-
+        if( matrix->getBitMatrix().getRow(IndexType(position)).count() > (size*_0cluster_limit/100) ){
+            *it = ClusterId(0); // add to 0cluster
+        } else {
+            *it = (*it)+1;
+        }
+        position++;
+    }
 
 }
 
@@ -320,7 +321,7 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::setClusterList(int numTC, int nu
     CClusterDefinition def;
     std::vector<ClusterId>::iterator maxIndex = std::max_element(RowIndexVector.begin(),RowIndexVector.end());
 
-    for(int a= 0 ; a <= int(*maxIndex)+1 ; a++)
+    for(int a = 0 ; a <= int(*maxIndex)+1 ; a++)
         clusterList[ boost::lexical_cast<std::string>(a) ] = CClusterDefinition();
 
     for(int i = 0 ; i < numTC ; i++)
@@ -328,6 +329,7 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::setClusterList(int numTC, int nu
 
     for(int i = 0 ; i < numCE ; i++)
         clusterList[ boost::lexical_cast<std::string>( int(ColsIndexVector[i])) ].addCodeElement(IndexType(i));
+
 }
 
 
@@ -347,7 +349,6 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::matrixTranspose(CSelectionData &
             bitMatrix->set(i,j, data.getCoverage()->getBitMatrix().get(IndexType(j),IndexType(i)));
 
 }
-
 
 
 

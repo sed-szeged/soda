@@ -90,7 +90,7 @@ void printHelp()
 
 
     cout<<"{ \"coverage-data\":\"/home/.../sample.coverage.SoDA\","<<endl<<"\"algorithm\":\"ochiai-dice-jaccard\","<<endl<<
-          "\"alg.index\":2,"<<endl<<"\"limit\":0.3,"<<endl<<"\"cluster-number\":3}"<<endl<<endl;
+          "\"alg.index\":2,"<<endl<<"\"limit\":0.3,"<<endl<<"\"0cluster(%)\":90,"<<endl<<"\"cluster-number\":3}"<<endl<<endl;
     cout<<"index: 0 - ochiai ; 1 - dice ; 2 - jaccard and limit=-1.0 == no limit"<<endl<<endl<<"or"<<endl<<endl;
 
 

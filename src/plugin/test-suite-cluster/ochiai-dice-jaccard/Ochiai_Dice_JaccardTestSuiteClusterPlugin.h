@@ -72,13 +72,14 @@ public:
 
     float results_vs_limit( float results, float limit );
 
-    void kMeans_row();
+    void kMeans_row(CCoverageMatrix* matrix);
 
-    void kMeans_cols();
+    void kMeans_cols(CCoverageMatrix* matrix);
 
     void setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList);
 
     void matrixTranspose(CSelectionData &data, CCoverageMatrix* newMatrix, CBitMatrix* bitMatrix, int numTC, int numCE);
+
 
 
 public:
@@ -96,6 +97,7 @@ public:
     int algorithm_index; // 0 - ochiai, 1-dice, 2-jaccard
     double limit = 0.0;
     int cluster_number;
+    int _0cluster_limit;
 };
 
 } /* namespace soda */

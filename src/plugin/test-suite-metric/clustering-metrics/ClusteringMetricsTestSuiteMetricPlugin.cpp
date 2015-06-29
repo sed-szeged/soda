@@ -112,7 +112,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::calculate(rapidjson::Document& resu
 
 
     // origin and sort matrix convert to image
-    //imageWrite(m_data);
+    imageWrite(m_data);
 
 }
 
@@ -136,7 +136,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::vectorInit(){
  */
 void ClusteringMetricsTestSuiteMetricPlugin::metrika4Calc(){
 
-    metrics4.resize(row_clusters+1);
+    metrics4.resize(row_clusters+1,0);
 
     int global_good = 0, global_bad = 0;
     for(int i = 1 ; i <= row_clusters ; i++ ){
@@ -170,7 +170,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika4Calc(){
  */
 void ClusteringMetricsTestSuiteMetricPlugin::metrika3Calc(){
 
-    metrics3.resize(row_clusters+1);
+    metrics3.resize(row_clusters+1,0);
 
     int global_good = 0, global_all = 0;
     for(int i = 1 ; i <= row_clusters ; i++ ){
@@ -203,7 +203,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika3Calc(){
  */
 void ClusteringMetricsTestSuiteMetricPlugin::metrika2Calc(){
 
-    metrics2.resize(row_clusters+1);
+    metrics2.resize(row_clusters+1,0);
 
     int global_good = 0, global_all = 0;
     for(int i = 1 ; i <= row_clusters ; i++ ){
@@ -238,7 +238,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika2Calc(){
  */
 void ClusteringMetricsTestSuiteMetricPlugin::metrika1Calc(){
 
-    metrics1.resize(row_clusters+1);
+    metrics1.resize(row_clusters+1,0);
 
     int global_good = 0, global_all = 0 ;
     for(int i = 1 ; i <= row_clusters ; i++ ){
@@ -355,6 +355,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::clusterIntersection(){
 
     for(int i = 0 ; i < m_clusterList->size() ; i++ ){
         if( m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size() > 0 ){
+            if(i==0) index_row=0;
             newRowIndexMap[i]=index_row;
             index_row++;
         }
@@ -362,6 +363,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::clusterIntersection(){
 
     for(int i = 0 ; i < m_clusterList->size() ; i++ ){
         if( m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size() > 0 ){
+            if(i==0) index_cols=0;
             newColsIndexMap[i]=index_cols;
             index_cols++;
         }
@@ -382,8 +384,16 @@ void ClusteringMetricsTestSuiteMetricPlugin::clusterIntersection(){
         }
     }
 
-    std::cout<<"|1| : "<<std::endl;
+
+    // cluster-intersection results dump
+    std::cout<<"|1| : "<<std::endl<<"  \t  ";
+    for(int j = 0 ; j <= cols_clusters ; j++) std::cout<<j<<"\t";
+    std::cout<<std::endl;
+    for(int j = 0 ; j <= cols_clusters ; j++) std::cout<<"---------";
+    std::cout<<std::endl;
+
     for(int i = 0 ; i <= row_clusters ; i++ ){
+        std::cout<<i<<"\t| ";
         for(int j = 0 ; j <= cols_clusters ; j++){
             std::cout<<ones[i][j]<<"\t";
         } std::cout<<std::endl;
@@ -391,8 +401,14 @@ void ClusteringMetricsTestSuiteMetricPlugin::clusterIntersection(){
     std::cout<<std::endl;
 
 
-    std::cout<<"|0| : "<<std::endl;
+    std::cout<<"|0| : "<<std::endl<<"  \t  ";
+    for(int j = 0 ; j <= cols_clusters ; j++) std::cout<<j<<"\t";
+    std::cout<<std::endl;
+    for(int j = 0 ; j <= cols_clusters ; j++) std::cout<<"---------";
+    std::cout<<std::endl;
+
     for(int i = 0 ; i <= row_clusters ; i++ ){
+        std::cout<<i<<"\t| ";
         for(int j = 0 ; j <= cols_clusters ; j++){
             std::cout<<zeros[i][j]<<"\t";
         } std::cout<<std::endl;
@@ -404,8 +420,12 @@ void ClusteringMetricsTestSuiteMetricPlugin::clusterIntersection(){
 int ClusteringMetricsTestSuiteMetricPlugin::rowClusterCount(){
     int count = 0;
     for(int i = 0 ; i < m_clusterList->size() ; i++ )
-        if ( m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size() > 0 ) count++;
+        if ( m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size() > 0 ){
+            if(i==0)count--;
+            count++;
+        }
 
+    std::cout<<std::endl;
     return count;
 }
 
@@ -414,7 +434,10 @@ int ClusteringMetricsTestSuiteMetricPlugin::rowClusterCount(){
 int ClusteringMetricsTestSuiteMetricPlugin::colsClusterCount(){
     int count = 0;
     for(int i = 0 ; i < m_clusterList->size() ; i++ )
-        if ( m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size() > 0 ) count++;
+        if ( m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size() > 0 ){
+            if(i==0)count--;
+            count++;
+        }
 
     return count;
 }
@@ -431,55 +454,55 @@ void ClusteringMetricsTestSuiteMetricPlugin::printVector( std::vector<float> met
 
 void ClusteringMetricsTestSuiteMetricPlugin::imageWrite(CSelectionData *data){
 
-    int sor = int(data->getCoverage()->getNumOfTestcases());
-    int oszlop = int(data->getCoverage()->getNumOfCodeElements());
+    int numTC = int(data->getCoverage()->getNumOfTestcases());
+    int numCE = int(data->getCoverage()->getNumOfCodeElements());
 
-    std::ofstream eredeti;
-    eredeti.open ("/home/user/Asztal/image_original.pgm");
-    eredeti<<"P2"<<std::endl;
-    eredeti<<oszlop<<" "<<sor<<std::endl<<"255"<<std::endl;
-    for (int i = 0; i < sor; i++){
-        for(int j=0;j<oszlop;j++){
+    std::ofstream original;
+    original.open ("../image_original.pgm");
+    original<<"P2"<<std::endl;
+    original<<numCE<<" "<<numTC<<std::endl<<"255"<<std::endl;
+    for (int i = 0; i < numTC; i++){
+        for(int j=0;j<numCE;j++){
             if( data->getCoverage()->getBitMatrix().get(i,j) ){
-                eredeti<<"0"<<std::endl;
+                original<<"0"<<std::endl;
             } else {
-                eredeti<<"255"<<std::endl;
+                original<<"255"<<std::endl;
             }
         }
     }
 
-    std::ofstream rendezett;
-    rendezett.open ("/home/user/Asztal/image_sort.pgm");
-    rendezett<<"P2"<<std::endl;
-    rendezett<<oszlop<<" "<<sor<<std::endl<<"255"<<std::endl;
+    std::ofstream sort;
+    sort.open ("../image_sort.pgm");
+    sort<<"P2"<<std::endl;
+    sort<<numCE<<" "<<numTC<<std::endl<<"255"<<std::endl;
 
-    std::vector<IndexType> tmp_row(sor);
-    std::vector<IndexType> tmp_cols(oszlop);
+    std::vector<IndexType> tmp_row(numTC);
+    std::vector<IndexType> tmp_cols(numCE);
 
-    int sorindex=0;
+    int rowindex=0;
     for(int a=0 ; a <= row_clusters ; a++){
         std::vector<IndexType> tc = m_clusterList->operator [](boost::lexical_cast<std::string>(a)).getTestCases();
         for( std::vector<IndexType>::iterator it = tc.begin() ; it != tc.end() ; ++it){
-            tmp_row[sorindex]=*it;
-            sorindex++;
+            tmp_row[rowindex]=*it;
+            rowindex++;
         }
     }
 
-    int oszlopindex=0;
+    int colsindex=0;
     for(int a=0 ; a <= cols_clusters ; a++){
         std::vector<IndexType> ce = m_clusterList->operator [](boost::lexical_cast<std::string>(a)).getCodeElements();
         for( std::vector<IndexType>::iterator it = ce.begin() ; it != ce.end() ; ++it){
-            tmp_cols[oszlopindex]=*it;
-            oszlopindex++;
+            tmp_cols[colsindex]=*it;
+            colsindex++;
         }
     }
 
-    for(std::vector<IndexType>::iterator it_sor=tmp_row.begin() ; it_sor!=tmp_row.end() ; ++it_sor){
-        for(std::vector<IndexType>::iterator it_oszlop=tmp_cols.begin() ; it_oszlop!=tmp_cols.end() ; ++it_oszlop){
-            if( data->getCoverage()->getBitMatrix().get(*it_sor,*it_oszlop) ){
-                rendezett<<"0"<<std::endl;
+    for(std::vector<IndexType>::iterator it_row=tmp_row.begin() ; it_row!=tmp_row.end() ; ++it_row){
+        for(std::vector<IndexType>::iterator it_cols=tmp_cols.begin() ; it_cols!=tmp_cols.end() ; ++it_cols){
+            if( data->getCoverage()->getBitMatrix().get(*it_row,*it_cols) ){
+                sort<<"0"<<std::endl;
             } else {
-                rendezett<<"255"<<std::endl;
+                sort<<"255"<<std::endl;
             }
         }
     }
@@ -490,16 +513,17 @@ void ClusteringMetricsTestSuiteMetricPlugin::imageWrite(CSelectionData *data){
 
 void ClusteringMetricsTestSuiteMetricPlugin::clusterInfo(){
     int _write_local_row_index = 1, _write_local_cols_index = 1;
+
     for(int i = 0 ; i < m_clusterList->size() ; i++ ){
         if(m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size() > 0){
-            std::cout<<_write_local_row_index<<". row-cluster : "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size()<<" test cases"<<std::endl;
+            std::cout<<_write_local_row_index<<". row-cluster (label: "<<i<<"): "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getTestCases().size()<<" test cases"<<std::endl;
             _write_local_row_index++;
         }
     }std::cout<<std::endl<<std::endl;
 
     for(int i = 0 ; i < m_clusterList->size() ; i++ ){
         if(m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size() > 0){
-            std::cout<<_write_local_cols_index<<". cols-cluster : "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size()<<" test cases"<<std::endl;
+            std::cout<<_write_local_cols_index<<". cols-cluster (label: "<<i<<"): "<<m_clusterList->operator [](boost::lexical_cast<std::string>(i)).getCodeElements().size()<<" test cases"<<std::endl;
             _write_local_cols_index++;
         }
     }std::cout<<std::endl<<std::endl;
