@@ -45,9 +45,7 @@ public:
 
     void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList);
 
-    std::vector<int> clustering_row(CSelectionData &data, int size1, int size2 );
-
-    std::vector<int> clustering_cols(CCoverageMatrix* data);
+    std::vector<int> clustering(CCoverageMatrix* data, int hammingTolerance, int nullTolerance);
 
     bool hamming_distance(CCoverageMatrix* data, int index1, int index2, int tolerance, int size);
 
