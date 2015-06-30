@@ -50,35 +50,25 @@ public:
 
     void execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList);
 
-    void row_results(CSelectionData &data, int algorithm_index);
+    void clusters(CCoverageMatrix* matrix, int algorithm_index, bool dimension);
 
-    //void cols_results(CSelectionData &data, int algorithm_index);
-    void cols_results(CCoverageMatrix* matrix, int algorithm_index);
+    void set_results(CCoverageMatrix* matrix, int index_1, int index_2, int count_1, int element, int algorithm_index, bool dimension);
 
-    void set_row_results(CSelectionData &data, int index_1, int index_2, int count_1, int element, int algorithm_index);
+    int intersections(CCoverageMatrix* matrix, int index_1, int index_2, int size);
 
-    //void set_cols_results(CSelectionData &data, int index_1, int index_2, int count_1, int element, int algorithm_index);
-    void set_cols_results(CCoverageMatrix* matrix, int index_1, int index_2, int count_1, int element, int algorithm_index);
-
-    int intersections_row(CSelectionData &data, int index_1, int index_2, int size);
-
-    //int intersections_cols(CSelectionData &data, int index_1, int index_2, int size);
-    int intersections_cols(CCoverageMatrix* matrix, int index_1, int index_2, int size);
-
-    int unions_row(CSelectionData &data, int index_1, int index_2, int size);
-
-    //int unions_cols(CSelectionData &data, int index_1, int index_2, int size);
-    int unions_cols(CCoverageMatrix* matrix, int index_1, int index_2, int size);
+    int unionsCalc(CCoverageMatrix* matrix, int index_1, int index_2, int size);
 
     float results_vs_limit( float results, float limit );
 
-    void kMeans_row(CCoverageMatrix* matrix);
-
-    void kMeans_cols(CCoverageMatrix* matrix);
+    void kMeans(CCoverageMatrix* matrix, bool dimension);
 
     void setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList);
 
-    void matrixTranspose(CSelectionData &data, CCoverageMatrix* newMatrix, CBitMatrix* bitMatrix, int numTC, int numCE);
+    void matrixTranspose(CSelectionData &matrix, CCoverageMatrix* newMatrix, CBitMatrix* bitMatrix, int numTC, int numCE);
+
+    void clusterDump(CCoverageMatrix* matrix, std::vector<ClusterId> labelVector, std::string outFile, bool dimension);
+
+    void setIndex(CCoverageMatrix* matrix, std::vector<ClusterId> IndexVector);
 
 
 
@@ -89,8 +79,6 @@ public:
     std::vector<ClusterId> RowIndexVector;
     std::vector<ClusterId>  ColsIndexVector;
 
-    std::vector<int> row_cluster_index;
-    std::vector<int> cols_cluster_index;
 
 
  private:
@@ -98,6 +86,9 @@ public:
     double limit = 0.0;
     int cluster_number;
     int _0cluster_limit;
+    std::string testClusterDump;
+    std::string codeElementsClusterDump;
+
 };
 
 } /* namespace soda */

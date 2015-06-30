@@ -53,6 +53,8 @@ public:
 
     void setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList);
 
+    void clusterDump(CCoverageMatrix* data, std::vector<int> labelVector, std::string outFile, int dimension);
+
 
 private:
     int m_hamm_diff_row;    // row tolerance (%)
@@ -60,6 +62,8 @@ private:
     int _0cluster_limit;    // 0cluster tolerance
     std::vector<int> row_cluster_index;
     std::vector<int> cols_cluster_index;
+    std::string testClusterDump;
+    std::string codeElementsClusterDump;
 
 };
 

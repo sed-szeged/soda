@@ -86,30 +86,11 @@ void CoverageMatrixGeneratorTestSuiteClusterPlugin::execute(CSelectionData &data
 
     coverageMatrix->save(matrix_name);
 
-
-    /*****
-    for(int i = 0 ; i < row_size ; i++){
-        for(int j = 0 ; j < cols_size ; j++){
-            std::cout<<bitMatrix->get(i,j)<<" ";
-        }std::cout<<std::endl;
-    }
-    *******/
-
-    /***********
-    for(int i = 0 ; i < row_size ; i++){
-        std::cout<<coverageMatrix->getTestcases().getValue(i)<<std::endl;
-    }
-
-    for(int j = 0 ; j < cols_size ; j++){
-        std::cout<<coverageMatrix->getCodeElements().getValue(j)<<std::endl;
-    }
-    ******************/
     ones.resize( cluster_number+1, std::vector<int>(cluster_number+1));
     zeros.resize( cluster_number+1, std::vector<int>(cluster_number+1));
 
     vectorInit();
 
-    std::cout<<std::endl;
     clusterIntersection(coverageMatrix);
 
     metrika1Calc();
@@ -119,9 +100,6 @@ void CoverageMatrixGeneratorTestSuiteClusterPlugin::execute(CSelectionData &data
     metrika3Calc();
 
     metrika4Calc();
-
-
-
 
 }
 

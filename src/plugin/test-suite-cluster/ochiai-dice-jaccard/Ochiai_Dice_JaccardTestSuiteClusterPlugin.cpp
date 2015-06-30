@@ -23,6 +23,7 @@
 #include "Ochiai_Dice_JaccardTestSuiteClusterPlugin.h"
 #include "cluster.hpp"
 #include "data/CBitMatrix.h"
+#include "../hamming/HammingTestSuiteClusterPlugin.h"
 
 namespace soda {
 
@@ -55,7 +56,10 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::init(rapidjson::Document &doc)
     limit = doc["limit"].GetDouble();
     cluster_number = doc["cluster-number"].GetInt();
     _0cluster_limit = doc["0cluster(%)"].GetInt();
+    testClusterDump = doc["test_clusters_dump"].GetString();
+    codeElementsClusterDump = doc["codeelement_clusters_dump"].GetString();
 }
+
 
 void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList)
 {
@@ -72,7 +76,7 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
 
     // TestCase X TestCase matrix calc.
     std::cout<<"... on rows..."<<std::endl;
-    row_results(data, algorithm_index);
+    clusters(data.getCoverage(), algorithm_index , false);
 
 
     // matrix transpose
@@ -84,123 +88,28 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
 
     // CodeElements X CodeElements matrix calc.
     std::cout<<"... on cols..."<<std::endl;
-    cols_results(coverageTransposeMatrix, algorithm_index);
-
+    clusters(coverageTransposeMatrix, algorithm_index , true);
 
 
 
     // k-means alg. on (row) x (row) matrix
     std::cout<<std::endl<<"k-means running on row..."<<std::endl;
-    kMeans_row(data.getCoverage());
+    kMeans(data.getCoverage(),false);
 
 
     // k-means alg. on (cols) x (cols) matrix
     std::cout<<"... and on cols"<<std::endl;
-    kMeans_cols(coverageTransposeMatrix);
+    kMeans(coverageTransposeMatrix,true);
+
 
 
     std::cout<<std::endl<<"Set clusterlist"<<std::endl;
     setClusterList( numTC, numCE, clusterList);
 
-}
+    // clusters dump
+    clusterDump(data.getCoverage(), RowIndexVector, testClusterDump, false );
+    clusterDump(data.getCoverage(), ColsIndexVector, codeElementsClusterDump, true);
 
-
-
-void Ochiai_Dice_JaccardTestSuiteClusterPlugin::row_results(CSelectionData &data, int alg_index){
-
-    int numTC = int(data.getCoverage()->getNumOfTestcases());
-    int numCE = int(data.getCoverage()->getNumOfCodeElements());
-
-    floatRowVectors.resize(numTC, std::vector<float>(numTC));
-
-    for(int index_1 = 0 ; index_1 < numTC ; index_1++){
-        int element_1 = int(data.getCoverage()->getBitMatrix().getRow(IndexType(index_1)).count());
-
-        for(int index_2 = 0 ; index_2 < numTC ; index_2++ )
-            set_row_results(data, index_1, index_2, element_1, numCE, alg_index);
-
-    }
-
-}
-
-
-
-
-void Ochiai_Dice_JaccardTestSuiteClusterPlugin::set_row_results(CSelectionData &data, int index_1, int index_2, int element_1, int numCE, int alg_index){
-
-    int element_2 = int(data.getCoverage()->getBitMatrix().getRow(IndexType(index_2)).count());
-
-    float* v_pointer = floatRowVectors[index_1].data();
-    float results=0.0;
-
-    if(alg_index==0){   // ochiai calc.
-        if( element_1*element_2 != 0 )
-            results = intersections_row(data, index_1, index_2, numCE) / (std::sqrt( element_1*element_2));
-
-    } else if(alg_index==1){    // dice calc.
-        if( element_1+element_2 != 0 )
-            results = 2*intersections_row(data, index_1, index_2, numCE) / float(element_1+element_2);
-
-    } else if(alg_index==2){    // jaccard calc.
-        int unions = unions_row(data, index_1, index_2, numCE);
-        if( unions != 0 )
-            results = intersections_row(data, index_1, index_2, numCE) / float(unions);
-
-    } else {
-        std::cout<<"Error"<<std::endl;
-        return;
-    }
-
-    *(v_pointer+index_2) = results_vs_limit(results,float(limit)) ;
-}
-
-
-
-void Ochiai_Dice_JaccardTestSuiteClusterPlugin::cols_results(CCoverageMatrix* matrix, int alg_index){
-
-    int numTC = int(matrix->getNumOfTestcases());
-    int numCE = int(matrix->getNumOfCodeElements());
-
-    floatColsVectors.resize(numTC, std::vector<float>(numTC));
-
-    for(int index_1 = 0 ; index_1 < numTC ; index_1++){
-
-        int element_1 = matrix->getBitMatrix().getRow( IndexType(index_1) ).count();
-
-        for(int index_2 = 0 ; index_2 < numTC ; index_2++ )
-            set_cols_results(matrix, index_1, index_2, element_1, numCE, alg_index);
-
-    }
-}
-
-
-
-void Ochiai_Dice_JaccardTestSuiteClusterPlugin::set_cols_results(CCoverageMatrix* matrix, int index_1, int index_2, int element_1, int numCE, int alg_index){
-
-    int element_2 = int( matrix->getBitMatrix().getRow( IndexType(index_2)).count() );
-
-    float results=0.0;
-    float* v_pointer = floatColsVectors[index_2].data();
-
-    if(alg_index==0){   // ochiai calc.
-        if( element_1*element_2 != 0 )
-            results = intersections_cols(matrix, index_1, index_2, numCE) / (std::sqrt( element_1*element_2));
-
-    } else if(alg_index==1){    // dice calc.
-        if( element_1+element_2 != 0 )
-            results = 2*intersections_cols(matrix, index_1, index_2, numCE) / float(element_1+element_2);
-
-    } else if(alg_index==2){    // jaccard calc.
-        int unions = unions_cols(matrix, index_1, index_2, numCE);
-        if( unions != 0 )
-            results = intersections_cols(matrix, index_1, index_2, numCE) / float(unions);
-
-    } else {
-        std::cout<<"Error"<<std::endl;
-        return;
-    }
-
-    *(v_pointer+index_1)= results_vs_limit(results,float(limit)) ;
 }
 
 
@@ -214,103 +123,60 @@ float Ochiai_Dice_JaccardTestSuiteClusterPlugin::results_vs_limit( float results
 }
 
 
-
-
-
-int Ochiai_Dice_JaccardTestSuiteClusterPlugin::intersections_row(CSelectionData &data, int index_1, int index_2, int size){
-    int intersections = 0;
-    for(int a = 0 ; a < size ; a++)
-        intersections += int( data.getCoverage()->getBitMatrix().get(IndexType(index_1),IndexType(a)) &&  data.getCoverage()->getBitMatrix().get(IndexType(index_2),IndexType(a)) ) ;
-
-    return intersections;
-}
-
-
-
-int Ochiai_Dice_JaccardTestSuiteClusterPlugin::intersections_cols(CCoverageMatrix* matrix, int index_1, int index_2, int size){
-    int intersections = 0;
-
-    for(int a = 0 ; a < size ; a++)
-        intersections += int( matrix->getBitMatrix().get(IndexType(index_1),IndexType(a)) && matrix->getBitMatrix().get(IndexType(index_2),IndexType(a)) );
-
-    return intersections;
-}
-
-
-
-
-int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unions_row(CSelectionData &data, int index_1, int index_2, int size){
-    int unions = 0;
-    for(int a = 0 ; a < size ; a++)
-        unions += int( data.getCoverage()->getBitMatrix().get(IndexType(index_1),IndexType(a)) || data.getCoverage()->getBitMatrix().get(IndexType(index_2),IndexType(a)) );
-
-    return unions;
-}
-
-
-
-int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unions_cols(CCoverageMatrix* matrix, int index_1, int index_2, int size){
-    int unions = 0;
-    for(int a = 0 ; a < size ; a++)
-        unions += int( matrix->getBitMatrix().get(IndexType(index_1),IndexType(a)) || matrix->getBitMatrix().get(IndexType(index_2),IndexType(a)) );
-
-    return unions;
-}
-
-
-
-void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_row(CCoverageMatrix* matrix){
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans(CCoverageMatrix *matrix, bool dimension){
 
     Clustering::ClusterId num_clusters = cluster_number;
-    Clustering::PointId num_points = floatRowVectors[0].size();
-    Clustering::Dimensions num_dimensions = floatRowVectors[0].size();
-    Clustering::PointsSpace ps_row(num_points, num_dimensions, Ochiai_Dice_JaccardTestSuiteClusterPlugin::floatRowVectors );
-    Clustering::Clusters clusters_row(num_clusters, ps_row);
+    Clustering::PointId num_points;
+    Clustering::Dimensions num_dimensions;
 
+    if( !dimension ){
+        num_points = floatRowVectors[0].size();
+        num_dimensions = floatRowVectors[0].size();
+    } else {
+        num_points = floatColsVectors[0].size();
+        num_dimensions = floatColsVectors[0].size();
+    }
 
-    clusters_row.k_means();
-
-    Ochiai_Dice_JaccardTestSuiteClusterPlugin::RowIndexVector = clusters_row.points_to_clusters__;
-
-    // alg. results (index) start: 0
     int size = matrix->getBitMatrix().getNumOfCols();
     int position = 0;
 
-    for (std::vector<ClusterId>::iterator it = RowIndexVector.begin() ; it != RowIndexVector.end(); ++it){
-        if( matrix->getBitMatrix().getRow(IndexType(position)).count() > (size*_0cluster_limit/100) ){
-            *it = ClusterId(0); // add to 0cluster
-        } else {
-            *it = (*it)+1;
+    if( !dimension ){
+
+        Clustering::PointsSpace ps(num_points, num_dimensions, floatRowVectors );
+        Clustering::Clusters clusters(num_clusters, ps);
+
+        clusters.k_means();
+
+        RowIndexVector = clusters.points_to_clusters__;
+
+        for (std::vector<ClusterId>::iterator it = RowIndexVector.begin() ; it != RowIndexVector.end(); ++it){
+            if( matrix->getBitMatrix().getRow(IndexType(position)).count() > (size*_0cluster_limit/100) ){
+                *it = ClusterId(0); // add to 0cluster
+            } else {
+                *it = (*it)+1;
+            }
+            position++;
         }
-        position++;
+
+    } else {
+
+        Clustering::PointsSpace ps(num_points, num_dimensions, floatColsVectors );
+        Clustering::Clusters clusters(num_clusters, ps);
+
+        clusters.k_means();
+
+        ColsIndexVector = clusters.points_to_clusters__;
+
+        for (std::vector<ClusterId>::iterator it = ColsIndexVector.begin() ; it != ColsIndexVector.end(); ++it){
+            if( matrix->getBitMatrix().getRow(IndexType(position)).count() > (size*_0cluster_limit/100) ){
+                *it = ClusterId(0); // add to 0cluster
+            } else {
+                *it = (*it)+1;
+            }
+            position++;
+        }
     }
 
-}
-
-void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans_cols(CCoverageMatrix* matrix){
-
-    Clustering::ClusterId num_clusters = cluster_number;
-    Clustering::PointId num_points = floatColsVectors[0].size();
-    Clustering::Dimensions num_dimensions = floatColsVectors[0].size();
-    Clustering::PointsSpace ps_cols(num_points, num_dimensions, Ochiai_Dice_JaccardTestSuiteClusterPlugin::floatColsVectors );
-    Clustering::Clusters clusters_cols(num_clusters, ps_cols);
-
-    clusters_cols.k_means();
-
-    Ochiai_Dice_JaccardTestSuiteClusterPlugin::ColsIndexVector = clusters_cols.points_to_clusters__;
-
-    // alg. results (index) start: 0   
-    int size = matrix->getBitMatrix().getNumOfCols();
-    int position = 0;
-
-    for (std::vector<ClusterId>::iterator it = ColsIndexVector.begin() ; it != ColsIndexVector.end(); ++it){
-        if( matrix->getBitMatrix().getRow(IndexType(position)).count() > (size*_0cluster_limit/100) ){
-            *it = ClusterId(0); // add to 0cluster
-        } else {
-            *it = (*it)+1;
-        }
-        position++;
-    }
 
 }
 
@@ -352,6 +218,108 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::matrixTranspose(CSelectionData &
 
 
 
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::clusterDump(CCoverageMatrix* data, std::vector<ClusterId> labelVector, std::string outFile, bool dimension){
+
+    std::vector<ClusterId>::iterator biggest = std::max_element( labelVector.begin(), labelVector.end() );
+    int size = labelVector.size();
+    std::ofstream outClusters;
+    outClusters.open(outFile.c_str());
+
+    for(int a = 0 ; a <= int(*biggest) ; a++){
+        outClusters << a << ". cluster elements:\n";
+        for ( int index = 0 ; index < size ; index++ ){
+            if( !dimension ){
+                if( labelVector[index] == a )
+                    outClusters << "\t" << data->getTestcases().getValue(IndexType(index)) << "\n" ;
+            } else {
+                if( labelVector[index] == a )
+                    outClusters << "\t" << data->getCodeElements().getValue(IndexType(index)) << "\n" ;
+            }
+        }
+        outClusters<<"\n";
+        for(int b = 0 ; b < 10 ; b++) outClusters<<"=======";
+        outClusters<<"\n\n";
+    }
+
+}
+
+
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::clusters(CCoverageMatrix* matrix, int algorithm_index, bool dimension){
+
+    int numTC = int(matrix->getNumOfTestcases());
+    int numCE = int(matrix->getNumOfCodeElements());
+
+    if( !dimension ){
+        floatRowVectors.resize(numTC, std::vector<float>(numTC));
+    } else {
+        floatColsVectors.resize(numTC, std::vector<float>(numTC));
+    }
+
+    for(int index_1 = 0 ; index_1 < numTC ; index_1++){
+        int element_1 = int( matrix->getBitMatrix().getRow(IndexType(index_1)).count() );
+
+        for(int index_2 = 0 ; index_2 < numTC ; index_2++ )
+            set_results(matrix, index_1, index_2, element_1, numCE, algorithm_index, dimension);
+
+    }
+
+}
+
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::set_results(CCoverageMatrix* matrix, int index_1, int index_2, int element_1, int numCE,  int algorithm_index, bool dimension){
+
+    int element_2 = int(matrix->getBitMatrix().getRow(IndexType(index_2)).count());
+
+    float* v_pointer;
+
+    if( !dimension ){
+        v_pointer = floatRowVectors[index_1].data();
+    } else {
+        v_pointer = floatColsVectors[index_1].data();
+    }
+
+    float results=0.0;
+
+    if(algorithm_index==0){   // ochiai calc.
+        if( element_1*element_2 != 0 )
+            results = intersections(matrix, index_1, index_2, numCE) / (std::sqrt( element_1*element_2));
+
+    } else if(algorithm_index==1){    // dice calc.
+        if( element_1+element_2 != 0 )
+            results = 2*intersections(matrix, index_1, index_2, numCE) / float(element_1+element_2);
+
+    } else if(algorithm_index==2){    // jaccard calc.
+        int unions = unionsCalc(matrix, index_1, index_2, numCE);
+        if( unions != 0 )
+            results = intersections(matrix, index_1, index_2, numCE) / float(unions);
+
+    } else {
+        std::cout<<"Error"<<std::endl;
+        return;
+    }
+
+    *(v_pointer+index_2) = results_vs_limit(results,float(limit)) ;
+
+}
+
+
+
+int Ochiai_Dice_JaccardTestSuiteClusterPlugin::intersections(CCoverageMatrix* matrix, int index_1, int index_2, int size){
+    int intersections = 0;
+    for(int a = 0 ; a < size ; a++)
+        intersections += int( matrix->getBitMatrix().get(IndexType(index_1),IndexType(a)) && matrix->getBitMatrix().get(IndexType(index_2),IndexType(a)) );
+
+    return intersections;
+}
+
+
+int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unionsCalc(CCoverageMatrix* matrix, int index_1, int index_2, int size){
+    int unions = 0;
+    for(int a = 0 ; a < size ; a++)
+        unions += int( matrix->getBitMatrix().get(IndexType(index_1),IndexType(a)) || matrix->getBitMatrix().get(IndexType(index_2),IndexType(a)) );
+
+    return unions;
+}
+
 
 extern "C" void registerPlugin(CKernel &kernel)
 {
@@ -359,3 +327,4 @@ extern "C" void registerPlugin(CKernel &kernel)
 }
 
 } /* namespace soda */
+

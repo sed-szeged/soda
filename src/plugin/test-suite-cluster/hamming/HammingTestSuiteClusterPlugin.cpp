@@ -54,6 +54,8 @@ void HammingTestSuiteClusterPlugin::init(rapidjson::Document &doc)
     m_hamm_diff_row = doc["hamming_dist_row(%)"].GetInt();
     m_hamm_diff_cols = doc["hamming_dist_cols(%)"].GetInt();
     _0cluster_limit = doc["0cluster(%)"].GetInt();
+    testClusterDump = doc["test_clusters_dump"].GetString();
+    codeElementsClusterDump = doc["codeelement_clusters_dump"].GetString();
 }
 
 void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList)
@@ -83,8 +85,11 @@ void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::
 
 
     // set clusterList
-    HammingTestSuiteClusterPlugin::setClusterList(numTC, numCE, clusterList);
+    setClusterList(numTC, numCE, clusterList);
 
+    // clusters dump
+    clusterDump(data.getCoverage(), row_cluster_index, testClusterDump, 0);
+    clusterDump(data.getCoverage(), cols_cluster_index, codeElementsClusterDump, 1);
 
 
 }
@@ -188,6 +193,32 @@ void HammingTestSuiteClusterPlugin::matrixTranspose(CSelectionData &data, CCover
 
 }
 
+
+
+void HammingTestSuiteClusterPlugin::clusterDump(CCoverageMatrix* data, std::vector<int> labelVector, std::string outFile, int dimension){
+
+    std::vector<int>::iterator biggest = std::max_element( labelVector.begin(), labelVector.end() );
+    int size = labelVector.size();
+    std::ofstream outClusters;
+    outClusters.open(outFile.c_str());
+
+    for(int a = 0 ; a <= *biggest ; a++){
+        outClusters << a << ". cluster elements:\n";
+        for ( int index = 0 ; index < size ; index++ ){
+            if( !dimension ){
+                if( labelVector[index] == a )
+                    outClusters << "\t" << data->getTestcases().getValue(IndexType(index)) << "\n" ;
+            } else {
+                if( labelVector[index] == a )
+                    outClusters << "\t" << data->getCodeElements().getValue(IndexType(index)) << "\n" ;
+            }
+        }
+        outClusters<<"\n";
+        for(int b = 0 ; b < 10 ; b++) outClusters<<"=======";
+        outClusters<<"\n\n";
+    }
+
+}
 
 
 extern "C" void registerPlugin(CKernel &kernel)

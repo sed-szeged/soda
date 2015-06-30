@@ -85,18 +85,37 @@ void printHelp()
 {
 
     cout << "Json file:" << endl<<endl;
-    cout<<"{ \"coverage-data\":\"/home/../sample.coverage.SoDA\","<<endl<<"\"algorithm\":\"hamming\","<<endl<<
-          "\"hamming_dist_row(%)\":10,"<<endl<<"\"hamming_dist_cols(%)\":10,"<<endl<<"\"0cluster(%)\":90 }"<<endl<<endl<<"or"<<endl<<endl;
+
+    cout<<"{"<<endl<<
+          "\"coverage-data\":\"../sample.cov.SoDA\","<<endl<<
+          "\"algorithm\":\"hamming\","<<endl<<
+          "\"hamming_dist_row(%)\":15,"<<endl<<
+          "\"hamming_dist_cols(%)\":25,"<<endl<<
+          "\"test_clusters_dump\":\"../testclusterdump.txt\","<<endl<<
+          "\"codeelement_clusters_dump\":\"../codelemclusterdump.txt\","<<endl<<
+          "\"0cluster(%)\":80"<<endl<<"}"<<endl<<endl;
 
 
-    cout<<"{ \"coverage-data\":\"/home/.../sample.coverage.SoDA\","<<endl<<"\"algorithm\":\"ochiai-dice-jaccard\","<<endl<<
-          "\"alg.index\":2,"<<endl<<"\"limit\":0.3,"<<endl<<"\"0cluster(%)\":90,"<<endl<<"\"cluster-number\":3}"<<endl<<endl;
-    cout<<"index: 0 - ochiai ; 1 - dice ; 2 - jaccard and limit=-1.0 == no limit"<<endl<<endl<<"or"<<endl<<endl;
+    cout<<"{"<<endl<<
+          "\"coverage-data\":\"../sample.cov.SoDA\","<<endl<<
+          "\"algorithm\":\"ochiai-dice-jaccard\","<<endl<<
+          "\"alg.index\":1,"<<endl<<
+          "\"limit\":-1.0,"<<endl<<
+          "\"0cluster(%)\":80,"<<endl<<
+          "\"test_clusters_dump\":\"../testclusterdump.txt\","<<endl<<
+          "\"codeelement_clusters_dump\":\"../codelemclusterdump.txt\","<<endl<<
+          "\"cluster-number\":5"<<endl<<"}"<<endl;
+    cout<<"index: 0 - ochiai ; 1 - dice ; 2 - jaccard and limit=-1.0 == no limit"<<endl<<endl;
 
 
-    cout<<"{ \"coverage-data\":\"/home/../output.coverage.SoDA\","<<endl<<"\"algorithm\":\"matrix-generator\","<<endl<<
-          "\"row-size\":100,"<<endl<<"\"cols-size\":200,"<<endl<<"\"cluster-number\":5,"<<endl<<"\"in(%)\":95,"<<endl<<
-          "\"out(%)\":10 }"<<endl<<endl;
+    cout<<"{"<<endl<<
+          "\"coverage-data\":\"../generated.cov.SoDA\","<<endl<<
+          "\"algorithm\":\"matrix-generator\","<<endl<<
+          "\"row-size\":100,"<<endl<<
+          "\"cols-size\":200,"<<endl<<
+          "\"cluster-number\":5,"<<endl<<
+          "\"in(%)\":95,"<<endl<<
+          "\"out(%)\":10"<<endl<<"}"<<endl<<endl;
 }
 
 
