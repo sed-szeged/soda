@@ -152,6 +152,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika4Calc(){
         }
         global_good += local_good;
         global_bad += local_bad;
+        if(local_bad==0) local_bad=1;//??????????????????????????
         metrics4[i] = float(local_good)/float(local_bad);
     }
 
@@ -174,19 +175,20 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika3Calc(){
 
     int global_good = 0, global_all = 0;
     for(int i = 1 ; i <= row_clusters ; i++ ){
-        int all = 0, good = 0;
+        int local_all = 0, local_good = 0;
         for(int j = 1 ; j <= cols_clusters ; j++ ){
             if( pairs[i].count(j)!=0 ){
-                good += ones[i][j] ;
+                local_good += ones[i][j] ;
             } else {
-                good += zeros[i][j];
+                local_good += zeros[i][j];
             }
-            all += ones[i][j];
-            all += zeros[i][j];
+            local_all += ones[i][j];
+            local_all += zeros[i][j];
         }
-        global_good += good;
-        global_all += all;
-        metrics3[i] = float(good)/float(all);
+        global_good += local_good;
+        global_all += local_all;
+        if(local_all==0) local_all=0;
+        metrics3[i] = float(local_good)/float(local_all);
     }
     std::cout<<"Global metrics3 ((\"good points\") / (sum points)) : "<<float(global_good)/float(global_all)<<std::endl;
 
@@ -207,21 +209,22 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika2Calc(){
 
     int global_good = 0, global_all = 0;
     for(int i = 1 ; i <= row_clusters ; i++ ){
-        int all = 0, good = 0;
+        int local_all = 0, local_good = 0;
         for(int j = 1 ; j <= cols_clusters ; j++ ){
             if( pairs[i].count(j)!=0 ){
-                good += ones[i][j] ;
-                good -= zeros[i][j];
+                local_good += ones[i][j] ;
+                local_good -= zeros[i][j];
             } else {
-                good += zeros[i][j];
-                good -= ones[i][j];
+                local_good += zeros[i][j];
+                local_good -= ones[i][j];
             }
-            all += ones[i][j];
-            all += zeros[i][j];
+            local_all += ones[i][j];
+            local_all += zeros[i][j];
         }
-        global_good += good;
-        global_all += all;
-        metrics2[i] = float(good)/float(all);
+        global_good += local_good;
+        global_all += local_all;
+        if(local_all==0) local_all=1;
+        metrics2[i] = float(local_good)/float(local_all);
     }
     std::cout<<"Global metrics2 ([(\"good points\")-(\"bad points\")] / (sum points)) : "<<float(global_good)/float(global_all)<<std::endl;
 
@@ -242,16 +245,17 @@ void ClusteringMetricsTestSuiteMetricPlugin::metrika1Calc(){
 
     int global_good = 0, global_all = 0 ;
     for(int i = 1 ; i <= row_clusters ; i++ ){
-        int all = 0, good = 0;
+        int local_all = 0, local_good = 0;
         for(int j = 1 ; j <= cols_clusters ; j++ ){
                 if( pairs[i].count(j)!=0 )
-                    good += ones[i][j] ;
-                all += ones[i][j];
+                    local_good += ones[i][j] ;
+                local_all += ones[i][j];
 
         }
-        global_good += good;
-        global_all += all;
-        metrics1[i] = float(good)/float(all);
+        global_good += local_good;
+        global_all += local_all;
+        if(local_all==0) local_all=1;
+        metrics1[i] = float(local_good)/float(local_all);
     }
 
     std::cout<<"Global metrics1 ((\"good 1 points\") / (|1 points|)) : "<<float(global_good)/float(global_all)<<std::endl;

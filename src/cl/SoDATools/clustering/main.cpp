@@ -164,7 +164,7 @@ void processJsonFiles(String path){
 
     boost::filesystem::path jsonPath(path);
 
-    std::string clusterAlgorithmName = reader["algorithm"].GetString();
+    std::string clusterAlgorithmName = reader["cluster-algorithm"].GetString();
 
     std::cout<<clusterAlgorithmName<<std::endl;
 
