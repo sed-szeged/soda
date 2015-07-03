@@ -70,6 +70,9 @@ public:
 
     void setIndex(CCoverageMatrix* matrix, std::vector<ClusterId> IndexVector);
 
+    void matrixDensity(CCoverageMatrix* matrix);
+
+    void histogram(CCoverageMatrix* matrix, bool dimension);
 
 
 public:

@@ -84,6 +84,7 @@ private:
 
     int row_clusters;
     int cols_clusters;
+    std::string resultsFile;
 
 };
 

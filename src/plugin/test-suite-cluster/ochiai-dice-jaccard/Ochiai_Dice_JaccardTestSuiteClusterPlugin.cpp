@@ -23,7 +23,8 @@
 #include "Ochiai_Dice_JaccardTestSuiteClusterPlugin.h"
 #include "cluster.hpp"
 #include "data/CBitMatrix.h"
-#include "../hamming/HammingTestSuiteClusterPlugin.h"
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace soda {
 
@@ -90,6 +91,14 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
     std::cout<<"... on cols..."<<std::endl;
     clusters(coverageTransposeMatrix, algorithm_index , true);
 
+
+    // matrix density = | 1 points | / (matrix size)
+    matrixDensity( data.getCoverage() );
+
+
+    // histogram dump
+    histogram( data.getCoverage(), false );
+    histogram(coverageTransposeMatrix, true);
 
 
     // k-means alg. on (row) x (row) matrix
@@ -184,10 +193,9 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::kMeans(CCoverageMatrix *matrix, 
 
 void Ochiai_Dice_JaccardTestSuiteClusterPlugin::setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList){
 
-    CClusterDefinition def;
     std::vector<ClusterId>::iterator maxIndex = std::max_element(RowIndexVector.begin(),RowIndexVector.end());
 
-    for(int a = 0 ; a <= int(*maxIndex)+1 ; a++)
+    for(int a = 0 ; a <= int(*maxIndex) ; a++)
         clusterList[ boost::lexical_cast<std::string>(a) ] = CClusterDefinition();
 
     for(int i = 0 ; i < numTC ; i++)
@@ -226,7 +234,7 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::clusterDump(CCoverageMatrix* dat
     outClusters.open(outFile.c_str());
 
     for(int a = 0 ; a <= int(*biggest) ; a++){
-        outClusters << a << ". cluster elements:\n";
+        outClusters << a << ". cluster elements ("<<std::count(labelVector.begin(),labelVector.end(),a)<<") :\n";
         for ( int index = 0 ; index < size ; index++ ){
             if( !dimension ){
                 if( labelVector[index] == a )
@@ -320,6 +328,48 @@ int Ochiai_Dice_JaccardTestSuiteClusterPlugin::unionsCalc(CCoverageMatrix* matri
     return unions;
 }
 
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::matrixDensity(CCoverageMatrix* matrix){
+
+    int size = matrix->getNumOfTestcases();
+    int count = 0;
+    for(int i = 0 ; i < size ; i++){
+        count += matrix->getBitMatrix().getRow(IndexType(i)).count();
+    }
+    std::cout<<"Matrix density: "<<float(count)/float((size*matrix->getNumOfCodeElements()))<<std::endl<<std::endl;
+}
+
+
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::histogram(CCoverageMatrix* matrix, bool dimension){
+
+    std::ofstream outHistogram;
+    std::string dumpPath(testClusterDump);
+    std::string fileName;
+    std::vector<std::string> strs;
+    boost::split(strs,dumpPath,boost::is_any_of("/"));
+
+    for(int i = 0 ; i < strs.size()-1;i++)
+        fileName += (strs[i]+"/");
+
+    if(dimension){
+        fileName += "histogram_"+getName()+"_cols_";
+    } else {
+        fileName += "histogram_"+getName()+"_rows_";
+    }
+
+    fileName += (boost::lexical_cast<std::string>(algorithm_index))+"_"+(boost::lexical_cast<std::string>(limit))+"_"+
+            (boost::lexical_cast<std::string>(_0cluster_limit))+"_"+(boost::lexical_cast<std::string>(cluster_number))+".csv";
+    outHistogram.open(fileName.c_str());
+
+    std::map<int,int> frequency;
+
+    int size = matrix->getNumOfTestcases();
+    for(int i = 0 ; i < size ; i++)
+        frequency[matrix->getBitMatrix().getRow(IndexType(i)).count()]++;
+
+    for (std::map<int,int>::iterator it=frequency.begin(); it!=frequency.end(); ++it)
+        outHistogram << it->first <<" ; "<< it->second << "\n";
+
+}
 
 extern "C" void registerPlugin(CKernel &kernel)
 {
