@@ -35,6 +35,7 @@ namespace soda {
 
 CKernel::CKernel() :
     m_pluginMap(new PluginMap()),
+    m_bugsetReaderPluginManager(NULL),
     m_changesetReaderPluginManager(NULL),
     m_coverageReaderPluginManager(NULL),
     m_resultsReaderPluginManager(NULL),
@@ -80,6 +81,15 @@ CKernel::~CKernel()
         delete it->second;
     }
     delete m_pluginMap;
+}
+
+BugsetReaderPluginManager& CKernel::getBugsetReaderPluginManager()
+{
+    if (m_bugsetReaderPluginManager == NULL) {
+        m_bugsetReaderPluginManager = new BugsetReaderPluginManager();
+        loadPluginsFromDirectory(m_pluginDir + "/bugset-reader");
+    }
+    return *m_bugsetReaderPluginManager;
 }
 
 ChangesetReaderPluginManager& CKernel::getChangesetReaderPluginManager()

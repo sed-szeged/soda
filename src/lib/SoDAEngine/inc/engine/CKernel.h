@@ -38,6 +38,7 @@ public:
     CKernel();
     ~CKernel();
 
+    BugsetReaderPluginManager& getBugsetReaderPluginManager();
     ChangesetReaderPluginManager& getChangesetReaderPluginManager();
     CoverageReaderPluginManager& getCoverageReaderPluginManager();
     ResultsReaderPluginManager& getResultsReaderPluginManager();
@@ -59,6 +60,7 @@ private:
      PluginMap *m_pluginMap;
 
      // Managers
+     BugsetReaderPluginManager               *m_bugsetReaderPluginManager;
      ChangesetReaderPluginManager            *m_changesetReaderPluginManager;
      CoverageReaderPluginManager             *m_coverageReaderPluginManager;
      ResultsReaderPluginManager              *m_resultsReaderPluginManager;

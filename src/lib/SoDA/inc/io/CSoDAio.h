@@ -69,7 +69,9 @@ public:
         EXECUTION,
         PASSED,
         CHANGESET,
-        CODEELEMENT_TRACE
+        CODEELEMENT_TRACE,
+        REVLIST,
+        BUGSET
     };
 
     /**

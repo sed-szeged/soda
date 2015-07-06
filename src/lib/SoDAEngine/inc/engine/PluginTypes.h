@@ -24,6 +24,7 @@
 
 #include "engine/CPluginManager.h"
 
+#include "engine/plugin/IBugsetReaderPlugin.h"
 #include "engine/plugin/IChangesetReaderPlugin.h"
 #include "engine/plugin/ICoverageReaderPlugin.h"
 #include "engine/plugin/IResultsReaderPlugin.h"
@@ -35,6 +36,7 @@
 
 namespace soda {
 
+typedef CPluginManager<IBugsetReaderPlugin>               BugsetReaderPluginManager;
 typedef CPluginManager<IChangesetReaderPlugin>            ChangesetReaderPluginManager;
 typedef CPluginManager<ICoverageReaderPlugin>             CoverageReaderPluginManager;
 typedef CPluginManager<IResultsReaderPlugin>              ResultsReaderPluginManager;

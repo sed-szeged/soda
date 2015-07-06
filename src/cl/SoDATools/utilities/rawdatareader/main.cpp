@@ -1,7 +1,8 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
+ *          David Havas <havasd@inf.u-szeged.hu>
  *
  * This file is part of SoDA.
  *
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
     options_description desc("Allowed options");
     desc.add_options()
             ("help,h",                    "produce help message")
-            ("type,t",   value<String>(), "type of reading. Could be: coverage, results, changeset")
+            ("type,t",   value<String>(), "type of reading. Could be: coverage, results, changeset, bugset")
             ("mode,m",   value<String>(), "the reading mode")
             ("list,l",                    "list the available reading modes")
             ("output,o", value<String>(), "output file")
@@ -152,6 +153,32 @@ int processArgs(options_description desc, int ac, char* av[])
                 } catch (std::out_of_range &e) {
                     std::cerr << "[ERROR] Unknown read mode. " << std::endl;
                     printPluginNames("changeset", kernel.getChangesetReaderPluginManager().getPluginNames());
+                    return 1;
+                }
+                return 0;
+            }
+        } else if (type == "bugset") {
+            if (vm.count("list")) {
+                printPluginNames("bugset", kernel.getBugsetReaderPluginManager().getPluginNames());
+                return 0;
+            }
+            if (vm.count("mode")) {
+                std::string mode = vm["mode"].as<std::string>();
+                std::string path = vm["path"].as<std::string>();
+                try {
+                    IBugsetReaderPlugin *plugin = kernel.getBugsetReaderPluginManager().getPlugin(mode);
+                    CBugset *bugset = plugin->read(path);
+                    if (vm.count("output")) {
+                        std::string output = vm["output"].as<std::string>();
+                        bugset->save(output);
+                    }
+                    if (bugset) {
+                        delete bugset;
+                    }
+                }
+                catch (std::out_of_range &e) {
+                    std::cerr << "[ERROR] Unknown read mode. " << std::endl;
+                    printPluginNames("bugset", kernel.getBugsetReaderPluginManager().getPluginNames());
                     return 1;
                 }
                 return 0;
