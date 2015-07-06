@@ -36,4 +36,4 @@ target_link_libraries(
 # Copy sample directory to the build directory
 add_custom_command(TARGET SoDATest POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIRECTORY}/sample/ $<TARGET_FILE_DIR:SoDATest>/sample/)
+    ${CMAKE_CURRENT_SOURCE_DIR}/sample $<TARGET_FILE_DIR:SoDATest>/sample)
