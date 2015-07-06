@@ -20,6 +20,8 @@
  */
 
 #include "ClusteringMetricsTestSuiteMetricPlugin.h"
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace soda {
 
@@ -71,11 +73,11 @@ void ClusteringMetricsTestSuiteMetricPlugin::calculate(rapidjson::Document& resu
     clusterInfo();
 
 
-    /* 1 and 0 in clusterpairs */
+    // 1 and 0 in clusterpairs
     clusterIntersection();
 
 
-    /* defining clusterpairs */
+    // defining clusterpairs
     row_clusters >= cols_clusters ? clusterPairsRow( row_clusters, cols_clusters) : clusterPairsCols(row_clusters,cols_clusters);
 
 
@@ -112,7 +114,7 @@ void ClusteringMetricsTestSuiteMetricPlugin::calculate(rapidjson::Document& resu
 
 
     // origin and sort matrix convert to image
-    imageWrite(m_data);
+    //imageWrite(m_data);
 
 }
 

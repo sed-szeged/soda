@@ -55,6 +55,10 @@ public:
 
     void clusterDump(CCoverageMatrix* data, std::vector<int> labelVector, std::string outFile, int dimension);
 
+    void matrixDensity(CCoverageMatrix* matrix);
+
+    void histogram(CCoverageMatrix* matrix, bool dimension);
+
 
 private:
     int m_hamm_diff_row;    // row tolerance (%)
@@ -64,6 +68,7 @@ private:
     std::vector<int> cols_cluster_index;
     std::string testClusterDump;
     std::string codeElementsClusterDump;
+    std::string resultMatrixName;
 
 };
 
