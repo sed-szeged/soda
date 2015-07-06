@@ -135,7 +135,7 @@ void LabelTestCodeElementsClusterPlugin::execute(CSelectionData &data, std::map<
     }
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteClusterPluginManager().addPlugin(new LabelTestCodeElementsClusterPlugin());
 }

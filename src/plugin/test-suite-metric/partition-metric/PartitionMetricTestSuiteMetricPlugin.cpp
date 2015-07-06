@@ -95,7 +95,7 @@ void PartitionMetricTestSuiteMetricPlugin::calculate(rapidjson::Document &result
     //partitionMetricStream.close();
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteMetricPluginManager().addPlugin(new PartitionMetricTestSuiteMetricPlugin());
 }

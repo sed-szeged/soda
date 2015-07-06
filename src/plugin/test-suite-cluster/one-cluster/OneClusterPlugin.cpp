@@ -63,7 +63,7 @@ void OneClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClus
     clusterList["full"] = cluster;
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteClusterPluginManager().addPlugin(new OneClusterPlugin());
 }

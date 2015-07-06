@@ -188,7 +188,7 @@ int RandomReductionPlugin::addRandom(std::vector<IndexType>& from, std::set<Inde
     return origsize - from.size();
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteReductionPluginManager().addPlugin(new RandomReductionPlugin());
 }

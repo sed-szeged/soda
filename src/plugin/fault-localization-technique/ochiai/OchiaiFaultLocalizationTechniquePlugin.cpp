@@ -148,7 +148,7 @@ void OchiaiFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &clust
     (std::cerr << "done." << std::endl).flush();
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getFaultLocalizationTechniquePluginManager().addPlugin(new OchiaiFaultLocalizationTechniquePlugin());
 }

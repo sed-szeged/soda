@@ -132,7 +132,7 @@ void UniquenessTestSuiteMetricPlugin::calculate(rapidjson::Document &results)
     //out.close();
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteMetricPluginManager().addPlugin(new UniquenessTestSuiteMetricPlugin());
 }

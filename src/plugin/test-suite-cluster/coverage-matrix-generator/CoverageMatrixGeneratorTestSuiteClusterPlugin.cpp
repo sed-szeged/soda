@@ -312,7 +312,7 @@ void CoverageMatrixGeneratorTestSuiteClusterPlugin::metrika1Calc(){
 }
 
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteClusterPluginManager().addPlugin(new CoverageMatrixGeneratorTestSuiteClusterPlugin());
 }

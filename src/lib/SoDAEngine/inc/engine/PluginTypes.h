@@ -34,6 +34,12 @@
 #include "engine/plugin/ITestSuiteReductionPlugin.h"
 #include "engine/plugin/IFaultLocalizationTechniquePlugin.h"
 
+#ifdef WIN32
+#define MSDLL_EXPORT __declspec(dllexport)
+#else
+#define MSDLL_EXPORT
+#endif
+
 namespace soda {
 
 typedef CPluginManager<IBugsetReaderPlugin>               BugsetReaderPluginManager;

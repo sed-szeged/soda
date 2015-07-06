@@ -91,7 +91,7 @@ void GeneralIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_
     }
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuitePrioritizationPluginManager().addPlugin(new GeneralIgnorePrioritizationPlugin());
 }

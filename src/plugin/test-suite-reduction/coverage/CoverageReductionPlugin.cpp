@@ -191,7 +191,7 @@ bool CoverageReductionPlugin::setSmaller(const IBitList& lhs, const IBitList& rh
   return false;
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteReductionPluginManager().addPlugin(new CoverageReductionPlugin());
 }

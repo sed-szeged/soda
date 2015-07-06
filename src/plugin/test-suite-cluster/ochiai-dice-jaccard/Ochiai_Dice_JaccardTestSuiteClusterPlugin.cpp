@@ -371,7 +371,7 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::histogram(CCoverageMatrix* matri
 
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteClusterPluginManager().addPlugin(new Ochiai_Dice_JaccardTestSuiteClusterPlugin());
 }

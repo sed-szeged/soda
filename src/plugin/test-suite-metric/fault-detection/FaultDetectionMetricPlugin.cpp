@@ -117,7 +117,7 @@ void FaultDetectionMetricPlugin::calculate(rapidjson::Document &results)
     //coverageStream.close();
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteMetricPluginManager().addPlugin(new FaultDetectionMetricPlugin());
 }
