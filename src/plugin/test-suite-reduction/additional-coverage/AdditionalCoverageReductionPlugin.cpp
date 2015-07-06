@@ -160,7 +160,7 @@ bool AdditionalCoverageReductionPlugin::operator()(qelement d1, qelement d2)
 }
 
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getTestSuiteReductionPluginManager().addPlugin(new AdditionalCoverageReductionPlugin());
 }

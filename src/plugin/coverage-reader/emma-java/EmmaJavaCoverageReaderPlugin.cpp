@@ -337,7 +337,7 @@ void EmmaJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
 }
 
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getCoverageReaderPluginManager().addPlugin(new EmmaJavaCoverageReaderPlugin());
 }

@@ -167,7 +167,7 @@ void OneRevisionPerFileChangesetReaderPlugin::readFromDirectory(fs::path p)
     }
 }
 
-extern "C" void registerPlugin(CKernel &kernel)
+extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
     kernel.getChangesetReaderPluginManager().addPlugin(new OneRevisionPerFileChangesetReaderPlugin());
 }
