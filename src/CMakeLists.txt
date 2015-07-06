@@ -33,9 +33,14 @@ option(test "Build tests" OFF)
 option(coverage "Build with coverage analysis support" OFF)
 option(withoutcl "Build without command line tools" 0)
 
+set(LINK_DL)
+if (UNIX)
+    set(LINK_DL dl)
+endif()
+
 set(LINKING_METHOD SHARED)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK)
+    add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK)
     set(LINKING_METHOD STATIC)
 endif()
 
@@ -89,7 +94,6 @@ if(test)
     # Specify include dir
     ExternalProject_Get_Property(googletest source_dir)
     include_directories(${source_dir}/include)
-
     add_subdirectory(test/lib)
 
     enable_testing()

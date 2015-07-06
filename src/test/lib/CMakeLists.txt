@@ -12,7 +12,11 @@ aux_source_directory(${SoDATest_SOURCE_DIR}/SoDA soda_src)
 aux_source_directory(${SoDATest_SOURCE_DIR}/plugin plugin_src)
 
 ExternalProject_Get_Property(googletest binary_dir)
-set(SUFFIX ".a")
+if (WIN32)
+    set(SUFFIX ".lib")
+else()
+    set(SUFFIX ".a")
+endif()
 
 add_executable(SoDATest SoDATest.cpp ${soda_src} ${plugin_src})
 
@@ -26,8 +30,10 @@ target_link_libraries(
     ${CMAKE_THREAD_LIBS_INIT}
     SoDA
     SoDAEngine
-    dl
+    ${LINK_DL}
     ${Boost_LIBRARIES})
 
 # Copy sample directory to the build directory
-file(COPY sample/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/sample/)
+add_custom_command(TARGET SoDATest POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIRECTORY}/sample/ $<TARGET_FILE_DIR:SoDATest>/sample/)

@@ -37,15 +37,15 @@ TEST(CBitMatrix, DefaultConstructor)
 
 TEST(CBitMatrix, Constructor)
 {
-    IndexType n = 1000;
-    IndexType m = 1000;
+    IndexType n = 10;
+    IndexType m = 10;
     CBitMatrix bitMatrix(n, m);
 
     EXPECT_NO_FATAL_FAILURE(bitMatrix.getRow(n-1));
     EXPECT_NO_FATAL_FAILURE(bitMatrix.getCol(m-1));
 
-    EXPECT_EQ(1000u, bitMatrix.getNumOfRows());
-    EXPECT_EQ(1000u, bitMatrix.getNumOfCols());
+    EXPECT_EQ(10, bitMatrix.getNumOfRows());
+    EXPECT_EQ(10, bitMatrix.getNumOfCols());
 }
 
 TEST(CBitMatrix, SetAndGet)
