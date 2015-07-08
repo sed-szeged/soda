@@ -62,4 +62,42 @@ void CChangesDataManager::dumpCodeElements(const String &filepath)
     }
 }
 
+void CChangesDataManager::dumpChanges(const String &filepath)
+{
+    INFO(getPrintInfo(), "CChangesDataManager::dumpChanges(\"" << filepath << "\")");
+    if (getDataHandler()->getChanges() || getDataHandler()->getSelection()) {
+        ofstream O((filepath + ".csv").c_str());
+
+        CChangeset* changeset = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getChangeset() : getDataHandler()->getChanges();
+        if (getWithNames()) {
+            O << ";" << changeset->getCodeElements().getValue(0);
+            for (IndexType ceidx = 1; ceidx < changeset->getCodeElements().size(); ++ceidx) {
+                O << ";" << changeset->getCodeElements().getValue(ceidx);
+            }
+            O << std::endl;
+        } else {
+            O << ";0";
+            for (IndexType ceidx = 1; ceidx < changeset->getCodeElements().size(); ++ceidx) {
+                O << ";" << ceidx;
+            }
+            O << std::endl;
+        }
+        IntVector revisions = changeset->getRevisions();
+        for (IndexType revId = 0; revId < revisions.size(); ++revId) {
+            O << revisions[revId] << ";";
+
+            O << (changeset->at(revisions[revId]).at(0) ? '1': '0');
+
+            for (IndexType ceidx = 1; ceidx < changeset->getCodeElements().size(); ++ceidx) {
+                O << ";" << (changeset->at(revisions[revId]).at(ceidx) ? '1': '0');
+            }
+            O << std::endl;
+        }
+
+        O.close();
+    } else {
+        WARN("There is no changes data to be dumped.");
+    }
+}
+
 } // namespace soda

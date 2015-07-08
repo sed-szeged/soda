@@ -56,6 +56,12 @@ public:
      * @param filepath  File path.
      */
     void dumpCodeElements(const String &filepath);
+
+    /**
+     * @brief Dumps code element changes for each revision to a specified file.
+     * @param filepath  File path.
+     */
+    void dumpChanges(const String &filepath);
 };
 
 } // namespace soda

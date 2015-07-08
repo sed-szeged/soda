@@ -135,6 +135,11 @@ int processArgs(options_description desc, int ac, char* av[])
             String tmp = vm["dump-changes-code-elements"].as<String>();
             handler->getChangesDataMgr().dumpCodeElements(tmp);
         }
+
+        if (vm.count("dump-changes")) {
+            String tmp = vm["dump-changes"].as<String>();
+            handler->getChangesDataMgr().dumpChanges(tmp);
+        }
     } catch(exception& e) {
         ERRO(e.what());
         return 1;
@@ -164,7 +169,8 @@ int main(int argc, char *argv[])
             ("dump-results-passfail",           value<String>(), "output file")
             ("load-changes,x",                    value<String>(), "input file")
             ("dump-changes-code-elements",      value<String>(), "output file")
-            ("with-names,w", "dump coverage data and results data with names")
+            ("dump-changes",                    value<String>(), "output file")
+            ("with-names,w", "dump coverage data,results data or changeset data with names")
             ("quiet,q", "silent mode")
     ;
 
