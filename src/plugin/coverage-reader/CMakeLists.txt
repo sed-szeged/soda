@@ -1,3 +1,4 @@
 add_subdirectory(one-test-per-file)
 add_subdirectory(gcov)
 add_subdirectory(emma-java)
+add_subdirectory(jacoco-java)

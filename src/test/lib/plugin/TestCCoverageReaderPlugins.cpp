@@ -194,4 +194,84 @@ TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginMethod)
     EXPECT_TRUE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.compiler.compiler (): void"));
 }
 
+TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
+    EXPECT_EQ("jacoco-java", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+/*TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginUnknownPath)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/this_dir_does_not_exists"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_THROW(coverageMatrix = plugin->read(vm), CException);
+}*/
+
+TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginPackage)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/JacocoCoverageSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("granularity", variable_value(String("package"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ(27u, coverageMatrix->getNumOfCodeElements());
+
+    EXPECT_FALSE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/internal"));
+    EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner"));
+}
+
+TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginSrc)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/JacocoCoverageSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("granularity", variable_value(String("src"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ(123u, coverageMatrix->getNumOfCodeElements());
+
+    EXPECT_FALSE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/internal/ArrayComparisonFailure.java"));
+    EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description.java"));
+}
+
+TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginClass)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/JacocoCoverageSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("granularity", variable_value(String("class"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ(182u, coverageMatrix->getNumOfCodeElements());
+
+    EXPECT_FALSE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/internal/ArrayComparisonFailure"));
+    EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description"));
+}
+
+TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginMethod)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/JacocoCoverageSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("granularity", variable_value(String("method"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ(1043u, coverageMatrix->getNumOfCodeElements());
+
+    EXPECT_FALSE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description/createSuiteDescription(Ljava/lang/String;[Ljava/lang/annotation/Annotation;)Lorg/junit/runner/Description;"));
+    EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description/createTestDescription(Ljava/lang/Class;Ljava/lang/String;)Lorg/junit/runner/Description;"));
+}
+
 
