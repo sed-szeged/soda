@@ -68,7 +68,7 @@ void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::
     std::cout<<std::endl<< "TC: "<< numTC << " ; CE: " << numCE << std::endl<< std::endl;
 
 
-    std::cout<<"Row clustering..."<<std::endl;
+    //std::cout<<"Row clustering..."<<std::endl;
     row_cluster_index = clustering( data.getCoverage(), m_hamm_diff_row, _0cluster_limit );
 
 
@@ -83,7 +83,7 @@ void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::
 
 
     // cols clustering
-    std::cout<<"Cols clustering..."<<std::endl;
+    //std::cout<<"Cols clustering..."<<std::endl;
     cols_cluster_index = clustering( coverageTransposeMatrix, m_hamm_diff_cols, _0cluster_limit);
 
 
@@ -99,10 +99,140 @@ void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::
     // set clusterList
     setClusterList(numTC, numCE, clusterList);
 
+
     // clusters dump
     clusterDump(data.getCoverage(), row_cluster_index, testClusterDump, 0);
     clusterDump(data.getCoverage(), cols_cluster_index, codeElementsClusterDump, 1);
 
+
+    // code elements inform.
+    ep_np_ef_nf(data);
+
+
+}
+
+
+// code elements inform.
+void HammingTestSuiteClusterPlugin::ep_np_ef_nf(CSelectionData &data){
+
+    int covSize = data.getCoverage()->getNumOfTestcases();
+    int resSize = data.getResults()->getNumOfTestcases();
+
+    IntVector revisions = data.getResults()->getRevisionNumbers();
+
+
+    // calc. all revision
+    for(IntVector::iterator rev_it = revisions.begin() ; rev_it != revisions.end() ; ++rev_it ){
+
+        // create output file name
+        std::ofstream outEP_NP_EF_NF;
+        std::string dumpPath(codeElementsClusterDump);
+        std::string fileName;
+        std::vector<std::string> strs;
+        boost::split(strs,dumpPath,boost::is_any_of("/"));
+        for(int i = 0 ; i < strs.size()-1;i++)
+            fileName += (strs[i]+"/");
+
+        fileName += "EP-NP-EF-NF-"+getName()+"-"+(boost::lexical_cast<std::string>(m_hamm_diff_row))+"-"+(boost::lexical_cast<std::string>(m_hamm_diff_cols))+"-"+
+                (boost::lexical_cast<std::string>(_0cluster_limit))+"-rev_"+boost::lexical_cast<std::string>(int(*rev_it))+".txt";
+
+
+        outEP_NP_EF_NF.open(fileName.c_str());
+        outEP_NP_EF_NF<<"passedCovered;passedNotCovered;failedCovered;failedNotCovered;"<<
+                        "failedCovered/passedCovered;failedNotCovered/passedNotCovered;F/P;failedCovered/(passedCovered+failedCovered)\n";
+
+
+        // the diff. between coverage and results (test cases)
+        std::set<std::string> covTCSet;
+        std::map<std::string,IndexType> covTCMap;
+        for( int i = 0 ; i < covSize ; i++ ){
+            std::string covTCName = data.getCoverage()->getTestcases().getValue(IndexType(i));
+            covTCSet.insert( covTCName );
+            covTCMap[ covTCName ] = data.getCoverage()->getTestcases().getID( covTCName );
+        }
+
+
+        std::set<std::string> resTCSet;
+        std::map<std::string,IndexType> resTCMap;
+        for( int i = 0 ; i < resSize ; i++ ){
+            std::string resTCName = data.getResults()->getTestcases().getValue(IndexType(i));
+            resTCSet.insert(resTCName);
+            resTCMap[resTCName] = data.getResults()->getTestcases().getID(resTCName);
+        }
+
+
+        // the diff:
+        std::set<std::string> covResDiff;
+        std::set_difference(covTCSet.begin(), covTCSet.end(), resTCSet.begin(), resTCSet.end(), std::inserter(covResDiff, covResDiff.begin()) );
+        //std::cout<<"In cov, out res: "<<covResDiff.size()<<std::endl;
+
+
+        for(std::set<std::string>::iterator it = covResDiff.begin() ; it != covResDiff.end() ; ++it)
+            covTCMap.erase( *it );
+
+
+        // cov. - res. index pairs
+        std::map<IndexType, IndexType> tcMap;
+        for(std::map<std::string,IndexType>::iterator it_res=resTCMap.begin() ; it_res!=resTCMap.end() ; ++it_res){
+            for(std::map<std::string,IndexType>::iterator it_cov=covTCMap.begin() ; it_cov!=covTCMap.end() ; ++it_cov){
+                if( it_cov->first == it_res->first ) tcMap[it_cov->second] = it_res->second;
+            }
+        }
+
+
+        IntVector codeElementIds = data.getCoverage()->getCodeElements().getIDList();
+        IntVector testCaseIds;
+        for(std::map<std::string,IndexType>::iterator it_cov=covTCMap.begin() ; it_cov!=covTCMap.end() ; ++it_cov)
+            testCaseIds.push_back(it_cov->second);
+
+
+        // calculate
+        for (IndexType i = 0; i < codeElementIds.size(); i++) {
+
+            IndexType cid = codeElementIds[i];
+            IndexType failedCovered = 0, passedCovered = 0, failedNotCovered = 0, passedNotCovered = 0;
+
+            for (IndexType j = 0; j < testCaseIds.size(); j++) {
+
+                IndexType tcid = testCaseIds[j];
+                IndexType tcidInResults = tcMap[tcid];
+
+                if ( data.getResults()->getExecutionBitList(*rev_it).at(tcidInResults)) {
+
+                    bool isPassed = data.getResults()->getPassedBitList(*rev_it).at(tcidInResults);
+                    bool isCovered = data.getCoverage()->getBitMatrix().get(tcid, cid);
+
+                    if (isCovered) {
+                        if (isPassed) {
+                            passedCovered++;
+                        } else {
+                            failedCovered++;
+                        }
+                    } else {
+                        if (isPassed) {
+                            passedNotCovered++;
+                        } else {
+                            failedNotCovered++;
+                        }
+                    }
+                }
+            }
+
+            float efPERep = 0.0 , nfPERnp = 0.0 , FPERP = 0.0 , efPERe;
+
+            if( passedCovered > 0 ) efPERep = float(failedCovered) / float(passedCovered);
+
+            if( passedNotCovered > 0 ) nfPERnp = float(failedNotCovered) / float(passedNotCovered);
+
+            if( (passedCovered + passedNotCovered) > 0 ) FPERP = float( failedCovered + failedNotCovered ) / float( passedCovered + passedNotCovered );
+
+            if( (passedCovered + failedCovered) > 0 ) efPERe = float(failedCovered) / float( passedCovered + failedCovered );
+
+            outEP_NP_EF_NF<<passedCovered<<";"<<passedNotCovered<<";"<<failedCovered<<";"<<failedNotCovered<<";"<<
+                         efPERep<<";"<<nfPERnp<<";"<<FPERP<<";"<<efPERe<<"\n";
+
+        }
+    }
 }
 
 
@@ -110,8 +240,6 @@ void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::
 void HammingTestSuiteClusterPlugin::setClusterList(int numTC, int numCE, std::map<std::string, CClusterDefinition>& clusterList){
 
     std::vector<int>::iterator biggest = std::max_element(row_cluster_index.begin(),row_cluster_index.end());
-    std::vector<int>::iterator biggest2 = std::max_element(cols_cluster_index.begin(),cols_cluster_index.end());
-
 
     for(int a= 0 ; a <= *biggest ; a++)
         clusterList[ boost::lexical_cast<std::string>(a) ] = CClusterDefinition();
@@ -121,16 +249,11 @@ void HammingTestSuiteClusterPlugin::setClusterList(int numTC, int numCE, std::ma
     
     for(int i = 0 ; i < numCE ; i++)
         clusterList[ boost::lexical_cast<std::string>( cols_cluster_index[i]) ].addCodeElement(IndexType(i));
-
-    /*
-     * TODO : ha nem egyenlo a ket klaszterszam akkor a parok alapjan hozzaadni a megfelelo elemeket a masikhoz
-     *
-     */
-
 }
 
 
 
+// clustering alg.
 std::vector<int> HammingTestSuiteClusterPlugin::clustering(CCoverageMatrix* data, int diff, int nullcluster){
 
     int size1 = data->getBitMatrix().getNumOfRows();
@@ -211,6 +334,7 @@ void HammingTestSuiteClusterPlugin::matrixTranspose(CSelectionData &data, CCover
 
 
 
+// clusters dump ( -> file )
 void HammingTestSuiteClusterPlugin::clusterDump(CCoverageMatrix* data, std::vector<int> labelVector, std::string outFile, int dimension){
 
     std::vector<int>::iterator biggest = std::max_element( labelVector.begin(), labelVector.end() );
@@ -242,16 +366,22 @@ void HammingTestSuiteClusterPlugin::clusterDump(CCoverageMatrix* data, std::vect
 
 }
 
+
+
+// matrix density calc.
 void HammingTestSuiteClusterPlugin::matrixDensity(CCoverageMatrix* matrix){
 
     int size = matrix->getNumOfTestcases();
     int count = 0;
-    for(int i = 0 ; i < size ; i++){
+    for(int i = 0 ; i < size ; i++)
         count += matrix->getBitMatrix().getRow(IndexType(i)).count();
-    }
+
     std::cout<<"Matrix density: "<<float(count)/float((size*matrix->getNumOfCodeElements()))<<std::endl<<std::endl;
 }
 
+
+
+// histogram calc.
 void HammingTestSuiteClusterPlugin::histogram(CCoverageMatrix* matrix, bool dimension){
 
     std::ofstream outHistogram;
@@ -267,6 +397,7 @@ void HammingTestSuiteClusterPlugin::histogram(CCoverageMatrix* matrix, bool dime
     } else {
         fileName += "histogram_"+getName()+"_rows_";
     }
+
     fileName += (boost::lexical_cast<std::string>(m_hamm_diff_row))+"_"+(boost::lexical_cast<std::string>(m_hamm_diff_cols))+"_"+
             (boost::lexical_cast<std::string>(_0cluster_limit))+".csv";
 

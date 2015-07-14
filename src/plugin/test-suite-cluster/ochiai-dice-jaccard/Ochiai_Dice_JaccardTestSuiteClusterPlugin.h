@@ -74,6 +74,8 @@ public:
 
     void histogram(CCoverageMatrix* matrix, bool dimension);
 
+    void ep_np_ef_nf(CSelectionData &data);
+
 
 public:
     std::vector< std::vector<float> > floatRowVectors;

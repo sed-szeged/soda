@@ -59,6 +59,8 @@ public:
 
     void histogram(CCoverageMatrix* matrix, bool dimension);
 
+    void ep_np_ef_nf(CSelectionData &data);
+
 
 private:
     int m_hamm_diff_row;    // row tolerance (%)

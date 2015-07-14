@@ -86,6 +86,7 @@ private:
     int cols_clusters;
     std::string resultsFile;
 
+
 };
 
 } /* namespace soda */

@@ -76,7 +76,7 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
 
 
     // TestCase X TestCase matrix calc.
-    std::cout<<"... on rows..."<<std::endl;
+    //std::cout<<"... on rows..."<<std::endl;
     clusters(data.getCoverage(), algorithm_index , false);
 
 
@@ -88,7 +88,7 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
 
 
     // CodeElements X CodeElements matrix calc.
-    std::cout<<"... on cols..."<<std::endl;
+    //std::cout<<"... on cols..."<<std::endl;
     clusters(coverageTransposeMatrix, algorithm_index , true);
 
 
@@ -102,26 +102,153 @@ void Ochiai_Dice_JaccardTestSuiteClusterPlugin::execute(CSelectionData &data, st
 
 
     // k-means alg. on (row) x (row) matrix
-    std::cout<<std::endl<<"k-means running on row..."<<std::endl;
+    //std::cout<<std::endl<<"k-means running on row..."<<std::endl;
     kMeans(data.getCoverage(),false);
 
 
     // k-means alg. on (cols) x (cols) matrix
-    std::cout<<"... and on cols"<<std::endl;
+    //std::cout<<"... and on cols"<<std::endl;
     kMeans(coverageTransposeMatrix,true);
 
 
 
-    std::cout<<std::endl<<"Set clusterlist"<<std::endl;
+    //std::cout<<std::endl<<"Set clusterlist"<<std::endl;
     setClusterList( numTC, numCE, clusterList);
+
 
     // clusters dump
     clusterDump(data.getCoverage(), RowIndexVector, testClusterDump, false );
     clusterDump(data.getCoverage(), ColsIndexVector, codeElementsClusterDump, true);
 
+    // code elements inform.
+    ep_np_ef_nf(data);
+
 }
 
 
+// code elements inform.
+void Ochiai_Dice_JaccardTestSuiteClusterPlugin::ep_np_ef_nf(CSelectionData &data){
+
+    int covSize = data.getCoverage()->getNumOfTestcases();
+    int resSize = data.getResults()->getNumOfTestcases();
+
+
+    IntVector revisions = data.getResults()->getRevisionNumbers();
+
+    // calc. all revision
+    for(IntVector::iterator rev_it = revisions.begin() ; rev_it != revisions.end() ; ++rev_it ){
+
+        // create output file name
+        std::ofstream outEP_NP_EF_NF;
+        std::string dumpPath(codeElementsClusterDump);
+        std::string fileName;
+        std::vector<std::string> strs;
+        boost::split(strs,dumpPath,boost::is_any_of("/"));
+        for(int i = 0 ; i < strs.size()-1;i++)
+            fileName += (strs[i]+"/");
+
+        fileName += "EP-NP-EF-NF-"+getName()+"-"+(boost::lexical_cast<std::string>(algorithm_index))+"-"+(boost::lexical_cast<std::string>(cluster_number))+"-"+
+                (boost::lexical_cast<std::string>(_0cluster_limit))+"-rev_"+boost::lexical_cast<std::string>(int(*rev_it))+".txt";
+
+
+
+        outEP_NP_EF_NF.open(fileName.c_str());
+        outEP_NP_EF_NF<<"passedCovered;passedNotCovered;failedCovered;failedNotCovered;"<<
+                        "failedCovered/passedCovered;failedNotCovered/passedNotCovered;F/P;failedCovered/(passedCovered+failedCovered)\n";
+
+
+        // the diff. between coverage and results (test cases)
+        std::set<std::string> covTCSet;
+        std::map<std::string,IndexType> covTCMap;
+        for( int i = 0 ; i < covSize ; i++ ){
+            std::string covTCName = data.getCoverage()->getTestcases().getValue(IndexType(i));
+            covTCSet.insert( covTCName );
+            covTCMap[ covTCName ] = data.getCoverage()->getTestcases().getID( covTCName );
+        }
+
+
+        std::set<std::string> resTCSet;
+        std::map<std::string,IndexType> resTCMap;
+        for( int i = 0 ; i < resSize ; i++ ){
+            std::string resTCName = data.getResults()->getTestcases().getValue(IndexType(i));
+            resTCSet.insert(resTCName);
+            resTCMap[resTCName] = data.getResults()->getTestcases().getID(resTCName);
+        }
+
+
+        // the diff:
+        std::set<std::string> covResDiff;
+        std::set_difference(covTCSet.begin(), covTCSet.end(), resTCSet.begin(), resTCSet.end(), std::inserter(covResDiff, covResDiff.begin()) );
+        //std::cout<<"In cov, out res: "<<covResDiff.size()<<std::endl;
+
+
+        for(std::set<std::string>::iterator it = covResDiff.begin() ; it != covResDiff.end() ; ++it)
+            covTCMap.erase( *it );
+
+
+        // cov. - res. index pairs
+        std::map<IndexType, IndexType> tcMap;
+        for(std::map<std::string,IndexType>::iterator it_res=resTCMap.begin() ; it_res!=resTCMap.end() ; ++it_res){
+            for(std::map<std::string,IndexType>::iterator it_cov=covTCMap.begin() ; it_cov!=covTCMap.end() ; ++it_cov){
+                if( it_cov->first==it_res->first ) tcMap[it_cov->second] = it_res->second;
+            }
+        }
+
+
+        IntVector codeElementIds = data.getCoverage()->getCodeElements().getIDList();
+        IntVector testCaseIds;
+        for(std::map<std::string,IndexType>::iterator it_cov=covTCMap.begin() ; it_cov!=covTCMap.end() ; ++it_cov)
+            testCaseIds.push_back(it_cov->second);
+
+
+        // calculate
+        for (IndexType i = 0; i < codeElementIds.size(); i++) {
+
+            IndexType cid = codeElementIds[i];
+            IndexType failedCovered = 0, passedCovered = 0, failedNotCovered = 0, passedNotCovered = 0;
+
+            for (IndexType j = 0; j < testCaseIds.size(); j++) {
+
+                IndexType tcid = testCaseIds[j];
+                IndexType tcidInResults = tcMap[tcid];
+
+                if ( data.getResults()->getExecutionBitList(*rev_it).at(tcidInResults)) {
+
+                    bool isPassed = data.getResults()->getPassedBitList(*rev_it).at(tcidInResults);
+                    bool isCovered = data.getCoverage()->getBitMatrix().get(tcid, cid);
+
+                    if (isCovered) {
+                        if (isPassed) {
+                            passedCovered++;
+                        } else {
+                            failedCovered++;
+                        }
+                    } else {
+                        if (isPassed) {
+                            passedNotCovered++;
+                        } else {
+                            failedNotCovered++;
+                        }
+                    }
+                }
+            }
+
+            float efPERep = 0.0 , nfPERnp = 0.0 , FPERP = 0.0 , efPERe;
+
+            if( passedCovered > 0 ) efPERep = float(failedCovered) / float(passedCovered);
+
+            if( passedNotCovered > 0 ) nfPERnp = float(failedNotCovered) / float(passedNotCovered);
+
+            if( (passedCovered + passedNotCovered) > 0 ) FPERP = float( failedCovered + failedNotCovered ) / float( passedCovered + passedNotCovered );
+
+            if( (passedCovered + failedCovered) > 0 ) efPERe = float(failedCovered) / float( passedCovered + failedCovered );
+
+            outEP_NP_EF_NF<<passedCovered<<";"<<passedNotCovered<<";"<<failedCovered<<";"<<failedNotCovered<<";"<<
+                         efPERep<<";"<<nfPERnp<<";"<<FPERP<<";"<<efPERe<<"\n";
+
+        }
+    }
+}
 
 
 float Ochiai_Dice_JaccardTestSuiteClusterPlugin::results_vs_limit( float results, float limit ){
