@@ -146,12 +146,12 @@ void RandomReductionPlugin::randomReduction(std::ofstream &outStream)
     // print final test suite:
     outStream << "Fixed iteration reduction" << std::endl;
     outStream << "Total " << reducedSize << " test cases in reduced test suite." << std::endl;
-    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize) / fullSize << "\%" << std::endl;
+    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize) / fullSize << "%" << std::endl;
 
     reducedSize = Trand.size();
     outStream << "Fixed size reduction" << std::endl;
     outStream << "Total " << reducedSize << " test cases in reduced test suite." << std::endl;
-    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize) / fullSize << "\%" << std::endl;
+    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize) / fullSize << "%" << std::endl;
 
     std::cerr << "done." << std::endl;
 }

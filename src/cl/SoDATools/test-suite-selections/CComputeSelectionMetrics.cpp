@@ -94,7 +94,7 @@ void CComputeSelectionMetrics::runMeasurementForOneSelectionSize(RevNumType rev,
         IndexType tcid;
         try {
             tcid = m_data->translateTestcaseIdFromCoverageToResults(*tcit);
-        } catch(CException& e) {
+        } catch(CException& ) {
             e_translation++;
             continue;
         }

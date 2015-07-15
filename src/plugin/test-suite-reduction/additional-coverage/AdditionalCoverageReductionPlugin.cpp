@@ -73,8 +73,6 @@ void AdditionalCoverageReductionPlugin::additionalCoverageReduction(std::ofstrea
     std::vector<qelement>* priorityQueue = new std::vector<qelement>();
     std::list<IndexType>*  notCoveredCEIDs = new std::list<IndexType>();
 
-    CBitList* actCoverage = new CBitList(m_nrOfCodeElements);
-
     for (IndexType tcid = 0; tcid < m_nrOfTestCases; tcid++) {
             qelement d;
             d.testcaseId = tcid;
@@ -126,7 +124,6 @@ void AdditionalCoverageReductionPlugin::additionalCoverageReduction(std::ofstrea
             if (coverageBitMatrix[nxt.testcaseId][*ceit]) {
                 register IndexType ceid = *ceit;
                 notCoveredCEIDs->erase(ceit++);
-                actCoverage->set(ceid, true);
                 for (std::vector<qelement>::iterator qi = priorityQueue->begin(); qi != priorityQueue->end(); ++qi) {
                     if (coverageBitMatrix[qi->testcaseId][ceid]) {
                         qi->priorityValue--;
@@ -149,7 +146,6 @@ void AdditionalCoverageReductionPlugin::additionalCoverageReduction(std::ofstrea
 
     std::cerr << "done." << std::endl;
 
-    delete actCoverage;
     delete priorityQueue;
     delete notCoveredCEIDs;
 }

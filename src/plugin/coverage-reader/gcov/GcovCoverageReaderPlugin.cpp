@@ -173,7 +173,7 @@ void GcovCoverageReaderPlugin::readCoverageDataFromFile(fs::path p)
 
         std::stringstream codeElementName;
         codeElementName << sourcePath << ":" << lineNumber;
-        m_coverage->addOrSetRelation(m_currentTestcase, codeElementName.str(), isdigit(rowData[0][0]));
+        m_coverage->addOrSetRelation(m_currentTestcase, codeElementName.str(), isdigit(rowData[0][0]) != 0);
     }
     in.close();
 }

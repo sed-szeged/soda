@@ -216,7 +216,7 @@ void processJsonFiles(std::string path)
             for (StringVector::const_iterator it = faultLocalizationTechniques.begin(); it != faultLocalizationTechniques.end(); ++it) {
                 try {
                     kernel.getFaultLocalizationTechniquePluginManager().getPlugin(*it);
-                } catch (std::out_of_range &e) {
+                } catch (std::out_of_range &) {
                     std::cerr << "[ERROR] Invalid fault localization technique name(" << *it
                               << ") in configuration file: " << path << "." << std::endl;
                     return;

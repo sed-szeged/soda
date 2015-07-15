@@ -83,7 +83,7 @@ CodeElementReports& CBugset::at(const String& revisionNumber) const
 
 bool CBugset::exists(const String& revisionNumber) const
 {
-    return m_reports->count(m_revisions->getID(revisionNumber));
+    return m_reports->count(m_revisions->getID(revisionNumber)) != 0;
 }
 
 StringVector CBugset::getRevisions(const String& codeElementName) const
@@ -99,7 +99,7 @@ StringVector CBugset::getRevisions(const String& codeElementName) const
 
 bool CBugset::containsData(const String& revisionNumber, const String& codeElementName) const
 {
-    return (*m_reports)[m_revisions->getID(revisionNumber)].count((*m_codeElements)[codeElementName]);
+    return (*m_reports)[m_revisions->getID(revisionNumber)].count((*m_codeElements)[codeElementName]) != 0;
 }
 
 Report const& CBugset::getReportInformations(String const& revisionNumber, String const& codeElementName) const
