@@ -32,6 +32,7 @@ CBugset::CBugset() :
     m_codeElements(new CIDManager()),
     m_revisions(new CIDManager()),
     m_reports(new ReportMap()),
+    m_reportDatas(new ReportDatas()),
     m_createCodeElements(true),
     m_createReports(true)
 { }
@@ -40,14 +41,16 @@ CBugset::CBugset(IIDManager* codeElements) :
     m_codeElements(codeElements),
     m_revisions(new CIDManager()),
     m_reports(new ReportMap()),
+    m_reportDatas(new ReportDatas()),
     m_createCodeElements(false),
     m_createReports(true)
 { }
 
-CBugset::CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* reports) :
+CBugset::CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* reports, ReportDatas* data) :
     m_codeElements(codeElements),
     m_revisions(revisions),
     m_reports(reports),
+    m_reportDatas(data),
     m_createCodeElements(false),
     m_createReports(false)
 { }
@@ -59,6 +62,8 @@ CBugset::~CBugset()
         m_reports = NULL;
         delete m_revisions;
         m_revisions = NULL;
+        delete m_reportDatas;
+        m_reportDatas = NULL;
     }
     if(m_createCodeElements) {
         delete m_codeElements;
@@ -97,9 +102,9 @@ bool CBugset::containsData(const String& revisionNumber, const String& codeEleme
     return (*m_reports)[m_revisions->getID(revisionNumber)].count((*m_codeElements)[codeElementName]);
 }
 
-ReportData const& CBugset::getReportInformations(String const& revisionNumber, String const& codeElementName) const
+Report const& CBugset::getReportInformations(String const& revisionNumber, String const& codeElementName) const
 {
-    return (*m_reports)[m_revisions->getID(revisionNumber)].at((*m_codeElements)[codeElementName]);
+    return (*m_reportDatas)[(*m_reports)[m_revisions->getID(revisionNumber)].at((*m_codeElements)[codeElementName])];
 }
 
 StringVector CBugset::getCodeElementNames(const String& revisionNumber) const
@@ -118,7 +123,7 @@ const IIDManager& CBugset::getCodeElements() const
     return *m_codeElements;
 }
 
-void CBugset::addReported(const String& revisionNumber, const String& codeElementName, ReportData& data)
+void CBugset::addReported(const String& revisionNumber, const String& codeElementName, RevNumType const reportId, Report& data)
 {
     if (!m_revisions->containsValue(revisionNumber)) {
         addRevision(revisionNumber);
@@ -128,12 +133,16 @@ void CBugset::addReported(const String& revisionNumber, const String& codeElemen
         addCodeElement(codeElementName);
     }
 
-    addReported(m_revisions->getID(revisionNumber), m_codeElements->getID(codeElementName), data);
+    if (!m_reportDatas->count(reportId)) {
+        (*m_reportDatas)[reportId] = data;
+    }
+
+    addReported(m_revisions->getID(revisionNumber), m_codeElements->getID(codeElementName), reportId);
 }
 
-void CBugset::addReported(RevNumType const revisionNumber, RevNumType const codeElementName, ReportData& data)
+void CBugset::addReported(RevNumType const revisionNumber, RevNumType const codeElementName, RevNumType const reportId)
 {
-    (*m_reports)[revisionNumber].insert(std::pair<RevNumType, ReportData>(codeElementName, data));
+    (*m_reports)[revisionNumber].insert(std::make_pair(codeElementName, reportId));
 }
 
 void CBugset::addRevision(const String& revisionNumber)
@@ -269,28 +278,39 @@ void CBugset::saveRevisionTable(io::CBinaryIO* out, const io::CSoDAio::ChunkID c
 
     out->writeUInt4(chunk);
     out->writeULongLong8(length);
-    out->writeUInt4(numberOfReports);
+    out->writeUInt4(m_reportDatas->size()); // number of reports
+    for (std::map<RevNumType, Report>::const_iterator it = m_reportDatas->begin(); it != m_reportDatas->end(); ++it) {
+        out->writeUInt4(it->first); // id
+        out->writeULongLong8(it->second.fixTime); // fix time
+        out->writeULongLong8(it->second.reportTime); // report time
+    }
+    out->writeUInt4(numberOfReports); // (revision, code element) -> report id
     for (ReportMap::const_iterator it = m_reports->begin(); it != m_reports->end(); ++it) {
         for (CodeElementReports::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
             out->writeUInt4(it->first); // revid
             out->writeUInt4(it2->first); // ceid
-            out->writeULongLong8(it2->second.fixTime); // fix time
-            out->writeULongLong8(it2->second.reportTime); // report time
+            out->writeUInt4(it2->second); // report id
         }
     }
 }
 
 void CBugset::loadRevisionTable(io::CBinaryIO* in)
 {
-    RevNumType numberOfReports = in->readUInt4();
-    for(RevNumType i = 0; i< numberOfReports; i++) {
-        RevNumType revId = in->readUInt4();
-        RevNumType ceId = in->readUInt4();
-
-        ReportData time;
+    RevNumType numberOfReportDatas = in->readUInt4();
+    for (RevNumType i = 0; i < numberOfReportDatas; ++i) {
+        RevNumType reportId = in->readUInt4();
+        Report time;
         time.fixTime = in->readULongLong8();
         time.reportTime = in->readULongLong8();
-        addReported(revId, ceId, time);
+        (*m_reportDatas)[reportId] = time;
+    }
+
+    RevNumType numberOfReports = in->readUInt4();
+    for (RevNumType i = 0; i< numberOfReports; i++) {
+        RevNumType revId = in->readUInt4();
+        RevNumType ceId = in->readUInt4();
+        RevNumType reportId = in->readUInt4();
+        (*m_reports)[revId].insert(std::make_pair(ceId, reportId));
     }
 }
 

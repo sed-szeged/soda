@@ -46,11 +46,13 @@ int main(int argc, char *argv[])
             ("coverage-data,c", value<String>(), "input file containing coverage matrix")
             ("changes-data,x", value<String>(), "input file containing change matrix")
             ("results-data,r", value<String>(), "input file containing test execution results")
+            ("bugs-data,b", value<String>(), "input file containing bug reports")
             ("output-dir,o", value<String>(), "output dir, if specified .dat files will be generated")
             ("testcase-coverage", "computes only the test case coverage related statistics")
             ("function-coverage", "computes only the function related statistics")
             ("changes", "computes ontly the change related statistics")
             ("fails", "computes only the failed test case related statistics")
+            ("bugs", "computes only the bug report related statistics")
             ("coverage-result-summary", "computes coverage and result summary")
             ("globalize,g", "globalize selection data")
             ("filter-to-coverage,f", "filter data to coverage")
@@ -98,14 +100,17 @@ int processArgs(int ac, char *av[])
             mgr.setTestMask(tmFails);
         if (vm.count("coverage-result-summary"))
             mgr.setTestMask(tmCoverageResultSummary);
+        if (vm.count("bugs"))
+            mgr.setTestMask(tmBugs);
 
         if (mgr.getTestMask() == tmNone) {
-            mgr.setTestMask(tmTestcaseCoverage | tmFunctionCoverage | tmChanges | tmFails | tmCoverageResultSummary);
+            mgr.setTestMask(tmTestcaseCoverage | tmFunctionCoverage | tmChanges | tmFails | tmCoverageResultSummary | tmBugs);
         }
 
         bool loadCoverage     = false;
         bool loadChanges      = false;
         bool loadResults      = false;
+        bool loadBugs         = false;
         bool globalize        = false;
         bool filterToCoverage = false;
 
@@ -157,6 +162,11 @@ int processArgs(int ac, char *av[])
             return 1;
         }
 
+        if (loadBugs && (!boost::filesystem::exists(vm["bugs-data"].as<String>()))) {
+            cout << "[ERROR] Invalid bugs-data file path!" << endl;
+            return 1;
+        }
+
         // Load data.
         if (loadCoverage) {
             mgr.loadCoverageData(vm["coverage-data"].as<String>());
@@ -166,6 +176,9 @@ int processArgs(int ac, char *av[])
         }
         if (loadResults) {
             mgr.loadResultsData(vm["results-data"].as<String>());
+        }
+        if (loadBugs) {
+            mgr.loadBugReportData(vm["bugs-data"].as<String>());
         }
         if (globalize) {
             mgr.getSelectionData()->globalize();

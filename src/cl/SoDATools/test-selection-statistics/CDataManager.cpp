@@ -55,6 +55,11 @@ void CDataManager::loadChangesetData(String path)
     m_selectionData->loadChangeset(path);
 }
 
+void CDataManager::loadBugReportData(String path)
+{
+    m_selectionData->loadBugs(path);
+}
+
 void CDataManager::calcStatistics()
 {
     if(!(boost::filesystem::exists(m_outputDir))) {
@@ -80,6 +85,15 @@ void CDataManager::calcStatistics()
         rapidjson::Document res;
         res.SetObject();
         stats.calcCovResultsSummary(res);
+        rapidjson::FileStream f(stdout);
+        rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
+        res.Accept(writer);
+    }
+
+    if (m_testMask & tmBugs) {
+        rapidjson::Document res;
+        res.SetObject();
+
         rapidjson::FileStream f(stdout);
         rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
         res.Accept(writer);

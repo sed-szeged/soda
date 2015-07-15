@@ -33,7 +33,8 @@ enum TestMask
     tmFunctionCoverage = 0x02,
     tmChanges = 0x04,
     tmFails = 0x08,
-    tmCoverageResultSummary = 0x10
+    tmCoverageResultSummary = 0x10,
+    tmBugs = 0x20
 };
 
 /**
@@ -70,6 +71,12 @@ public:
      * @param path Path to changeset data.
      */
     void loadChangesetData(String path);
+
+    /**
+    * @brief Loads bug report data from the specified path.
+    * @param path Path to bug data.
+    */
+    void loadBugReportData(String path);
 
     /**
      * @brief Calculates selection statistics according to test mask.
