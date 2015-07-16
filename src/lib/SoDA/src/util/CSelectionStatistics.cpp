@@ -21,6 +21,7 @@
 
 #include "util/CSelectionStatistics.h"
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -174,6 +175,166 @@ void CSelectionStatistics::calcCovResultsSummary(rapidjson::Document &doc)
     doc.AddMember("executed_histogram", exec, doc.GetAllocator());
 
     (cerr << " done" << endl).flush();
+}
+
+void CSelectionStatistics::calcBugRelatedStatistics(rapidjson::Document &doc)
+{
+    RevNumType nrOfClosedReports = m_selectionData->getBugs()->getReports().size();
+    doc.AddMember("number_of_closed_reports", nrOfClosedReports, doc.GetAllocator());
+    calcBugStatisticsForAllBugs(doc);
+    calcBugStatisticsForAllCEs(doc);
+}
+
+void CSelectionStatistics::calcBugStatisticsForAllBugs(rapidjson::Document &doc)
+{
+    struct BugStatistic {
+        std::set<RevNumType> nrOfFixes;
+        std::set<RevNumType> nrOfAffectedCEs;
+        time_t fixTime;
+    };
+    std::map<RevNumType, BugStatistic> bugStats;
+    ReportDataMap const& reportDatas = m_selectionData->getBugs()->getReports();
+    for (ReportDataMap::const_iterator it = reportDatas.begin(); it != reportDatas.end(); ++it) {
+        bugStats[it->first] = BugStatistic();
+        bugStats[it->first].fixTime = it->second.fixTime - it->second.reportTime;
+    }
+
+    ReportMap const& reportMap = m_selectionData->getBugs()->getReportMap();
+    // revision, <code element, report id>
+    for (ReportMap::const_iterator it = reportMap.begin(); it != reportMap.end(); ++it) {
+        // code element, report id
+        for (CodeElementReports::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+            bugStats[it2->second].nrOfAffectedCEs.insert(it2->first);
+            bugStats[it2->second].nrOfFixes.insert(it->first);
+        }
+    }
+
+    rapidjson::Value allBugs(rapidjson::kArrayType);
+    std::vector<RevNumType> fixesVec;
+    RevNumType sumFixes = 0;
+    std::vector<RevNumType> affectedCEVec;
+    RevNumType sumAffectedCE = 0;
+
+    for (std::map<RevNumType, BugStatistic>::const_iterator it = bugStats.begin(); it != bugStats.end(); ++it) {
+        // collecting data for statistics
+        sumFixes += it->second.nrOfFixes.size();
+        fixesVec.push_back(it->second.nrOfFixes.size());
+        sumAffectedCE += it->second.nrOfAffectedCEs.size();
+        affectedCEVec.push_back(it->second.nrOfAffectedCEs.size());
+
+        // creates json array for all reports
+        rapidjson::Value bugStat(rapidjson::kObjectType);
+        bugStat.AddMember("report_id", it->first, doc.GetAllocator());
+        bugStat.AddMember("number_of_fixes", it->second.nrOfFixes.size(), doc.GetAllocator());
+        bugStat.AddMember("number_of_affected_ce", it->second.nrOfAffectedCEs.size(), doc.GetAllocator());
+        bugStat.AddMember("fix_time", it->second.fixTime, doc.GetAllocator());
+        allBugs.PushBack(bugStat, doc.GetAllocator());
+    }
+    doc.AddMember("per_bug_statistics", allBugs, doc.GetAllocator());
+
+    rapidjson::Value bugStatistics(rapidjson::kObjectType);
+    {
+        // sorts the numbers for easier statistics calculations
+        // number of fixes statistics
+        std::sort(fixesVec.begin(), fixesVec.end());
+        rapidjson::Value numFixesStat(rapidjson::kObjectType);
+        numFixesStat.AddMember("min", fixesVec.front(), doc.GetAllocator());
+        numFixesStat.AddMember("max", fixesVec.back(), doc.GetAllocator());
+        numFixesStat.AddMember("avg", (float)sumFixes / fixesVec.size(), doc.GetAllocator());
+        if (fixesVec.size() % 2 == 0) { // average of the two middle number
+            RevNumType nthElem = fixesVec.size() / 2;
+            float avg = (fixesVec[nthElem] + fixesVec[nthElem + 1]) / 2;
+            numFixesStat.AddMember("med", avg, doc.GetAllocator());
+        }
+        else { // one middle
+            numFixesStat.AddMember("med", fixesVec[std::ceil(fixesVec.size() / 2)], doc.GetAllocator());
+        }
+        bugStatistics.AddMember("number_of_fixes", numFixesStat, doc.GetAllocator());
+    }
+
+    {
+        // affected code elements statistics
+        std::sort(affectedCEVec.begin(), affectedCEVec.end());
+        rapidjson::Value numAffectedCEStat(rapidjson::kObjectType);
+        numAffectedCEStat.AddMember("min", affectedCEVec.front(), doc.GetAllocator());
+        numAffectedCEStat.AddMember("max", affectedCEVec.back(), doc.GetAllocator());
+        numAffectedCEStat.AddMember("avg", (float)sumAffectedCE / affectedCEVec.size(), doc.GetAllocator());
+        if (affectedCEVec.size() % 2 == 0) { // average of the two middle number
+            RevNumType nthElem = affectedCEVec.size() / 2;
+            float avg = (float)(affectedCEVec[nthElem] + affectedCEVec[nthElem + 1]) / 2;
+            numAffectedCEStat.AddMember("med", avg, doc.GetAllocator());
+        }
+        else { // one middle
+            numAffectedCEStat.AddMember("med", affectedCEVec[std::ceil((float)affectedCEVec.size() / 2)], doc.GetAllocator());
+        }
+        bugStatistics.AddMember("number_of_affected_ce", numAffectedCEStat, doc.GetAllocator());
+    }
+    doc.AddMember("bug_statistics", bugStatistics, doc.GetAllocator());
+
+}
+
+void CSelectionStatistics::calcBugStatisticsForAllCEs(rapidjson::Document &doc)
+{
+    struct CEStatistic {
+        std::set<RevNumType> nrOfFixes;
+        std::set<RevNumType> nrOfAffectedBugs;
+    };
+
+    std::map<RevNumType, CEStatistic> ceStats;
+
+    ReportMap const& reportMap = m_selectionData->getBugs()->getReportMap();
+    // revision, <code element, report id>
+    for (ReportMap::const_iterator it = reportMap.begin(); it != reportMap.end(); ++it) {
+        // code element, report id
+        for (CodeElementReports::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+            if (!ceStats.count(it2->first)) {
+                ceStats[it2->first] = CEStatistic();
+            }
+            ceStats[it2->first].nrOfFixes.insert(it->first);
+            ceStats[it2->first].nrOfAffectedBugs.insert(it2->second);
+        }
+    }
+
+    std::vector<RevNumType> fixesVec;
+    RevNumType sumFixes = 0;
+    rapidjson::Value allCEs(rapidjson::kArrayType);
+    for (std::map<RevNumType, CEStatistic>::const_iterator it = ceStats.begin(); it != ceStats.end(); ++it) {
+        // collecting metadata
+        fixesVec.push_back(it->second.nrOfFixes.size());
+        sumFixes += it->second.nrOfFixes.size();
+
+        // creating json array for all code elements
+        rapidjson::Value ceStat(rapidjson::kObjectType);
+        rapidjson::Value val(rapidjson::kStringType);
+        val.SetString(m_selectionData->getBugs()->getCodeElements().getValue(it->first).c_str(), doc.GetAllocator());
+        ceStat.AddMember("ce_name", val, doc.GetAllocator());
+        ceStat.AddMember("number_of_fixes", it->second.nrOfFixes.size(), doc.GetAllocator());
+        ceStat.AddMember("number_of_affected_reports", it->second.nrOfAffectedBugs.size(), doc.GetAllocator());
+        allCEs.PushBack(ceStat, doc.GetAllocator());
+    }
+    doc.AddMember("per_ce_statistics", allCEs, doc.GetAllocator());
+
+    rapidjson::Value ceStatistics(rapidjson::kObjectType);
+    {
+        rapidjson::Value numberOfFixesStat(rapidjson::kObjectType);
+        // affected code elements statistics
+        std::sort(fixesVec.begin(), fixesVec.end());
+        rapidjson::Value numAffectedCEStat(rapidjson::kObjectType);
+        numberOfFixesStat.AddMember("min", fixesVec.front(), doc.GetAllocator());
+        numberOfFixesStat.AddMember("max", fixesVec.back(), doc.GetAllocator());
+        numberOfFixesStat.AddMember("avg", (float)sumFixes / fixesVec.size(), doc.GetAllocator());
+        if (fixesVec.size() % 2 == 0) { // average of the two middle number
+            RevNumType nthElem = fixesVec.size() / 2;
+            float avg = (float)(fixesVec[nthElem] + fixesVec[nthElem + 1]) / 2;
+            numberOfFixesStat.AddMember("med", avg, doc.GetAllocator());
+        }
+        else { // one middle
+            numberOfFixesStat.AddMember("med", fixesVec[std::ceil((float)fixesVec.size() / 2)], doc.GetAllocator());
+        }
+        ceStatistics.AddMember("number_of_fixes", numberOfFixesStat, doc.GetAllocator());
+    }
+    ceStatistics.AddMember("number_of_faulty_ces", ceStats.size(), doc.GetAllocator());
+    doc.AddMember("ce_statistics", ceStatistics, doc.GetAllocator());
 }
 
 void CSelectionStatistics::toJson(IdxIdxMap &data, rapidjson::Value &val, rapidjson::Document &root)

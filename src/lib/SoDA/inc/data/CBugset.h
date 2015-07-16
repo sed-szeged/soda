@@ -36,7 +36,7 @@ struct Report {
 // code element id, bug id
 typedef std::map<RevNumType, RevNumType> CodeElementReports;
 typedef std::map<RevNumType, CodeElementReports> ReportMap;
-typedef std::map<RevNumType, Report> ReportDatas;
+typedef std::map<RevNumType, Report> ReportDataMap;
 
 /**
 * @brief The CBugset class stores which code elements were reported with an issue in multiple revisions.
@@ -60,7 +60,7 @@ public:
     * @param codeElements  Specified code elements.
     * @param changes  Specified change set.
     */
-    CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* changes, ReportDatas* data);
+    CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* changes, ReportDataMap* data);
 
     /**
     * @brief Destroys a CBugset object.
@@ -104,12 +104,17 @@ public:
     */
     Report const& getReportInformations(String const& revisionNumber, String const& codeElementName) const;
 
-
     /**
     * @brief Returns the stored reports.
     * @return Map which stores report id and report data.
     */
-    ReportDatas const& getReports() const;
+    ReportDataMap const& getReports() const;
+
+    /**
+    * @brief Returns a map which stores revision, code element and report data ids.
+    * @return Map which stores revisions, code elements and report id.
+    */
+    ReportMap const& getReportMap() const;
 
     /**
     * @brief Returns the code elements of a specified revision.
@@ -273,7 +278,7 @@ private:
     /**
     * @brief Stores bug report ids and report datas.
     */
-    ReportDatas* m_reportDatas;
+    ReportDataMap* m_reportDatas;
 
     /**
     * @brief Stores reported code elements groupped by revision and bug id.

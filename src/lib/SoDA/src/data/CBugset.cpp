@@ -32,7 +32,7 @@ CBugset::CBugset() :
     m_codeElements(new CIDManager()),
     m_revisions(new CIDManager()),
     m_reports(new ReportMap()),
-    m_reportDatas(new ReportDatas()),
+    m_reportDatas(new ReportDataMap()),
     m_createCodeElements(true),
     m_createReports(true)
 { }
@@ -41,12 +41,12 @@ CBugset::CBugset(IIDManager* codeElements) :
     m_codeElements(codeElements),
     m_revisions(new CIDManager()),
     m_reports(new ReportMap()),
-    m_reportDatas(new ReportDatas()),
+    m_reportDatas(new ReportDataMap()),
     m_createCodeElements(false),
     m_createReports(true)
 { }
 
-CBugset::CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* reports, ReportDatas* data) :
+CBugset::CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* reports, ReportDataMap* data) :
     m_codeElements(codeElements),
     m_revisions(revisions),
     m_reports(reports),
@@ -105,6 +105,16 @@ bool CBugset::containsData(const String& revisionNumber, const String& codeEleme
 Report const& CBugset::getReportInformations(String const& revisionNumber, String const& codeElementName) const
 {
     return (*m_reportDatas)[(*m_reports)[m_revisions->getID(revisionNumber)].at((*m_codeElements)[codeElementName])];
+}
+
+ReportDataMap const& CBugset::getReports() const
+{
+    return *m_reportDatas;
+}
+
+ReportMap const& CBugset::getReportMap() const
+{
+    return *m_reports;
 }
 
 StringVector CBugset::getCodeElementNames(const String& revisionNumber) const

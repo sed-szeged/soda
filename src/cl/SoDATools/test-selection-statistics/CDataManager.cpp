@@ -67,13 +67,21 @@ void CDataManager::calcStatistics()
     }
 
     CSelectionStatistics stats = CSelectionStatistics(m_selectionData);
+    FILE* file = stdout;
     if (m_testMask & (tmTestcaseCoverage | tmFunctionCoverage)) {
+        if (!m_outputDir.empty()) {
+            String path = m_outputDir + "/covRelatedStat.json";
+            file = fopen(path.c_str(), "w");
+        }
         rapidjson::Document res;
         res.SetObject();
         stats.calcCoverageRelatedStatistics(res);
-        rapidjson::FileStream f(stdout);
+        rapidjson::FileStream f(file);
         rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
         res.Accept(writer);
+        if (!m_outputDir.empty()) {
+            fclose(file);
+        }
     }
     /*if (m_testMask & tmFails) {
         stats.calcFailStatistics();
@@ -82,21 +90,35 @@ void CDataManager::calcStatistics()
         stats.calcChangeRelatedStatistics();
     }*/
     if (m_testMask & tmCoverageResultSummary) {
+        String path = m_outputDir + "/covResultsSummary.json";
+        if (!m_outputDir.empty()) {
+            file = fopen(path.c_str(), "w");
+        }
         rapidjson::Document res;
         res.SetObject();
         stats.calcCovResultsSummary(res);
-        rapidjson::FileStream f(stdout);
+        rapidjson::FileStream f(file);
         rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
         res.Accept(writer);
+        if (!m_outputDir.empty()) {
+            fclose(file);
+        }
     }
 
     if (m_testMask & tmBugs) {
+        String path = m_outputDir + "/bugStatistics.json";
+        if (!m_outputDir.empty()) {
+            file = fopen(path.c_str(), "w");
+        }
         rapidjson::Document res;
         res.SetObject();
-
-        rapidjson::FileStream f(stdout);
+        stats.calcBugRelatedStatistics(res);
+        rapidjson::FileStream f(file);
         rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
         res.Accept(writer);
+        if (!m_outputDir.empty()) {
+            fclose(file);
+        }
     }
 }
 

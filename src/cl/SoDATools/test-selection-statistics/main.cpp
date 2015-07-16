@@ -138,6 +138,14 @@ int processArgs(int ac, char *av[])
             return 1;
         }
 
+        if ((mgr.getTestMask() & (tmBugs)) && vm.count("bugs-data")) {
+            loadBugs = true;
+        }
+        else if (mgr.getTestMask() & tmFails) {
+            cout << "The bugs-data parameter is missing!" << endl;
+            cout << desc << endl;
+            return 1;
+        }
 
         if ((mgr.getTestMask() & tmCoverageResultSummary) || vm.count("globalize")) {
             globalize = true;
