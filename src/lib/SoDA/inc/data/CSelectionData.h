@@ -27,6 +27,7 @@
 #include "data/CChangeset.h"
 #include "data/CCoverageMatrix.h"
 #include "data/CResultsMatrix.h"
+#include "data/CBugset.h"
 
 namespace soda {
 
@@ -77,6 +78,16 @@ public:
     virtual void loadResults(const String&);
 
     /**
+    * @brief Loads the content of bug report informations from the specified path.
+    */
+    virtual void loadBugs(const String&);
+
+    /**
+    * @brief Loads the content of bug report informations from the specified path.
+    */
+    virtual void loadBugs(const char*);
+
+    /**
      * @brief Returns a changeset object.
      * @return Changeset object.
      */
@@ -93,6 +104,12 @@ public:
      * @return Results object.
      */
     inline CResultsMatrix* getResults() {return m_results;}
+
+    /**
+     * @brief Returns the stored bug report informations.
+     * @return Bugset object.
+     */
+    inline CBugset* getBugs() { return m_bugs; }
 
     /**
      * @brief Returns the IDManager of global code element names.
@@ -194,6 +211,11 @@ protected:
     CIDMapper *m_resultsTestcases;
 
     /**
+     * @brief Stores id,name pairs of bug report code elements.
+     */
+    CIDMapper *m_bugCodeElements;
+
+    /**
      * @brief Stores changeset data.
      */
     CChangeset *m_changeset;
@@ -207,6 +229,11 @@ protected:
      * @brief Stores results data.
      */
     CResultsMatrix *m_results;
+
+    /**
+     * @brief Stores bug report informations.
+     */
+    CBugset *m_bugs;
 };
 
 } /* namespace soda*/

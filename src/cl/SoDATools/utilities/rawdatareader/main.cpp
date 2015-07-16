@@ -100,7 +100,7 @@ int processArgs(options_description desc, int ac, char* av[])
                     if (matrix) {
                         delete matrix;
                     }
-                } catch (std::out_of_range &e) {
+                } catch (std::out_of_range &) {
                     std::cerr << "[ERROR] Unknown read mode. " << std::endl;
                     printPluginNames("coverage", kernel.getCoverageReaderPluginManager().getPluginNames());
                     return 1;
@@ -125,7 +125,7 @@ int processArgs(options_description desc, int ac, char* av[])
                     if (results) {
                         delete results;
                     }
-                } catch (std::out_of_range &e) {
+                } catch (std::out_of_range &) {
                     std::cerr << "[ERROR] Unknown read mode. " << std::endl;
                     printPluginNames("results", kernel.getResultsReaderPluginManager().getPluginNames());
                     return 1;
@@ -150,7 +150,7 @@ int processArgs(options_description desc, int ac, char* av[])
                     if (changeset) {
                         delete changeset;
                     }
-                } catch (std::out_of_range &e) {
+                } catch (std::out_of_range &) {
                     std::cerr << "[ERROR] Unknown read mode. " << std::endl;
                     printPluginNames("changeset", kernel.getChangesetReaderPluginManager().getPluginNames());
                     return 1;
@@ -176,7 +176,7 @@ int processArgs(options_description desc, int ac, char* av[])
                         delete bugset;
                     }
                 }
-                catch (std::out_of_range &e) {
+                catch (std::out_of_range &) {
                     std::cerr << "[ERROR] Unknown read mode. " << std::endl;
                     printPluginNames("bugset", kernel.getBugsetReaderPluginManager().getPluginNames());
                     return 1;

@@ -155,7 +155,7 @@ void CIDMapper::add(const String& value)
     try {
         id = getLastIndex();
         id++;
-    } catch (std::length_error &e) {}
+    } catch (std::length_error &) {}
 
     add(id, value);
 }

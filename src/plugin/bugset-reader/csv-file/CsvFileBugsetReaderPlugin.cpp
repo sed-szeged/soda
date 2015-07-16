@@ -96,10 +96,11 @@ void CsvFileBugsetReaderPlugin::readFromDirectory(fs::path p)
                     continue;
                 }
 
-                ReportData times;
-                times.fixTime = boost::lexical_cast<time_t>(data[4]);
-                times.reportTime = boost::lexical_cast<time_t>(data[2]);
-                m_bugset->addReported(data[3], data[6], times);
+                RevNumType const id = boost::lexical_cast<RevNumType>(data[0].substr(1));
+                Report rData;
+                rData.fixTime = boost::lexical_cast<time_t>(data[4]);
+                rData.reportTime = boost::lexical_cast<time_t>(data[2]);
+                m_bugset->addReported(data[3], data[6], id, rData);
                 data.clear();
             }
             in.close();

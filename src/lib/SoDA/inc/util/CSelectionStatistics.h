@@ -68,6 +68,11 @@ public:
     void calcCovResultsSummary(rapidjson::Document &doc);
 
     /**
+    * @brief Calculates bug statistics.
+    */
+    void calcBugRelatedStatistics(rapidjson::Document &doc);
+
+    /**
      * @brief Converts the given data to json array.
      * @param data Data to convert.
      * @return Returns the converted json file.
@@ -75,6 +80,16 @@ public:
     void toJson(IdxIdxMap &data, rapidjson::Value& val, rapidjson::Document &root);
 
 private:
+
+    /**
+    * @brief Calculates bug related statistics for all bugs.
+    */
+    void calcBugStatisticsForAllBugs(rapidjson::Document &doc);
+
+    /**
+    * @brief Calculates bug related statistics for all code elements.
+    */
+    void calcBugStatisticsForAllCEs(rapidjson::Document &doc);
 
     /**
      * @brief Stores selection data.

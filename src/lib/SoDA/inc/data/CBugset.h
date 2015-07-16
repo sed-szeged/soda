@@ -24,17 +24,18 @@
 
 #include "interface/IBitList.h"
 #include "interface/IIDManager.h"
-#include "data/CRevision.h"
 
 namespace soda {
 
-struct ReportData {
+struct Report {
     time_t reportTime;
     time_t fixTime;
 };
 
-typedef std::map<RevNumType, ReportData> CodeElementReports;
+// code element id, bug id
+typedef std::map<RevNumType, RevNumType> CodeElementReports;
 typedef std::map<RevNumType, CodeElementReports> ReportMap;
+typedef std::map<RevNumType, Report> ReportDataMap;
 
 /**
 * @brief The CBugset class stores which code elements were reported with an issue in multiple revisions.
@@ -58,7 +59,7 @@ public:
     * @param codeElements  Specified code elements.
     * @param changes  Specified change set.
     */
-    CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* changes);
+    CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* changes, ReportDataMap* data);
 
     /**
     * @brief Destroys a CBugset object.
@@ -100,7 +101,19 @@ public:
     * @param codeElementName  Specified code element name.
     * @return Additional report information for the specified code element and revision.
     */
-    ReportData const& getReportInformations(String const& revisionNumber, String const& codeElementName) const;
+    Report const& getReportInformations(String const& revisionNumber, String const& codeElementName) const;
+
+    /**
+    * @brief Returns the stored reports.
+    * @return Map which stores report id and report data.
+    */
+    ReportDataMap const& getReports() const;
+
+    /**
+    * @brief Returns a map which stores revision, code element and report data ids.
+    * @return Map which stores revisions, code elements and report id.
+    */
+    ReportMap const& getReportMap() const;
 
     /**
     * @brief Returns the code elements of a specified revision.
@@ -132,17 +145,18 @@ public:
     * @brief Adds a code element with a specified revision number and state.
     * @param revisionNumber  Revision number.
     * @param codeElementName  Code element name.
+    * @param reportId Id of the bug report.
     * @param data  Additional information for the given code element.
     */
-    virtual void addReported(const String& revisionNumber, const String& codeElementName, ReportData& data);
+    virtual void addReported(const String& revisionNumber, const String& codeElementName, RevNumType const reportId, Report& data);
 
     /**
     * @brief Adds a code element with a specified revision number and state.
     * @param revisionNumber  Revision number.
     * @param codeElementName  Code element name.
-    * @param data  Additional information for the given code element.
+    * @param reportId Id of the bug report.
     */
-    virtual void addReported(RevNumType const revisionNumber, RevNumType const codeElementName, ReportData& data);
+    virtual void addReported(RevNumType const revisionNumber, RevNumType const codeElementName, RevNumType const reportId);
 
     /**
     * @brief Adds a specified revision number to the bug set.
@@ -261,7 +275,12 @@ private:
     IIDManager* m_revisions;
 
     /**
-    * @brief Stores reported code elements groupped by revision.
+    * @brief Stores bug report ids and report datas.
+    */
+    ReportDataMap* m_reportDatas;
+
+    /**
+    * @brief Stores reported code elements groupped by revision and bug id.
     */
     ReportMap* m_reports;
 

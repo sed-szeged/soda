@@ -60,7 +60,7 @@ CResultsDataManager CDataHandler::getResultsDataMgr()
 
 bool CDataHandler::createSelection()
 {
-    return (m_pSelection = new CSelectionData());
+    return (m_pSelection = new CSelectionData()) != NULL;
 }
 
 CChangeset* CDataHandler::getChanges(bool create)

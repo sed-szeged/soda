@@ -30,11 +30,13 @@ CSelectionData::CSelectionData() :
 
     m_changesetCodeElements(new CIDMapper(m_globalCodeElements)),
     m_coverageCodeElements(new CIDMapper(m_globalCodeElements)),
+    m_bugCodeElements(new CIDMapper(m_globalCodeElements)),
     m_coverageTestcases(new CIDMapper(m_globalTestcases)),
     m_resultsTestcases(new CIDMapper(m_globalTestcases)),
 
     m_changeset(new CChangeset(m_changesetCodeElements)),
     m_coverage(new CCoverageMatrix(m_coverageTestcases, m_coverageCodeElements)),
+    m_bugs(new CBugset(m_bugCodeElements)),
     m_results(new CResultsMatrix(m_resultsTestcases))
 {
 }
@@ -44,7 +46,9 @@ CSelectionData::~CSelectionData()
     delete m_changeset;
     delete m_coverage;
     delete m_results;
+    delete m_bugs;
 
+    delete m_bugCodeElements;
     delete m_changesetCodeElements;
     delete m_coverageCodeElements;
     delete m_coverageTestcases;
@@ -84,10 +88,21 @@ void CSelectionData::loadResults(const String &filename)
     m_results->load(filename);
 }
 
+void CSelectionData::loadBugs(const char* fname)
+{
+    m_bugs->load(fname);
+}
+
+void CSelectionData::loadBugs(const String &filename)
+{
+    m_bugs->load(filename);
+}
+
 void CSelectionData::globalize()
 {
     for (IndexType i = 0; i < m_globalCodeElements->size(); i++) {
         String cename = (*m_globalCodeElements)[i];
+        m_bugs->addCodeElementName(cename);
         m_changeset->addCodeElementName(cename);
         m_coverage->addCodeElementName(cename);
     }

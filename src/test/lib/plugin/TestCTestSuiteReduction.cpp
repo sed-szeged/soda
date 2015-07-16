@@ -40,7 +40,6 @@ protected:
 
     virtual void SetUp() {
         // Create selection data.
-        std::srand(std::time(0));
         for (int i = 0; i < 100; ++i) {
             for (int j = 0; j < 100; ++j) {
                 data.getCoverage()->addOrSetRelation("test-" + boost::lexical_cast<String>(i), "ce-" + boost::lexical_cast<String>(j), (j <= i) ? true : false);

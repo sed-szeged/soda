@@ -197,7 +197,7 @@ void DuplationReductionPlugin::duplationReduction(std::ofstream &outStream)
 
     // print final test suite:
     outStream << "Total " << reducedSize << " test cases in reduced test suite." << std::endl;
-    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize) / fullSize << "\%" << std::endl;
+    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize) / fullSize << "%" << std::endl;
 
     std::cerr << "done." << std::endl;
 }
