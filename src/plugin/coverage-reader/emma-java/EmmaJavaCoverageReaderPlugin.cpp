@@ -232,7 +232,7 @@ void EmmaJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
     for (std::vector<fs::path>::iterator it = pathVector.begin(); it != pathVector.end(); it++) {
         if (is_directory(*it)) { // recurse into subdirs
             if (basename(*it) != "") {
-                readFromDirectory1stPass(*it, cut);
+                readFromDirectory(*it, cut);
             } else {
                 info_tmax--;
                 info_max--;

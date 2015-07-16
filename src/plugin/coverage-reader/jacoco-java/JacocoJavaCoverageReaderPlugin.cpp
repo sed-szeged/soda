@@ -88,8 +88,8 @@ void JacocoJavaCoverageReaderPlugin::readFromDirectoryStructure(const char * dir
     }
 
     size_t cutsize = coverage_path.generic_string().length() + ((*(coverage_path.generic_string().rbegin()) == '/') ? 0 : 1);
-    readFromDirectory1stPass(coverage_path, cutsize);
-    m_coverage->refitMatrixSize();
+    //readFromDirectory1stPass(coverage_path, cutsize);
+    //m_coverage->refitMatrixSize();
     readFromDirectory(coverage_path, cutsize);
 }
 
@@ -195,7 +195,7 @@ void JacocoJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
     for (std::vector<fs::path>::iterator it = pathVector.begin(); it != pathVector.end(); it++) {
         if (is_directory(*it)) { // recurse into subdirs
             if (basename(*it) != "") {
-                readFromDirectory1stPass(*it, cut);
+                readFromDirectory(*it, cut);
             } else {
                 info_tmax--;
                 info_max--;
@@ -219,9 +219,7 @@ void JacocoJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
 
                     BOOST_FOREACH(ptree::value_type &node, packageNode.second.get_child("")) {
                         if (m_granularity == PACKAGE && node.first == "counter" && node.second.get<String>("<xmlattr>.type") == "METHOD") {
-                            if (node.second.get<String>("<xmlattr>.covered") != "0") {
-                                m_coverage->setRelation(tcname, packageName, true);
-                            }
+                            m_coverage->addOrSetRelation(tcname, packageName, (node.second.get<String>("<xmlattr>.covered") != "0"));
                             break;
                         }
 
@@ -230,9 +228,7 @@ void JacocoJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
 
                             BOOST_FOREACH(ptree::value_type &methodNode, node.second.get_child("")) {
                                 if (m_granularity == CLASS && methodNode.first == "counter" && methodNode.second.get<String>("<xmlattr>.type") == "METHOD") {
-                                    if (methodNode.second.get<String>("<xmlattr>.covered") != "0") {
-                                        m_coverage->setRelation(tcname, className, true);
-                                    }
+                                    m_coverage->addOrSetRelation(tcname, className, (methodNode.second.get<String>("<xmlattr>.covered") != "0"));
                                     break;
                                 }
 
@@ -241,8 +237,8 @@ void JacocoJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
                                     codeElement << className << "/" << methodNode.second.get<String>("<xmlattr>.name") << methodNode.second.get<String>("<xmlattr>.desc");
 
                                     BOOST_FOREACH(ptree::value_type &counterNode, methodNode.second.get_child("")) {
-                                        if (counterNode.first == "counter" && counterNode.second.get<String>("<xmlattr>.type") == "METHOD" && counterNode.second.get<String>("<xmlattr>.covered") != "0") {
-                                            m_coverage->setRelation(tcname, codeElement.str(), true);
+                                        if (counterNode.first == "counter" && counterNode.second.get<String>("<xmlattr>.type") == "METHOD") {
+                                            m_coverage->addOrSetRelation(tcname, codeElement.str(), (counterNode.second.get<String>("<xmlattr>.covered") != "0"));
                                             break;
                                         }
                                     }
@@ -255,8 +251,8 @@ void JacocoJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
                             codeElement << packageName << "/" << srcName;
 
                             BOOST_FOREACH(ptree::value_type &counterNode, node.second.get_child("")) {
-                                if (counterNode.first == "counter" && counterNode.second.get<String>("<xmlattr>.type") == "METHOD" && counterNode.second.get<String>("<xmlattr>.covered") != "0") {
-                                    m_coverage->setRelation(tcname, codeElement.str(), true);
+                                if (counterNode.first == "counter" && counterNode.second.get<String>("<xmlattr>.type") == "METHOD") {
+                                    m_coverage->addOrSetRelation(tcname, codeElement.str(), (counterNode.second.get<String>("<xmlattr>.covered") != "0"));
                                     break;
                                 }
                             }
@@ -268,113 +264,6 @@ void JacocoJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
             in.close();
         }
     }
-
-    /*
-    for (std::vector<fs::path>::iterator it = pathVector.begin(); it != pathVector.end(); it++) {
-        if (is_directory(*it)) { // recurse into subdirs
-            if (basename(*it) != "") {
-                readFromDirectory1stPass(*it, cut);
-            } else {
-                info_tmax--;
-                info_max--;
-            }
-        } else {
-            std::cout << info_cnt++ << "/" << info_max << ' ' << info_tcnt++ << "/" << info_tmax << '\r';
-            std::cout.flush();
-
-            std::string tcname = it->generic_string().substr(cut);
-            cutExtension(tcname);
-            m_coverage->addTestcaseName(tcname);
-
-            std::ifstream in(it->string().c_str());
-            std::string line;
-
-            boost::regex packageStartExpr(".*<package .+>.*");
-            boost::regex packageEndExpr(".*</package>.*");
-            while (std::getline(in, line)) {
-                // Skip first few lines
-                if (!boost::regex_match(line, packageStartExpr)) {
-                    continue;
-                }
-                std::stringstream xmlString;
-                xmlString << line << std::endl;
-                while (std::getline(in, line)) {
-                    xmlString << line << std::endl;
-                    if (boost::regex_match(line, packageEndExpr)) {
-                        break;
-                    }
-                }
-
-                // Process XML
-                pt::ptree xml;
-                pt::read_xml(xmlString, xml);
-
-                String packageName = xml.get<String>("package.<xmlattr>.name");
-
-                std::stringstream codeElement;
-                codeElement << packageName;
-                bool covered = false;
-                BOOST_FOREACH(ptree::value_type &srcFile, xml.get_child("package")) {
-                    if (srcFile.first == "srcfile") {
-                        String srcFileName = srcFile.second.get<String>("<xmlattr>.name");
-                        if (m_granularity == SRC) {
-                            codeElement.str(String());
-                            codeElement.clear();
-                            codeElement << packageName << "." << srcFileName;
-                        }
-
-                        BOOST_FOREACH(ptree::value_type &classElement, srcFile.second.get_child("")) {
-                            if (classElement.first == "class") {
-                                String className = classElement.second.get<String>("<xmlattr>.name");
-                                if (m_granularity == CLASS) {
-                                    codeElement.str(String());
-                                    codeElement.clear();
-                                    codeElement << packageName << "." << className;
-                                }
-
-                                BOOST_FOREACH(ptree::value_type &method, classElement.second.get_child("")) {
-                                    if (method.first == "method") {
-                                        String methodName = method.second.get<String>("<xmlattr>.name");
-
-                                        if (m_granularity == METHOD) {
-                                            codeElement.str(String());
-                                            codeElement.clear();
-                                            codeElement << packageName << "." << className << "." << methodName;
-                                        }
-
-                                        BOOST_FOREACH(ptree::value_type &coverage, method.second.get_child("coverage")) {
-                                            if (coverage.second.get<String>("type") == "method, %") {
-                                                String value = coverage.second.get<String>("value");
-                                                if (value == "100% (1/1)") {
-                                                    m_coverage->setRelation(tcname, codeElement.str(), true);
-                                                    covered = true;
-                                                }
-                                                break;
-                                            }
-                                        }
-                                        if (m_granularity < METHOD && covered) {
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (m_granularity < CLASS && covered) {
-                                    break;
-                                } else {
-                                    covered = false;
-                                }
-                            }
-                        }
-                        if (m_granularity < SRC && covered) {
-                            break;
-                        } else {
-                            covered = false;
-                        }
-                    }
-                }
-            }
-            in.close();
-        }
-    }*/
 }
 
 
