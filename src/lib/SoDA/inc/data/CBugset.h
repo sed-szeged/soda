@@ -24,7 +24,6 @@
 
 #include "interface/IBitList.h"
 #include "interface/IIDManager.h"
-#include "data/CRevision.h"
 
 namespace soda {
 

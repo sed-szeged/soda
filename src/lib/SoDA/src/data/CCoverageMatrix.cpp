@@ -138,7 +138,7 @@ void CCoverageMatrix::setRelation(const String& testcaseName, const String& code
 {
     try {
         m_data->set((*m_testcases)[testcaseName], (*m_codeElements)[codeElementName], isCovered);
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
         throw CException("CCoverageMatrix::setRelation()", "Coverage matrix does not contain item!");
     }
 }

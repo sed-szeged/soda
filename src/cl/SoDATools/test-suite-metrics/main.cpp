@@ -245,7 +245,7 @@ void processJsonFiles(String path)
             for (StringVector::const_iterator it = metrics.begin(); it != metrics.end(); ++it) {
                 try {
                     kernel.getTestSuiteMetricPluginManager().getPlugin(*it);
-                } catch (std::out_of_range &e) {
+                } catch (std::out_of_range &) {
                     std::cerr << "[ERROR] Invalid metric name(" << *it
                               << ") in configuration file: " << path << "." << std::endl;
                     return;

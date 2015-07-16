@@ -86,7 +86,7 @@ void CoverageReductionPlugin::coverageReduction(std::ofstream &outStream)
 
     // print initial test suites
     outStream << "Total " << fullSize << " test cases in full test suite." << std::endl;
-    outStream << "Total coverage: " << totCoverage.count() << " procedures (" << 100.0 * (totCoverage.count()) / m_nrOfCodeElements << "\%)." << std::endl;
+    outStream << "Total coverage: " << totCoverage.count() << " procedures (" << 100.0 * (totCoverage.count()) / m_nrOfCodeElements << "%)." << std::endl;
 
     CReductionData reducedMatrix_gen(m_data->getCoverage(), m_programName + "-GEN", m_dirPath);
     CReductionData reducedMatrix_geniter(m_data->getCoverage(), m_programName + "-GENITER", m_dirPath);
@@ -161,11 +161,11 @@ void CoverageReductionPlugin::coverageReduction(std::ofstream &outStream)
     // print final test suites:
     outStream << std::endl;
     outStream << "Total " << reducedSize_gen << " test cases in reduced test suite (General)." << std::endl;
-    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize_gen) / fullSize << "\%" << std::endl;
-    outStream << "Final coverage (General): " << actCoverage.count() << " procedures (" << 100.0 * (actCoverage.count()) / m_nrOfCodeElements << "\%)." << std::endl;
+    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize_gen) / fullSize << "%" << std::endl;
+    outStream << "Final coverage (General): " << actCoverage.count() << " procedures (" << 100.0 * (actCoverage.count()) / m_nrOfCodeElements << "%)." << std::endl;
     outStream << std::endl;
     outStream << "Total " << reducedSize_vec << " test cases in reduced test suite (Vector-based)." << std::endl;
-    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize_vec) / fullSize << "\%" << std::endl;
+    outStream << "Reduction rate: " << 100.0 * (fullSize - reducedSize_vec) / fullSize << "%" << std::endl;
     std::cerr << "done." << std::endl;
 }
 

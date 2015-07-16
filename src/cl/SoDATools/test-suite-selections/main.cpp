@@ -195,7 +195,7 @@ void processJsonFiles(String path)
             for (StringVector::const_iterator it = priolist.begin(); it != priolist.end(); ++it) {
                 try {
                     kernel.getTestSuitePrioritizationPluginManager().getPlugin(*it);
-                } catch (std::out_of_range &e) {
+                } catch (std::out_of_range &) {
                     std::cerr << "[ERROR] Invalid prioritization algorithm name(" << *it
                               << ") in configuration file: " << path << "." << std::endl;
                     return;
@@ -271,7 +271,7 @@ void processJsonFiles(String path)
             try {
                 plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin(t);
                 plugin->init(&selectionData);
-            } catch (std::out_of_range &e) {
+            } catch (std::out_of_range &) {
                 std::cerr << "[ERROR] Unknown algorithm mode. " << std::endl;
                 printPluginNames("prioritization", kernel.getTestSuitePrioritizationPluginManager().getPluginNames());
                 return;

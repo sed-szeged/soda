@@ -193,7 +193,7 @@ void processJsonFiles(String path)
 
                 try {
                     kernel.getTestSuiteReductionPluginManager().getPlugin(*it);
-                } catch (std::out_of_range &e) {
+                } catch (std::out_of_range &) {
                     std::cerr << "[ERROR] Invalid reduction algorithm name(" << *it
                               << ") in configuration file: " << path << "." << std::endl;
                     return;
@@ -256,7 +256,7 @@ void processJsonFiles(String path)
             try {
                 plugin = kernel.getTestSuiteReductionPluginManager().getPlugin(reductionMethod);
                 plugin->init(&selectionData, reader);
-            } catch (std::out_of_range &e) {
+            } catch (std::out_of_range &) {
                 std::cerr << "[ERROR] Unknown reduction mode. " << std::endl;
                 printPluginNames(kernel.getTestSuiteReductionPluginManager().getPluginNames());
                 return;

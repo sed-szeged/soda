@@ -36,7 +36,7 @@ CPlugin::CPlugin(const std::string &pluginPath) :
         m_registerFunction =
                 CSharedLibraryHandler::getFunctionPointer<registerPluginFunctionSignature>(m_sharedLibraryHandle, "registerPlugin");
         m_reference_count = new size_t(1);
-    } catch (std::exception &e) {
+    } catch (std::exception &) {
         if (m_sharedLibraryHandle != NULL) {
             CSharedLibraryHandler::unloadLibrary(m_sharedLibraryHandle);
         }
