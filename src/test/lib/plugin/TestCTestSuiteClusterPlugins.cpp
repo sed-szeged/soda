@@ -55,11 +55,130 @@ protected:
         doc.AddMember("cluster-sizes", val, doc.GetAllocator());
         doc.AddMember("cluster-test-list", "sample/ClusterPluginSampleDir/label-test-codeelement-test.txt", doc.GetAllocator());
         doc.AddMember("cluster-code-elements-list", "sample/ClusterPluginSampleDir/label-test-codeelement-method.txt", doc.GetAllocator());
+
+        doc.AddMember("test_clusters_dump", "sample/ClusterPluginSampleDir/testDump.txt", doc.GetAllocator());
+        doc.AddMember("codeelement_clusters_dump", "sample/ClusterPluginSampleDir/codeDump.txt", doc.GetAllocator());
     }
 
     virtual void TearDown() {
     }
 };
+
+
+
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteHammingClusterPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("hamming"));
+    EXPECT_EQ("hamming", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteHamming01ClusterPlugin)
+{
+    doc.AddMember("hamming_dist_row(%)", 50, doc.GetAllocator());
+    doc.AddMember("hamming_dist_cols(%)", 50, doc.GetAllocator());
+    doc.AddMember("0cluster(%)", 100, doc.GetAllocator());
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("hamming"));
+    EXPECT_NO_THROW(plugin->init(doc));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
+
+    EXPECT_EQ(3, clusterList.size());   // two cluster + (empty) nullcluster
+    EXPECT_EQ(0, clusterList["0"].getCodeElements().size());
+    EXPECT_EQ(0, clusterList["0"].getTestCases().size());
+    EXPECT_EQ(50, clusterList["1"].getCodeElements().size());
+    EXPECT_EQ(50, clusterList["2"].getTestCases().size());
+
+}
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteHamming02ClusterPlugin)
+{
+    doc.AddMember("hamming_dist_row(%)", 20, doc.GetAllocator());
+    doc.AddMember("hamming_dist_cols(%)", 50, doc.GetAllocator());
+    doc.AddMember("0cluster(%)", 90, doc.GetAllocator());
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("hamming"));
+    EXPECT_NO_THROW(plugin->init(doc));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
+
+    EXPECT_EQ(6, clusterList.size()); // five cluster + nullcluster
+    EXPECT_EQ(10, clusterList["0"].getCodeElements().size());
+    EXPECT_EQ(50, clusterList["1"].getCodeElements().size());
+    EXPECT_EQ(20, clusterList["2"].getTestCases().size());
+}
+
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOchiaiDiceJaccardClusterPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("ochiai-dice-jaccard"));
+    EXPECT_EQ("ochiai-dice-jaccard", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOchiaiClusterPlugin)
+{
+    doc.AddMember("alg.index", 0, doc.GetAllocator());
+    doc.AddMember("limit", -1.0, doc.GetAllocator());
+    doc.AddMember("0cluster(%)", 100, doc.GetAllocator());
+    doc.AddMember("cluster-number", 2, doc.GetAllocator());
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("ochiai-dice-jaccard"));
+    EXPECT_NO_THROW(plugin->init(doc));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
+
+    EXPECT_EQ(3, clusterList.size());
+    EXPECT_EQ(0, clusterList["0"].getCodeElements().size());
+    EXPECT_EQ(0, clusterList["0"].getTestCases().size());
+    EXPECT_EQ(69, clusterList["1"].getCodeElements().size());
+    EXPECT_EQ(31, clusterList["1"].getTestCases().size());
+    EXPECT_EQ(31, clusterList["2"].getCodeElements().size());
+    EXPECT_EQ(69, clusterList["2"].getTestCases().size());
+}
+
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDiceClusterPlugin)
+{
+    doc.AddMember("alg.index", 1, doc.GetAllocator());
+    doc.AddMember("limit", -1.0, doc.GetAllocator());
+    doc.AddMember("0cluster(%)", 95, doc.GetAllocator());
+    doc.AddMember("cluster-number", 3, doc.GetAllocator());
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("ochiai-dice-jaccard"));
+    EXPECT_NO_THROW(plugin->init(doc));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
+
+    EXPECT_EQ(4, clusterList.size());
+    EXPECT_EQ(5, clusterList["0"].getCodeElements().size());
+    EXPECT_EQ(17, clusterList["1"].getTestCases().size());
+    EXPECT_EQ(49, clusterList["2"].getCodeElements().size());
+    EXPECT_EQ(49, clusterList["3"].getTestCases().size());
+}
+
+
+TEST_F(CTestSuiteClusterPluginsTest, TestSuiteJaccardClusterPlugin)
+{
+    doc.AddMember("alg.index", 2, doc.GetAllocator());
+    doc.AddMember("limit", -1.0, doc.GetAllocator());
+    doc.AddMember("0cluster(%)", 90, doc.GetAllocator());
+    doc.AddMember("cluster-number", 4, doc.GetAllocator());
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("ochiai-dice-jaccard"));
+    EXPECT_NO_THROW(plugin->init(doc));
+    EXPECT_NO_THROW(plugin->execute(data, clusterList));
+
+    EXPECT_EQ(10, clusterList["0"].getCodeElements().size());
+
+    EXPECT_LE(clusterList["1"].getCodeElements().size(), clusterList["4"].getTestCases().size());
+    EXPECT_GE(clusterList["1"].getCodeElements().size(), clusterList["4"].getTestCases().size());
+
+    EXPECT_LE(clusterList["2"].getCodeElements().size(), clusterList["3"].getTestCases().size());
+    EXPECT_GE(clusterList["2"].getCodeElements().size(), clusterList["3"].getTestCases().size());
+
+}
+
+
 
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPluginMetaInfo)
 {
@@ -81,6 +200,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
     EXPECT_EQ(data.getCoverage()->getNumOfCodeElements(), clusterList["full"].getCodeElements().size());
     EXPECT_EQ(data.getCoverage()->getNumOfTestcases(), clusterList["full"].getTestCases().size());
 }
+
 
 TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPluginMetaInfo)
 {

@@ -70,7 +70,6 @@ private:
     std::vector<int> cols_cluster_index;
     std::string testClusterDump;
     std::string codeElementsClusterDump;
-    std::string resultMatrixName;
 
 };
 

@@ -58,7 +58,6 @@ void HammingTestSuiteClusterPlugin::init(rapidjson::Document &doc)
     _0cluster_limit = doc["0cluster(%)"].GetInt();
     testClusterDump = doc["test_clusters_dump"].GetString();
     codeElementsClusterDump = doc["codeelement_clusters_dump"].GetString();
-    resultMatrixName = doc["results-data"].GetString();
 }
 
 void HammingTestSuiteClusterPlugin::execute(CSelectionData &data, std::map<std::string, CClusterDefinition>& clusterList)
