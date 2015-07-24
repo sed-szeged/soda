@@ -28,12 +28,13 @@
 using namespace boost::program_options;
 using namespace soda;
 
+CKernel kernel;
+
 class CCoverageReaderPluginsTest : public testing::Test
 {
 protected:
     CCoverageMatrix* coverageMatrix;
     ICoverageReaderPlugin* plugin;
-    CKernel kernel;
     variables_map vm;
 
     virtual void SetUp() {
