@@ -57,9 +57,11 @@ public:
     /**
     * @brief Creates a CBugset object with specified code elements and bugset.
     * @param codeElements  Specified code elements.
-    * @param changes  Specified change set.
+    * @param revisions  Specified revision number.
+    * @param reports  Bug reports data which links code elements and revisions with the appripriate bug reports.
+    * @param data  Specified bug reports.
     */
-    CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* changes, ReportDataMap* data);
+    CBugset(IIDManager* codeElements, IIDManager* revisions, ReportMap* reports, ReportDataMap* data);
 
     /**
     * @brief Destroys a CBugset object.
@@ -169,12 +171,6 @@ public:
     * @param revisionNumbers  Specified revision numbers.
     */
     virtual void addRevision(const StringVector& revisionNumbers);
-
-    /**
-    * @brief Adds a new code element to the bug set.
-    * @param codeElementName  Specified code element name.
-    */
-    virtual void addCodeElement(const String& codeElementName);
 
     /**
     * @brief Adds code elements from another code element IDManager.

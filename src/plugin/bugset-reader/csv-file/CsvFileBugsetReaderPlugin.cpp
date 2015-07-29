@@ -46,7 +46,7 @@ std::string CsvFileBugsetReaderPlugin::getName()
 
 std::string CsvFileBugsetReaderPlugin::getDescription()
 {
-    return "The bug information is in csv files and the format is: TODO.";
+    return "The bug information is in csv files and the format is: bug_id, bug_url, bug_report_timestamp, fix_hash, fix_timestamp, method_name, method_qualified_name, file, line.";
 }
 
 CBugset* CsvFileBugsetReaderPlugin::read(const std::string &path)

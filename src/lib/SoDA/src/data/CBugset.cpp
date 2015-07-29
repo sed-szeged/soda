@@ -25,7 +25,7 @@
 #include "data/CIndexBitList.h"
 #include "data/CIDManager.h"
 #include "exception/CException.h"
-
+#include <iostream>
 namespace soda {
 
 CBugset::CBugset() :
@@ -83,6 +83,9 @@ CodeElementReports& CBugset::at(const String& revisionNumber) const
 
 bool CBugset::exists(const String& revisionNumber) const
 {
+    if (!m_revisions->containsValue(revisionNumber)) {
+        return false;
+    }
     return m_reports->count(m_revisions->getID(revisionNumber)) != 0;
 }
 
@@ -99,11 +102,22 @@ StringVector CBugset::getRevisions(const String& codeElementName) const
 
 bool CBugset::containsData(const String& revisionNumber, const String& codeElementName) const
 {
+    if (!m_revisions->containsValue(revisionNumber) || !m_codeElements->containsValue(codeElementName)) {
+        return false;
+    }
+
     return (*m_reports)[m_revisions->getID(revisionNumber)].count((*m_codeElements)[codeElementName]) != 0;
 }
 
 Report const& CBugset::getReportInformations(String const& revisionNumber, String const& codeElementName) const
 {
+    if (!m_revisions->containsValue(revisionNumber)) {
+        throw CException("soda::CBugset::getReportInformations", "Not existing revision.");
+    }
+
+    if (!m_codeElements->containsValue(codeElementName)) {
+        throw CException("soda::CBugset::getReportInformations", "Not existing code element.");
+    }
     return (*m_reportDatas)[(*m_reports)[m_revisions->getID(revisionNumber)].at((*m_codeElements)[codeElementName])];
 }
 
@@ -140,7 +154,7 @@ void CBugset::addReported(const String& revisionNumber, const String& codeElemen
     }
 
     if (!m_codeElements->containsValue(codeElementName)) {
-        addCodeElement(codeElementName);
+        addCodeElementName(codeElementName);
     }
 
     if (!m_reportDatas->count(reportId)) {
@@ -167,11 +181,6 @@ void CBugset::addRevision(const StringVector& revisionNumbers)
     }
 }
 
-void CBugset::addCodeElement(const String& codeElementName)
-{
-    m_codeElements->add(codeElementName);
-}
-
 void CBugset::addCodeElement(const IIDManager& codeElements)
 {
     addCodeElement(codeElements.getValueList());
@@ -180,7 +189,7 @@ void CBugset::addCodeElement(const IIDManager& codeElements)
 void CBugset::addCodeElement(const StringVector& codeElements)
 {
     for(StringVector::const_iterator it = codeElements.begin(); it != codeElements.end(); ++it) {
-        addCodeElement(*it);
+        addCodeElementName(*it);
     }
 }
 
