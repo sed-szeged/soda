@@ -25,7 +25,7 @@
 #include "data/CIndexBitList.h"
 #include "data/CIDManager.h"
 #include "exception/CException.h"
-#include <iostream>
+
 namespace soda {
 
 CBugset::CBugset() :

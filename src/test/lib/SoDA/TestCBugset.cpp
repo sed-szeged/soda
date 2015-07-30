@@ -203,8 +203,3 @@ TEST_F(CBugsetTest, RemoveRevisionOperations) {
     EXPECT_NO_FATAL_FAILURE(bugset2->removeRevision("rev-1"));
     EXPECT_EQ(9, bugset2->getRevisions().size());
 }
-
-
-/// report operations
-/// save load
-

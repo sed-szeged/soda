@@ -2,6 +2,7 @@
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
  * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
+ *          David Havas <havasd@inf.u-szeged.hu>
  *
  * This file is part of SoDA.
  *
@@ -23,6 +24,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <stdio.h>
 #include <set>
 
@@ -56,7 +58,9 @@ CKernel kernel;
 IndexType revision;
 std::map<std::string, CClusterDefinition> clusterList;
 std::string outputDir;
+std::string projectName;
 
+std::set<std::string> baseMetrics;
 std::set<std::string> metricsCalculated;
 
 int main(int argc, char* argv[]) {
@@ -129,7 +133,10 @@ std::string getJsonString()
        << "\"revision\": 1,\n\t"
        << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the metrics\",\n\t"
        << "\"metrics\": [ \"list of metrics to calculate\" ],\n\t"
-       << "\"globalize\": true,\n\t"
+       << "\"base-metrics\": [ \"coverage\", \"partition-metric\", \"tpce\" ],\n\t"
+       << "\"project-name\": \"name of the project, this string will be the part of the output file names\",\n\t"
+       << "\"globalize\": false,\n\t"
+       << "\"filter-to-coverage\": false,\n\t"
        << "\"output-dir\": \"output directory\"\n"
        << "}"
        << std::endl;
@@ -193,24 +200,52 @@ void calculateMetric(CSelectionData *selectionData, const std::string &name, rap
 
 void saveResults(rapidjson::Document &results)
 {
-    std::ofstream out;
-    out.open(std::string(outputDir + "/test.suite.metrics.csv").c_str());
-    out << ";";
+    std::stringstream base;
+    std::stringstream ext;
+    bool hasBase = false, hasExt = false;
+    base << ";";
+    ext << ";";
     for (std::set<std::string>::iterator it = metricsCalculated.begin(); it != metricsCalculated.end(); it++) {
-        out << *it << ";";
+        if (baseMetrics.count(*it)) {
+            hasBase = true;
+            base << *it << ";";
+        }
+        else {
+            hasExt = true;
+            ext << *it << ";";
+        }
     }
-    out << std::endl;
+    base << std::endl;
+    ext << std::endl;
 
     std::map<std::string, CClusterDefinition>::iterator clusterIt;
     for (clusterIt = clusterList.begin(); clusterIt != clusterList.end(); clusterIt++) {
         std::string clusterName = clusterIt->first;
-        out << clusterName << ";";
+        base << clusterName << ";";
+        ext << clusterName << ";";
         for (std::set<std::string>::iterator it = metricsCalculated.begin(); it != metricsCalculated.end(); it++) {
-            out << results[clusterName.c_str()][(*it).c_str()].GetDouble() << ";";
+            if (baseMetrics.count(*it)) {
+                base << results[clusterName.c_str()][(*it).c_str()].GetDouble() << ";";
+            }
+            else {
+                ext << results[clusterName.c_str()][(*it).c_str()].GetDouble() << ";";
+            }
         }
-        out << std::endl;
+        base << std::endl;
+        ext << std::endl;
     }
-    out.close();
+
+    if (hasBase) {
+        std::ofstream out(std::string(outputDir + "/" + projectName + "-base-metrics.csv").c_str());
+        out << base.str();
+        out.close();
+    }
+
+    if (hasExt) {
+        std::ofstream out(std::string(outputDir + "/" + projectName + "-ext-metrics.csv").c_str());
+        out << ext.str();
+        out.close();
+    }
 }
 
 void processJsonFiles(String path)
@@ -234,6 +269,10 @@ void processJsonFiles(String path)
 
         CSelectionData *selectionData = new CSelectionData();
 
+        for (rapidjson::Value::ConstValueIterator itr = reader["base-metrics"].Begin(); itr != reader["base-metrics"].End(); ++itr) {
+            baseMetrics.insert(itr->GetString());
+        }
+
         StringVector metrics;
         for (rapidjson::Value::ConstValueIterator itr = reader["metrics"].Begin(); itr != reader["metrics"].End(); ++itr)
             metrics.push_back(itr->GetString());
@@ -255,6 +294,7 @@ void processJsonFiles(String path)
 
         revision = reader["revision"].GetInt();
         outputDir = reader["output-dir"].GetString();
+        projectName = reader["project-name"].GetString();
         if (outputDir.empty()) {
             std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
             return;
@@ -290,6 +330,12 @@ void processJsonFiles(String path)
             selectionData->globalize();
             (std::cerr << " done" << std::endl).flush();
         }
+        
+        if (reader["filter-to-coverage"].GetBool()) {
+            (std::cerr << "[INFO] Filtering to coverage ...").flush();
+            selectionData->filterToCoverage();
+            (std::cerr << " done" << std::endl).flush();
+        }
 
         clusterList.clear();
         metricsCalculated.clear();
@@ -305,7 +351,6 @@ void processJsonFiles(String path)
                 calculateMetric(selectionData, *it, results);
             }
         }
-
 
         saveResults(results);
 
