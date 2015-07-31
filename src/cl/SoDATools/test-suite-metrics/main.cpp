@@ -62,16 +62,17 @@ std::string projectName;
 
 std::set<std::string> baseMetrics;
 std::set<std::string> metricsCalculated;
+rapidjson::Value *metricNameMapping;
 
 int main(int argc, char* argv[]) {
     std::cout << "test-suite-metrics (SoDA tool)" << std::endl;
 
     options_description desc("Options");
     desc.add_options()
-            ("help,h", "Prints help message")
-            ("create-json-file,j", "Creates a sample json file")
-            ("list-cluster-algorithms,c", "Lists the cluster algorithms")
-            ("list-metric-plugins,m", "Lists the metric plugins");
+        ("help,h", "Prints help message")
+        ("create-json-file,j", "Creates a sample json file")
+        ("list-cluster-algorithms,c", "Lists the cluster algorithms")
+        ("list-metric-plugins,m", "Lists the metric plugins");
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -116,32 +117,42 @@ void createJsonFile()
 void printHelp()
 {
     std::cout << "This application measures the given test suites with the specified options in a json config files."
-              << std::endl << std::endl;
+        << std::endl << std::endl;
     std::cout << "USAGE:" << std::endl
-              << "\ttest-suite-metrics [-h|c|m|j]" << std::endl
-              << "\ttest-suite-metrics json file path" << std::endl
-              << "\ttest-suite-metrics directory which contains one or more json files" << std::endl << std::endl;
+        << "\ttest-suite-metrics [-h|c|m|j]" << std::endl
+        << "\ttest-suite-metrics json file path" << std::endl
+        << "\ttest-suite-metrics directory which contains one or more json files" << std::endl << std::endl;
     std::cout << "Json configuration file format:" << std::endl
-              << getJsonString();
+        << getJsonString();
 }
 
 std::string getJsonString()
 {
-    std::stringstream ss;
-    ss << "{\n\t\"coverage-data\": \"coverage file path\",\n\t"
-       << "\"results-data\": \"results file path\",\n\t"
-       << "\"revision\": 1,\n\t"
-       << "\"cluster-algorithm\": \"the name of the cluster algorithm to run before calculating the metrics\",\n\t"
-       << "\"metrics\": [ \"list of metrics to calculate\" ],\n\t"
-       << "\"base-metrics\": [ \"coverage\", \"partition-metric\", \"tpce\" ],\n\t"
-       << "\"project-name\": \"name of the project, this string will be the part of the output file names\",\n\t"
-       << "\"globalize\": false,\n\t"
-       << "\"filter-to-coverage\": false,\n\t"
-       << "\"output-dir\": \"output directory\"\n"
-       << "}"
-       << std::endl;
+    std::string json = R"template({
+    "coverage-data": "coverage file path",
+    "results-data": "results file path",
+    "bug-data": "bugset unused",
+    "revision": 1,
+    "cluster-algorithm": "one-cluster",
+    "metrics": [ ],
+    "base-metrics": [ "coverage", "partition-metric", "tpce" ],
+    "metric-notations":
+    {
+        "coverage": "COV",
+        "coverage-efficiency": "COV-Eff",
+        "partition-metric": "PART",
+        "partition-efficiency": "PART-Eff",
+        "uniqueness": "UNIQ",
+        "specialization": "SPEC",
+        "tpce": "TpCE"
+    },
+    "project-name": "prefix of the output file",
+    "globalize": true,
+    "filter-to-coverage": false,
+    "output-dir": "output directory"
+})template";
 
-    return ss.str();
+    return json;
 }
 
 void printPluginNames(const String &type, const std::vector<String> &plugins)
@@ -161,7 +172,8 @@ int loadJsonFiles(String path)
 
     if (is_regular_file(path)) {
         processJsonFiles(path);
-    } else if (is_directory(path)) {
+    }
+    else if (is_directory(path)) {
         directory_iterator endIt;
         for (directory_iterator it(path); it != endIt; it++) {
             if (is_directory(it->status())) {
@@ -206,13 +218,18 @@ void saveResults(rapidjson::Document &results)
     base << ";";
     ext << ";";
     for (std::set<std::string>::iterator it = metricsCalculated.begin(); it != metricsCalculated.end(); it++) {
+        auto metricName = *it;
+        if (metricNameMapping->HasMember(metricName.c_str())) {
+            metricName = (*metricNameMapping)[metricName.c_str()].GetString();
+        }
+
         if (baseMetrics.count(*it)) {
             hasBase = true;
-            base << *it << ";";
+            base << metricName << ";";
         }
         else {
             hasExt = true;
-            ext << *it << ";";
+            ext << metricName << ";";
         }
     }
     base << std::endl;
@@ -255,7 +272,7 @@ void processJsonFiles(String path)
 
         rapidjson::Document reader;
         {
-            FILE *in = fopen (path.c_str(), "r");
+            FILE *in = fopen(path.c_str(), "r");
             char readBuffer[65536];
             rapidjson::FileReadStream is(in, readBuffer, sizeof(readBuffer));
             reader.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
@@ -281,17 +298,21 @@ void processJsonFiles(String path)
         if (metrics.empty()) {
             std::cerr << "[ERROR] Missing metrics parameter in config file " << path << "." << std::endl;
             return;
-        } else {
+        }
+        else {
             for (StringVector::const_iterator it = metrics.begin(); it != metrics.end(); ++it) {
                 try {
                     kernel.getTestSuiteMetricPluginManager().getPlugin(*it);
-                } catch (std::out_of_range &) {
+                }
+                catch (std::out_of_range &) {
                     std::cerr << "[ERROR] Invalid metric name(" << *it
-                              << ") in configuration file: " << path << "." << std::endl;
+                        << ") in configuration file: " << path << "." << std::endl;
                     return;
                 }
             }
         }
+
+        metricNameMapping = &reader["metric-notations"];
 
         revision = reader["revision"].GetInt();
         projectName = reader["project-name"].GetString();
@@ -321,7 +342,8 @@ void processJsonFiles(String path)
             (std::cerr << " done\n[INFO] loading results from " << resPath << " ...").flush();
             selectionData->loadResults(resPath);
             (std::cerr << " done" << std::endl).flush();
-        } else {
+        }
+        else {
             std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
             return;
         }
@@ -356,12 +378,14 @@ void processJsonFiles(String path)
         saveResults(results);
 
         delete selectionData;
-    } catch (std::exception &e) {
+    }
+    catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
         return;
-    } catch (...) {
+    }
+    catch (...) {
         std::cerr << "Exception of unknown type while processsing configuration file(" << path << ") arguments."
-                  << std::endl;
+            << std::endl;
         return;
     }
     return;

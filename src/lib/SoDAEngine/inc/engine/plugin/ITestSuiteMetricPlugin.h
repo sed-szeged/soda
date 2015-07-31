@@ -50,13 +50,13 @@ public:
      * @brief Returns the name of the plugin.
      * @return
      */
-    virtual std::string getName() = 0;
+    virtual String getName() = 0;
 
     /**
      * @brief Returns the description of the plugin.
      * @return
      */
-    virtual std::string getDescription() = 0;
+    virtual String getDescription() = 0;
 
     /**
      * @brief Initialize the plugin.
@@ -64,13 +64,13 @@ public:
      * @param clusterList The clusters of test cases and code elements.
      * @param revisionList The revisions to consider.
      */
-    virtual void init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision) = 0;
+    virtual void init(CSelectionData *data, std::map<String, CClusterDefinition> *clusterList, IndexType revision) = 0;
 
     /**
      * @brief Returns the list of plugins names that the plugin depens on.
      * @return List of dependencies.
      */
-    virtual std::vector<std::string> getDependency() = 0;
+    virtual std::vector<String> getDependency() = 0;
 
     /**
      * @brief Calculates the metrics of a test suite.
