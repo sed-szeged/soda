@@ -63,6 +63,10 @@ void CCoverageDataManager::dumpData(const String &filepath, bool psize, char cse
             for (IndexType ceidx = 1; ceidx < m.getNumOfCols(); ++ceidx) {
                 O << csep << coverage->getCodeElements().getValue(ceidx);
             }
+
+            if (getDataHandler()->getRevision()) {
+                O << csep << "Pass/fail";
+            }
             O << rsep;
         }
 
@@ -74,6 +78,44 @@ void CCoverageDataManager::dumpData(const String &filepath, bool psize, char cse
 
             for (IndexType ceidx = 1; ceidx < m.getNumOfCols(); ++ceidx) {
                 O << csep << (m[tcidx][ceidx] ? '1' : '0');
+            }
+
+            // pass fail info for a specified revision
+            if (getDataHandler()->getRevision()) {
+                CResultsMatrix::TestResultType resType;
+                if (getDataHandler()->getSelection()->getResults()->getTestcases().containsValue(coverage->getTestcases().getValue(tcidx))) {
+                    resType = getDataHandler()->getSelection()->getResults()->getResult(getDataHandler()->getRevision(), coverage->getTestcases().getValue(tcidx));
+                }
+                else {
+                    std::cout << "Not existing TC: " << coverage->getTestcases().getValue(tcidx) << std::endl;
+                    resType = (CResultsMatrix::TestResultType)-1;
+                }
+
+                O << csep;
+                switch (resType) {
+                    case CResultsMatrix::trtNotExecuted:
+                        break;
+                    case CResultsMatrix::trtFailed:
+                        O << 0;
+                        break;
+                    case CResultsMatrix::trtPassed:
+                        O << 1;
+                        break;
+                    default: // not existing testcase
+                        O << -1;
+                        break;
+                }
+            }
+            O << rsep;
+        }
+
+        // bug data
+        if (getDataHandler()->getRevision()) {
+            auto bugs = getDataHandler()->getSelection()->getBugs()->getBuggedCodeElements(1348408576);
+            O << "Bugged";
+            for (IndexType ceidx = 0; ceidx < m.getNumOfCols(); ++ceidx) {
+                auto ceName = coverage->getCodeElements().getValue(ceidx);
+                O << csep << (std::find(bugs.begin(), bugs.end(), ceName) != bugs.end() ? '1' : '0');
             }
             O << rsep;
         }

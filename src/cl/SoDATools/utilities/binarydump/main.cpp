@@ -67,12 +67,11 @@ int processArgs(options_description desc, int ac, char* av[])
             handler->setWithNames(true);
         }
 
-        if (vm.count("selection-data")) {
-            if(!(vm.count("load-coverage") && vm.count("load-results") && vm.count("load-changes"))) {
-                ERRO("For selection data you must specify coverage, results, and changes to be loaded!");
-                return 1;
-            }
+        if (vm.count("revision")) {
+            handler->setRevision(vm["revision"].as<IndexType>());
+        }
 
+        if (vm.count("selection-data")) {
             if (handler->createSelection()) {
                 INFO(handler->getPrintInfo(), "Working with selection data");
             } else {
@@ -98,12 +97,17 @@ int processArgs(options_description desc, int ac, char* av[])
             handler->getChangesDataMgr().load(tmp);
         }
 
+        if (vm.count("load-bugs")) {
+            String tmp = vm["load-bugs"].as<String>();
+            handler->getSelection()->loadBugs(tmp);
+        }
+
         /*
         * DUMP DATA
         */
         if (vm.count("dump-coverage-data")) {
             String tmp = vm["dump-coverage-data"].as<String>();
-            handler->getCoverageDataMgr().dumpData(tmp);
+            handler->getCoverageDataMgr().dumpData(tmp, false, '@');
         }
         if (vm.count("dump-coverage-testcases")) {
             String tmp = vm["dump-coverage-testcases"].as<String>();
@@ -170,6 +174,8 @@ int main(int argc, char *argv[])
             ("load-changes,x",                    value<String>(), "input file")
             ("dump-changes-code-elements",      value<String>(), "output file")
             ("dump-changes",                    value<String>(), "output file")
+            ("load-bugs,b",                     value<String>(), "input file")
+            ("revision", value<IndexType>(), "revision number")
             ("with-names,w", "dump coverage data,results data or changeset data with names")
             ("quiet,q", "silent mode")
     ;

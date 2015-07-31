@@ -76,12 +76,12 @@ public:
 
     /**
      * @brief Returns the value of m_bPrintInfo member.
-     * @return Value of m_bPrintInfo member.
+     * @return Value of printInfo member.
      */
     bool getPrintInfo() const;
 
     /**
-     * @brief Sets the value of m_bPrintInfo member.
+     * @brief Sets the value of printInfo member.
      * @param set  Value to be set.
      */
     void setPrintInfo(bool set);
@@ -99,16 +99,28 @@ public:
     void setWithPassFail(bool set);
 
     /**
-     * @brief Returns the value of m_bWithNames member.
-     * @return Value of m_bWithNames member.
+     * @brief Returns the value of withNames member.
+     * @return Value of withNames member.
      */
     bool getWithNames() const;
 
     /**
-     * @brief Sets the value of m_bWithNames member.
+     * @brief Sets the value of withNames member.
      * @param set  Value to be set.
      */
     void setWithNames(bool set);
+
+    /**
+    * @brief Returns the value of revision member.
+    * @return Value of revision member.
+    */
+    IndexType getRevision() const;
+
+    /**
+    * @brief Sets the value of revision member.
+    * @param set  Value to be set.
+    */
+    void setRevision(IndexType set);
 
     /**
      * @brief Creates a CSelectionData object.
@@ -190,7 +202,7 @@ private:
     /**
      * @brief If true than the methods can write to standard output.
      */
-    bool m_bPrintInfo;
+    bool printInfo;
 
     /**
      * @brief If true than data has pass fail info.
@@ -200,7 +212,12 @@ private:
     /**
      * @brief If true than writes code element names and test case names.
      */
-    bool m_bWithNames;
+    bool withNames;
+
+    /**
+     * \brief Revision number for the extended coverage dump.
+     */
+    IndexType revision = 0;
 
     /**
      * @brief Stores read format type.
@@ -225,7 +242,7 @@ private:
     /**
      * @brief Stores selection data.
      */
-    CSelectionData     *m_pSelection;
+    CSelectionData *m_pSelection;
 
     /**
      * @brief Stores test case names.

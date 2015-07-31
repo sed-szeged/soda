@@ -27,7 +27,7 @@
 namespace soda {
 
 CDataHandler::CDataHandler() :
-    m_bPrintInfo(true), m_bWithPassFail(true), m_bWithNames(false),
+    printInfo(true), m_bWithPassFail(true), withNames(false),
     m_eReadFormat(rfUnknown), m_pChanges(NULL), m_pCoverage(NULL),
     m_pResults(NULL), m_pSelection(NULL), m_pTestcases(NULL),
     m_pCodeElements(NULL)
@@ -114,12 +114,12 @@ CIDManager* CDataHandler::getCodeElements()
 
 bool CDataHandler::getPrintInfo() const
 {
-    return m_bPrintInfo;
+    return printInfo;
 }
 
 void CDataHandler::setPrintInfo(bool set)
 {
-    m_bPrintInfo = set;
+    printInfo = set;
 }
 
 bool CDataHandler::getWithPassFail() const
@@ -134,12 +134,22 @@ void CDataHandler::setWithPassFail(bool set)
 
 bool CDataHandler::getWithNames() const
 {
-    return m_bWithNames;
+    return withNames;
 }
 
 void CDataHandler::setWithNames(bool set)
 {
-    m_bWithNames = set;
+    withNames = set;
+}
+
+IndexType CDataHandler::getRevision() const
+{
+    return revision;
+}
+
+void CDataHandler::setRevision(IndexType rev)
+{
+    revision = rev;
 }
 
 ReadFormat CDataHandler::getReadFormat() const

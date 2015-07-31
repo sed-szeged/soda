@@ -236,13 +236,13 @@ void saveResults(rapidjson::Document &results)
     }
 
     if (hasBase) {
-        std::ofstream out(std::string(outputDir + "/" + projectName + "-base-metrics.csv").c_str());
+        std::ofstream out(std::string(outputDir + "/" + projectName + "-metrics-base.csv").c_str());
         out << base.str();
         out.close();
     }
 
     if (hasExt) {
-        std::ofstream out(std::string(outputDir + "/" + projectName + "-ext-metrics.csv").c_str());
+        std::ofstream out(std::string(outputDir + "/" + projectName + "-metrics-ext.csv").c_str());
         out << ext.str();
         out.close();
     }
@@ -274,8 +274,9 @@ void processJsonFiles(String path)
         }
 
         StringVector metrics;
-        for (rapidjson::Value::ConstValueIterator itr = reader["metrics"].Begin(); itr != reader["metrics"].End(); ++itr)
+        for (rapidjson::Value::ConstValueIterator itr = reader["metrics"].Begin(); itr != reader["metrics"].End(); ++itr) {
             metrics.push_back(itr->GetString());
+        }
 
         if (metrics.empty()) {
             std::cerr << "[ERROR] Missing metrics parameter in config file " << path << "." << std::endl;
@@ -293,8 +294,8 @@ void processJsonFiles(String path)
         }
 
         revision = reader["revision"].GetInt();
-        outputDir = reader["output-dir"].GetString();
         projectName = reader["project-name"].GetString();
+        outputDir = reader["output-dir"].GetString();
         if (outputDir.empty()) {
             std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
             return;
@@ -330,7 +331,7 @@ void processJsonFiles(String path)
             selectionData->globalize();
             (std::cerr << " done" << std::endl).flush();
         }
-        
+
         if (reader["filter-to-coverage"].GetBool()) {
             (std::cerr << "[INFO] Filtering to coverage ...").flush();
             selectionData->filterToCoverage();

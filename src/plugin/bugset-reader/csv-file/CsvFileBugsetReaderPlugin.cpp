@@ -98,9 +98,14 @@ void CsvFileBugsetReaderPlugin::readFromDirectory(fs::path p)
 
                 RevNumType const id = boost::lexical_cast<RevNumType>(data[0].substr(1));
                 Report rData;
-                rData.fixTime = boost::lexical_cast<time_t>(data[4]);
-                rData.reportTime = boost::lexical_cast<time_t>(data[2]);
-                m_bugset->addReported(data[3], data[6], id, rData);
+                boost::regex timeRe("000$");
+                auto time = boost::regex_replace(data[4], timeRe, "");
+                rData.fixTime = boost::lexical_cast<time_t>(time);
+                time = boost::regex_replace(data[2], timeRe, "");
+                rData.reportTime = boost::lexical_cast<time_t>(time);
+                boost::regex re("\\.");
+                auto ceName = boost::regex_replace(data[6], re, "/");
+                m_bugset->addReported(data[3], ceName, id, rData);
                 data.clear();
             }
             in.close();

@@ -20,6 +20,7 @@
  */
 
 #include <stdexcept>
+#include <iostream>
 
 #include "data/CBugset.h"
 #include "data/CIndexBitList.h"
@@ -147,6 +148,21 @@ const IIDManager& CBugset::getCodeElements() const
     return *m_codeElements;
 }
 
+StringVector CBugset::getBuggedCodeElements(time_t revisionTime) {
+    StringVector bugs;
+
+    for (auto elem : *m_reports) {
+        for (auto ceRepPair : elem.second) {
+            auto data = (*m_reportDatas)[ceRepPair.second];
+            if (data.reportTime <= revisionTime && revisionTime <= data.fixTime) {
+                auto codeElementName = m_codeElements->getValue(ceRepPair.first);
+                bugs.push_back(codeElementName);
+                std::cout << "Bugged code element found: " << codeElementName << std::endl;
+            }
+        }
+    }
+    return bugs;
+}
 void CBugset::addReported(const String& revisionNumber, const String& codeElementName, RevNumType const reportId, Report& data)
 {
     if (!m_revisions->containsValue(revisionNumber)) {

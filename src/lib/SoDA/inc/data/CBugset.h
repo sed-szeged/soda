@@ -144,6 +144,13 @@ public:
     StringVector getRevisions() const;
 
     /**
+    * @brief Returns bugged code elements based on the given time.
+    * @param revisionTime The designated time.
+    * @return Code elements which were bugged at the given time.
+    */
+    virtual StringVector getBuggedCodeElements(time_t revisionTime);
+
+    /**
     * @brief Adds a code element with a specified revision number and state.
     * @param revisionNumber  Revision number.
     * @param codeElementName  Code element name.

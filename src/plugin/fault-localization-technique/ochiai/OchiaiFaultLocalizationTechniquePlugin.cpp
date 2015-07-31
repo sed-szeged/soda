@@ -78,7 +78,7 @@ void OchiaiFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &clust
     std::ofstream ochiaiStreamDetailed;
     if (writeDetails) {
         ochiaiStreamDetailed.open((output + "/ochiai.details.csv").c_str());
-        ochiaiStreamDetailed << "#revision; code element; ef; ep; nf; np; ochiai" << std::endl;
+        ochiaiStreamDetailed << "@ ef@ ep@ nf@ np@ ef/(ef+ep)@ nf/(nf+np)@ ochiai" << std::endl;
     }
 
     CCoverageMatrix *coverageMatrix = m_data->getCoverage();
@@ -138,8 +138,18 @@ void OchiaiFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &clust
 
         (*m_distribution)[ochiai]++;
 
-        if (writeDetails)
-            ochiaiStreamDetailed << m_revision << ";" << cid << ";" << failedCovered << ";" << passedCovered << ";" << failedNotCovered << ";" << passedNotCovered << ";" << ochiai << std::endl;
+        if (writeDetails) {
+            double efperefnp = 0;
+            if ((failedCovered + passedCovered) > 0) {
+                efperefnp = (double)failedCovered / (failedCovered + passedCovered);
+            }
+            double nfpernfnp = 0;
+            if ((failedNotCovered + passedNotCovered) > 0) {
+                nfpernfnp = (double)failedNotCovered / (failedNotCovered + passedNotCovered);
+            }
+            //ef@ ep@ nf@ np@ ef / (ef + ep)@ nf / (nf + np)@
+            ochiaiStreamDetailed << coverageMatrix->getCodeElements().getValue(cid) << "@" << failedCovered << "@" << passedCovered << "@" << failedNotCovered << "@" << passedNotCovered << "@" << efperefnp << "@" << nfpernfnp << "@" << ochiai << std::endl;
+        }
     }
 
     if (writeDetails)
