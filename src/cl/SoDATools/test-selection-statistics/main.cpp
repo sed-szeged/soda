@@ -48,6 +48,9 @@ int main(int argc, char *argv[])
             ("results-data,r", value<String>(), "input file containing test execution results")
             ("bugs-data,b", value<String>(), "input file containing bug reports")
             ("output-dir,o", value<String>(), "output dir, if specified .dat files will be generated")
+            ("projectName,p", value<String>(), "project name")
+            ("slice-size,s", value<int>(), "histogram slice size")
+            ("slice-number,n", value<int>(), "histogram slice number")
             ("testcase-coverage", "computes only the test case coverage related statistics")
             ("function-coverage", "computes only the function related statistics")
             ("changes", "computes ontly the change related statistics")
@@ -194,6 +197,24 @@ int processArgs(int ac, char *av[])
                 mgr.getSelectionData()->filterToCoverage();
             }
         }
+
+        std::string projectName;
+        int slice_size, slice_number;
+
+        if ( vm.count("projectName") ) {
+            projectName = vm["projectName"].as<String>();
+        }
+
+        if ( vm.count("slice-size") ) {
+            slice_size = vm["slice-size"].as<int>();
+        }
+
+        if ( vm.count("slice-number") ) {
+            slice_number = vm["slice-number"].as<int>();
+        }
+
+        mgr.setHistogramParameters(projectName, slice_size, slice_number);
+
 
         mgr.calcStatistics();
     } catch(std::exception& e) {

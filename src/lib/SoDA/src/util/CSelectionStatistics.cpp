@@ -19,13 +19,27 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "boost/lexical_cast.hpp"
 #include "util/CSelectionStatistics.h"
 #include <sstream>
 #include <algorithm>
+#include <math.h>
 
 using namespace std;
 
 namespace soda {
+
+struct BugStatistic {
+    std::set<RevNumType> nrOfFixes;
+    std::set<RevNumType> nrOfAffectedCEs;
+    time_t fixTime;
+};
+
+struct CEStatistic {
+    std::set<RevNumType> nrOfFixes;
+    std::set<RevNumType> nrOfAffectedBugs;
+};
+
 
 CSelectionStatistics::CSelectionStatistics(CSelectionData *data) :
     m_selectionData(data)
@@ -70,12 +84,21 @@ void CSelectionStatistics::calcCoverageRelatedStatistics(rapidjson::Document &do
     doc.AddMember("density", covered / (nrOfTestCases * nrOfCodeElements), doc.GetAllocator());
     doc.AddMember("average_test_cases_per_code_elements", covered / nrOfCodeElements, doc.GetAllocator());
     doc.AddMember("average_code_elements_per_test_cases", covered / nrOfTestCases, doc.GetAllocator());
+
     rapidjson::Value testCov(rapidjson::kObjectType);
     toJson(dataTestCases, testCov, doc);
     doc.AddMember("test_coverage_histogram", testCov, doc.GetAllocator());
+
+
+    outCodeHistogram( nrOfCodeElements, dataCodeElements );
+    outTestHistogram(nrOfTestCases, dataTestCases );
+
+
     rapidjson::Value codeCov(rapidjson::kObjectType);
     toJson(dataCodeElements, codeCov, doc);
     doc.AddMember("code_coverage_histogram", codeCov, doc.GetAllocator());
+
+
 }
 
 /*
@@ -187,11 +210,7 @@ void CSelectionStatistics::calcBugRelatedStatistics(rapidjson::Document &doc)
 
 void CSelectionStatistics::calcBugStatisticsForAllBugs(rapidjson::Document &doc)
 {
-    struct BugStatistic {
-        std::set<RevNumType> nrOfFixes;
-        std::set<RevNumType> nrOfAffectedCEs;
-        time_t fixTime;
-    };
+
     std::map<RevNumType, BugStatistic> bugStats;
     ReportDataMap const& reportDatas = m_selectionData->getBugs()->getReports();
     for (ReportDataMap::const_iterator it = reportDatas.begin(); it != reportDatas.end(); ++it) {
@@ -247,7 +266,7 @@ void CSelectionStatistics::calcBugStatisticsForAllBugs(rapidjson::Document &doc)
             numFixesStat.AddMember("med", avg, doc.GetAllocator());
         }
         else { // one middle
-            numFixesStat.AddMember("med", fixesVec[std::ceil(fixesVec.size() / 2)], doc.GetAllocator());
+            numFixesStat.AddMember("med", fixesVec[ceil(fixesVec.size() / 2)], doc.GetAllocator());
         }
         bugStatistics.AddMember("number_of_fixes", numFixesStat, doc.GetAllocator());
     }
@@ -265,7 +284,7 @@ void CSelectionStatistics::calcBugStatisticsForAllBugs(rapidjson::Document &doc)
             numAffectedCEStat.AddMember("med", avg, doc.GetAllocator());
         }
         else { // one middle
-            numAffectedCEStat.AddMember("med", affectedCEVec[std::ceil((float)affectedCEVec.size() / 2)], doc.GetAllocator());
+            numAffectedCEStat.AddMember("med", affectedCEVec[ceil((float)affectedCEVec.size() / 2)], doc.GetAllocator());
         }
         bugStatistics.AddMember("number_of_affected_ce", numAffectedCEStat, doc.GetAllocator());
     }
@@ -275,11 +294,6 @@ void CSelectionStatistics::calcBugStatisticsForAllBugs(rapidjson::Document &doc)
 
 void CSelectionStatistics::calcBugStatisticsForAllCEs(rapidjson::Document &doc)
 {
-    struct CEStatistic {
-        std::set<RevNumType> nrOfFixes;
-        std::set<RevNumType> nrOfAffectedBugs;
-    };
-
     std::map<RevNumType, CEStatistic> ceStats;
 
     ReportMap const& reportMap = m_selectionData->getBugs()->getReportMap();
@@ -329,7 +343,7 @@ void CSelectionStatistics::calcBugStatisticsForAllCEs(rapidjson::Document &doc)
             numberOfFixesStat.AddMember("med", avg, doc.GetAllocator());
         }
         else { // one middle
-            numberOfFixesStat.AddMember("med", fixesVec[std::ceil((float)fixesVec.size() / 2)], doc.GetAllocator());
+            numberOfFixesStat.AddMember("med", fixesVec[ceil((float)fixesVec.size() / 2)], doc.GetAllocator());
         }
         ceStatistics.AddMember("number_of_fixes", numberOfFixesStat, doc.GetAllocator());
     }
@@ -346,6 +360,62 @@ void CSelectionStatistics::toJson(IdxIdxMap &data, rapidjson::Value &val, rapidj
         rapidjson::Value value;
         value.SetUint64(it->second);
         val.AddMember(key, value, root.GetAllocator());
+    }
+}
+
+void CSelectionStatistics::setHistogramParameters(String projectNameString, int sliceSize, int sliceNumber, String outputDir)
+{
+    m_pojectName = projectNameString;
+    m_sliceSize = sliceSize;
+    m_sliceNumber = sliceNumber;
+    m_outputDir = outputDir;
+}
+
+void CSelectionStatistics::outCodeHistogram( int nrOfCodeElements, IdxIdxMap dataCodeElements )
+{
+    std::ofstream outCodeHistogramSize, outCodeHistogramNumber;
+    string codeHistogramSizeFileName = m_outputDir+"/"+m_pojectName+"-cov-hist-code-s"+boost::lexical_cast<std::string>(m_sliceSize)+".csv";
+    string codeHistogramNumberFileName = m_outputDir+"/"+m_pojectName+"-cov-hist-code-n"+boost::lexical_cast<std::string>(m_sliceNumber)+".csv";
+
+    outCodeHistogramSize.open(codeHistogramSizeFileName.c_str());
+    outCodeHistogramSize<<"intervals;count\n";
+    for(int i = 0 ; i < nrOfCodeElements ; i=i+m_sliceSize){
+        int sum = 0;
+        for(int j = 0 ; j < m_sliceSize; j++) sum += dataCodeElements[i+j];
+        outCodeHistogramSize<<i<<"-"<<i+m_sliceSize-1<<";"<<sum<<"\n";
+    }
+
+    outCodeHistogramNumber.open(codeHistogramNumberFileName.c_str());
+    outCodeHistogramNumber<<"intervals;count\n";
+    for(int i = 0 ; i < m_sliceNumber  ; i++){
+        int sum = 0;
+        for(int j = 0 ; j < ceil(nrOfCodeElements/m_sliceNumber); j++) sum += dataCodeElements[(i*ceil(nrOfCodeElements/m_sliceNumber) )+j];
+        outCodeHistogramNumber<< (i*ceil(nrOfCodeElements/m_sliceNumber)) <<"-"<< ((i+1)*ceil(nrOfCodeElements/m_sliceNumber))-1 <<";"<<sum<<"\n";
+    }
+}
+
+
+
+void CSelectionStatistics::outTestHistogram( int nrOfTestCases, IdxIdxMap dataTestCases )
+{
+    std::ofstream outTestHistogramSize, outTestHistogramNumber;
+    string testHistogramSizeFileName = m_outputDir+"/"+m_pojectName+"-cov-hist-test-s"+boost::lexical_cast<std::string>(m_sliceSize)+".csv";
+    string testHistogramNumberFileName = m_outputDir+"/"+m_pojectName+"-cov-hist-test-n"+boost::lexical_cast<std::string>(m_sliceNumber)+".csv";
+
+    outTestHistogramSize.open(testHistogramSizeFileName.c_str());
+    outTestHistogramSize<<"intervals;count\n";
+    for(int i = 0 ; i < nrOfTestCases ; i=i+m_sliceSize){
+        int sum = 0;
+        for(int j = 0 ; j < m_sliceSize; j++) sum += dataTestCases[i+j];
+        outTestHistogramSize<<i<<"-"<<i+m_sliceSize-1<<";"<<sum<<"\n";
+    }
+
+    outTestHistogramNumber.open(testHistogramNumberFileName.c_str());
+    outTestHistogramNumber<<"intervals;count\n";
+    for(int i = 0 ; i < m_sliceNumber  ; i++){
+        int sum = 0;
+        for(int j = 0 ; j < ceil(nrOfTestCases/m_sliceNumber); j++) sum += dataTestCases[(i*ceil(nrOfTestCases/m_sliceNumber) )+j];
+        outTestHistogramNumber<< (i*ceil(nrOfTestCases/m_sliceNumber)) <<"-"<< ((i+1)*ceil(nrOfTestCases/m_sliceNumber))-1 <<";"<<sum<<"\n";
     }
 }
 

@@ -67,6 +67,7 @@ void CDataManager::calcStatistics()
     }
 
     CSelectionStatistics stats = CSelectionStatistics(m_selectionData);
+    stats.setHistogramParameters(m_pojectName,m_sliceSize,m_sliceNumber, m_outputDir);
     FILE* file = stdout;
     if (m_testMask & (tmTestcaseCoverage | tmFunctionCoverage)) {
         if (!m_outputDir.empty()) {
@@ -120,6 +121,13 @@ void CDataManager::calcStatistics()
             fclose(file);
         }
     }
+}
+
+void CDataManager::setHistogramParameters(String projectNameString, int sliceSize, int sliceNumber)
+{
+    m_pojectName = projectNameString;
+    m_sliceSize = sliceSize;
+    m_sliceNumber = sliceNumber;
 }
 
 CSelectionData* CDataManager::getSelectionData()

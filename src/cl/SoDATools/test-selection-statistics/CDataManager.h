@@ -113,6 +113,8 @@ public:
      */
     void setTestMask(int mask);
 
+    void setHistogramParameters(String projectNameString, int sliceSize, int sliceNumber);
+
 private:
 
     /**
@@ -129,6 +131,10 @@ private:
      * @brief Test mask stores the requested statistic methods.
      */
     int m_testMask;
+
+    String m_pojectName;
+    int m_sliceSize;
+    int m_sliceNumber;
 };
 
 } // namespace soda

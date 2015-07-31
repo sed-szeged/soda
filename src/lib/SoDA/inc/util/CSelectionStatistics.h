@@ -79,6 +79,12 @@ public:
      */
     void toJson(IdxIdxMap &data, rapidjson::Value& val, rapidjson::Document &root);
 
+    void setHistogramParameters(String projectNameString, int sliceSize, int sliceNumber, String outputDir);
+
+    void outCodeHistogram( int nrOfCodeElements, IdxIdxMap dataCodeElements );
+
+    void outTestHistogram( int nrOfTestCases, IdxIdxMap dataTestCases );
+
 private:
 
     /**
@@ -95,6 +101,11 @@ private:
      * @brief Stores selection data.
      */
     CSelectionData *m_selectionData;
+
+    String m_pojectName;
+    int m_sliceSize;
+    int m_sliceNumber;
+    String m_outputDir;
 };
 
 } // namespace soda
