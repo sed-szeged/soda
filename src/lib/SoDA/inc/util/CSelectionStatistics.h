@@ -85,6 +85,8 @@ public:
 
     void outTestHistogram( int nrOfTestCases, IdxIdxMap dataTestCases );
 
+    void outTestRunAndExecInfo(IdxIdxMap execData, int fail, int notFail);
+
 private:
 
     /**

@@ -144,6 +144,7 @@ void CSelectionStatistics::calcFailStatistics(rapidjson::Document &doc)
         data[count]++;
     }
 
+
     doc.AddMember("number_of_total_fails", failed, doc.GetAllocator());
     doc.AddMember("average_failed_test_cases_per_revision", (float)failed / nrOfRevisions, doc.GetAllocator());
 
@@ -164,6 +165,8 @@ void CSelectionStatistics::calcCovResultsSummary(rapidjson::Document &doc)
     IndexType nOfTestCases = m_selectionData->getCoverage()->getNumOfTestcases();
     IndexType nOfRevisions = m_selectionData->getResults()->getNumOfRevisions();
     IntVector revisions = m_selectionData->getResults()->getRevisionNumbers();
+    IndexType sumFailedCnt = 0;
+    IndexType sumExecCnt = 0;
 
     doc.AddMember("number_of_revisions", nOfRevisions, doc.GetAllocator());
     doc.AddMember("number_of_test_cases", nOfTestCases, doc.GetAllocator());
@@ -177,8 +180,10 @@ void CSelectionStatistics::calcCovResultsSummary(rapidjson::Document &doc)
             IndexType rev = revisions[i];
             if (m_selectionData->getResults()->getExecutionBitList(rev).at(tcidInResult)) {
                 execCnt++;
+                sumExecCnt++;
                 if (!m_selectionData->getResults()->getPassedBitList(rev).at(tcidInResult)) {
                     failedCnt++;
+                    sumFailedCnt++;
                 }
             }
         }
@@ -190,6 +195,8 @@ void CSelectionStatistics::calcCovResultsSummary(rapidjson::Document &doc)
         key.SetString(static_cast<ostringstream*>( &(ostringstream() << tcid) )->str().c_str(), doc.GetAllocator());
         tcInfos.AddMember(key, tcInfo, doc.GetAllocator());
     }
+
+    outTestRunAndExecInfo( execData, sumFailedCnt , sumExecCnt-sumFailedCnt);
 
     doc.AddMember("test_case_info", tcInfos, doc.GetAllocator());
 
@@ -418,5 +425,29 @@ void CSelectionStatistics::outTestHistogram( int nrOfTestCases, IdxIdxMap dataTe
         outTestHistogramNumber<< (i*ceil(nrOfTestCases/m_sliceNumber)) <<"-"<< ((i+1)*ceil(nrOfTestCases/m_sliceNumber))-1 <<";"<<sum<<"\n";
     }
 }
+
+
+
+
+void CSelectionStatistics::outTestRunAndExecInfo(IdxIdxMap execData, int fail, int notFail)
+{
+    int exec=0, notExec=0;
+    for( IdxIdxMap::iterator it = execData.begin() ; it != execData.end() ; ++it){
+        if( int(it->first) ){
+            exec = int(it->second);
+        } else {
+            notExec = int(it->second);
+        }
+    }
+
+    std::ofstream outTestInfo;
+    string outTestInfoFileName = m_outputDir+"/"+m_pojectName+"-test-run-and-exec-info.csv";
+    outTestInfo.open(outTestInfoFileName.c_str());
+    outTestInfo<<"test cases;exec. test cases;not exec. test cases;pass test cases;fail test cases\n";
+    outTestInfo<<exec+notExec<<";"<<exec<<";"<<notExec<<";"<<notFail<<";"<<fail;
+
+}
+
+
 
 } // namespace soda
