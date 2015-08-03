@@ -157,7 +157,6 @@ StringVector CBugset::getBuggedCodeElements(time_t revisionTime) {
             if (data.reportTime <= revisionTime && revisionTime <= data.fixTime) {
                 auto codeElementName = m_codeElements->getValue(ceRepPair.first);
                 bugs.push_back(codeElementName);
-                std::cout << "Bugged code element found: " << codeElementName << std::endl;
             }
         }
     }

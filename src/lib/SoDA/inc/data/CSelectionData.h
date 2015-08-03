@@ -213,7 +213,7 @@ protected:
     /**
      * @brief Stores id,name pairs of bug report code elements.
      */
-    CIDMapper *m_bugCodeElements;
+    CIDManager *m_bugCodeElements;
 
     /**
      * @brief Stores changeset data.

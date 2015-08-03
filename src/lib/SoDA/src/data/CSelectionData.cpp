@@ -30,7 +30,7 @@ CSelectionData::CSelectionData() :
 
     m_changesetCodeElements(new CIDMapper(m_globalCodeElements)),
     m_coverageCodeElements(new CIDMapper(m_globalCodeElements)),
-    m_bugCodeElements(new CIDMapper(m_globalCodeElements)),
+    m_bugCodeElements(new CIDManager()),
     m_coverageTestcases(new CIDMapper(m_globalTestcases)),
     m_resultsTestcases(new CIDMapper(m_globalTestcases)),
 
@@ -102,7 +102,7 @@ void CSelectionData::globalize()
 {
     for (IndexType i = 0; i < m_globalCodeElements->size(); i++) {
         String cename = (*m_globalCodeElements)[i];
-        m_bugs->addCodeElementName(cename);
+        //m_bugs->addCodeElementName(cename);
         m_changeset->addCodeElementName(cename);
         m_coverage->addCodeElementName(cename);
     }

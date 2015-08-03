@@ -131,11 +131,12 @@ std::string getJsonString()
     std::string json = R"template({
     "coverage-data": "coverage file path",
     "results-data": "results file path",
-    "bug-data": "bugset unused",
+    "bug-data": "bugs file path",
     "revision": 1,
+    "revision-timestamp": 1348408576,
     "cluster-algorithm": "one-cluster",
     "metrics": [ ],
-    "base-metrics": [ "coverage", "partition-metric", "tpce" ],
+    "base-metrics": [ "coverage", "partition-metric", "tpce", "T", "P" ],
     "metric-notations":
     {
         "coverage": "COV",
@@ -214,7 +215,6 @@ void saveResults(rapidjson::Document &results)
 {
     std::stringstream base;
     std::stringstream ext;
-    bool hasBase = false, hasExt = false;
     base << ";";
     ext << ";";
     for (std::set<std::string>::iterator it = metricsCalculated.begin(); it != metricsCalculated.end(); it++) {
@@ -224,15 +224,20 @@ void saveResults(rapidjson::Document &results)
         }
 
         if (baseMetrics.count(*it)) {
-            hasBase = true;
             base << metricName << ";";
         }
         else {
-            hasExt = true;
             ext << metricName << ";";
         }
     }
-    base << std::endl;
+
+    // FIXME: Implement dynamic generation.
+    // FIXME: Multiple clusters.
+    base << "T;P;" << std::endl;
+    ext << "TestPresent;TestRun;TestPass;";
+    if (results["full"].HasMember("BuggyP()")) {
+        ext << "BuggyP();";
+    }
     ext << std::endl;
 
     std::map<std::string, CClusterDefinition>::iterator clusterIt;
@@ -248,17 +253,30 @@ void saveResults(rapidjson::Document &results)
                 ext << results[clusterName.c_str()][(*it).c_str()].GetDouble() << ";";
             }
         }
+
+        for (rapidjson::Value::MemberIterator it = results[clusterName.c_str()].MemberBegin(); it != results[clusterName.c_str()].MemberEnd(); ++it) {
+            if (metricsCalculated.count(it->name.GetString())) {
+                continue;
+            }
+
+            if (baseMetrics.count(it->name.GetString())) {
+                base << it->value.GetInt() << ";";
+            }
+            else {
+                ext << it->value.GetInt() << ";";
+            }
+        }
         base << std::endl;
         ext << std::endl;
     }
 
-    if (hasBase) {
+    {
         std::ofstream out(std::string(outputDir + "/" + projectName + "-metrics-base.csv").c_str());
         out << base.str();
         out.close();
     }
 
-    if (hasExt) {
+    {
         std::ofstream out(std::string(outputDir + "/" + projectName + "-metrics-ext.csv").c_str());
         out << ext.str();
         out.close();
@@ -315,6 +333,7 @@ void processJsonFiles(String path)
         metricNameMapping = &reader["metric-notations"];
 
         revision = reader["revision"].GetInt();
+        time_t revTime = reader["revision-timestamp"].GetUint64();
         projectName = reader["project-name"].GetString();
         outputDir = reader["output-dir"].GetString();
         if (outputDir.empty()) {
@@ -336,6 +355,7 @@ void processJsonFiles(String path)
             resPath = jsonPath.parent_path().string() + "/" + resPath;
         }
 
+        // TODO: We should lift the results file mandatory becuase there are computable metrics which doesn't requires results data.
         if (exists(covPath) && exists(resPath)) {
             (std::cerr << "[INFO] loading coverage from " << covPath << " ...").flush();
             selectionData->loadCoverage(covPath);
@@ -346,6 +366,16 @@ void processJsonFiles(String path)
         else {
             std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
             return;
+        }
+
+        String bugPath = reader["bug-data"].GetString();
+        if (exists(bugPath)) {
+            (std::cerr << "[INFO] loading bugs from " << bugPath << " ...").flush();
+            selectionData->loadBugs(bugPath);
+            (std::cerr << " done\n").flush();
+        }
+        else {
+            std::cerr << "[WARNING] Not existing bug data path in config file " << path << "." << std::endl;
         }
 
         if (reader["globalize"].GetBool()) {
@@ -373,6 +403,32 @@ void processJsonFiles(String path)
             if (metricsCalculated.find(*it) == metricsCalculated.end()) {
                 calculateMetric(selectionData, *it, results);
             }
+        }
+
+        // FIXME: This is a hack... Find a general way for it maybe with unifying the different tools.
+        // TODO: Implement calculations for clusters also.
+        // The following codes will add additional datas to the json object.
+        // Base file:
+        // T = Testcases
+        results["full"].AddMember("T", selectionData->getResults()->getNumOfTestcases(), results.GetAllocator());
+        // P = procedures FIXME: rename it to CE?
+        results["full"].AddMember("P", selectionData->getCoverage()->getNumOfCodeElements(), results.GetAllocator());
+        // Ext file:
+        // TestPresent
+        results["full"].AddMember("TestPresent", selectionData->getResults()->getNumOfTestcases(), results.GetAllocator());
+        // TestRun
+        results["full"].AddMember("TestRun", selectionData->getResults()->getExecutionBitList(revision).count(), results.GetAllocator());
+        // TestPassed
+        results["full"].AddMember("TestPassed", selectionData->getResults()->getPassedBitList(revision).count(), results.GetAllocator());
+        if (!bugPath.empty()) {
+            StringVector bugCEs = selectionData->getBugs()->getBuggedCodeElements(revTime);
+            int count = 0;
+            for (auto ce : selectionData->getCoverage()->getCodeElements().getValueList()) {
+                if (std::find(bugCEs.begin(), bugCEs.end(), ce) != bugCEs.end()) {
+                    ++count;
+                }
+            }
+            results["full"].AddMember("BuggyP()", count, results.GetAllocator());
         }
 
         saveResults(results);
