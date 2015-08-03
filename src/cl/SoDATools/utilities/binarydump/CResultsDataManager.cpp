@@ -124,4 +124,37 @@ void CResultsDataManager::dumpPassFail(const String& filepath, bool psize, char 
         WARN("There is no results data to be dumped.");
 }
 
+void CResultsDataManager::dumpTimeline(const String& filepath, char csep, char rsep)
+{
+    INFO(getPrintInfo(), "CResultsDataManager::dumpTimeline(\"" << filepath << "\")");
+    if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
+        ofstream O((filepath + ".csv").c_str());
+        CResultsMatrix* results = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults();
+        IntVector revList = results->getRevisionNumbers();
+        const IIDManager& idm = results->getTestcases();
+
+        O << csep;
+        for (IndexType idx = 0; idx < revList.size(); ++idx) {
+            O << revList[idx] << csep;
+        }
+        O << rsep;
+
+        for (IndexType idx = 0; idx < idm.size(); ++idx) {
+            O << idm[idx] << csep;
+            for (IndexType ridx = 0; ridx < revList.size(); ++ridx) {
+                if (results->isExecuted(revList[ridx], idm[idx])) {
+                    O << results->isPassed(revList[ridx], idm[idx]);
+                }
+                O << csep;
+            }
+            O << rsep;
+        }
+
+
+        O.close();
+    } else {
+        WARN("There is no results data to be dumped.");
+    }
+}
+
 } // namespace soda

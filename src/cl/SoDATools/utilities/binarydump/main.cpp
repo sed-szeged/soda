@@ -134,6 +134,10 @@ int processArgs(options_description desc, int ac, char* av[])
             String tmp = vm["dump-results-passfail"].as<String>();
             handler->getResultsDataMgr().dumpPassFail(tmp);
         }
+        if (vm.count("dump-results-timeline")) {
+            String tmp = vm["dump-results-timeline"].as<String>();
+            handler->getResultsDataMgr().dumpTimeline(tmp);
+        }
 
         if (vm.count("dump-changes-code-elements")) {
             String tmp = vm["dump-changes-code-elements"].as<String>();
@@ -171,6 +175,7 @@ int main(int argc, char *argv[])
             ("dump-results-revisions",          value<String>(), "output file")
             ("dump-results-execution",          value<String>(), "output file")
             ("dump-results-passfail",           value<String>(), "output file")
+            ("dump-results-timeline",           value<String>(), "output file")
             ("load-changes,x",                    value<String>(), "input file")
             ("dump-changes-code-elements",      value<String>(), "output file")
             ("dump-changes",                    value<String>(), "output file")
