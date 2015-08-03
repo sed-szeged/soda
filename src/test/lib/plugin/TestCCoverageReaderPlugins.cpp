@@ -271,8 +271,8 @@ TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginMethod)
     EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
     EXPECT_EQ(1043u, coverageMatrix->getNumOfCodeElements());
 
-    EXPECT_FALSE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description/createSuiteDescription(Ljava/lang/String;[Ljava/lang/annotation/Annotation;)Lorg/junit/runner/Description;"));
-    EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description/createTestDescription(Ljava/lang/Class;Ljava/lang/String;)Lorg/junit/runner/Description;"));
+    EXPECT_FALSE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description/createSuiteDescription(Ljava/lang/String,[Ljava/lang/annotation/Annotation,)Lorg/junit/runner/Description,"));
+    EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description/createTestDescription(Ljava/lang/Class,Ljava/lang/String,)Lorg/junit/runner/Description,"));
 }
 
 

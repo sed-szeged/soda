@@ -155,8 +155,8 @@ void JacocoJavaCoverageReaderPlugin::readFromDirectory1stPass(fs::path p, size_t
                                 if (methodNode.first == "method") {
                                     std::stringstream codeElement;
                                     codeElement << className << "/" << methodNode.second.get<String>("<xmlattr>.name") << methodNode.second.get<String>("<xmlattr>.desc");
-
-                                    m_coverage->addCodeElementName(codeElement.str());
+                                    String methodName = boost::replace_all_copy(codeElement.str(), ";", ",");
+                                    m_coverage->addCodeElementName(methodName);
                                     continue;
                                 }
                             }
@@ -235,10 +235,11 @@ void JacocoJavaCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
                                 if (m_granularity == METHOD && methodNode.first == "method") {
                                     std::stringstream codeElement;
                                     codeElement << className << "/" << methodNode.second.get<String>("<xmlattr>.name") << methodNode.second.get<String>("<xmlattr>.desc");
+                                    String methodName = boost::replace_all_copy(codeElement.str(), ";", ",");
 
                                     BOOST_FOREACH(ptree::value_type &counterNode, methodNode.second.get_child("")) {
                                         if (counterNode.first == "counter" && counterNode.second.get<String>("<xmlattr>.type") == "METHOD") {
-                                            m_coverage->addOrSetRelation(tcname, codeElement.str(), (counterNode.second.get<String>("<xmlattr>.covered") != "0"));
+                                            m_coverage->addOrSetRelation(tcname, methodName, (counterNode.second.get<String>("<xmlattr>.covered") != "0"));
                                             break;
                                         }
                                     }
