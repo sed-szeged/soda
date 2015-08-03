@@ -207,10 +207,14 @@ int processArgs(int ac, char *av[])
 
         if ( vm.count("slice-size") ) {
             slice_size = vm["slice-size"].as<int>();
+        } else {
+            slice_size = 10;
         }
 
         if ( vm.count("slice-number") ) {
             slice_number = vm["slice-number"].as<int>();
+        } else {
+            slice_number = 30;
         }
 
         mgr.setHistogramParameters(projectName, slice_size, slice_number);
