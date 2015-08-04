@@ -26,7 +26,6 @@
 namespace soda {
 
 OchiaiFaultLocalizationTechniquePlugin::OchiaiFaultLocalizationTechniquePlugin() :
-    m_values(new FLValues()),
     m_distribution(new FLDistribution()),
     m_data(NULL),
     m_revision(0)
@@ -35,7 +34,6 @@ OchiaiFaultLocalizationTechniquePlugin::OchiaiFaultLocalizationTechniquePlugin()
 
 OchiaiFaultLocalizationTechniquePlugin::~OchiaiFaultLocalizationTechniquePlugin()
 {
-    delete m_values;
     delete m_distribution;
 }
 
@@ -49,15 +47,11 @@ std::string OchiaiFaultLocalizationTechniquePlugin::getDescription()
     return "Calculates the ochiai value for each code element.";
 }
 
-void OchiaiFaultLocalizationTechniquePlugin::init(CSelectionData *data, IndexType revision)
+void OchiaiFaultLocalizationTechniquePlugin::init(CSelectionData *data, ClusterMap *clusters, IndexType revision)
 {
     m_data = data;
+    clusterList = clusters;
     m_revision = revision;
-}
-
-OchiaiFaultLocalizationTechniquePlugin::FLValues& OchiaiFaultLocalizationTechniquePlugin::getValues()
-{
-    return *m_values;
 }
 
 OchiaiFaultLocalizationTechniquePlugin::FLDistribution& OchiaiFaultLocalizationTechniquePlugin::getDistribution()
@@ -65,96 +59,122 @@ OchiaiFaultLocalizationTechniquePlugin::FLDistribution& OchiaiFaultLocalizationT
     return *m_distribution;
 }
 
-void OchiaiFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &cluster, const std::string &output)
+void OchiaiFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
 {
     (std::cerr << "[INFO] Ochiai ... ").flush();
-
-    delete m_values;
-    m_values = new FLValues();
-    m_values->SetObject();
     m_distribution->clear();
-
-    bool writeDetails = !output.empty();
-    std::ofstream ochiaiStreamDetailed;
-    if (writeDetails) {
-        ochiaiStreamDetailed.open((output + "/ochiai.details.csv").c_str());
-        ochiaiStreamDetailed << "@ ef@ ep@ nf@ np@ ef/(ef+ep)@ nf/(nf+np)@ ochiai" << std::endl;
-    }
 
     CCoverageMatrix *coverageMatrix = m_data->getCoverage();
 
-    std::map<IndexType, IndexType> tcMap;
-    IntVector testCaseIds = cluster.getTestCases();
-    IntVector codeElementIds = cluster.getCodeElements();
+    std::map<std::string, CClusterDefinition>::iterator it;
+    for (it = clusterList->begin(); it != clusterList->end(); it++) {
+        std::map<IndexType, IndexType> tcMap;
+        IntVector testCaseIds = (*it).second.getTestCases();
+        IntVector codeElementIds = (*it).second.getCodeElements();
 
-    for (IndexType i = 0; i < testCaseIds.size(); i++) {
-        tcMap[testCaseIds[i]] = m_data->translateTestcaseIdFromCoverageToResults(testCaseIds[i]);
-    }
+        // FIXME: Remove code duplication.
+        bool hasCluster = res.HasMember(it->first.c_str());
+        rapidjson::Value *clusterObj = nullptr;
+        // group for cluster data
+        if (!hasCluster) {
+            res.AddMember(rapidjson::Value(it->first.c_str(), res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+            clusterObj = &res[it->first.c_str()];
+        }
+        else {
+            clusterObj = &res[it->first.c_str()];
+        }
 
-    for (IndexType i = 0; i < codeElementIds.size(); i++) {
-        IndexType cid = codeElementIds[i];
-        IndexType failedCovered = 0;
-        IndexType passedCovered = 0;
-        IndexType failedNotCovered = 0;
-        IndexType passedNotCovered = 0;
-        for (IndexType j = 0; j < testCaseIds.size(); j++) {
-            IndexType tcid = testCaseIds[j];
-            IndexType tcidInResults = tcMap[tcid];
-            if (m_data->getResults()->getExecutionBitList(m_revision).at(tcidInResults)) {
-                bool isPassed = m_data->getResults()->getPassedBitList(m_revision).at(tcidInResults);
-                bool isCovered = coverageMatrix->getBitMatrix().get(tcid, cid);
-                if (isCovered) {
-                    if (!isPassed) {
-                        failedCovered++;
-                    } else {
-                        passedCovered++;
-                    }
-                } else {
-                    if (!isPassed) {
-                        failedNotCovered++;
-                    } else {
-                        passedNotCovered++;
+        if (!hasCluster) {
+            for (IndexType i = 0; i < testCaseIds.size(); i++) {
+                tcMap[testCaseIds[i]] = m_data->translateTestcaseIdFromCoverageToResults(testCaseIds[i]);
+            }
+        }
+
+        for (IndexType i = 0; i < codeElementIds.size(); i++) {
+            IndexType cid = codeElementIds[i];
+            std::string ceIdStr = std::to_string(cid);
+
+            // holds the metric values for one code element
+            rapidjson::Value *ceMetrics;
+            if (!clusterObj->HasMember(ceIdStr.c_str())) {
+                clusterObj->AddMember(rapidjson::Value(ceIdStr.c_str(), res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+                ceMetrics = &(*clusterObj)[ceIdStr.c_str()];
+            }
+            else {
+                ceMetrics = &(*clusterObj)[ceIdStr.c_str()];
+            }
+
+            IndexType failedCovered = 0;
+            IndexType passedCovered = 0;
+            IndexType failedNotCovered = 0;
+            IndexType passedNotCovered = 0;
+
+            if (hasCluster) {
+                failedCovered = (*ceMetrics)["ef"].GetUint64();
+                passedCovered = (*ceMetrics)["ep"].GetUint64();
+                failedNotCovered = (*ceMetrics)["nf"].GetUint64();
+                passedNotCovered = (*ceMetrics)["np"].GetUint64();
+            }
+            else {
+                double efperefep = 0;
+                double nfpernfnp = 0;
+
+                for (IndexType j = 0; j < testCaseIds.size(); j++) {
+                    IndexType tcid = testCaseIds[j];
+                    IndexType tcidInResults = tcMap[tcid];
+
+                    if (m_data->getResults()->getExecutionBitList(m_revision).at(tcidInResults)) {
+                        bool isPassed = m_data->getResults()->getPassedBitList(m_revision).at(tcidInResults);
+                        bool isCovered = coverageMatrix->getBitMatrix().get(tcid, cid);
+                        if (isCovered) {
+                            if (isPassed) {
+                                passedCovered++;
+                            }
+                            else {
+                                failedCovered++;
+                            }
+                        }
+                        else {
+                            if (isPassed) {
+                                passedNotCovered++;
+                            }
+                            else {
+                                failedNotCovered++;
+                            }
+                        }
                     }
                 }
-            }
-        }
-        double ochiai = 0;
-        IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
-        IndexType covered = failedCovered + passedCovered;
-        if (nrOfFailedTestcases > 0 && covered > 0) {
-            double denominator = std::sqrt(nrOfFailedTestcases * covered);
-            if (denominator > 0) {
-                ochiai = (double)failedCovered / denominator;
-            }
-        }
 
-        {
-            rapidjson::Value key;
-            key.SetString(static_cast<std::ostringstream*>( &(std::ostringstream() << cid) )->str().c_str(), m_values->GetAllocator());
-            rapidjson::Value val;
-            val.SetDouble(ochiai);
-            m_values->AddMember(key, val, m_values->GetAllocator());
-        }
+                if ((failedCovered + passedCovered) > 0) {
+                    efperefep = (double)failedCovered / (failedCovered + passedCovered);
+                }
+                if ((failedNotCovered + passedNotCovered) > 0) {
+                    nfpernfnp = (double)failedNotCovered / (failedNotCovered + passedNotCovered);
+                }
 
-        (*m_distribution)[ochiai]++;
+                // ef; ep; nf; np; ef/(ef+ep); nf/(nf+np);
+                ceMetrics->AddMember("ef", failedCovered, res.GetAllocator());
+                ceMetrics->AddMember("ep", passedCovered, res.GetAllocator());
+                ceMetrics->AddMember("nf", failedNotCovered, res.GetAllocator());
+                ceMetrics->AddMember("np", passedNotCovered, res.GetAllocator());
+                ceMetrics->AddMember("ef/(ef+ep)", efperefep, res.GetAllocator());
+                ceMetrics->AddMember("nf/(nf+np)", nfpernfnp, res.GetAllocator());
+            }
 
-        if (writeDetails) {
-            double efperefnp = 0;
-            if ((failedCovered + passedCovered) > 0) {
-                efperefnp = (double)failedCovered / (failedCovered + passedCovered);
+            double ochiai = 0;
+            IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
+            IndexType covered = failedCovered + passedCovered;
+            if (nrOfFailedTestcases > 0 && covered > 0) {
+                double denominator = std::sqrt(nrOfFailedTestcases * covered);
+                if (denominator > 0) {
+                    ochiai = (double)failedCovered / denominator;
+                }
             }
-            double nfpernfnp = 0;
-            if ((failedNotCovered + passedNotCovered) > 0) {
-                nfpernfnp = (double)failedNotCovered / (failedNotCovered + passedNotCovered);
-            }
-            //ef@ ep@ nf@ np@ ef / (ef + ep)@ nf / (nf + np)@
-            ochiaiStreamDetailed << coverageMatrix->getCodeElements().getValue(cid) << "@" << failedCovered << "@" << passedCovered << "@" << failedNotCovered << "@" << passedNotCovered << "@" << efperefnp << "@" << nfpernfnp << "@" << ochiai << std::endl;
+
+            ceMetrics->AddMember("ochiai", ochiai, res.GetAllocator());
+            (*m_distribution)[ochiai]++;
         }
     }
-
-    if (writeDetails)
-        ochiaiStreamDetailed.close();
-
     (std::cerr << "done." << std::endl).flush();
 }
 

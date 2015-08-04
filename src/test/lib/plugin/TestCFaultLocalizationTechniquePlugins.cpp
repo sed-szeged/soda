@@ -29,6 +29,8 @@
 
 using namespace soda;
 
+extern CKernel kernel;
+
 class CFaultLocalizationTechniquePluginsTest : public testing::Test
 {
 protected:
@@ -36,7 +38,7 @@ protected:
     std::map<std::string, CClusterDefinition> clusterList;
     CSelectionData selection;
     IFaultLocalizationTechniquePlugin *plugin;
-    CKernel kernel;
+    rapidjson::Document results;
 
     virtual void SetUp() {
         // Create selection data.
@@ -57,7 +59,7 @@ protected:
 TEST_F(CFaultLocalizationTechniquePluginsTest, OchiaiMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("ochiai"));
-    EXPECT_NO_THROW(plugin->init(&selection, 12345));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
 
     EXPECT_EQ("ochiai", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
@@ -66,20 +68,20 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, OchiaiMetaInfo)
 TEST_F(CFaultLocalizationTechniquePluginsTest, Ochiai)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("ochiai"));
-    EXPECT_NO_THROW(plugin->init(&selection, 12345));
-    EXPECT_NO_THROW(plugin->calculate(clusterList["full"], "sample"));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+    EXPECT_NO_THROW(plugin->calculate(results));
 
-    EXPECT_EQ(100u, plugin->getValues().MemberCount());
-    EXPECT_DOUBLE_EQ(0.57735026918962584, plugin->getValues()["0"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.57735026918962584, plugin->getValues()["1"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.40824829046386307, plugin->getValues()["2"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.67171717171717171, CTestSuiteScore::flScore(clusterList["full"], plugin->getValues()["0"].GetDouble(), plugin->getDistribution()));
+    EXPECT_EQ(100u, results["full"].MemberCount());
+    EXPECT_DOUBLE_EQ(0.57735026918962584, results["full"]["0"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.57735026918962584, results["full"]["1"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.40824829046386307, results["full"]["2"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.67171717171717171, CTestSuiteScore::flScore(clusterList["full"], results["full"]["0"].GetDouble(), plugin->getDistribution()));
 }
 
 TEST_F(CFaultLocalizationTechniquePluginsTest, TarantulaMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("tarantula"));
-    EXPECT_NO_THROW(plugin->init(&selection, 12345));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
 
     EXPECT_EQ("tarantula", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
@@ -88,12 +90,12 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, TarantulaMetaInfo)
 TEST_F(CFaultLocalizationTechniquePluginsTest, Tarantula)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("tarantula"));
-    EXPECT_NO_THROW(plugin->init(&selection, 12345));
-    EXPECT_NO_THROW(plugin->calculate(clusterList["full"], "sample"));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+    EXPECT_NO_THROW(plugin->calculate(results));
 
-    EXPECT_EQ(100u, plugin->getValues().MemberCount());
-    EXPECT_DOUBLE_EQ(1, plugin->getValues()["0"].GetDouble());
-    EXPECT_DOUBLE_EQ(1, plugin->getValues()["1"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.25, plugin->getValues()["2"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.78787878787878785, CTestSuiteScore::flScore(clusterList["full"], plugin->getValues()["0"].GetDouble(), plugin->getDistribution()));
+    EXPECT_EQ(100u, results["full"].MemberCount());
+    EXPECT_DOUBLE_EQ(1, results["full"]["0"].GetDouble());
+    EXPECT_DOUBLE_EQ(1, results["full"]["1"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.25, results["full"]["2"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.78787878787878785, CTestSuiteScore::flScore(clusterList["full"], results["full"]["0"].GetDouble(), plugin->getDistribution()));
 }

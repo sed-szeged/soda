@@ -46,22 +46,17 @@ public:
     /**
      * @brief Initialize the plugin.
      * @param data The test suite data.
+     * @param clusters List of clusters.
      * @param revisionList The revisions to consider.
      */
-    void init(CSelectionData *data, IndexType revision);
+    void init(CSelectionData *data, ClusterMap *clusters, IndexType revision);
 
     /**
-     * @brief Calculates the score values for each code element in the cluster.
+     * @brief Calculates the score values for each code element in clusters.
      * @param cluster The cluster to use during the calculation.
      * @param output The path to the output directory.
      */
-    void calculate(CClusterDefinition &cluster,  const std::string &output);
-
-    /**
-     * @brief Returns the values of fault localization technique for each code element.
-     * @return
-     */
-    FLValues& getValues();
+    void calculate(rapidjson::Document &res);
 
     /**
      * @brief Returns the distributiuon of fault lcoalization technique values.
@@ -70,9 +65,9 @@ public:
     FLDistribution& getDistribution();
 
 private:
-    FLValues       *m_values;
     FLDistribution *m_distribution;
     CSelectionData *m_data;
+    ClusterMap *clusterList;
     IndexType       m_revision;
 };
 

@@ -40,11 +40,6 @@ class IFaultLocalizationTechniquePlugin
 {
 public:
     /**
-     * @brief The value of fault localization technique for each code element.
-     *        The key is the id of the code element.
-     */
-    typedef rapidjson::Document FLValues;
-    /**
      * @brief The distribution of the fault localization technique values.
      *        The key is the value and the value is the number of the
      *        code elements with that fault localization technique value.
@@ -75,13 +70,7 @@ public:
      * @param data The test suite data.
      * @param revisionList The revisions to consider.
      */
-    virtual void init(CSelectionData *data, IndexType revision) = 0;
-
-    /**
-     * @brief Returns the values of fault localization technique for each code element.
-     * @return
-     */
-    virtual FLValues& getValues() = 0;
+    virtual void init(CSelectionData *data, ClusterMap *clusters, IndexType revision) = 0;
 
     /**
      * @brief Returns the distributiuon of fault lcoalization technique values.
@@ -90,11 +79,10 @@ public:
     virtual FLDistribution& getDistribution() = 0;
 
     /**
-     * @brief Calculates the score values for each code element in the cluster.
-     * @param cluster The cluster to use during the calculation.
-     * @param output The path to the output directory.
+     * @brief Calculates the score values for each code element in the clusters.
+     * @param res Rapidjson document which contains the calculated values.
      */
-    virtual void calculate(CClusterDefinition &cluster,  const std::string &output) = 0;
+    virtual void calculate(rapidjson::Document &res) = 0;
 };
 
 } /* namespace soda */

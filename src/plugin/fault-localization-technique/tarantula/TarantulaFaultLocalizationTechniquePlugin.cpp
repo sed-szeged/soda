@@ -23,7 +23,6 @@
 namespace soda {
 
 TarantulaFaultLocalizationTechniquePlugin::TarantulaFaultLocalizationTechniquePlugin() :
-    m_values(new FLValues()),
     m_distribution(new FLDistribution()),
     m_data(NULL),
     m_revision(0)
@@ -32,7 +31,6 @@ TarantulaFaultLocalizationTechniquePlugin::TarantulaFaultLocalizationTechniquePl
 
 TarantulaFaultLocalizationTechniquePlugin::~TarantulaFaultLocalizationTechniquePlugin()
 {
-    delete m_values;
     delete m_distribution;
 }
 
@@ -46,15 +44,11 @@ std::string TarantulaFaultLocalizationTechniquePlugin::getDescription()
     return "Calculates the tarantula value for each code element.";
 }
 
-void TarantulaFaultLocalizationTechniquePlugin::init(CSelectionData *data, IndexType revision)
+void TarantulaFaultLocalizationTechniquePlugin::init(CSelectionData *data, ClusterMap *clusters, IndexType revision)
 {
     m_data = data;
+    clusterList = clusters;
     m_revision = revision;
-}
-
-TarantulaFaultLocalizationTechniquePlugin::FLValues& TarantulaFaultLocalizationTechniquePlugin::getValues()
-{
-    return *m_values;
 }
 
 TarantulaFaultLocalizationTechniquePlugin::FLDistribution& TarantulaFaultLocalizationTechniquePlugin::getDistribution()
@@ -62,87 +56,124 @@ TarantulaFaultLocalizationTechniquePlugin::FLDistribution& TarantulaFaultLocaliz
     return *m_distribution;
 }
 
-void TarantulaFaultLocalizationTechniquePlugin::calculate(CClusterDefinition &cluster, const std::string &output)
+void TarantulaFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
 {
     (std::cerr << "[INFO] Tarantula ... ").flush();
-
-    delete m_values;
-    m_values = new FLValues();
-    m_values->SetObject();
     m_distribution->clear();
-
-    bool writeDetails = !output.empty();
-    std::ofstream tarantulaStreamDetailed;
-
-    if (writeDetails) {
-        tarantulaStreamDetailed.open((output + "/tarantula.details.csv").c_str());
-        tarantulaStreamDetailed << "#revision; code element; ef; ep; nf; np; tarantula" << std::endl;
-    }
 
     CCoverageMatrix *coverageMatrix = m_data->getCoverage();
 
-    std::map<IndexType, IndexType> tcMap;
-    IntVector testCaseIds = cluster.getTestCases();
-    IntVector codeElementIds = cluster.getCodeElements();
+    std::map<std::string, CClusterDefinition>::iterator it;
+    for (it = clusterList->begin(); it != clusterList->end(); it++) {
 
-    for (IndexType i = 0; i < testCaseIds.size(); i++) {
-        tcMap[testCaseIds[i]] = m_data->translateTestcaseIdFromCoverageToResults(testCaseIds[i]);
-    }
+        std::map<IndexType, IndexType> tcMap;
+        IntVector testCaseIds = it->second.getTestCases();
+        IntVector codeElementIds = it->second.getCodeElements();
 
-    for (IndexType i = 0; i < codeElementIds.size(); i++) {
-        IndexType cid = codeElementIds[i];
-        IndexType failedCovered = 0;
-        IndexType passedCovered = 0;
-        IndexType failedNotCovered = 0;
-        IndexType passedNotCovered = 0;
-        for (IndexType j = 0; j < testCaseIds.size(); j++) {
-            IndexType tcid = testCaseIds[j];
-            IndexType tcidInResults = tcMap[tcid];
+        // FIXME: Remove code duplication.
+        bool hasCluster = res.HasMember(it->first.c_str());
+        rapidjson::Value *clusterObj = nullptr;
+        // group for cluster data
+        if (!hasCluster) {
+            res.AddMember(rapidjson::Value(it->first.c_str(), res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+            clusterObj = &res[it->first.c_str()];
+        }
+        else {
+            clusterObj = &res[it->first.c_str()];
+        }
 
-            if (m_data->getResults()->getExecutionBitList(m_revision).at(tcidInResults)) {
-                bool isPassed = m_data->getResults()->getPassedBitList(m_revision).at(tcidInResults);
-                bool isCovered = coverageMatrix->getBitMatrix().get(tcid, cid);
-                if (isCovered) {
-                    if (isPassed) {
-                        passedCovered++;
-                    } else {
-                        failedCovered++;
-                    }
-                } else {
-                    if (isPassed) {
-                        passedNotCovered++;
-                    } else {
-                        failedNotCovered++;
+        if (!hasCluster) {
+            for (IndexType i = 0; i < testCaseIds.size(); i++) {
+                tcMap[testCaseIds[i]] = m_data->translateTestcaseIdFromCoverageToResults(testCaseIds[i]);
+            }
+        }
+
+        for (IndexType i = 0; i < codeElementIds.size(); i++) {
+            IndexType cid = codeElementIds[i];
+            std::string ceIdStr = std::to_string(cid);
+
+            // holds the metric values for one code element
+            rapidjson::Value *ceMetrics;
+            if (!clusterObj->HasMember(ceIdStr.c_str())) {
+                clusterObj->AddMember(rapidjson::Value(ceIdStr.c_str(), res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+                ceMetrics = &(*clusterObj)[ceIdStr.c_str()];
+            }
+            else {
+                ceMetrics = &(*clusterObj)[ceIdStr.c_str()];
+            }
+
+            IndexType failedCovered = 0;
+            IndexType passedCovered = 0;
+            IndexType failedNotCovered = 0;
+            IndexType passedNotCovered = 0;
+
+            if (hasCluster) {
+                failedCovered = (*ceMetrics)["ef"].GetUint64();
+                passedCovered = (*ceMetrics)["ep"].GetUint64();
+                failedNotCovered = (*ceMetrics)["nf"].GetUint64();
+                passedNotCovered = (*ceMetrics)["np"].GetUint64();
+            }
+            else {
+                double efperefep = 0;
+                double nfpernfnp = 0;
+
+                for (IndexType j = 0; j < testCaseIds.size(); j++) {
+                    IndexType tcid = testCaseIds[j];
+                    IndexType tcidInResults = tcMap[tcid];
+
+                    if (m_data->getResults()->getExecutionBitList(m_revision).at(tcidInResults)) {
+                        bool isPassed = m_data->getResults()->getPassedBitList(m_revision).at(tcidInResults);
+                        bool isCovered = coverageMatrix->getBitMatrix().get(tcid, cid);
+                        if (isCovered) {
+                            if (isPassed) {
+                                passedCovered++;
+                            }
+                            else {
+                                failedCovered++;
+                            }
+                        }
+                        else {
+                            if (isPassed) {
+                                passedNotCovered++;
+                            }
+                            else {
+                                failedNotCovered++;
+                            }
+                        }
                     }
                 }
+
+                if ((failedCovered + passedCovered) > 0) {
+                    efperefep = (double)failedCovered / (failedCovered + passedCovered);
+                }
+                if ((failedNotCovered + passedNotCovered) > 0) {
+                    nfpernfnp = (double)failedNotCovered / (failedNotCovered + passedNotCovered);
+                }
+
+                // ef; ep; nf; np; ef/(ef+ep); nf/(nf+np);
+                ceMetrics->AddMember("ef", failedCovered, res.GetAllocator());
+                ceMetrics->AddMember("ep", passedCovered, res.GetAllocator());
+                ceMetrics->AddMember("nf", failedNotCovered, res.GetAllocator());
+                ceMetrics->AddMember("np", passedNotCovered, res.GetAllocator());
+                ceMetrics->AddMember("ef/(ef+ep)", efperefep, res.GetAllocator());
+                ceMetrics->AddMember("nf/(nf+np)", nfpernfnp, res.GetAllocator());
             }
-        }
-        double tarantula = 0;
-        IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
-        IndexType nrOfPassedTestcases = passedCovered + passedNotCovered;
-        if (nrOfFailedTestcases > 0 && nrOfPassedTestcases > 0) {
-            double denominator = (((double)failedCovered/nrOfFailedTestcases) + ((double)passedCovered/nrOfPassedTestcases));
-            if (denominator > 0) {
-                tarantula = ((double)failedCovered/nrOfFailedTestcases) / denominator;
+
+            double tarantula = 0;
+            IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
+            IndexType nrOfPassedTestcases = passedCovered + passedNotCovered;
+            if (nrOfFailedTestcases > 0 && nrOfPassedTestcases > 0) {
+                double denominator = (((double)failedCovered / nrOfFailedTestcases) + ((double)passedCovered / nrOfPassedTestcases));
+                if (denominator > 0) {
+                    tarantula = ((double)failedCovered / nrOfFailedTestcases) / denominator;
+                }
             }
+
+            ceMetrics->AddMember("tarantula", tarantula, res.GetAllocator());
+
+            (*m_distribution)[tarantula]++;
         }
-
-        {
-            rapidjson::Value key;
-            key.SetString(static_cast<std::ostringstream*>( &(std::ostringstream() << cid) )->str().c_str(), m_values->GetAllocator());
-            rapidjson::Value val;
-            val.SetDouble(tarantula);
-            m_values->AddMember(key, val, m_values->GetAllocator());
-        }
-
-        (*m_distribution)[tarantula]++;
-
-        if (writeDetails)
-            tarantulaStreamDetailed << m_revision << ";" << cid << ";" << failedCovered << ";" << passedCovered << ";" << failedNotCovered << ";" << passedNotCovered << ";" << tarantula << std::endl;
     }
-
-    if (writeDetails)
-        tarantulaStreamDetailed.close();
 
     (std::cerr << "done." << std::endl).flush();
 }
