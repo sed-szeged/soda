@@ -90,8 +90,8 @@ void CSelectionStatistics::calcCoverageRelatedStatistics(rapidjson::Document &do
     doc.AddMember("test_coverage_histogram", testCov, doc.GetAllocator());
 
 
-    outCodeHistogram( nrOfCodeElements, dataCodeElements );
-    outTestHistogram(nrOfTestCases, dataTestCases );
+    outCodeHistogram( nrOfTestCases, dataCodeElements );
+    outTestHistogram( nrOfCodeElements, dataTestCases );
 
 
     rapidjson::Value codeCov(rapidjson::kObjectType);
@@ -378,7 +378,7 @@ void CSelectionStatistics::setHistogramParameters(String projectNameString, int 
     m_outputDir = outputDir;
 }
 
-void CSelectionStatistics::outCodeHistogram( int nrOfCodeElements, IdxIdxMap dataCodeElements )
+void CSelectionStatistics::outCodeHistogram( int nrOfTestCases, IdxIdxMap dataCodeElements )
 {
     std::ofstream outCodeHistogramSize, outCodeHistogramNumber;
     string codeHistogramSizeFileName = m_outputDir+"/"+m_pojectName+"-cov-hist-code-s"+boost::lexical_cast<std::string>(m_sliceSize)+".csv";
@@ -386,24 +386,26 @@ void CSelectionStatistics::outCodeHistogram( int nrOfCodeElements, IdxIdxMap dat
 
     outCodeHistogramSize.open(codeHistogramSizeFileName.c_str());
     outCodeHistogramSize<<"intervals;count\n";
-    for(int i = 0 ; i < nrOfCodeElements ; i=i+m_sliceSize){
+    for(int i = 0 ; i < nrOfTestCases ; i=i+m_sliceSize){
         int sum = 0;
         for(int j = 0 ; j < m_sliceSize; j++) sum += dataCodeElements[i+j];
         outCodeHistogramSize<<i<<"-"<<i+m_sliceSize-1<<";"<<sum<<"\n";
     }
 
+    std::cout<<nrOfTestCases<<"/"<<m_sliceNumber<<" ---> ceil: "<<ceil(nrOfTestCases/m_sliceNumber)<<std::endl;
+
     outCodeHistogramNumber.open(codeHistogramNumberFileName.c_str());
     outCodeHistogramNumber<<"intervals;count\n";
     for(int i = 0 ; i < m_sliceNumber  ; i++){
         int sum = 0;
-        for(int j = 0 ; j < ceil(nrOfCodeElements/m_sliceNumber); j++) sum += dataCodeElements[(i*ceil(nrOfCodeElements/m_sliceNumber) )+j];
-        outCodeHistogramNumber<< (i*ceil(nrOfCodeElements/m_sliceNumber)) <<"-"<< ((i+1)*ceil(nrOfCodeElements/m_sliceNumber))-1 <<";"<<sum<<"\n";
+        for(int j = 0 ; j < ceil(nrOfTestCases/m_sliceNumber)+1 ; j++) sum += dataCodeElements[(i*(ceil(nrOfTestCases/m_sliceNumber)+1) )+j];
+        outCodeHistogramNumber<< (i*(ceil(nrOfTestCases/m_sliceNumber)+1)) <<"-"<< ((i+1)*(ceil(nrOfTestCases/m_sliceNumber)+1))-1 <<";"<<sum<<"\n";
     }
 }
 
 
 
-void CSelectionStatistics::outTestHistogram( int nrOfTestCases, IdxIdxMap dataTestCases )
+void CSelectionStatistics::outTestHistogram( int nrOfCodeElements, IdxIdxMap dataTestCases )
 {
     std::ofstream outTestHistogramSize, outTestHistogramNumber;
     string testHistogramSizeFileName = m_outputDir+"/"+m_pojectName+"-cov-hist-test-s"+boost::lexical_cast<std::string>(m_sliceSize)+".csv";
@@ -411,7 +413,7 @@ void CSelectionStatistics::outTestHistogram( int nrOfTestCases, IdxIdxMap dataTe
 
     outTestHistogramSize.open(testHistogramSizeFileName.c_str());
     outTestHistogramSize<<"intervals;count\n";
-    for(int i = 0 ; i < nrOfTestCases ; i=i+m_sliceSize){
+    for(int i = 0 ; i < nrOfCodeElements ; i=i+m_sliceSize){
         int sum = 0;
         for(int j = 0 ; j < m_sliceSize; j++) sum += dataTestCases[i+j];
         outTestHistogramSize<<i<<"-"<<i+m_sliceSize-1<<";"<<sum<<"\n";
@@ -421,8 +423,8 @@ void CSelectionStatistics::outTestHistogram( int nrOfTestCases, IdxIdxMap dataTe
     outTestHistogramNumber<<"intervals;count\n";
     for(int i = 0 ; i < m_sliceNumber  ; i++){
         int sum = 0;
-        for(int j = 0 ; j < ceil(nrOfTestCases/m_sliceNumber); j++) sum += dataTestCases[(i*ceil(nrOfTestCases/m_sliceNumber) )+j];
-        outTestHistogramNumber<< (i*ceil(nrOfTestCases/m_sliceNumber)) <<"-"<< ((i+1)*ceil(nrOfTestCases/m_sliceNumber))-1 <<";"<<sum<<"\n";
+        for(int j = 0 ; j < ceil(nrOfCodeElements/m_sliceNumber)+1; j++) sum += dataTestCases[(i*(ceil(nrOfCodeElements/m_sliceNumber)+1) )+j];
+        outTestHistogramNumber<< (i*(ceil(nrOfCodeElements/m_sliceNumber)+1)) <<"-"<< ((i+1)*(ceil(nrOfCodeElements/m_sliceNumber)+1))-1 <<";"<<sum<<"\n";
     }
 }
 
