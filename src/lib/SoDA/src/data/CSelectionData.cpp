@@ -21,6 +21,7 @@
 
 #include "data/CSelectionData.h"
 #include "exception/CException.h"
+#include <iostream>
 
 namespace soda {
 
@@ -147,10 +148,15 @@ void CSelectionData::filterToCoverage()
 
     for (IndexType i = 0; i < m_coverageTestcases->size(); i++) {
         String tcname = (*m_coverageTestcases)[i];
+
+        if (!m_resultsTestcases->containsValue(tcname)) {
+            std::cout << "[WARNING] Not existing test case: " << tcname << std::endl;
+            continue;
+        }
         for (size_t r = 0; r < revs.size(); ++r) {
-            IndexType lid, ceid;
-            if ((lid = l_resultsTestcases->getID(tcname)) && ((ceid = m_resultsTestcases->getID(tcname)))) {
-                l_results->setResult(revs[r], lid, m_results->getResult(revs[r], ceid));
+            IndexType lid, tcid;
+            if ((lid = l_resultsTestcases->getID(tcname)) && ((tcid = m_resultsTestcases->getID(tcname)))) {
+                l_results->setResult(revs[r], lid, m_results->getResult(revs[r], tcid));
             }
         }
     }

@@ -385,9 +385,9 @@ void processJsonFiles(String path)
         }
 
         if (reader["filter-to-coverage"].GetBool()) {
-            (std::cerr << "[INFO] Filtering to coverage ...").flush();
+            (std::cerr << "[INFO] Filtering to coverage ..." << std::endl).flush();
             selectionData->filterToCoverage();
-            (std::cerr << " done" << std::endl).flush();
+            (std::cerr << "Filtering done" << std::endl).flush();
         }
 
         clusterList.clear();
@@ -410,7 +410,7 @@ void processJsonFiles(String path)
         // The following codes will add additional datas to the json object.
         // Base file:
         // T = Testcases
-        results["full"].AddMember("T", selectionData->getResults()->getNumOfTestcases(), results.GetAllocator());
+        results["full"].AddMember("T", selectionData->getResults()->getExecutionBitList(revision).size(), results.GetAllocator());
         // P = procedures FIXME: rename it to CE?
         results["full"].AddMember("P", selectionData->getCoverage()->getNumOfCodeElements(), results.GetAllocator());
         // Ext file:

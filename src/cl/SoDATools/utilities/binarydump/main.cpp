@@ -107,7 +107,7 @@ int processArgs(options_description desc, int ac, char* av[])
         */
         if (vm.count("dump-coverage-data")) {
             String tmp = vm["dump-coverage-data"].as<String>();
-            handler->getCoverageDataMgr().dumpData(tmp, false, '@');
+            handler->getCoverageDataMgr().dumpData(tmp);
         }
         if (vm.count("dump-coverage-testcases")) {
             String tmp = vm["dump-coverage-testcases"].as<String>();
