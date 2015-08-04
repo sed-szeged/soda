@@ -142,14 +142,21 @@ void CDataHandler::setWithNames(bool set)
     withNames = set;
 }
 
-IndexType CDataHandler::getRevision() const
-{
+IndexType CDataHandler::getRevision() const {
     return revision;
 }
 
 void CDataHandler::setRevision(IndexType rev)
 {
     revision = rev;
+}
+
+time_t CDataHandler::getRevisionTimestamp() const {
+    return revisionTime;
+}
+
+void CDataHandler::setRevisionTimestamp(time_t time) {
+    revisionTime = time;
 }
 
 ReadFormat CDataHandler::getReadFormat() const

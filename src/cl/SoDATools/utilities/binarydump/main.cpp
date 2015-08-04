@@ -71,6 +71,9 @@ int processArgs(options_description desc, int ac, char* av[])
             handler->setRevision(vm["revision"].as<IndexType>());
         }
 
+        if (vm.count("revision-timestamp")) {
+            handler->setRevisionTimestamp(vm["revision-timestamp"].as<time_t>());
+        }
         if (vm.count("selection-data")) {
             if (handler->createSelection()) {
                 INFO(handler->getPrintInfo(), "Working with selection data");
@@ -181,6 +184,7 @@ int main(int argc, char *argv[])
             ("dump-changes",                    value<String>(), "output file")
             ("load-bugs,b",                     value<String>(), "input file")
             ("revision", value<IndexType>(), "revision number")
+            ("revision-timestamp", value<time_t>(), "revision timestamp TODO: remove when timestamps are merged with revision number")
             ("with-names,w", "dump coverage data,results data or changeset data with names")
             ("quiet,q", "silent mode")
     ;

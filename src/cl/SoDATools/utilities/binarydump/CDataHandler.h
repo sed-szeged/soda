@@ -122,6 +122,11 @@ public:
     */
     void setRevision(IndexType set);
 
+
+    time_t getRevisionTimestamp() const;
+
+    void setRevisionTimestamp(time_t time);
+
     /**
      * @brief Creates a CSelectionData object.
      * @return True if the creation was succesful.
@@ -218,6 +223,8 @@ private:
      * \brief Revision number for the extended coverage dump.
      */
     IndexType revision = 0;
+
+    time_t revisionTime;
 
     /**
      * @brief Stores read format type.

@@ -111,7 +111,7 @@ void CCoverageDataManager::dumpData(const String &filepath, bool psize, char cse
 
         // bug data
         if (getDataHandler()->getRevision()) {
-            auto bugs = getDataHandler()->getSelection()->getBugs()->getBuggedCodeElements(1348408576);
+            auto bugs = getDataHandler()->getSelection()->getBugs()->getBuggedCodeElements(getDataHandler()->getRevisionTimestamp());
             O << "Bugged";
             for (IndexType ceidx = 0; ceidx < m.getNumOfCols(); ++ceidx) {
                 auto ceName = coverage->getCodeElements().getValue(ceidx);
