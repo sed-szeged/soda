@@ -18,18 +18,18 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OCHIAIFAULTLOCALIZATIONTECHNIQUEPLUGIN_H
-#define OCHIAIFAULTLOCALIZATIONTECHNIQUEPLUGIN_H
+#ifndef COMMONFAULTLOCALIZATIONTECHNIQUEPLUGIN_H
+#define COMMONFAULTLOCALIZATIONTECHNIQUEPLUGIN_H
 
 #include "engine/CKernel.h"
 
 namespace soda {
 
-class OchiaiFaultLocalizationTechniquePlugin : public IFaultLocalizationTechniquePlugin
+class CommonFaultLocalizationTechniquePlugin : public IFaultLocalizationTechniquePlugin
 {
 public:
-    OchiaiFaultLocalizationTechniquePlugin();
-    virtual ~OchiaiFaultLocalizationTechniquePlugin();
+    CommonFaultLocalizationTechniquePlugin();
+    virtual ~CommonFaultLocalizationTechniquePlugin();
 
     /**
      * @brief Returns the name of the plugin.
@@ -71,7 +71,7 @@ public:
     FLDistribution& getDistribution();
 
 private:
-    FLDistribution *m_distribution;
+    FLDistribution distribution;
     CSelectionData *m_data;
     ClusterMap *clusterList;
     IndexType       m_revision;
@@ -79,4 +79,4 @@ private:
 
 } /* namespace soda */
 
-#endif // OCHIAIFAULTLOCALIZATIONTECHNIQUEPLUGIN_H
+#endif // COMMONFAULTLOCALIZATIONTECHNIQUEPLUGIN_H

@@ -35,13 +35,19 @@ public:
      * @brief Returns the name of the plugin.
      * @return
      */
-    std::string getName();
+    String getName();
 
     /**
      * @brief Returns the description of the plugin.
      * @return
      */
-     std::string getDescription();
+     String getDescription();
+
+     /**
+     * @brief Returns the list of plugins names that the plugin depens on.
+     * @return List of dependencies.
+     */
+     StringVector getDependency();
 
     /**
      * @brief Initialize the plugin.

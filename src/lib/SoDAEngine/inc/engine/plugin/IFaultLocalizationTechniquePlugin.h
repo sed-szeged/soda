@@ -57,13 +57,19 @@ public:
      * @brief Returns the name of the plugin.
      * @return
      */
-    virtual std::string getName() = 0;
+    virtual String getName() = 0;
 
     /**
      * @brief Returns the description of the plugin.
      * @return
      */
-    virtual std::string getDescription() = 0;
+    virtual String getDescription() = 0;
+
+    /**
+    * @brief Returns the list of plugins names that the plugin depens on.
+    * @return List of dependencies.
+    */
+    virtual std::vector<String> getDependency() = 0;
 
     /**
      * @brief Initialize the plugin.

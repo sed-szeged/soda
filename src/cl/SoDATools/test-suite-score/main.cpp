@@ -45,17 +45,23 @@ using namespace soda::io;
 using namespace boost::filesystem;
 using namespace boost::program_options;
 
-void processJsonFiles(std::string path);
-int  loadJsonFiles(std::string path);
+void processJsonFiles(String path);
+int  loadJsonFiles(String path);
 void printPluginNames(const String &type, const std::vector<String> &plugins);
 void printHelp();
-std::string getJsonString();
+String getJsonString();
 void createJsonFile();
 
 CKernel kernel;
 
+IndexType revision;
+String projectName;
+String outputDir;
+ClusterMap clusterList;
+std::set<String> flTechniquesCalculated;
+
 // Code element -> technique -> value
-typedef std::map<IndexType, std::map<std::string, double> > FLScoreValues;
+typedef std::map<IndexType, std::map<String, double> > FLScoreValues;
 
 int main(int argc, char* argv[]) {
     std::cout << "test-suite-score (SoDA tool)" << std::endl;
@@ -119,9 +125,9 @@ void printHelp()
               << getJsonString();
 }
 
-std::string getJsonString()
+String getJsonString()
 {
-    std::string json = R"template({
+    String json = R"template({
     "coverage-data": "coverage file path",
     "results-data": "results file path",
     "bug-data": "bugset path",
@@ -135,7 +141,8 @@ std::string getJsonString()
     "revision-timestamp": 1348408576,
     "failed-code-elements": [],
     "total-failed-testcases": 10
-})template";
+}
+)template";
 
     return json;
 }
@@ -148,7 +155,7 @@ void printPluginNames(const String &type, const std::vector<String> &plugins)
     }
 }
 
-int loadJsonFiles(std::string path)
+int loadJsonFiles(String path)
 {
     if (!exists(path)) {
         std::cerr << "[ERROR] Invalid configuration file path." << std::endl;
@@ -176,10 +183,79 @@ int loadJsonFiles(std::string path)
     return 0;
 }
 
-void processJsonFiles(std::string path)
+void calculateFlTechnique(CSelectionData &selectionData, const String &name, rapidjson::Document &results)
+{
+    IFaultLocalizationTechniquePlugin *flTechnique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin(name);
+
+    StringVector dependencies = flTechnique->getDependency();
+    for (StringVector::iterator it = dependencies.begin(); it != dependencies.end(); it++) {
+        if (flTechniquesCalculated.find(*it) == flTechniquesCalculated.end()) {
+            calculateFlTechnique(selectionData, *it, results);
+        }
+    }
+
+    (std::cerr << "[INFO] Calculating fault localization values: " << flTechnique->getName() << " ...").flush();
+    flTechnique->init(&selectionData, &clusterList, revision);
+    flTechnique->calculate(results);
+    flTechniquesCalculated.insert(name);
+    (std::cerr << " done." << std::endl).flush();
+}
+
+void saveResults(CSelectionData &selectionData, rapidjson::Document & results, StringVector &buggedCEs, bool full) {
+    std::stringstream sbflStream;
+
+    // header of the output file
+    // TODO: Changeable header for statements
+    sbflStream << "Function;";
+    for (rapidjson::Value::MemberIterator metricIt = results.MemberBegin()->value.MemberBegin()->value.MemberBegin(); metricIt != results.MemberBegin()->value.MemberBegin()->value.MemberEnd(); ++metricIt) {
+        sbflStream << metricIt->name.GetString() << ";";
+    }
+    // append bugged header if exists
+    if (buggedCEs.size()) {
+        sbflStream << "Bugged;";
+    }
+    sbflStream << std::endl;
+
+    if (full) {
+        for (rapidjson::Value::MemberIterator ceIt = results["full"].MemberBegin(); ceIt != results["full"].MemberEnd(); ceIt++) {
+            auto ceName = selectionData.getCoverage()->getCodeElements().getValue(std::stoul(ceIt->name.GetString()));
+            sbflStream << ceName << ";";
+            for (rapidjson::Value::MemberIterator valueIt = ceIt->value.MemberBegin(); valueIt != ceIt->value.MemberEnd(); ++valueIt) {
+
+                if (valueIt->value.IsUint64()) {
+                    sbflStream << valueIt->value.GetUint64();
+                }
+                else if (valueIt->value.IsDouble()) {
+                    sbflStream << valueIt->value.GetDouble();
+                }
+                sbflStream << ";";
+
+            }
+            if (buggedCEs.size()) {
+                sbflStream << (std::find(buggedCEs.begin(), buggedCEs.end(), ceName) != buggedCEs.end() ? "1" : "0");
+            }
+
+            sbflStream << std::endl;
+        }
+    }
+    else {
+        // TODO: implement output generation for multiple clusters
+    }
+
+    {
+        std::ofstream out(String(outputDir + "/" + projectName + "-sbfl.csv").c_str());
+        out << sbflStream.str();
+        out.close();
+    }
+}
+
+void processJsonFiles(String path)
 {
     try {
         std::cout << "[INFO] Processing " << path << " configuration file." << std::endl;
+
+        flTechniquesCalculated.clear();
+        clusterList.clear();
 
         rapidjson::Document reader;
         {
@@ -192,14 +268,17 @@ void processJsonFiles(std::string path)
 
         boost::filesystem::path jsonPath(path);
         CSelectionData selectionData;
-        std::map<std::string, CClusterDefinition> clusterList;
 
-        std::string clusterAlgorithmName = reader["cluster-algorithm"].GetString();
+        String clusterAlgorithmName = reader["cluster-algorithm"].GetString();
         ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin(clusterAlgorithmName);
         clusterAlgorithm->init(reader);
 
-        std::string projectName = reader["project-name"].GetString();
-        std::string outputDir = reader["output-dir"].GetString();
+        projectName = reader["project-name"].GetString();
+        if (projectName.empty()) {
+            std::cerr << "[ERROR] Missing project-name parameter in config file " << path << "." << std::endl;
+            return;
+        }
+        outputDir = reader["output-dir"].GetString();
         if (outputDir.empty()) {
             std::cerr << "[ERROR] Missing output-dir parameter in config file " << path << "." << std::endl;
             return;
@@ -255,7 +334,7 @@ void processJsonFiles(std::string path)
             selectionData.loadBugs(bugPath);
             (std::cerr << " done\n").flush();
         }
-        else {
+        else if (!bugPath.empty()) {
             std::cerr << "[WARNING] Not existing bug data path in config file " << path << "." << std::endl;
         }
 
@@ -275,10 +354,10 @@ void processJsonFiles(std::string path)
         clusterAlgorithm->execute(selectionData, clusterList);
         (std::cerr << " done." << std::endl).flush();
 
-        std::map<std::string, FLScoreValues> scoresByCluster;
+        std::map<String, FLScoreValues> scoresByCluster;
         std::vector<IndexType> failedCodeElements;
 
-        IndexType revision = reader["revision"].GetInt();
+        revision = reader["revision"].GetInt();
         time_t revTime = reader["revision-timestamp"].GetUint64();
         IndexType totalFailedTestcases = reader["total-failed-testcases"].GetInt();
 
@@ -296,7 +375,7 @@ void processJsonFiles(std::string path)
         // FIXME: Refactor
         /*for (clusterIt = clusterList.begin(); clusterIt != clusterList.end(); clusterIt++) {
             // Prepare directory for the output.
-            std::stringstream ss;
+            Stringstream ss;
             ss << outputDir << "/" << revision << "/" << clusterIt->first;
             boost::filesystem::path dir(ss.str().c_str());
             boost::filesystem::create_directories(dir);
@@ -315,16 +394,12 @@ void processJsonFiles(std::string path)
 
         rapidjson::Document results;
         results.SetObject();
-        for (IndexType i = 0; i < faultLocalizationTechniques.size(); i++) {
-            std::string flTechniqueName = faultLocalizationTechniques[i];
-            IFaultLocalizationTechniquePlugin *technique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin(flTechniqueName);
-
-            technique->init(&selectionData, &clusterList, revision);
-            technique->calculate(results);
+        for (auto flTechnique : faultLocalizationTechniques) {
+            calculateFlTechnique(selectionData, flTechnique, results);
 
             /*for (clusterIt = clusterList.begin(); clusterIt != clusterList.end(); clusterIt++) {
                 // Calculate FL score
-                std::stringstream ss;
+                Stringstream ss;
                 ss << outputDir << "/" << revision << "/" << clusterIt->first;
 
                 IFaultLocalizationTechniquePlugin::FLValues *values = &technique->getValues();
@@ -346,63 +421,14 @@ void processJsonFiles(std::string path)
 
         }
 
-        std::stringstream sbflStream;
         auto buggedCEs = selectionData.getBugs()->getBuggedCodeElements(revTime);
+        saveResults(selectionData, results, buggedCEs, clusterAlgorithmName == "one-cluster");
 
-        if (clusterAlgorithmName == "one-cluster") {
-            sbflStream << "Function;";
-            bool first = true;
-            for (rapidjson::Value::MemberIterator ceIt = results["full"].MemberBegin(); ceIt != results["full"].MemberEnd(); ceIt++) {
-                auto ceName = selectionData.getCoverage()->getCodeElements().getValue(std::stoul(ceIt->name.GetString()));
-                if (!first) {
-                    sbflStream << ceName << ";";
-                }
-                for (rapidjson::Value::MemberIterator metrics = ceIt->value.MemberBegin(); metrics != ceIt->value.MemberEnd(); ++metrics) {
-                    // header of the csv file
-                    if (first) {
-                        sbflStream << metrics->name.GetString() << ";";
-                        continue;
-                    }
-
-                    if (metrics->value.IsUint64()) {
-                        sbflStream << metrics->value.GetUint64();
-                    }
-                    else if (metrics->value.IsDouble()) {
-                        sbflStream << metrics->value.GetDouble();
-                    }
-                    sbflStream << ";";
-
-                }
-
-                if (first) {
-                    sbflStream << "Bugged;";
-                }
-                else {
-                    if (std::find(buggedCEs.begin(), buggedCEs.end(), ceName) != buggedCEs.end()) {
-                        sbflStream << "1";
-                    }
-                    else {
-                        sbflStream << "0";
-                    }
-                }
-                sbflStream << std::endl;
-                first = false;
-            }
-        }
-        else {
-            // TODO: implement output generation for multiple clusters
-        }
-
-        {
-            std::ofstream out(std::string(outputDir + "/" + projectName + "-sbfl.csv").c_str());
-            out << sbflStream.str();
-            out.close();
-        }
         // Save the score values
         // FIXME: Refactor
-        /*std::map<std::string, FLScoreValues>::iterator scoreIt;
+        /*std::map<String, FLScoreValues>::iterator scoreIt;
         for (scoreIt = scoresByCluster.begin(); scoreIt != scoresByCluster.end(); scoreIt++) {
-            std::stringstream ss;
+            Stringstream ss;
             ss << outputDir << "/" << revision << "/" << scoreIt->first << "/fl.score.csv";
 
             std::ofstream flScoreStream;
@@ -417,7 +443,7 @@ void processJsonFiles(std::string path)
                 IndexType cid = failedCodeElements[j];
                 flScoreStream << scoreIt->first << ";" << cid << ";";
                 for (IndexType k = 0; k < faultLocalizationTechniques.size(); k++) {
-                    std::string flTechniqueName = faultLocalizationTechniques[k];
+                    String flTechniqueName = faultLocalizationTechniques[k];
                     flScoreStream << scoresByCluster[scoreIt->first][cid][flTechniqueName] << ";";
                 }
                 flScoreStream << std::endl;
