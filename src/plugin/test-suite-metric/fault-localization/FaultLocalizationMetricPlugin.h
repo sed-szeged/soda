@@ -65,7 +65,7 @@ public:
     void calculate(rapidjson::Document &results);
 
 private:
-    void writePartitions(CPartitionAlgorithm &algorithm, rapidjson::Document &results);
+    IndexType getPartitionCoverage(std::set<IndexType> const &codeElements, IntVector const &testCases);
     void partitionStatistics(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string& clusterId, rapidjson::Document &results);
 
 private:

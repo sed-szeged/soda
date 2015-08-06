@@ -211,6 +211,84 @@ void calculateMetric(CSelectionData *selectionData, const std::string &name, rap
     (std::cerr << " done." << std::endl).flush();
 }
 
+void addExtraMetrics(CSelectionData *selectionData, rapidjson::Document &results, IndexType revision, time_t revTime, String const& bugPath) {
+    // FIXME: This is a hack... Find a general way for it maybe with unifying the different tools.
+    // TODO: Implement calculations for clusters also.
+    // The following codes will add additional datas to the json object.
+    // Base file:
+    // T = Testcases
+    results["full"].AddMember("T", selectionData->getResults()->getExecutionBitList(revision).size(), results.GetAllocator());
+    // P = procedures FIXME: rename it to CE?
+    results["full"].AddMember("P", selectionData->getCoverage()->getNumOfCodeElements(), results.GetAllocator());
+    // Ext file:
+    // TestPresent
+    results["full"].AddMember("TestPresent", selectionData->getResults()->getNumOfTestcases(), results.GetAllocator());
+    // TestRun
+    results["full"].AddMember("TestRun", selectionData->getResults()->getExecutionBitList(revision).count(), results.GetAllocator());
+    // TestPassed
+    results["full"].AddMember("TestPassed", selectionData->getResults()->getPassedBitList(revision).count(), results.GetAllocator());
+    if (!bugPath.empty()) {
+        StringVector bugCEs = selectionData->getBugs()->getBuggedCodeElements(revTime);
+        int count = 0;
+        for (auto ce : selectionData->getCoverage()->getCodeElements().getValueList()) {
+            if (std::find(bugCEs.begin(), bugCEs.end(), ce) != bugCEs.end()) {
+                ++count;
+            }
+        }
+        results["full"].AddMember("BuggyP()", count, results.GetAllocator());
+    }
+}
+
+void savePartitionData(rapidjson::Document &results, CSelectionData *selectionData) {
+    std::stringstream stat;
+    std::stringstream data;
+
+    // header of code-partition.csv file
+    stat << ";";
+    for (auto statIt = results[clusterList.begin()->first.c_str()]["partition-statistics"].MemberBegin(); statIt != results[clusterList.begin()->first.c_str()]["partition-statistics"].MemberEnd(); ++statIt) {
+        stat << statIt->name.GetString() << ";";
+    }
+    stat << std::endl;
+
+    ClusterMap::iterator clusterIt;
+    for (clusterIt = clusterList.begin(); clusterIt != clusterList.end(); clusterIt++) {
+        String clusterName = clusterIt->first;
+        stat << clusterName << ";";
+        for (auto statIt = results[clusterName.c_str()]["partition-statistics"].MemberBegin(); statIt != results[clusterName.c_str()]["partition-statistics"].MemberEnd(); ++statIt) {
+            if (statIt->value.IsDouble()) {
+                stat << statIt->value.GetDouble();
+            }
+            else {
+                stat << statIt->value.GetUint64();
+            }
+            stat << ";";
+        }
+        stat << std::endl;
+
+        // FIXME: Implement generating
+        for (auto dataIt = results[clusterName.c_str()]["partition-data"].Begin(); dataIt != results[clusterName.c_str()]["partition-data"].End(); ++dataIt) {
+            data << (*dataIt)["partition-cover"].GetUint64() << ";" << (*dataIt)["partition-size"].GetUint64() << ";";
+            for (auto ceIt = (*dataIt)["partition-elements"].Begin(); ceIt != (*dataIt)["partition-elements"].End(); ++ceIt) {
+                data << selectionData->getCoverage()->getCodeElements().getValue(ceIt->GetUint64()) << ";";
+            }
+            data << ";";
+            data << std::endl;
+        }
+    }
+
+    {
+        std::ofstream out(String(outputDir + "/" + projectName + "-code-partition.csv").c_str());
+        out << stat.str();
+        out.close();
+    }
+
+    {
+        std::ofstream out(String(outputDir + "/" + projectName + "-code-partition-data.csv").c_str());
+        out << data.str();
+        out.close();
+    }
+}
+
 void saveResults(rapidjson::Document &results)
 {
     std::stringstream base;
@@ -240,7 +318,7 @@ void saveResults(rapidjson::Document &results)
     }
     ext << std::endl;
 
-    std::map<std::string, CClusterDefinition>::iterator clusterIt;
+    ClusterMap::iterator clusterIt;
     for (clusterIt = clusterList.begin(); clusterIt != clusterList.end(); clusterIt++) {
         std::string clusterName = clusterIt->first;
         base << clusterName << ";";
@@ -255,7 +333,7 @@ void saveResults(rapidjson::Document &results)
         }
 
         for (rapidjson::Value::MemberIterator it = results[clusterName.c_str()].MemberBegin(); it != results[clusterName.c_str()].MemberEnd(); ++it) {
-            if (metricsCalculated.count(it->name.GetString())) {
+            if (metricsCalculated.count(it->name.GetString()) || !it->value.IsNumber()) {
                 continue;
             }
 
@@ -271,13 +349,13 @@ void saveResults(rapidjson::Document &results)
     }
 
     {
-        std::ofstream out(std::string(outputDir + "/" + projectName + "-metrics-base.csv").c_str());
+        std::ofstream out(String(outputDir + "/" + projectName + "-metrics-base.csv").c_str());
         out << base.str();
         out.close();
     }
 
     {
-        std::ofstream out(std::string(outputDir + "/" + projectName + "-metrics-ext.csv").c_str());
+        std::ofstream out(String(outputDir + "/" + projectName + "-metrics-ext.csv").c_str());
         out << ext.str();
         out.close();
     }
@@ -405,34 +483,12 @@ void processJsonFiles(String path)
             }
         }
 
-        // FIXME: This is a hack... Find a general way for it maybe with unifying the different tools.
-        // TODO: Implement calculations for clusters also.
-        // The following codes will add additional datas to the json object.
-        // Base file:
-        // T = Testcases
-        results["full"].AddMember("T", selectionData->getResults()->getExecutionBitList(revision).size(), results.GetAllocator());
-        // P = procedures FIXME: rename it to CE?
-        results["full"].AddMember("P", selectionData->getCoverage()->getNumOfCodeElements(), results.GetAllocator());
-        // Ext file:
-        // TestPresent
-        results["full"].AddMember("TestPresent", selectionData->getResults()->getNumOfTestcases(), results.GetAllocator());
-        // TestRun
-        results["full"].AddMember("TestRun", selectionData->getResults()->getExecutionBitList(revision).count(), results.GetAllocator());
-        // TestPassed
-        results["full"].AddMember("TestPassed", selectionData->getResults()->getPassedBitList(revision).count(), results.GetAllocator());
-        if (!bugPath.empty()) {
-            StringVector bugCEs = selectionData->getBugs()->getBuggedCodeElements(revTime);
-            int count = 0;
-            for (auto ce : selectionData->getCoverage()->getCodeElements().getValueList()) {
-                if (std::find(bugCEs.begin(), bugCEs.end(), ce) != bugCEs.end()) {
-                    ++count;
-                }
-            }
-            results["full"].AddMember("BuggyP()", count, results.GetAllocator());
-        }
+        addExtraMetrics(selectionData, results, revision, revTime, bugPath);
 
         saveResults(results);
-
+        if (metricsCalculated.count("fault-localization")) {
+            savePartitionData(results, selectionData);
+        }
         delete selectionData;
     }
     catch (std::exception &e) {

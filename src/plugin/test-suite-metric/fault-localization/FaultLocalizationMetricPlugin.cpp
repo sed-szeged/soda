@@ -26,7 +26,6 @@
 #include <sstream>
 
 #include "boost/filesystem.hpp"
-
 #include "FaultLocalizationMetricPlugin.h"
 
 namespace soda {
@@ -68,15 +67,11 @@ std::vector<std::string> FaultLocalizationMetricPlugin::getDependency()
 
 void FaultLocalizationMetricPlugin::calculate(rapidjson::Document &results)
 {
-    std::map<std::string, CClusterDefinition>::iterator it;
+    ClusterMap::iterator it;
     for (it = m_clusterList->begin(); it != m_clusterList->end(); it++) {
 
         if (!results.HasMember(it->first.c_str())) {
-            rapidjson::Value key;
-            key.SetString(it->first.c_str(), results.GetAllocator());
-            rapidjson::Value cluster;
-            cluster.SetObject();
-            results.AddMember(key, cluster, results.GetAllocator());
+            results.AddMember(rapidjson::Value(it->first.c_str(), results.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), results.GetAllocator());
         }
 
         CPartitionAlgorithm algorithm;
@@ -88,8 +83,6 @@ void FaultLocalizationMetricPlugin::calculate(rapidjson::Document &results)
         //boost::filesystem::path dir(ss.str().c_str());
         //boost::filesystem::create_directory(dir);
 
-        //writePartitions(algorithm, ss.str());
-
         std::cerr << "[INFO] Calculating statisitcs: " << it->first << std::endl;
         partitionStatistics(algorithm, it->second, it->first, results);
         std::cerr << "[INFO] Calculating statisitcs: " << it->first << " DONE." << std::endl;
@@ -97,58 +90,25 @@ void FaultLocalizationMetricPlugin::calculate(rapidjson::Document &results)
 
 }
 
-void FaultLocalizationMetricPlugin::writePartitions(CPartitionAlgorithm &algorithm, rapidjson::Document &results)
-{
-    /*std::ofstream out;
-
-    out.open((output + "/partitions.csv").c_str());
-
-    CPartitionAlgorithm::PartitionInfo &partitionInfo = algorithm.getPartitionInfo();
-    CPartitionAlgorithm::PartitionData &partitions = algorithm.getPartitions();
-
-    for (CPartitionAlgorithm::PartitionInfo::iterator it = partitionInfo.begin(); it != partitionInfo.end(); it++) {
-        if ((*it).partitionId) {
-            out << (*it).cid << "|";
-            for (std::set<IndexType>::iterator it2 = partitions[(*it).partitionId].begin(); it2 != partitions[(*it).partitionId].end(); it2++) {
-                out << *it2 << ";";
-            }
-            out << std::endl;
-        }
-    }
-
-    out.close();*/
-}
-
 void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string& clusterId, rapidjson::Document &result)
 {
-    /*
-    std::ofstream partitionStatistics;
-    std::ofstream partitionDistribution;
-
-    partitionStatistics.open((output + "/partitions.statistics.csv").c_str());
-    partitionDistribution.open((output + "/partitions.distribution.csv").c_str());
-
-    partitionStatistics << "#revision;number of testcases;number of methods; number of classes;minimum size;maximum size; AVG size; FL (absolute); FL (normalized)" << std::endl;
-    partitionDistribution  << "#revision; size of partition; number of partitions" << std::endl;
-    */
-
     CPartitionAlgorithm::PartitionInfo &partitionInfo = algorithm.getPartitionInfo();
     CPartitionAlgorithm::PartitionData &partitions = algorithm.getPartitions();
 
     IndexType nrOfPartitions = partitions.size();
     IndexType nrOfCodeElementsInPartition = partitionInfo.size();
-    //IndexType nrOfTestcases = cluster.getTestCases().size();
+    IndexType nrOfTestcases = cluster.getTestCases().size();
     IndexType minSize = nrOfCodeElementsInPartition;
     IndexType maxSize = 0;
 
     double avgSize = 0.0;
     double flMetric = 0;
-
-    std::map<IndexType, IndexType> distribution;
+    double area = 0;
+    //std::map<IndexType, IndexType> distribution;
 
     for (CPartitionAlgorithm::PartitionData::iterator partIt = partitions.begin(); partIt != partitions.end(); partIt++) {
         IndexType size = partIt->second.size();
-        distribution[size]++;
+        //distribution[size]++;
         if (size < minSize) {
             minSize = size;
         }
@@ -161,31 +121,77 @@ void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &alg
     }
     avgSize /= nrOfPartitions;
 
-    //double flMetricAbs = flMetric;
-    if(nrOfCodeElementsInPartition==0){
+    rapidjson::Value partDataArray(rapidjson::kArrayType);
+    for (auto &partition : partitions) {
+        rapidjson::Value partData(rapidjson::kObjectType);
+        IndexType nrOfCoveredTests = getPartitionCoverage(partition.second, cluster.getTestCases());
+        IndexType partSize = partition.second.size();
+
+        area += nrOfCoveredTests * partSize;
+
+        partData.AddMember("partition-cover", nrOfCoveredTests, result.GetAllocator());
+        partData.AddMember("partition-size", partSize, result.GetAllocator());
+        rapidjson::Value ceIds(rapidjson::kArrayType);
+        for (auto ceIdx : partition.second) {
+            ceIds.PushBack(ceIdx, result.GetAllocator());
+        }
+        partData.AddMember("partition-elements", ceIds, result.GetAllocator());
+        partDataArray.PushBack(partData, result.GetAllocator());
+    }
+
+    result[clusterId.c_str()].AddMember("partition-data", partDataArray, result.GetAllocator());
+
+    area /= nrOfCodeElementsInPartition * nrOfTestcases;
+
+    if(nrOfCodeElementsInPartition == 0){
         flMetric = 0;
-    } else if(nrOfCodeElementsInPartition==1){
+    } else if(nrOfCodeElementsInPartition == 1){
         flMetric /= nrOfCodeElementsInPartition * (nrOfCodeElementsInPartition);
     } else {
         flMetric /= nrOfCodeElementsInPartition * (nrOfCodeElementsInPartition - 1);
     }
 
+    double regularity = 0;
+    if (nrOfPartitions >= 1 && nrOfCodeElementsInPartition > 1) {
+        regularity = double(nrOfPartitions - 1) / (nrOfCodeElementsInPartition - 1);
+    }
+
     rapidjson::Value::MemberIterator metricIt = result[clusterId.c_str()].FindMember("fault-localization");
     if (metricIt == result[clusterId.c_str()].MemberEnd()) {
-        rapidjson::Value v;
-        v.SetDouble(flMetric);
-        result[clusterId.c_str()].AddMember("fault-localization", v, result.GetAllocator());
+        result[clusterId.c_str()].AddMember("fault-localization", flMetric, result.GetAllocator());
     } else
         metricIt->value.SetDouble(flMetric);
 
-    //partitionStatistics << m_revision << ";" << nrOfTestcases << ";" << nrOfCodeElementsInPartition << ";" << nrOfPartitions << ";" << minSize << ";" << maxSize << ";" << avgSize << ";" << flMetricAbs << ";" << flMetric << std::endl;
+    rapidjson::Value partitionStatObject(rapidjson::kObjectType);
+    partitionStatObject.AddMember("CP_K", nrOfPartitions, result.GetAllocator());
+    partitionStatObject.AddMember("CP_Min", minSize, result.GetAllocator());
+    partitionStatObject.AddMember("CP_Max", maxSize, result.GetAllocator());
+    partitionStatObject.AddMember("CP_Avg", avgSize, result.GetAllocator());
+    partitionStatObject.AddMember("CP_AvgP", 1.0 / nrOfPartitions, result.GetAllocator());
+    partitionStatObject.AddMember("CP_REG", regularity, result.GetAllocator());
+    partitionStatObject.AddMember("CP_AREA", area, result.GetAllocator());
+    result[clusterId.c_str()].AddMember("partition-statistics", partitionStatObject, result.GetAllocator());
+}
 
-    /*for (std::map<IndexType, IndexType>::iterator it = distribution.begin(); it != distribution.end(); it++) {
-        partitionDistribution << m_revision << ";" << it->first << ";" <<  it->second << std::endl;
-    }*/
-
-    //partitionStatistics.close();
-    //partitionDistribution.close();
+IndexType FaultLocalizationMetricPlugin::getPartitionCoverage(std::set<IndexType> const &codeElements, IntVector const &testCases) {
+    IndexType count = 0;
+    for (auto tcIdx : testCases) {
+        auto &row = m_data->getCoverage()->getBitMatrix().getRow(tcIdx);
+        if (row.count() < codeElements.size()) {
+            continue;
+        }
+        bool covered = true;
+        for (auto ce : codeElements) {
+            if (!row.at(ce)) {
+                covered = false;
+                break;
+            }
+        }
+        if (covered) {
+            ++count;
+        }
+    }
+    return count;
 }
 
 extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
