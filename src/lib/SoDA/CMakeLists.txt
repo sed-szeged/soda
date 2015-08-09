@@ -19,3 +19,6 @@ aux_source_directory(${SoDALib_SOURCE_DIR}/src src)
 add_library(SoDA ${LINKING_METHOD} ${headers} ${data_src} ${exception_src} ${interface_src} ${io_src} ${util_src} ${src})
 add_dependencies(SoDA rapidjson)
 target_link_libraries(SoDA ${Boost_LIBRARIES})
+install(TARGETS SoDA
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)

@@ -9,7 +9,7 @@ set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/ext)
 
 # Activate C++11 support
 if (UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    add_definitions("-std=c++11")
 endif()
 
 # Set the build type if it isn't already
@@ -42,6 +42,13 @@ set(LINK_DL)
 if (UNIX)
     set(LINK_DL dl)
 endif()
+
+# the RPATH to be used when installing, but only if it's not a system directory
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF("${isSystemDir}" STREQUAL "-1")
+
 
 set(LINKING_METHOD SHARED)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")

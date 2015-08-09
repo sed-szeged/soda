@@ -8,9 +8,6 @@ file(GLOB test_suite_score_headers ./*.h)
 
 aux_source_directory(${test_suite_score_SOURCE_DIR} test_suite_score_src)
 
-if (UNIX)
-	set(LINK_LIBRARIES dl)
-endif()
-
 add_executable(test-suite-score ${test_suite_score_headers} ${test_suite_score_src})
-target_link_libraries(test-suite-score SoDAEngine SoDA ${Boost_LIBRARIES} ${LINK_LIBRARIES})
+target_link_libraries(test-suite-score SoDAEngine SoDA ${Boost_LIBRARIES} ${LINK_DL})
+install(TARGETS test-suite-score RUNTIME DESTINATION bin)

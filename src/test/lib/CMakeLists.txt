@@ -6,10 +6,6 @@ include_directories(
     ${RAPIDJSON_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS})
 
-if (UNIX)
-    add_definitions(-std=c++11)
-endif()
-
 aux_source_directory(${SoDATest_SOURCE_DIR}/SoDA soda_src)
 aux_source_directory(${SoDATest_SOURCE_DIR}/plugin plugin_src)
 

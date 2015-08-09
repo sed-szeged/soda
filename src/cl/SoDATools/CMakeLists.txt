@@ -30,6 +30,7 @@ add_subdirectory(clustering)
 aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/binarydump binaryDump_src)
 add_executable(binaryDump ${binaryDump_src})
 target_link_libraries(binaryDump SoDA ${Boost_LIBRARIES})
+install(TARGETS binaryDump RUNTIME DESTINATION bin)
 
 # instrumentServer
 if (UNIX)
@@ -43,3 +44,4 @@ endif()
 aux_source_directory(${SoDATools_SOURCE_DIR}/sample sample_src)
 add_executable(sample ${sample_src})
 target_link_libraries(sample SoDA ${Boost_LIBRARIES})
+install(TARGETS sample RUNTIME DESTINATION bin)
