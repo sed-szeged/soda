@@ -135,7 +135,18 @@ std::string getJsonString()
     "revision": 1,
     "revision-timestamp": 1348408576,
     "cluster-algorithm": "one-cluster",
-    "metrics": [ ],
+    "metrics": [ )template";
+    bool first = true;
+    for (auto &plugin : kernel.getTestSuiteMetricPluginManager().getPluginNames()) {
+        if (!first) {
+            json += ", ";
+        }
+        json += "\"" + plugin + "\"";
+        if (first) {
+            first = false;
+        }
+    }
+    json += R"template(],
     "base-metrics": [ "coverage", "partition-metric", "tpce", "T", "P", "density", "average_test_cases_per_code_elements", "average_code_elements_per_test_cases" ],
     "metric-notations":
     {
@@ -148,10 +159,11 @@ std::string getJsonString()
         "tpce": "TpCE"
     },
     "project-name": "prefix of the output file",
-    "globalize": true,
-    "filter-to-coverage": false,
+    "globalize": false,
+    "filter-to-coverage": true,
     "output-dir": "output directory"
-})template";
+}
+)template";
 
     return json;
 }

@@ -132,9 +132,20 @@ String getJsonString()
     "results-data": "results file path",
     "bug-data": "bugset path",
     "cluster-algorithm": "one-cluster",
-    "fault-localization-techniques": [ "ochiai", "tarantula" ],
-    "globalize": true,
-    "filter-to-coverage": false,
+    "fault-localization-techniques": [ )template";
+    bool first = true;
+    for (auto &plugin : kernel.getFaultLocalizationTechniquePluginManager().getPluginNames()) {
+        if (!first) {
+            json += ", ";
+        }
+        json += "\"" + plugin + "\"";
+        if (first) {
+            first = false;
+        }
+    }
+    json += R"template(],
+    "globalize": false,
+    "filter-to-coverage": true,
     "project-name": "prefix of the output files",
     "output-dir": "output directory",
     "revision": 51,
