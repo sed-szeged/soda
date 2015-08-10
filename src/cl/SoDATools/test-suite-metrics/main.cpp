@@ -136,7 +136,7 @@ std::string getJsonString()
     "revision-timestamp": 1348408576,
     "cluster-algorithm": "one-cluster",
     "metrics": [ ],
-    "base-metrics": [ "coverage", "partition-metric", "tpce", "T", "P" ],
+    "base-metrics": [ "coverage", "partition-metric", "tpce", "T", "P", "density", "average_test_cases_per_code_elements", "average_code_elements_per_test_cases" ],
     "metric-notations":
     {
         "coverage": "COV",
@@ -237,6 +237,16 @@ void addExtraMetrics(CSelectionData *selectionData, rapidjson::Document &results
         }
         results["full"].AddMember("BuggyP()", count, results.GetAllocator());
     }
+
+    IntVector rowCounts;
+    IndexType covered = 0;
+    IndexType nrOfTestCases = selectionData->getCoverage()->getNumOfTestcases();
+    IndexType nrOfCodeElements = selectionData->getCoverage()->getNumOfCodeElements();
+    selectionData->getCoverage()->getBitMatrix().rowCounts(rowCounts);
+    std::for_each(rowCounts.begin(), rowCounts.end(), [&covered](IndexType &rowCount){ covered += rowCount; });
+    results["full"].AddMember("density", (double)covered / (nrOfTestCases * nrOfCodeElements), results.GetAllocator());
+    results["full"].AddMember("average_test_cases_per_code_elements", (double)covered / nrOfCodeElements, results.GetAllocator());
+    results["full"].AddMember("average_code_elements_per_test_cases", (double)covered / nrOfTestCases, results.GetAllocator());
 }
 
 void savePartitionData(rapidjson::Document &results, CSelectionData *selectionData) {
@@ -311,7 +321,7 @@ void saveResults(rapidjson::Document &results)
 
     // FIXME: Implement dynamic generation.
     // FIXME: Multiple clusters.
-    base << "T;P;" << std::endl;
+    base << "T;P;density;average_test_cases_per_code_elements;average_code_elements_per_test_cases;" << std::endl;
     ext << "TestPresent;TestRun;TestPass;";
     if (results["full"].HasMember("BuggyP()")) {
         ext << "BuggyP();";
@@ -338,10 +348,20 @@ void saveResults(rapidjson::Document &results)
             }
 
             if (baseMetrics.count(it->name.GetString())) {
-                base << it->value.GetInt() << ";";
+                if (it->value.IsDouble()) {
+                    base << it->value.GetDouble() << ";";
+                }
+                else {
+                    base << it->value.GetInt() << ";";
+                }
             }
             else {
-                ext << it->value.GetInt() << ";";
+                if (it->value.IsDouble()) {
+                    ext << it->value.GetDouble() << ";";
+                }
+                else {
+                    ext << it->value.GetInt() << ";";
+                }
             }
         }
         base << std::endl;
