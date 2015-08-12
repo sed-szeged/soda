@@ -119,6 +119,9 @@ void DejaGNUOneRevisionPerFileResultsReaderPlugin::readFromDirectory1stPass(fs::
                 } else if (startsWith(i, "UNSUPPORTED: ")) {
                     i += 13;
                     m_results->addTestcaseName(i);
+                } else if (startsWith(i, "AFAIL: ")) {
+                    i += 7;
+                    m_results->addTestcaseName(i);
                 }
             }
             in.close();
@@ -162,6 +165,9 @@ void DejaGNUOneRevisionPerFileResultsReaderPlugin::readFromDirectory(fs::path p)
                     m_results->setResult(revision, i, CResultsMatrix::trtFailed);
                 } else if(startsWith(i, "UNSUPPORTED: ")) {
                     i += 13;
+                    m_results->setResult(revision, i, CResultsMatrix::trtNotExecuted);
+                } else if (startsWith(i, "AFAIL: ")) {
+                    i += 7;
                     m_results->setResult(revision, i, CResultsMatrix::trtNotExecuted);
                 }
             }
