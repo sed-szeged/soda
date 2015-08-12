@@ -222,9 +222,7 @@ void saveResults(CSelectionData &selectionData, rapidjson::Document & results, S
         sbflStream << metricIt->name.GetString() << ";";
     }
     // append bugged header if exists
-    if (buggedCEs.size()) {
-        sbflStream << "Bugged;";
-    }
+    sbflStream << "Bugged;";
     sbflStream << std::endl;
 
     if (full) {
@@ -242,10 +240,8 @@ void saveResults(CSelectionData &selectionData, rapidjson::Document & results, S
                 sbflStream << ";";
 
             }
-            if (buggedCEs.size()) {
-                sbflStream << (std::find(buggedCEs.begin(), buggedCEs.end(), ceName) != buggedCEs.end() ? "1" : "0");
-            }
 
+            sbflStream << (std::find(buggedCEs.begin(), buggedCEs.end(), ceName) != buggedCEs.end() ? "1" : "0");
             sbflStream << std::endl;
         }
     }

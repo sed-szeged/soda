@@ -293,7 +293,6 @@ void savePartitionData(rapidjson::Document &results, CSelectionData *selectionDa
             for (auto ceIt = (*dataIt)["partition-elements"].Begin(); ceIt != (*dataIt)["partition-elements"].End(); ++ceIt) {
                 data << selectionData->getCoverage()->getCodeElements().getValue(ceIt->GetUint64()) << ";";
             }
-            data << ";";
             data << std::endl;
         }
     }
