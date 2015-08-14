@@ -72,7 +72,7 @@ public:
      */
     void dumpCodeElements(const String &filepath);
 
-	void dumpImage(const String &filepath);
+	void dumpImage(const String &filepath, int granularity);
 };
 
 } // namespace soda

@@ -24,6 +24,7 @@
 #include "CDataHandler.h"
 #include <fstream>
 
+
 namespace soda {
 
 CCoverageDataManager::CCoverageDataManager(CDataHandler *handler) :
@@ -140,30 +141,44 @@ void CCoverageDataManager::dumpTestcases(const String &filepath)
 }
 
 
-void CCoverageDataManager::dumpImage(const String &filepath)
+void CCoverageDataManager::dumpImage(const String &filepath, int scale)
 {
-	if ( getDataHandler()->getCoverage() )
-	{
-		int numTC = int(getDataHandler()->getCoverage()->getNumOfTestcases());
-		int numCE = int(getDataHandler()->getCoverage()->getNumOfCodeElements());
+	ofstream pgm((filepath + ".pgm").c_str());
+	IndexType R = getDataHandler()->getCoverage()->getNumOfTestcases();
+	IndexType C = getDataHandler()->getCoverage()->getNumOfCodeElements();
+	int granularity = int(C) / scale;
+	int width = (granularity>0) ? granularity : C;
+	int height = (width * R + C - 1) / C;
+	const unsigned long long int max = ((R + height - 1) / height) * ((C + width - 1) / width);
+	const unsigned long long int imax = ((max<65535) ? max : 65535);
+	unsigned int *pic = new unsigned int[width];
+	int lastor = 0;
 
-		ofstream image((filepath + ".pgm").c_str());
-		image << "P2" << std::endl;
-		image << numCE << " " << numTC << std::endl << "255" << std::endl;
-		for (int i = 0; i < numTC; i++){
-			for (int j = 0; j<numCE; j++){
-				if (getDataHandler()->getCoverage()->getBitMatrix().get(i, j)){
-					image << "0" << std::endl;
-				}
-				else {
-					image << "255" << std::endl;
-				}
+	pgm << "P2" << std::endl << width << " " << height << std::endl << imax << std::endl;
+	for (int i = 0; i<width; pic[i++] = 0);
+	for (IndexType r = 0; r < R; r++) {
+		int nextor = (r * height / R);
+		if (nextor != lastor) {
+			for (int i = 0; i<width; pic[i++] = 0) {
+				pgm << (max - pic[i]) * imax / max << ' ';
+			}
+			pgm << std::endl;
+		}
+		lastor = nextor;
+		for (IndexType c = 0; c < C; c++) {
+			if (getDataHandler()->getCoverage()->getBitMatrix().get(r, c)) {
+				pic[c * width / C]++;
 			}
 		}
-
 	}
-
+	for (int i = 0; i<width; pic[i++] = 0) {
+		pgm << (max - pic[i]) * imax / max << ' ';
+	}
+	pgm << std::endl;
+	delete[] pic;
 }
+
+
 
 void CCoverageDataManager::dumpCodeElements(const String &filepath)
 {
