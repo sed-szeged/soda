@@ -139,6 +139,32 @@ void CCoverageDataManager::dumpTestcases(const String &filepath)
         WARN("There is no coverage data to be dumped.");
 }
 
+
+void CCoverageDataManager::dumpImage(const String &filepath)
+{
+	if ( getDataHandler()->getCoverage() )
+	{
+		int numTC = int(getDataHandler()->getCoverage()->getNumOfTestcases());
+		int numCE = int(getDataHandler()->getCoverage()->getNumOfCodeElements());
+
+		ofstream image((filepath + ".pgm").c_str());
+		image << "P2" << std::endl;
+		image << numCE << " " << numTC << std::endl << "255" << std::endl;
+		for (int i = 0; i < numTC; i++){
+			for (int j = 0; j<numCE; j++){
+				if (getDataHandler()->getCoverage()->getBitMatrix().get(i, j)){
+					image << "0" << std::endl;
+				}
+				else {
+					image << "255" << std::endl;
+				}
+			}
+		}
+
+	}
+
+}
+
 void CCoverageDataManager::dumpCodeElements(const String &filepath)
 {
     INFO(getPrintInfo(), "CCoverageDataManager::dumpCodeElements(\"" << filepath << "\")");

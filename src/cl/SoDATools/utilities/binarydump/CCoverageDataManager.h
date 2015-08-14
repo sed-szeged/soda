@@ -71,6 +71,8 @@ public:
      * @param filepath  File path.
      */
     void dumpCodeElements(const String &filepath);
+
+	void dumpImage(const String &filepath);
 };
 
 } // namespace soda
