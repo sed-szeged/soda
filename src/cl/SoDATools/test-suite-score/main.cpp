@@ -293,7 +293,7 @@ void processJsonFiles(String path)
         if (outputDir[0] == '.')
             outputDir = jsonPath.parent_path().string() + "/" + outputDir;
         if (!exists(outputDir))
-            boost::filesystem::create_directory(boost::filesystem::path(outputDir));
+            boost::filesystem::create_directories(boost::filesystem::path(outputDir));
 
         StringVector faultLocalizationTechniques;
         for (rapidjson::Value::ConstValueIterator itr = reader["fault-localization-techniques"].Begin(); itr != reader["fault-localization-techniques"].End(); ++itr)
