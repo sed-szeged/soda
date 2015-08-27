@@ -67,6 +67,7 @@ public:
 private:
     IndexType getPartitionCoverage(std::set<IndexType> const &codeElements, IntVector const &testCases);
     void partitionStatistics(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string& clusterId, rapidjson::Document &results);
+    void partitionStatisticsFiltered(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string& clusterId, rapidjson::Document &results);
 
 private:
     CSelectionData *m_data;

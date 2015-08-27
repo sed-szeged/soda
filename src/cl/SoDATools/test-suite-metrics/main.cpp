@@ -153,6 +153,7 @@ std::string getJsonString()
         "coverage": "COV",
         "coverage-efficiency": "COV-Eff",
         "partition-metric": "PART",
+        "partition-metric'": "PART'",
         "partition-efficiency": "PART-Eff",
         "uniqueness": "UNIQ",
         "specialization": "SPEC",
@@ -259,15 +260,21 @@ void addExtraMetrics(CSelectionData *selectionData, rapidjson::Document &results
     results["full"].AddMember("density", (double)covered / (nrOfTestCases * nrOfCodeElements), results.GetAllocator());
     results["full"].AddMember("average_test_cases_per_code_elements", (double)covered / nrOfCodeElements, results.GetAllocator());
     results["full"].AddMember("average_code_elements_per_test_cases", (double)covered / nrOfTestCases, results.GetAllocator());
+
+    metricsCalculated.insert("partition-metric'");
 }
 
 void savePartitionData(rapidjson::Document &results, CSelectionData *selectionData) {
     std::stringstream stat;
     std::stringstream data;
+    std::stringstream dataMod;
 
     // header of code-partition.csv file
     stat << ";";
     for (auto statIt = results[clusterList.begin()->first.c_str()]["partition-statistics"].MemberBegin(); statIt != results[clusterList.begin()->first.c_str()]["partition-statistics"].MemberEnd(); ++statIt) {
+        stat << statIt->name.GetString() << ";";
+    }
+    for (auto statIt = results[clusterList.begin()->first.c_str()]["partition-statistics'"].MemberBegin(); statIt != results[clusterList.begin()->first.c_str()]["partition-statistics'"].MemberEnd(); ++statIt) {
         stat << statIt->name.GetString() << ";";
     }
     stat << std::endl;
@@ -277,6 +284,15 @@ void savePartitionData(rapidjson::Document &results, CSelectionData *selectionDa
         String clusterName = clusterIt->first;
         stat << clusterName << ";";
         for (auto statIt = results[clusterName.c_str()]["partition-statistics"].MemberBegin(); statIt != results[clusterName.c_str()]["partition-statistics"].MemberEnd(); ++statIt) {
+            if (statIt->value.IsDouble()) {
+                stat << statIt->value.GetDouble();
+            }
+            else {
+                stat << statIt->value.GetUint64();
+            }
+            stat << ";";
+        }
+        for (auto statIt = results[clusterName.c_str()]["partition-statistics'"].MemberBegin(); statIt != results[clusterName.c_str()]["partition-statistics'"].MemberEnd(); ++statIt) {
             if (statIt->value.IsDouble()) {
                 stat << statIt->value.GetDouble();
             }
@@ -295,6 +311,13 @@ void savePartitionData(rapidjson::Document &results, CSelectionData *selectionDa
             }
             data << std::endl;
         }
+        for (auto dataIt = results[clusterName.c_str()]["partition-data'"].Begin(); dataIt != results[clusterName.c_str()]["partition-data'"].End(); ++dataIt) {
+            dataMod << (*dataIt)["partition-cover'"].GetUint64() << ";" << (*dataIt)["partition-size'"].GetUint64() << ";";
+            for (auto ceIt = (*dataIt)["partition-elements'"].Begin(); ceIt != (*dataIt)["partition-elements'"].End(); ++ceIt) {
+                dataMod << selectionData->getCoverage()->getCodeElements().getValue(ceIt->GetUint64()) << ";";
+            }
+            dataMod << std::endl;
+        }
     }
 
     {
@@ -306,6 +329,12 @@ void savePartitionData(rapidjson::Document &results, CSelectionData *selectionDa
     {
         std::ofstream out(String(outputDir + "/" + projectName + "-code-partition-data.csv").c_str());
         out << data.str();
+        out.close();
+    }
+
+    {
+        std::ofstream out(String(outputDir + "/" + projectName + "-code-partition-data-mod.csv").c_str());
+        out << dataMod.str();
         out.close();
     }
 }

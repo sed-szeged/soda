@@ -85,6 +85,7 @@ void FaultLocalizationMetricPlugin::calculate(rapidjson::Document &results)
 
         std::cerr << "[INFO] Calculating statisitcs: " << it->first << std::endl;
         partitionStatistics(algorithm, it->second, it->first, results);
+        partitionStatisticsFiltered(algorithm, it->second, it->first, results);
         std::cerr << "[INFO] Calculating statisitcs: " << it->first << " DONE." << std::endl;
     }
 
@@ -172,6 +173,107 @@ void FaultLocalizationMetricPlugin::partitionStatistics(CPartitionAlgorithm &alg
     partitionStatObject.AddMember("CP_AREA", area, result.GetAllocator());
     result[clusterId.c_str()].AddMember("partition-statistics", partitionStatObject, result.GetAllocator());
 }
+
+void FaultLocalizationMetricPlugin::partitionStatisticsFiltered(CPartitionAlgorithm &algorithm, CClusterDefinition &cluster, const std::string& clusterId, rapidjson::Document &result)
+{
+
+    CPartitionAlgorithm::PartitionInfo &partitionInfo = algorithm.getPartitionInfo();
+    CPartitionAlgorithm::PartitionData &partitions = algorithm.getPartitions();
+
+
+    IndexType nrOfCodeElementsInPartition = partitionInfo.size();
+    IndexType nrOfTestcases = cluster.getTestCases().size();
+    IndexType minSize = nrOfCodeElementsInPartition;
+    IndexType maxSize = 0;
+
+    double avgSize = 0.0;
+    double flMetric = 0;
+    double area = 0;
+    //std::map<IndexType, IndexType> distribution;
+
+    // TODO Merge these for loops into one
+    for (auto &partition : partitions) {
+        IndexType nrOfCoveredTests = getPartitionCoverage(partition.second, cluster.getTestCases());
+        if (nrOfCoveredTests == 0) {
+            nrOfCodeElementsInPartition -= partition.second.size();
+            partitions.erase(partition.first);
+
+            break;
+        }
+    }
+
+    IndexType nrOfPartitions = partitions.size();
+
+    for (CPartitionAlgorithm::PartitionData::iterator partIt = partitions.begin(); partIt != partitions.end(); partIt++) {
+        IndexType size = partIt->second.size();
+        //distribution[size]++;
+        if (size < minSize) {
+            minSize = size;
+        }
+        if (size > maxSize) {
+            maxSize = size;
+        }
+        avgSize += size;
+
+        flMetric += size * (size - 1);
+    }
+    avgSize /= nrOfPartitions;
+
+    rapidjson::Value partDataArray(rapidjson::kArrayType);
+    for (auto &partition : partitions) {
+        rapidjson::Value partData(rapidjson::kObjectType);
+        IndexType nrOfCoveredTests = getPartitionCoverage(partition.second, cluster.getTestCases());
+        IndexType partSize = partition.second.size();
+
+        area += nrOfCoveredTests * partSize;
+
+        partData.AddMember("partition-cover'", nrOfCoveredTests, result.GetAllocator());
+        partData.AddMember("partition-size'", partSize, result.GetAllocator());
+        rapidjson::Value ceIds(rapidjson::kArrayType);
+        for (auto ceIdx : partition.second) {
+            ceIds.PushBack(ceIdx, result.GetAllocator());
+        }
+        partData.AddMember("partition-elements'", ceIds, result.GetAllocator());
+        partDataArray.PushBack(partData, result.GetAllocator());
+    }
+
+    result[clusterId.c_str()].AddMember("partition-data'", partDataArray, result.GetAllocator());
+
+    area /= nrOfCodeElementsInPartition * nrOfTestcases;
+
+    if(nrOfCodeElementsInPartition == 0){
+        flMetric = 0;
+    } else if(nrOfCodeElementsInPartition == 1){
+        flMetric /= nrOfCodeElementsInPartition * (nrOfCodeElementsInPartition);
+    } else {
+        flMetric /= nrOfCodeElementsInPartition * (nrOfCodeElementsInPartition - 1);
+    }
+
+    double regularity = 0;
+    if (nrOfPartitions >= 1 && nrOfCodeElementsInPartition > 1) {
+        regularity = double(nrOfPartitions - 1) / (nrOfCodeElementsInPartition - 1);
+    }
+
+    rapidjson::Value::MemberIterator metricIt = result[clusterId.c_str()].FindMember("fault-localization'");
+    if (metricIt == result[clusterId.c_str()].MemberEnd()) {
+        result[clusterId.c_str()].AddMember("fault-localization'", flMetric, result.GetAllocator());
+    } else
+        metricIt->value.SetDouble(flMetric);
+
+    rapidjson::Value partitionStatObject(rapidjson::kObjectType);
+    partitionStatObject.AddMember("CP_K'", nrOfPartitions, result.GetAllocator());
+    partitionStatObject.AddMember("CP_Min'", minSize, result.GetAllocator());
+    partitionStatObject.AddMember("CP_Max'", maxSize, result.GetAllocator());
+    partitionStatObject.AddMember("CP_Avg'", avgSize, result.GetAllocator());
+    partitionStatObject.AddMember("CP_AvgP'", 1.0 / nrOfPartitions, result.GetAllocator());
+    partitionStatObject.AddMember("CP_REG'", regularity, result.GetAllocator());
+    // TODO update area
+    partitionStatObject.AddMember("CP_AREA'", area, result.GetAllocator());
+    result[clusterId.c_str()].AddMember("partition-statistics'", partitionStatObject, result.GetAllocator());
+
+}
+
+
 
 IndexType FaultLocalizationMetricPlugin::getPartitionCoverage(std::set<IndexType> const &codeElements, IntVector const &testCases) {
     IndexType count = 0;
