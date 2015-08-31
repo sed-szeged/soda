@@ -97,8 +97,6 @@ void CSelectionStatistics::calcCoverageRelatedStatistics(rapidjson::Document &do
     rapidjson::Value codeCov(rapidjson::kObjectType);
     toJson(dataCodeElements, codeCov, doc);
     doc.AddMember("code_coverage_histogram", codeCov, doc.GetAllocator());
-
-
 }
 
 /*

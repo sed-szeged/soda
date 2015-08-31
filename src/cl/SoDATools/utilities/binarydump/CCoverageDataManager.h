@@ -72,7 +72,13 @@ public:
      */
     void dumpCodeElements(const String &filepath);
 
-	void dumpImage(const String &filepath, int granularity);
+    void dumpImage(const String &filepath, int granularity);
+
+    /**
+    * @brief Dumps code element names to a specified file.
+    * @param filepath  File path.
+    */
+    void dumpCodeElementCoverage(const String &filepath);
 };
 
 } // namespace soda

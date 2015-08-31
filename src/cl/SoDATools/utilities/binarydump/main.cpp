@@ -77,7 +77,8 @@ int processArgs(options_description desc, int ac, char* av[])
         if (vm.count("selection-data")) {
             if (handler->createSelection()) {
                 INFO(handler->getPrintInfo(), "Working with selection data");
-            } else {
+            }
+            else {
                 WARN("Can't create selection data");
             }
         }
@@ -120,14 +121,20 @@ int processArgs(options_description desc, int ac, char* av[])
             String tmp = vm["dump-coverage-code-elements"].as<String>();
             handler->getCoverageDataMgr().dumpCodeElements(tmp);
         }
-		if (vm.count("dump-coverage-image")) {
-			String tmp = vm["dump-coverage-image"].as<String>();
-			int scale = 1;
-			if (vm.count("image-scale")) {
-				scale = (vm["image-scale"].as<int>());
-			}
-			handler->getCoverageDataMgr().dumpImage(tmp,scale);
-		}
+
+        if (vm.count("dump-coverage-image")) {
+            String tmp = vm["dump-coverage-image"].as<String>();
+            int scale = 1;
+            if (vm.count("image-scale")) {
+                scale = (vm["image-scale"].as<int>());
+            }
+            handler->getCoverageDataMgr().dumpImage(tmp, scale);
+        }
+
+        if (vm.count("dump-code-element-coverage")) {
+            String tmp = vm["dump-code-element-coverage"].as<String>();
+            handler->getCoverageDataMgr().dumpCodeElementCoverage(tmp);
+        }
 
         if (vm.count("dump-results-testcases")) {
             String tmp = vm["dump-results-testcases"].as<String>();
@@ -159,10 +166,12 @@ int processArgs(options_description desc, int ac, char* av[])
             String tmp = vm["dump-changes"].as<String>();
             handler->getChangesDataMgr().dumpChanges(tmp);
         }
-    } catch(exception& e) {
+    }
+    catch (exception& e) {
         ERRO(e.what());
         return 1;
-    } catch(...) {
+    }
+    catch (...) {
         ERRO("Exception of unknown type while processsing command line arguments!");
     }
 
@@ -172,34 +181,35 @@ int processArgs(options_description desc, int ac, char* av[])
 
 int main(int argc, char *argv[])
 {
-    cout << "binaryDump (SoDA tool)" <<  endl;
+    cout << "binaryDump (SoDA tool)" << endl;
     options_description desc("Allowed options");
     desc.add_options()
-            ("help,h",                                           "produce help message")
-            ("selection-data,S",                                 "create and work with selection data")
-            ("load-coverage,c",                   value<String>(), "input file")
-            ("dump-coverage-data",              value<String>(), "output file")
-            ("dump-coverage-testcases",         value<String>(), "output file")
-            ("dump-coverage-code-elements",     value<String>(), "output file")
-			("dump-coverage-image", value<String>(), "output file")
-			("image-scale,i", value<int>(), "image scale")
-            ("load-results,r",                    value<String>(), "input file")
-            ("dump-results-testcases",          value<String>(), "output file")
-            ("dump-results-revisions",          value<String>(), "output file")
-            ("dump-results-execution",          value<String>(), "output file")
-            ("dump-results-passfail",           value<String>(), "output file")
-            ("dump-results-timeline",           value<String>(), "output file")
-            ("load-changes,x",                    value<String>(), "input file")
-            ("dump-changes-code-elements",      value<String>(), "output file")
-            ("dump-changes",                    value<String>(), "output file")
-            ("load-bugs,b",                     value<String>(), "input file")
-            ("revision", value<IndexType>(), "revision number")
-            ("revision-timestamp", value<time_t>(), "revision timestamp TODO: remove when timestamps are merged with revision number")
-            ("with-names,w", "dump coverage data,results data or changeset data with names")
-            ("quiet,q", "silent mode")
-    ;
+        ("help,h", "produce help message")
+        ("selection-data,S", "create and work with selection data")
+        ("load-coverage,c", value<String>(), "input file")
+        ("dump-coverage-data", value<String>(), "output file")
+        ("dump-coverage-testcases", value<String>(), "output file")
+        ("dump-coverage-code-elements", value<String>(), "output file")
+        ("dump-code-element-coverage", value<String>(), "output file")
+        ("dump-coverage-image", value<String>(), "output file")
+        ("image-scale,i", value<int>(), "image scale")
+        ("load-results,r", value<String>(), "input file")
+        ("dump-results-testcases", value<String>(), "output file")
+        ("dump-results-revisions", value<String>(), "output file")
+        ("dump-results-execution", value<String>(), "output file")
+        ("dump-results-passfail", value<String>(), "output file")
+        ("dump-results-timeline", value<String>(), "output file")
+        ("load-changes,x", value<String>(), "input file")
+        ("dump-changes-code-elements", value<String>(), "output file")
+        ("dump-changes", value<String>(), "output file")
+        ("load-bugs,b", value<String>(), "input file")
+        ("revision", value<IndexType>(), "revision number")
+        ("revision-timestamp", value<time_t>(), "revision timestamp TODO: remove when timestamps are merged with revision number")
+        ("with-names,w", "dump coverage data,results data or changeset data with names")
+        ("quiet,q", "silent mode")
+        ;
 
-    if(argc < 2) {
+    if (argc < 2) {
         ERRO("There are no arguments!" << endl << desc);
         return 1;
     }

@@ -143,42 +143,40 @@ void CCoverageDataManager::dumpTestcases(const String &filepath)
 
 void CCoverageDataManager::dumpImage(const String &filepath, int scale)
 {
-	ofstream pgm((filepath + ".pgm").c_str());
-	IndexType R = getDataHandler()->getCoverage()->getNumOfTestcases();
-	IndexType C = getDataHandler()->getCoverage()->getNumOfCodeElements();
-	int granularity = int(C) / scale;
-	int width = (granularity>0) ? granularity : C;
-	int height = (width * R + C - 1) / C;
-	const unsigned long long int max = ((R + height - 1) / height) * ((C + width - 1) / width);
-	const unsigned long long int imax = ((max<65535) ? max : 65535);
-	unsigned int *pic = new unsigned int[width];
-	int lastor = 0;
+    ofstream pgm((filepath + ".pgm").c_str());
+    IndexType R = getDataHandler()->getCoverage()->getNumOfTestcases();
+    IndexType C = getDataHandler()->getCoverage()->getNumOfCodeElements();
+    int granularity = int(C) / scale;
+    int width = (granularity > 0) ? granularity : C;
+    int height = (width * R + C - 1) / C;
+    const unsigned long long int max = ((R + height - 1) / height) * ((C + width - 1) / width);
+    const unsigned long long int imax = ((max < 65535) ? max : 65535);
+    unsigned int *pic = new unsigned int[width];
+    int lastor = 0;
 
-	pgm << "P2" << std::endl << width << " " << height << std::endl << imax << std::endl;
-	for (int i = 0; i<width; pic[i++] = 0);
-	for (IndexType r = 0; r < R; r++) {
-		int nextor = (r * height / R);
-		if (nextor != lastor) {
-			for (int i = 0; i<width; pic[i++] = 0) {
-				pgm << (max - pic[i]) * imax / max << ' ';
-			}
-			pgm << std::endl;
-		}
-		lastor = nextor;
-		for (IndexType c = 0; c < C; c++) {
-			if (getDataHandler()->getCoverage()->getBitMatrix().get(r, c)) {
-				pic[c * width / C]++;
-			}
-		}
-	}
-	for (int i = 0; i<width; pic[i++] = 0) {
-		pgm << (max - pic[i]) * imax / max << ' ';
-	}
-	pgm << std::endl;
-	delete[] pic;
+    pgm << "P2" << std::endl << width << " " << height << std::endl << imax << std::endl;
+    for (int i = 0; i < width; pic[i++] = 0);
+    for (IndexType r = 0; r < R; r++) {
+        int nextor = (r * height / R);
+        if (nextor != lastor) {
+            for (int i = 0; i < width; pic[i++] = 0) {
+                pgm << (max - pic[i]) * imax / max << ' ';
+            }
+            pgm << std::endl;
+        }
+        lastor = nextor;
+        for (IndexType c = 0; c < C; c++) {
+            if (getDataHandler()->getCoverage()->getBitMatrix().get(r, c)) {
+                pic[c * width / C]++;
+            }
+        }
+    }
+    for (int i = 0; i < width; pic[i++] = 0) {
+        pgm << (max - pic[i]) * imax / max << ' ';
+    }
+    pgm << std::endl;
+    delete[] pic;
 }
-
-
 
 void CCoverageDataManager::dumpCodeElements(const String &filepath)
 {
@@ -193,6 +191,23 @@ void CCoverageDataManager::dumpCodeElements(const String &filepath)
         O.close();
     } else {
         WARN("There is no coverage data to be dumped.");
+    }
+}
+
+void CCoverageDataManager::dumpCodeElementCoverage(const String &filepath) {
+    INFO(getPrintInfo(), "CCoverageDataManager::dumpCodeElementCoverage(\"" << filepath << "\")");
+    if (!getDataHandler()->getCoverage() && !getDataHandler()->getSelection()) {
+        return;
+    }
+    auto coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
+    ofstream O((filepath + ".csv").c_str());
+    O << ";coverage;coverage(%)" << std::endl;
+
+    IndexType nrOfTests = coverage->getNumOfTestcases();
+    IntVector coveredCEs;
+    coverage->getBitMatrix().colCounts(coveredCEs);
+    for (IndexType ceId = 0; ceId < coverage->getNumOfCodeElements(); ++ceId) {
+        O << coverage->getCodeElements().getValue(ceId) << ";" << coveredCEs[ceId] << ";" << (double)coveredCEs[ceId] / nrOfTests << std::endl;
     }
 }
 
