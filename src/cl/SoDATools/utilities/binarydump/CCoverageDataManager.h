@@ -75,10 +75,16 @@ public:
     void dumpImage(const String &filepath, int granularity);
 
     /**
-    * @brief Dumps code element names to a specified file.
+    * @brief Dumps code element names with test coverage information.
     * @param filepath  File path.
     */
     void dumpCodeElementCoverage(const String &filepath);
+
+    /**
+    * @brief Dumps testcases names with code element coverage information.
+    * @param filepath  File path.
+    */
+    void dumpTestCoverage(const String &filepath);
 };
 
 } // namespace soda

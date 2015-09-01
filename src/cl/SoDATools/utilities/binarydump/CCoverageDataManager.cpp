@@ -211,4 +211,21 @@ void CCoverageDataManager::dumpCodeElementCoverage(const String &filepath) {
     }
 }
 
+void CCoverageDataManager::dumpTestCoverage(const String &filepath) {
+    INFO(getPrintInfo(), "CCoverageDataManager::dumpTestCoverage(\"" << filepath << "\")");
+    if (!getDataHandler()->getCoverage() && !getDataHandler()->getSelection()) {
+        return;
+    }
+    auto coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
+    ofstream O((filepath + ".csv").c_str());
+    O << ";coverage;coverage(%)" << std::endl;
+
+    IndexType nrOfCodeElements = coverage->getNumOfCodeElements();
+    IntVector coveredTests;
+    coverage->getBitMatrix().rowCounts(coveredTests);
+    for (IndexType tcId = 0; tcId < coverage->getNumOfTestcases(); ++tcId) {
+        O << coverage->getTestcases().getValue(tcId) << ";" << coveredTests[tcId] << ";" << (double)coveredTests[tcId] / nrOfCodeElements << std::endl;
+    }
+}
+
 } // namespace soda
