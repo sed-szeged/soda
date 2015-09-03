@@ -262,6 +262,7 @@ void addExtraMetrics(CSelectionData *selectionData, rapidjson::Document &results
     results["full"].AddMember("average_code_elements_per_test_cases", (double)covered / nrOfTestCases, results.GetAllocator());
 
     metricsCalculated.insert("partition-metric'");
+    metricsCalculated.insert("fault-localization'");
 }
 
 void savePartitionData(rapidjson::Document &results, CSelectionData *selectionData) {
