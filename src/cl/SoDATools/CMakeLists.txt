@@ -8,6 +8,9 @@ include_directories(${SoDATools_SOURCE_DIR}/../../lib/SoDA/inc
 # rawDataReader
 add_subdirectory(utilities/rawdatareader)
 
+# soda-tool
+add_subdirectory(soda-tool)
+
 # reduction
 add_subdirectory(utilities/test-suite-reduction)
 
@@ -31,6 +34,12 @@ aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/binarydump binaryDump_src
 add_executable(binaryDump ${binaryDump_src})
 target_link_libraries(binaryDump SoDA ${Boost_LIBRARIES})
 install(TARGETS binaryDump RUNTIME DESTINATION bin)
+
+# coverage-comparator
+aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/coverage-comparator coverageCompare_src)
+add_executable(coverage-comparator ${coverageCompare_src})
+target_link_libraries(coverage-comparator SoDA ${Boost_LIBRARIES})
+install(TARGETS coverage-comparator RUNTIME DESTINATION bin)
 
 # instrumentServer
 if (UNIX)
