@@ -8,9 +8,6 @@ include_directories(${SoDATools_SOURCE_DIR}/../../lib/SoDA/inc
 # rawDataReader
 add_subdirectory(utilities/rawdatareader)
 
-# soda-tool
-add_subdirectory(soda-tool)
-
 # reduction
 add_subdirectory(utilities/test-suite-reduction)
 
