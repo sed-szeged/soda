@@ -23,7 +23,7 @@
 #include "util/CSelectionStatistics.h"
 #include "CDataManager.h"
 #include "rapidjson/prettywriter.h"
-#include "rapidjson/filestream.h"
+#include "rapidjson/filewritestream.h"
 
 using namespace std;
 
@@ -66,8 +66,9 @@ void CDataManager::calcStatistics()
         rapidjson::Document res;
         res.SetObject();
         stats.calcCoverageRelatedStatistics(res);
-        rapidjson::FileStream f(stdout);
-        rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
+        char writeBuffer[65535];
+        rapidjson::FileWriteStream f(stdout, writeBuffer, sizeof(writeBuffer));
+        rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(f);
         res.Accept(writer);
     }
     /*if (m_testMask & tmFails) {
@@ -80,8 +81,9 @@ void CDataManager::calcStatistics()
         rapidjson::Document res;
         res.SetObject();
         stats.calcCovResultsSummary(res);
-        rapidjson::FileStream f(stdout);
-        rapidjson::PrettyWriter<rapidjson::FileStream> writer(f);
+        char writeBuffer[65535];
+        rapidjson::FileWriteStream f(stdout, writeBuffer, sizeof(writeBuffer));
+        rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(f);
         res.Accept(writer);
     }
 }
