@@ -26,7 +26,8 @@
 #include "engine/plugin/IFaultLocalizationTechniquePlugin.h"
 #include "engine/plugin/ITestSuiteClusterPlugin.h"
 #include "engine/CKernel.h"
-
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 using namespace soda;
 
 extern CKernel kernel;
@@ -49,6 +50,10 @@ protected:
         selection.getResults()->setResult(12345, 1, CResultsMatrix::trtFailed);
         ITestSuiteClusterPlugin *clusterAlg = kernel.getTestSuiteClusterPluginManager().getPlugin("one-cluster");
         clusterAlg->execute(selection, clusterList);
+
+        plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("common");
+        plugin->init(&selection, &clusterList, 12345);
+        plugin->calculate(results);
         plugin = NULL;
     }
 
@@ -72,10 +77,10 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, Ochiai)
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_EQ(100u, results["full"].MemberCount());
-    EXPECT_DOUBLE_EQ(0.57735026918962584, results["full"]["0"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.57735026918962584, results["full"]["1"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.40824829046386307, results["full"]["2"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.67171717171717171, CTestSuiteScore::flScore(clusterList["full"], results["full"]["0"].GetDouble(), plugin->getDistribution()));
+    EXPECT_DOUBLE_EQ(0.57735026918962584, results["full"]["0"]["ochiai"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.57735026918962584, results["full"]["1"]["ochiai"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.40824829046386307, results["full"]["2"]["ochiai"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.67171717171717171, CTestSuiteScore::flScore(clusterList["full"], results["full"]["0"]["ochiai"].GetDouble(), plugin->getDistribution()));
 }
 
 TEST_F(CFaultLocalizationTechniquePluginsTest, TarantulaMetaInfo)
@@ -94,8 +99,32 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, Tarantula)
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_EQ(100u, results["full"].MemberCount());
-    EXPECT_DOUBLE_EQ(1, results["full"]["0"].GetDouble());
-    EXPECT_DOUBLE_EQ(1, results["full"]["1"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.25, results["full"]["2"].GetDouble());
-    EXPECT_DOUBLE_EQ(0.78787878787878785, CTestSuiteScore::flScore(clusterList["full"], results["full"]["0"].GetDouble(), plugin->getDistribution()));
+    EXPECT_DOUBLE_EQ(1, results["full"]["0"]["tarantula"].GetDouble());
+    EXPECT_DOUBLE_EQ(1, results["full"]["1"]["tarantula"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.25, results["full"]["2"]["tarantula"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.78787878787878785, CTestSuiteScore::flScore(clusterList["full"], results["full"]["0"]["tarantula"].GetDouble(), plugin->getDistribution()));
+}
+
+TEST_F(CFaultLocalizationTechniquePluginsTest, CommonMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("common"));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+
+    EXPECT_EQ("common", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+TEST_F(CFaultLocalizationTechniquePluginsTest, Common)
+{
+    EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("common"));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+    EXPECT_NO_THROW(plugin->calculate(results));
+
+    EXPECT_EQ(100u, results["full"].MemberCount());
+    EXPECT_DOUBLE_EQ(1, results["full"]["2"]["ep"].GetDouble());
+    EXPECT_DOUBLE_EQ(1, results["full"]["1"]["ef"].GetDouble());
+    EXPECT_DOUBLE_EQ(3, results["full"]["98"]["nf"].GetDouble());
+    EXPECT_DOUBLE_EQ(1, results["full"]["98"]["np"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.66666666666666663, results["full"]["0"]["nf/(nf+np)"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.5, results["full"]["55"]["ef/(ef+ep)"].GetDouble());
 }

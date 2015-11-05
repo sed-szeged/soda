@@ -61,25 +61,13 @@ CCoverageMatrix* AnnotationJavaCoverageReaderPlugin::read(const variables_map &v
 void AnnotationJavaCoverageReaderPlugin::readFromFile(String const &file)
 {
     CCoverageMatrix *mutationM = new CCoverageMatrix();
-    std::ifstream annots(annotations);
-    String line;
-    while (std::getline(annots, line)) {
-        if (line.find("mutation") != String::npos) {
-            mutationM->addCodeElementName(line);
-        }
-        else {
-            coverage->addCodeElementName(line);
-        }
-        coverage->refitMatrixSize();
-        mutationM->refitMatrixSize();
-    }
-
     fs::path coverage_path(file);
     if (!(exists(coverage_path) && is_regular_file(coverage_path))) {
         throw CException("AnnotationJavaCoverageReaderPlugin::readFromDirectoryStructure()", "Specified path does not exists or is not a file.");
     }
 
     std::ifstream in(file);
+    String line;
     while (std::getline(in, line)) {
         StringVector data;
         
@@ -93,6 +81,19 @@ void AnnotationJavaCoverageReaderPlugin::readFromFile(String const &file)
         }
     }
     in.close();
+
+    std::ifstream annots(annotations);
+    while (std::getline(annots, line)) {
+        if (line.find("mutation") != String::npos) {
+            mutationM->addCodeElementName(line);
+        }
+        else {
+            coverage->addCodeElementName(line);
+        }
+        coverage->refitMatrixSize();
+        mutationM->refitMatrixSize();
+    }
+
     mutationM->save("mutation.cov.SoDA");
     delete mutationM;
 }

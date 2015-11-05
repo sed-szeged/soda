@@ -340,7 +340,7 @@ void savePartitionData(rapidjson::Document &results, CSelectionData *selectionDa
     }
 }
 
-void saveResults(rapidjson::Document &results)
+void saveMetrics(rapidjson::Document &results)
 {
     std::stringstream base;
     std::stringstream ext;
@@ -418,6 +418,29 @@ void saveResults(rapidjson::Document &results)
     {
         std::ofstream out(String(outputDir + "/" + projectName + "-metrics-ext.csv").c_str());
         out << ext.str();
+        out.close();
+    }
+}
+
+void saveResults(rapidjson::Document &results) {
+    std::stringstream base;
+    for (rapidjson::Value::MemberIterator it = results["results-metrics"].MemberBegin(); it != results["results-metrics"].MemberEnd(); ++it) {
+        base << it->name.GetString() << ";";
+    }
+    base << std::endl;
+    for (rapidjson::Value::MemberIterator it = results["results-metrics"].MemberBegin(); it != results["results-metrics"].MemberEnd(); ++it) {
+        if (it->value.IsDouble()) {
+            base << it->value.GetDouble() << ";";
+        }
+        else {
+            base << it->value.GetInt() << ";";
+        }
+    }
+    base << std::endl;
+
+    {
+        std::ofstream out(String(outputDir + "/" + projectName + "-mutation-metrics.csv").c_str());
+        out << base.str();
         out.close();
     }
 }
@@ -546,6 +569,7 @@ void processJsonFiles(String path)
 
         addExtraMetrics(selectionData, results, revision, revTime, bugPath);
 
+        saveMetrics(results);
         saveResults(results);
         if (metricsCalculated.count("fault-localization")) {
             savePartitionData(results, selectionData);

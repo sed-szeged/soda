@@ -106,16 +106,52 @@ void CResultsDataManager::dumpPassFail(const String& filepath, bool psize, char 
     INFO(getPrintInfo(), "CResultsDataManager::dumpPassFail(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
         ofstream O((filepath + ".csv").c_str());
-        const IBitMatrix& m = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults())->getPassedBitMatrix();
+        CResultsMatrix const& res = *(getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults());
+        IBitMatrix const &m = res.getPassedBitMatrix();
 
         if (psize) {
-            O << m.getNumOfRows() << csep << m.getNumOfCols() << rsep;
+            O << res.getNumOfRevisions() << csep << res.getNumOfTestcases() << rsep;
         }
 
-        for (IndexType rev = 0; rev < m.getNumOfRows(); ++rev) {
-            O << m[rev][0];
-            for(IndexType tcidx = 1; tcidx < m.getNumOfCols(); ++tcidx) {
-                O << csep << (m[rev][tcidx] ? '1' : '0');
+        auto &tcIdList = res.getTestcases().getIDList();
+        if (getWithNames()) {
+            for (auto &tcidx : tcIdList) {
+                O << csep << res.getTestcases().getValue(tcidx);
+            }
+
+            O << csep << "New fail" << csep << "New pass" << rsep;
+        }
+
+        
+        for (auto &rev : res.getRevisionNumbers()) {
+            IndexType nrOfNewFail = 0, nrOfNewPass = 0;
+            if (getWithNames()) {
+                O << rev << csep;
+            }
+
+            for (auto &tcidx : tcIdList) {
+                switch(res.getResult(rev, tcidx)) {
+                    case CResultsMatrix::trtPassed:
+                        O << '1';
+                        if (res.getResult(0, tcidx) == CResultsMatrix::trtFailed) {
+                            ++nrOfNewPass;
+                        }
+                        break;
+                    case CResultsMatrix::trtFailed:
+                        O << '0';
+                        if (res.getResult(0, tcidx) == CResultsMatrix::trtPassed) {
+                            ++nrOfNewFail;
+                        }
+                        break;
+                    case CResultsMatrix::trtNotExecuted:
+                        O << "-1";
+                        break;
+                }
+                O << csep;
+            }
+
+            if (getWithNames()) {
+                O << nrOfNewFail << csep << nrOfNewPass;
             }
             O << rsep;
         }
