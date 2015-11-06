@@ -81,6 +81,12 @@ public:
     void dumpCodeElementCoverage(const String &filepath);
 
     /**
+    * @brief Dumps covering tests for the given code element.
+    * @param codeElement  The name of code element.
+    */
+    void dumpCodeElementCoverageFor(const String &codeElement);
+
+    /**
     * @brief Dumps testcases names with code element coverage information.
     * @param filepath  File path.
     */

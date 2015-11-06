@@ -211,6 +211,24 @@ void CCoverageDataManager::dumpCodeElementCoverage(const String &filepath) {
     }
 }
 
+void CCoverageDataManager::dumpCodeElementCoverageFor(const String &codeElement) {
+    INFO(getPrintInfo(), "CCoverageDataManager::dumpCodeElementCoverageFor(\"" << codeElement << "\")");
+    if (!getDataHandler()->getCoverage() && !getDataHandler()->getSelection()) {
+        return;
+    }
+    auto coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
+
+
+    IndexType nrOfTests = coverage->getNumOfTestcases();
+    IntVector coveredCEs;
+    IndexType ceId = coverage->getCodeElements().getID(codeElement);
+    for (IndexType tcId = 0; tcId < coverage->getNumOfTestcases(); ++tcId) {
+        if (coverage->getBitMatrix().get(tcId, ceId)) {
+            std::cout << coverage->getTestcases().getValue(tcId) << std::endl;
+        }
+    }
+}
+
 void CCoverageDataManager::dumpTestCoverage(const String &filepath) {
     INFO(getPrintInfo(), "CCoverageDataManager::dumpTestCoverage(\"" << filepath << "\")");
     if (!getDataHandler()->getCoverage() && !getDataHandler()->getSelection()) {
