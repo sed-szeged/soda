@@ -113,7 +113,7 @@ void CResultsDataManager::dumpPassFail(const String& filepath, bool psize, char 
             O << res.getNumOfRevisions() << csep << res.getNumOfTestcases() << rsep;
         }
 
-        auto &tcIdList = res.getTestcases().getIDList();
+        auto tcIdList = res.getTestcases().getIDList();
         if (getWithNames()) {
             for (auto &tcidx : tcIdList) {
                 O << csep << res.getTestcases().getValue(tcidx);

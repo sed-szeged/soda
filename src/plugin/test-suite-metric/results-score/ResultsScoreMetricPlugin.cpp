@@ -32,7 +32,7 @@ ResultsScoreMetricPlugin::~ResultsScoreMetricPlugin() {
 }
 
 std::string ResultsScoreMetricPlugin::getName() {
-    return "fail-results-score";
+    return "results-score";
 }
 
 std::string ResultsScoreMetricPlugin::getDescription() {
