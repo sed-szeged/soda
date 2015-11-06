@@ -53,8 +53,10 @@ std::string AnnotationJavaCoverageReaderPlugin::getDescription()
 CCoverageMatrix* AnnotationJavaCoverageReaderPlugin::read(const variables_map &vm)
 {
     coverage = new CCoverageMatrix();
-    readFromFile(vm["path"].as<String>());
     annotations = vm["list-annot"].as<String>();
+    outputPath = vm["output"].as<String>();
+    outputPath.append(".mut");
+    readFromFile(vm["path"].as<String>());
     return coverage;
 }
 
@@ -94,7 +96,7 @@ void AnnotationJavaCoverageReaderPlugin::readFromFile(String const &file)
         mutationM->refitMatrixSize();
     }
 
-    mutationM->save("mutation.cov.SoDA");
+    mutationM->save(outputPath);
     delete mutationM;
 }
 

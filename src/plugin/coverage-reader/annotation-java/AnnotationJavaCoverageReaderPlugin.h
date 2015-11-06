@@ -63,6 +63,7 @@ private:
     CCoverageMatrix *mutationCoverage;
 
     String annotations;
+    String outputPath;
 };
 
 }
