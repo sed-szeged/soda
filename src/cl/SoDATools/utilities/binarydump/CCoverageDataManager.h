@@ -91,6 +91,12 @@ public:
     * @param filepath  File path.
     */
     void dumpTestCoverage(const String &filepath);
+
+    /**
+    * @brief Dumps covering methods for the given test.
+    * @param test  The name of test.
+    */
+    void dumpTestCoverageFor(const String &test);
 };
 
 } // namespace soda
