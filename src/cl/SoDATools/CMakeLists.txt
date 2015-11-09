@@ -20,6 +20,9 @@ add_subdirectory(test-suite-selections)
 # test-suite-metrics
 add_subdirectory(test-suite-metrics)
 
+# coverage
+add_subdirectory(coverage)
+
 # test-suite-score
 add_subdirectory(test-suite-score)
 
