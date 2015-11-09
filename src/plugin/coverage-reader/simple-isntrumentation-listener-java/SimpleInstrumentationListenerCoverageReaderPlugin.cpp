@@ -27,50 +27,52 @@
 #include "boost/regex.hpp"
 #include "boost/lexical_cast.hpp"
 #include "exception/CException.h"
-#include "AnnotationJavaCoverageReaderPlugin.h"
+#include "SimpleInstrumentationListenerCoverageReaderPlugin.h"
 
 namespace pt = boost::property_tree;
 
 namespace soda {
 
-AnnotationJavaCoverageReaderPlugin::AnnotationJavaCoverageReaderPlugin() :
-    coverage(NULL)
+SimpleInstrumentationListenerJavaCoverageReaderPlugin::SimpleInstrumentationListenerJavaCoverageReaderPlugin() :
+    coverage(nullptr), mutationCoverage(nullptr)
 {}
 
-AnnotationJavaCoverageReaderPlugin::~AnnotationJavaCoverageReaderPlugin()
+SimpleInstrumentationListenerJavaCoverageReaderPlugin::~SimpleInstrumentationListenerJavaCoverageReaderPlugin()
 {}
 
-std::string AnnotationJavaCoverageReaderPlugin::getName()
+std::string SimpleInstrumentationListenerJavaCoverageReaderPlugin::getName()
 {
-    return "annotation-java";
+    return "simple-instrumentation-listener-java";
 }
 
-std::string AnnotationJavaCoverageReaderPlugin::getDescription()
+std::string SimpleInstrumentationListenerJavaCoverageReaderPlugin::getDescription()
 {
     return "Reads coverage from SimpleInstrumentationListener output.";
 }
 
-CCoverageMatrix* AnnotationJavaCoverageReaderPlugin::read(const variables_map &vm)
+CCoverageMatrix* SimpleInstrumentationListenerJavaCoverageReaderPlugin::read(const variables_map &vm)
 {
     coverage = new CCoverageMatrix();
+    codeElements = vm["list-code-elements"].as<String>();
+    outputPath = vm["output"].as<String>();
+    outputPath.append(".mut");
     readFromFile(vm["path"].as<String>());
-    annotations = vm["list-annot"].as<String>();
     return coverage;
 }
 
-void AnnotationJavaCoverageReaderPlugin::readFromFile(String const &file)
+void SimpleInstrumentationListenerJavaCoverageReaderPlugin::readFromFile(String const &file)
 {
     CCoverageMatrix *mutationM = new CCoverageMatrix();
     fs::path coverage_path(file);
     if (!(exists(coverage_path) && is_regular_file(coverage_path))) {
-        throw CException("AnnotationJavaCoverageReaderPlugin::readFromDirectoryStructure()", "Specified path does not exists or is not a file.");
+        throw CException("SimpleInstrumentationListenerJavaCoverageReaderPlugin::readFromDirectoryStructure()", "Specified path does not exists or is not a file.");
     }
 
     std::ifstream in(file);
     String line;
     while (std::getline(in, line)) {
         StringVector data;
-        
+        // Input lines contains test name:code element naem pairs with a ':' separator.
         data.push_back(line.substr(0, line.find_first_of(":")));
         data.push_back(line.substr(line.find_first_of(":") + 1));
         if (data[1].find("mutation") != String::npos) {
@@ -82,25 +84,29 @@ void AnnotationJavaCoverageReaderPlugin::readFromFile(String const &file)
     }
     in.close();
 
-    std::ifstream annots(annotations);
-    while (std::getline(annots, line)) {
-        if (line.find("mutation") != String::npos) {
-            mutationM->addCodeElementName(line);
+    if (!codeElements.empty()) {
+        std::ifstream codeElementsList(codeElements);
+        while (std::getline(codeElementsList, line)) {
+            if (line.find("mutation") != String::npos) {
+                mutationM->addCodeElementName(line);
+            }
+            else {
+                coverage->addCodeElementName(line);
+            }
+            coverage->refitMatrixSize();
+            mutationM->refitMatrixSize();
         }
-        else {
-            coverage->addCodeElementName(line);
-        }
-        coverage->refitMatrixSize();
-        mutationM->refitMatrixSize();
     }
 
-    mutationM->save("mutation.cov.SoDA");
+    if (mutationM->getTestcases().size()) {
+        mutationM->save(outputPath);
+    }
     delete mutationM;
 }
 
 extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
-    kernel.getCoverageReaderPluginManager().addPlugin(new AnnotationJavaCoverageReaderPlugin());
+    kernel.getCoverageReaderPluginManager().addPlugin(new SimpleInstrumentationListenerJavaCoverageReaderPlugin());
 }
 
 } /* namespace soda */
