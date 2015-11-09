@@ -19,8 +19,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ANNOTATION_JAVACOVERAGEREADERPLUGIN_H
-#define ANNOTATION_JAVACOVERAGEREADERPLUGIN_H
+#ifndef SIMPLEINSTRUMENTATIONLISTENERCOVERAGEREADERPLUGIN_H
+#define SIMPLEINSTRUMENTATIONLISTENERCOVERAGEREADERPLUGIN_H
 
 #ifndef BOOST_FILESYSTEM_VERSION
 #define BOOST_FILESYSTEM_VERSION 3
@@ -35,15 +35,15 @@ namespace fs = boost::filesystem;
 namespace soda {
 
 /**
- * @brief The AnnotationJavaCoverageReaderPlugin class implements methods which reads
- *        annotated coverage data and converts it to statement level coverage data.
+ * @brief The SimpleInstrumentationListenerJavaCoverageReaderPlugin class implements methods which reads
+ *        SimpleInstrumentationListener output. SimpleInstrumentationListener can be found in the SoDA maven plugin package.
  */
-class AnnotationJavaCoverageReaderPlugin : public ICoverageReaderPlugin
+class SimpleInstrumentationListenerJavaCoverageReaderPlugin : public ICoverageReaderPlugin
 {
 public:
 
-    AnnotationJavaCoverageReaderPlugin();
-    virtual ~AnnotationJavaCoverageReaderPlugin();
+    SimpleInstrumentationListenerJavaCoverageReaderPlugin();
+    virtual ~SimpleInstrumentationListenerJavaCoverageReaderPlugin();
 
     std::string getName();
     std::string getDescription();
@@ -52,7 +52,8 @@ public:
 
 private:
     /**
-     * @brief
+     * @brief Fills CCoverageMatrix with the content of the given file.
+     *        Format: <test name>:<code element>
      */
     void readFromFile(String const &file);
 
@@ -62,10 +63,10 @@ private:
     CCoverageMatrix *coverage;
     CCoverageMatrix *mutationCoverage;
 
-    String annotations;
+    String codeElements;
     String outputPath;
 };
 
 }
 
-#endif /* ANNOTATION_JAVACOVERAGEREADERPLUGIN_H */
+#endif /* SIMPLEINSTRUMENTATIONLISTENERCOVERAGEREADERPLUGIN_H */
