@@ -218,9 +218,6 @@ void CCoverageDataManager::dumpCodeElementCoverageFor(const String &codeElement)
     }
     auto coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
 
-
-    IndexType nrOfTests = coverage->getNumOfTestcases();
-    IntVector coveredCEs;
     IndexType ceId = coverage->getCodeElements().getID(codeElement);
     for (IndexType tcId = 0; tcId < coverage->getNumOfTestcases(); ++tcId) {
         if (coverage->getBitMatrix().get(tcId, ceId)) {
@@ -266,6 +263,21 @@ void CCoverageDataManager::dumpTestCoverage(const String &filepath) {
             }
 
             O << test << ";" << covered << std::endl;
+        }
+    }
+}
+
+void CCoverageDataManager::dumpTestCoverageFor(const String &test) {
+    INFO(getPrintInfo(), "CCoverageDataManager::dumpTestCoverageFor(\"" << test << "\")");
+    if (!getDataHandler()->getCoverage() && !getDataHandler()->getSelection()) {
+        return;
+    }
+    auto coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
+
+    IndexType tcId = coverage->getTestcases().getID(test);
+    for (IndexType ceId = 0; ceId < coverage->getNumOfCodeElements(); ++ceId) {
+        if (coverage->getBitMatrix().get(tcId, ceId)) {
+            std::cout << coverage->getCodeElements().getValue(ceId) << std::endl;
         }
     }
 }
