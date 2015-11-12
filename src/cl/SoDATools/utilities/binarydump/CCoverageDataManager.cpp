@@ -236,13 +236,37 @@ void CCoverageDataManager::dumpTestCoverage(const String &filepath) {
     }
     auto coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
     ofstream O((filepath + ".csv").c_str());
-    O << ";coverage;coverage(%)" << std::endl;
+    // TODO: FIXME
+    if (!getDataHandler()->ceFilter.size() && !getDataHandler()->testFilter.size()) {
+        O << ";coverage;coverage(%)" << std::endl;
 
-    IndexType nrOfCodeElements = coverage->getNumOfCodeElements();
-    IntVector coveredTests;
-    coverage->getBitMatrix().rowCounts(coveredTests);
-    for (IndexType tcId = 0; tcId < coverage->getNumOfTestcases(); ++tcId) {
-        O << coverage->getTestcases().getValue(tcId) << ";" << coveredTests[tcId] << ";" << (double)coveredTests[tcId] / nrOfCodeElements << std::endl;
+        IndexType nrOfCodeElements = coverage->getNumOfCodeElements();
+        IntVector coveredTests;
+        coverage->getBitMatrix().rowCounts(coveredTests);
+        for (IndexType tcId = 0; tcId < coverage->getNumOfTestcases(); ++tcId) {
+            O << coverage->getTestcases().getValue(tcId) << ";" << coveredTests[tcId] << ";" << (double)coveredTests[tcId] / nrOfCodeElements << std::endl;
+        }
+    }
+    else {
+        O << ";coverage" << std::endl;
+        for (auto &test : coverage->getTestcases().getValueList()) {
+            // skip contained tests
+            if (getDataHandler()->testFilter.count(test)) {
+                continue;
+            }
+            IndexType covered = 0;
+            for (auto &ce : coverage->getCodeElements().getValueList()) {
+                // skip contained ces
+                if (getDataHandler()->ceFilter.count(ce)) {
+                    continue;
+                }
+                if (coverage->getRelation(test, ce)) {
+                    ++covered;
+                }
+            }
+
+            O << test << ";" << covered << std::endl;
+        }
     }
 }
 

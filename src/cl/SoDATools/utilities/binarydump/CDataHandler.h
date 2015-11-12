@@ -225,7 +225,10 @@ private:
     IndexType revision = 0;
 
     time_t revisionTime;
-
+public:
+    std::set<String> testFilter;
+    std::set<String> ceFilter;
+private:
     /**
      * @brief Stores read format type.
      */

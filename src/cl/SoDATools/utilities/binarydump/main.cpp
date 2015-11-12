@@ -107,6 +107,25 @@ int processArgs(options_description desc, int ac, char* av[])
         }
 
         /*
+        * FILTER DATA
+        */
+        if (vm.count("filter-code-elements")) {
+            std::ifstream in(vm["filter-code-elements"].as<String>());
+            String line;
+            while (std::getline(in, line)) {
+                handler->ceFilter.insert(line);
+            }
+        }
+
+        if (vm.count("filter-tests")) {
+            std::ifstream in(vm["filter-tests"].as<String>());
+            String line;
+            while (std::getline(in, line)) {
+                handler->testFilter.insert(line);
+            }
+        }
+
+        /*
         * DUMP DATA
         */
         if (vm.count("dump-coverage-data")) {
@@ -217,6 +236,8 @@ int main(int argc, char *argv[])
         ("load-bugs,b", value<String>(), "input file")
         ("revision", value<IndexType>(), "revision number")
         ("revision-timestamp", value<time_t>(), "revision timestamp TODO: remove when timestamps are merged with revision number")
+        ("filter-code-elements", value<String>(), "Path to a file which contains code elements which will be removed from the coverage matrix")
+        ("filter-tests", value<String>(), "Path to a file which contains the testcases which will be removed from the coverage matrix")
         ("with-names,w", "dump coverage data,results data or changeset data with names")
         ("quiet,q", "silent mode")
         ;

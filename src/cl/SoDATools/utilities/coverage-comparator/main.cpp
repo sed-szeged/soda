@@ -98,7 +98,21 @@ void loadMatrices() {
 
 std::set<String> compareMatrices() {
     std::set<String> diff;
+
+    std::set<std::pair<int, int>> compared;
     // iterates over code elements and test cases
+    for (int lhs = 0; lhs < coverages.size(); ++lhs) {
+        for (int rhs = 0; rhs < coverages.size(); ++rhs) {
+            if (lhs == rhs || compared.count(std::make_pair(lhs, rhs)) || compared.count(std::make_pair(rhs, lhs))) {
+                continue;
+            }
+
+            // TODO: compare
+
+            compared.insert(std::make_pair(lhs, rhs));
+        }
+    }
+
     for (auto &i : coverages[0]->getTestcases().getValueList()) {
         for (auto &j : coverages[0]->getCodeElements().getValueList()) {
             for (size_t matrixA = 1; matrixA < coverages.size(); ++matrixA) {
