@@ -25,6 +25,7 @@
   *       The binary dump program dumps the specified data from the specified data file.
   */
 
+#include <fstream>
 #include "CDataHandler.h"
 #include "CCoverageDataManager.h"
 #include "CResultsDataManager.h"
