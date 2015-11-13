@@ -42,12 +42,12 @@ int main(int argc, char *argv[])
             ("type,t",   value<String>(), "type of reading. Could be: coverage, results, changeset, bugset")
             ("mode,m",   value<String>(), "the reading mode")
             ("list,l",                    "list the available reading modes")
-            ("list-code-elements",value<String>(), "input text file where lines contains the names of the manually instrumented methods. Used by simple-instrumentation-listener-java coverage reader plugin.")
             ("output,o", value<String>(), "output file")
             ("path,p",   value<String>(), "path to input directory")
             ("granularity,g",   value<String>(), "granularity to read")
             ("cut-source-path,c", value<String>()->default_value(""), "removes the matched part from the code element names used by gcov reader plugin")
             ("filter-input-files,f", value<String>()->default_value(""), "regex, skips the matched input files. Multiple expressions are separated with commas. Used by gcov reader plugin")
+            ("list-code-elements", value<String>(), "input text file where lines contains the names of the manually instrumented methods. Used by simple-instrumentation-listener-java coverage reader plugin.")
     ;
 
     if(argc < 2) {

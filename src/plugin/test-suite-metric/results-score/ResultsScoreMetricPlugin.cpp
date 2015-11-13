@@ -58,10 +58,13 @@ void ResultsScoreMetricPlugin::calculate(rapidjson::Document &results) {
     std::set<IndexType> newFailRevs;
     std::set<IndexType> newPassRevs;
 
-    for (IndexType j = 0; j < nrOfTestcases; j++) {
-        auto baseResult = tcResults->getResult(0, j);
-        for (IndexType rev = 1; rev < tcResults->getNumOfRevisions(); ++rev) {
-            auto currResult = tcResults->getResult(rev, j);
+    for (auto &tcIdx : tcResults->getTestcases().getIDList()) {
+        auto baseResult = tcResults->getResult(0, tcIdx);
+        for (auto &rev : tcResults->getRevisionNumbers()) {
+            if (!rev) { // base results
+                continue;
+            }
+            auto currResult = tcResults->getResult(rev, tcIdx);
             // new fail
             if (currResult == CResultsMatrix::trtFailed && baseResult == CResultsMatrix::trtPassed) {
                 newFailRevs.insert(rev);
