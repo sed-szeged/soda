@@ -517,16 +517,23 @@ void processJsonFiles(String path)
             resPath = jsonPath.parent_path().string() + "/" + resPath;
         }
 
-        // TODO: We should lift the results file mandatory becuase there are computable metrics which doesn't requires results data.
-        if (exists(covPath) && exists(resPath)) {
+        if (exists(covPath)) {
             (std::cerr << "[INFO] loading coverage from " << covPath << " ...").flush();
             selectionData->loadCoverage(covPath);
-            (std::cerr << " done\n[INFO] loading results from " << resPath << " ...").flush();
+            (std::cerr << " done" << std::endl).flush();
+        }
+        else {
+            std::cerr << "[WARNING] Not existing coverage data path in config file " << path << "." << std::endl;
+            return;
+        }
+
+        if (exists(resPath)) {
+            (std::cerr << "[INFO] loading results from " << resPath << " ...").flush();
             selectionData->loadResults(resPath);
             (std::cerr << " done" << std::endl).flush();
         }
         else {
-            std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
+            std::cerr << "[WARNING] Not existing results data path in config file " << path << "." << std::endl;
             return;
         }
 
