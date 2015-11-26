@@ -524,7 +524,6 @@ void processJsonFiles(String path)
         }
         else {
             std::cerr << "[WARNING] Not existing coverage data path in config file " << path << "." << std::endl;
-            return;
         }
 
         if (exists(resPath)) {
@@ -534,7 +533,6 @@ void processJsonFiles(String path)
         }
         else {
             std::cerr << "[WARNING] Not existing results data path in config file " << path << "." << std::endl;
-            return;
         }
 
         String bugPath = reader["bug-data"].GetString();
