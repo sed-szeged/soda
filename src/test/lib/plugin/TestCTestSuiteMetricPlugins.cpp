@@ -230,3 +230,21 @@ TEST_F(CTestSuiteMetricPluginsTest, PartitionEfficiency)
 
     EXPECT_DOUBLE_EQ(3.6399999999999997, results["cluster - cluster"]["partition-efficiency"].GetDouble());
 }
+
+TEST_F(CTestSuiteMetricPluginsTest, ResultsScoreMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("results-score"));
+    EXPECT_EQ("results-score", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+TEST_F(CTestSuiteMetricPluginsTest, ResultsScore)
+{
+    CSelectionData data;
+    data.loadResults("sample/MetricPluginSampleDir/oryx.50.returns.res.SoDA");
+    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("results-score"));
+    EXPECT_NO_THROW(plugin->init(&data, &clusterList, 0));
+    EXPECT_NO_THROW(plugin->calculate(results));
+    EXPECT_DOUBLE_EQ(0.83999999999999997, results["results-metrics"]["fail-results-score"].GetDouble());
+    EXPECT_DOUBLE_EQ(0, results["results-metrics"]["pass-results-score"].GetDouble());
+}
