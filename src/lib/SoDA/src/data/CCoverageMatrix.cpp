@@ -125,6 +125,26 @@ const IndexType CCoverageMatrix::getNumOfCodeElements() const
     return m_codeElements->getIDList().size();
 }
 
+bool CCoverageMatrix::isCoveredCodeElement(const String &codeElementName) const {
+    return isCoveredCodeElement((*m_codeElements)[codeElementName]);
+}
+
+bool CCoverageMatrix::isCoveredCodeElement(const IndexType ceId) const {
+    // FIXME: Rewrite getCol function without allocating memory on heap.
+    auto& tmpCol = m_data->getCol(ceId);
+    bool covered = tmpCol.count();
+    delete &tmpCol;
+    return covered;
+}
+
+bool CCoverageMatrix::isCoveredTest(const String &testName) const {
+    return isCoveredTest((*m_testcases)[testName]);
+}
+
+bool CCoverageMatrix::isCoveredTest(const IndexType tcId) const {
+    return m_data->getRow(tcId).count();
+}
+
 bool CCoverageMatrix::getRelation(const String& testcaseName, const String& codeElementName) const
 {
     if (!m_testcases->containsValue(testcaseName) || !m_codeElements->containsValue(codeElementName)) {

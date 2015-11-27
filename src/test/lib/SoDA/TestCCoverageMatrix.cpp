@@ -91,16 +91,43 @@ TEST_F(CCoverageMatrixTest, GetCodeElements)
     EXPECT_EQ(0u, coverageMatrix->getCodeElements("unknown test").size());
 }
 
+TEST_F(CCoverageMatrixTest, IsCoveredCodeElements)
+{
+    coverageMatrix->addCodeElementName("codeElement1");
+    coverageMatrix->addCodeElementName("codeElement2");
+    coverageMatrix->addTestcaseName("testName1");
+    coverageMatrix->addTestcaseName("testName2");
+    coverageMatrix->refitMatrixSize();
+    coverageMatrix->setRelation("testName1", "codeElement1", true);
+    coverageMatrix->setRelation("testName1", "codeElement2", false);
+    EXPECT_TRUE(coverageMatrix->isCoveredCodeElement("codeElement1"));
+    EXPECT_FALSE(coverageMatrix->isCoveredCodeElement("codeElement2"));
+}
+
 TEST_F(CCoverageMatrixTest, GetTestcases)
 {
     coverageMatrix->addTestcaseName("testName1");
     coverageMatrix->addTestcaseName("testName2");
     coverageMatrix->addCodeElementName("codeElement1");
+    coverageMatrix->addCodeElementName("codeElement2");
     coverageMatrix->refitMatrixSize();
     coverageMatrix->setRelation("testName1", "codeElement1", true);
     coverageMatrix->setRelation(coverageMatrix->getTestcases().getID("testName2"), coverageMatrix->getCodeElements().getID("codeElement1"), true);
     EXPECT_EQ(2u, coverageMatrix->getTestcases("codeElement1").size());
     EXPECT_EQ(0u, coverageMatrix->getTestcases("unknown code element").size());
+}
+
+TEST_F(CCoverageMatrixTest, IsCoveredTestCase)
+{
+    coverageMatrix->addCodeElementName("codeElement1");
+    coverageMatrix->addCodeElementName("codeElement2");
+    coverageMatrix->addTestcaseName("testName1");
+    coverageMatrix->addTestcaseName("testName2");
+    coverageMatrix->refitMatrixSize();
+    coverageMatrix->setRelation("testName1", "codeElement1", true);
+    coverageMatrix->setRelation("testName1", "codeElement2", false);
+    EXPECT_TRUE(coverageMatrix->isCoveredTest("testName1"));
+    EXPECT_FALSE(coverageMatrix->isCoveredTest("testName2"));
 }
 
 TEST_F(CCoverageMatrixTest, GetRelation)

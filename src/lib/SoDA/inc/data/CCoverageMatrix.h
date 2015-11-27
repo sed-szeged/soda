@@ -107,6 +107,34 @@ public:
     virtual const IndexType getNumOfCodeElements() const;
 
     /**
+     * @brief Returns true if the given code element is covered by any of the test cases.
+     * @param codeElementName Name of the code element.
+     * @return True if the given code element is covered by any of the tests.
+     */
+    bool isCoveredCodeElement(const String& codeElementName) const;
+
+    /**
+     * @brief Returns true if the given code element is covered by any of the test cases.
+     * @param ceId Id of a code element.
+     * @return True if the given code element is covered by any of the tests.
+     */
+    bool isCoveredCodeElement(const IndexType ceId) const;
+
+    /**
+     * @brief Returns true if the given test is covered by any of the code elements.
+     * @param testName Name of the code element.
+     * @return True if the given test is covered by any of the code elements.
+     */
+    bool isCoveredTest(const String& testName) const;
+
+    /**
+     * @brief Returns true if the given test is covered by a code element.
+     * @param tcId Id of a test case.
+     * @return True if the given test case is covered by a code element.
+     */
+    bool isCoveredTest(IndexType const tcId) const;
+
+    /**
      * @brief Returns true if the specified test case and code element
      *          is covered in the bit matrix.
      * @param testcaseName  Test case name.
