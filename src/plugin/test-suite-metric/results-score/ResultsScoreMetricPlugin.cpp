@@ -25,7 +25,7 @@
 
 namespace soda {
 
-ResultsScoreMetricPlugin::ResultsScoreMetricPlugin() : data(nullptr), clusterList(nullptr) {
+ResultsScoreMetricPlugin::ResultsScoreMetricPlugin() : data(nullptr) {
 }
 
 ResultsScoreMetricPlugin::~ResultsScoreMetricPlugin() {

@@ -46,7 +46,7 @@ public:
     /**
      * @brief Initialize the plugin.
      * @param data The test suite data.
-     * @param clusterList The clusters of test cases and code elements.
+     * @param clusterList [UNUSED] The clusters of test cases and code elements.
      * @param revisionList The revisions to consider.
      */
     void init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision);
@@ -65,7 +65,6 @@ public:
 
 private:
     CSelectionData *data;
-    ClusterMap *clusterList;
 };
 
 } /* namespace soda */
