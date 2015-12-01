@@ -81,6 +81,7 @@ void CSelectionStatistics::calcCoverageRelatedStatistics(rapidjson::Document &do
     (cerr << endl).flush();
     doc.AddMember("number_of_code_elements", nrOfCodeElements, doc.GetAllocator());
     doc.AddMember("number_of_test_cases", nrOfTestCases, doc.GetAllocator());
+    doc.AddMember("covered", covered, doc.GetAllocator());
     doc.AddMember("density", covered / (nrOfTestCases * nrOfCodeElements), doc.GetAllocator());
     doc.AddMember("average_test_cases_per_code_elements", covered / nrOfCodeElements, doc.GetAllocator());
     doc.AddMember("average_code_elements_per_test_cases", covered / nrOfTestCases, doc.GetAllocator());
