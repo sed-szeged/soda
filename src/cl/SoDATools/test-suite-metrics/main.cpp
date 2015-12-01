@@ -72,7 +72,8 @@ int main(int argc, char* argv[]) {
         ("help,h", "Prints help message")
         ("create-json-file,j", "Creates a sample json file")
         ("list-cluster-algorithms,c", "Lists the cluster algorithms")
-        ("list-metric-plugins,m", "Lists the metric plugins");
+        ("list-metric-plugins,m", "Lists the metric plugins")
+        ("list-mutation-plugins,", "Lists the metric plugins");
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -96,6 +97,11 @@ int main(int argc, char* argv[]) {
     }
     if (vm.count("list-metric-plugins")) {
         printPluginNames("metric", kernel.getTestSuiteMetricPluginManager().getPluginNames());
+        return 0;
+    }
+
+    if (vm.count("list-mutation-plugins")) {
+        printPluginNames("mutation", kernel.getMutationMetricPluginManager().getPluginNames());
         return 0;
     }
 
@@ -135,6 +141,7 @@ std::string getJsonString()
     "revision": 1,
     "revision-timestamp": 1348408576,
     "cluster-algorithm": "one-cluster",
+    "mutation-metrics": [ "mutation-category, results-score" ],
     "metrics": [ )template";
     bool first = true;
     for (auto &plugin : kernel.getTestSuiteMetricPluginManager().getPluginNames()) {
@@ -422,13 +429,14 @@ void saveMetrics(rapidjson::Document &results)
     }
 }
 
-void saveResults(rapidjson::Document &results) {
+void saveMutationMetrics(rapidjson::Document &results) {
+    const char* MUTATION_METRICS = "mutation-metrics";
     std::stringstream base;
-    for (rapidjson::Value::MemberIterator it = results["results-metrics"].MemberBegin(); it != results["results-metrics"].MemberEnd(); ++it) {
+    for (rapidjson::Value::MemberIterator it = results[MUTATION_METRICS].MemberBegin(); it != results[MUTATION_METRICS].MemberEnd(); ++it) {
         base << it->name.GetString() << ";";
     }
     base << std::endl;
-    for (rapidjson::Value::MemberIterator it = results["results-metrics"].MemberBegin(); it != results["results-metrics"].MemberEnd(); ++it) {
+    for (rapidjson::Value::MemberIterator it = results[MUTATION_METRICS].MemberBegin(); it != results[MUTATION_METRICS].MemberEnd(); ++it) {
         if (it->value.IsDouble()) {
             base << it->value.GetDouble() << ";";
         }
@@ -476,8 +484,7 @@ void processJsonFiles(String path)
         }
 
         if (metrics.empty()) {
-            std::cerr << "[ERROR] Missing metrics parameter in config file " << path << "." << std::endl;
-            return;
+            std::cerr << "[WARNING] Missing metrics parameter in config file " << path << "." << std::endl;
         }
         else {
             for (StringVector::const_iterator it = metrics.begin(); it != metrics.end(); ++it) {
@@ -566,6 +573,18 @@ void processJsonFiles(String path)
 
         rapidjson::Document results;
         results.SetObject();
+        // Calculates mutation metrics
+        if (reader.HasMember("mutation-metrics")) {
+            for (rapidjson::Value::ConstValueIterator itr = reader["mutation-metrics"].Begin(); itr != reader["mutation-metrics"].End(); ++itr) {
+                (std::cout << "[INFO] Running mutation metric plugin: " << itr->GetString() << " ...").flush();
+                IMutationMetricPlugin *plugin = kernel.getMutationMetricPluginManager().getPlugin(itr->GetString());
+                plugin->init(selectionData, reader);
+                plugin->calculate(results);
+                (std::cout << " done" << std::endl).flush();
+            }
+            saveMutationMetrics(results);
+        }
+
         for (StringVector::iterator it = metrics.begin(); it != metrics.end(); it++) {
             if (metricsCalculated.find(*it) == metricsCalculated.end()) {
                 calculateMetric(selectionData, *it, results);
@@ -575,10 +594,10 @@ void processJsonFiles(String path)
         addExtraMetrics(selectionData, results, revision, revTime, bugPath);
 
         saveMetrics(results);
-        saveResults(results);
         if (metricsCalculated.count("fault-localization")) {
             savePartitionData(results, selectionData);
         }
+
         delete selectionData;
     }
     catch (std::exception &e) {

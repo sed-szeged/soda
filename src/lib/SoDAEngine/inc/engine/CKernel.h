@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
  *
@@ -47,6 +47,7 @@ public:
     TestSuitePrioritizationPluginManager& getTestSuitePrioritizationPluginManager();
     TestSuiteReductionPluginManager& getTestSuiteReductionPluginManager();
     FaultLocalizationTechniquePluginManager& getFaultLocalizationTechniquePluginManager();
+    MutationMetricPluginManager& getMutationMetricPluginManager();
 
 private:
     /**
@@ -57,18 +58,19 @@ private:
 private:
     typedef std::map<std::string, CPlugin* > PluginMap;
 
-     PluginMap *m_pluginMap;
+     PluginMap *pluginMap;
 
      // Managers
-     BugsetReaderPluginManager               *m_bugsetReaderPluginManager;
-     ChangesetReaderPluginManager            *m_changesetReaderPluginManager;
-     CoverageReaderPluginManager             *m_coverageReaderPluginManager;
-     ResultsReaderPluginManager              *m_resultsReaderPluginManager;
-     TestSuiteClusterPluginManager           *m_testSuiteClusterPluginManager;
-     TestSuiteMetricPluginManager            *m_testSuiteMetricPluginManager;
-     TestSuitePrioritizationPluginManager    *m_testSuitePrioritizationPluginManager;
-     TestSuiteReductionPluginManager         *m_testSuiteReductionPluginManager;
-     FaultLocalizationTechniquePluginManager *m_faultLocalizationTechniquePluginManager;
+     BugsetReaderPluginManager               *bugsetReaderPluginManager;
+     ChangesetReaderPluginManager            *changesetReaderPluginManager;
+     CoverageReaderPluginManager             *coverageReaderPluginManager;
+     ResultsReaderPluginManager              *resultsReaderPluginManager;
+     TestSuiteClusterPluginManager           *testSuiteClusterPluginManager;
+     TestSuiteMetricPluginManager            *testSuiteMetricPluginManager;
+     TestSuitePrioritizationPluginManager    *testSuitePrioritizationPluginManager;
+     TestSuiteReductionPluginManager         *testSuiteReductionPluginManager;
+     FaultLocalizationTechniquePluginManager *faultLocalizationTechniquePluginManager;
+     MutationMetricPluginManager             *mutationMetricPluginManager;
 
      std::string m_pluginDir;
 };

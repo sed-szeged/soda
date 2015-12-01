@@ -212,7 +212,7 @@ void calculateFlTechnique(CSelectionData &selectionData, const String &name, rap
     (std::cerr << " done." << std::endl).flush();
 }
 
-void saveResults(CSelectionData &selectionData, rapidjson::Document & results, StringVector &buggedCEs, bool full) {
+void saveMutationMetrics(CSelectionData &selectionData, rapidjson::Document & results, StringVector &buggedCEs, bool full) {
     std::stringstream sbflStream;
 
     // header of the output file
@@ -429,7 +429,7 @@ void processJsonFiles(String path)
         }
 
         auto buggedCEs = selectionData.getBugs()->getBuggedCodeElements(revTime);
-        saveResults(selectionData, results, buggedCEs, clusterAlgorithmName == "one-cluster");
+        saveMutationMetrics(selectionData, results, buggedCEs, clusterAlgorithmName == "one-cluster");
 
         // Save the score values
         // FIXME: Refactor

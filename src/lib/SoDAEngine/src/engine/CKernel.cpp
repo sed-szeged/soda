@@ -34,16 +34,16 @@
 namespace soda {
 
 CKernel::CKernel() :
-    m_pluginMap(new PluginMap()),
-    m_bugsetReaderPluginManager(NULL),
-    m_changesetReaderPluginManager(NULL),
-    m_coverageReaderPluginManager(NULL),
-    m_resultsReaderPluginManager(NULL),
-    m_testSuiteClusterPluginManager(NULL),
-    m_testSuiteMetricPluginManager(NULL),
-    m_testSuitePrioritizationPluginManager(NULL),
-    m_testSuiteReductionPluginManager(NULL),
-    m_faultLocalizationTechniquePluginManager(NULL),
+    pluginMap(new PluginMap()),
+    bugsetReaderPluginManager(nullptr),
+    changesetReaderPluginManager(nullptr),
+    coverageReaderPluginManager(nullptr),
+    resultsReaderPluginManager(nullptr),
+    testSuiteClusterPluginManager(nullptr),
+    testSuiteMetricPluginManager(nullptr),
+    testSuitePrioritizationPluginManager(nullptr),
+    testSuiteReductionPluginManager(nullptr),
+    faultLocalizationTechniquePluginManager(nullptr),
     m_pluginDir(SODA_PLUGIN_DIR)
 {
 
@@ -51,117 +51,128 @@ CKernel::CKernel() :
 
 CKernel::~CKernel()
 {
-    if (m_changesetReaderPluginManager) {
-        delete m_changesetReaderPluginManager;
+    if (changesetReaderPluginManager) {
+        delete changesetReaderPluginManager;
     }
-    if (m_coverageReaderPluginManager) {
-        delete m_coverageReaderPluginManager;
+    if (coverageReaderPluginManager) {
+        delete coverageReaderPluginManager;
     }
-    if (m_resultsReaderPluginManager) {
-        delete m_resultsReaderPluginManager;
+    if (resultsReaderPluginManager) {
+        delete resultsReaderPluginManager;
     }
-    if (m_testSuiteClusterPluginManager) {
-        delete m_testSuiteClusterPluginManager;
+    if (testSuiteClusterPluginManager) {
+        delete testSuiteClusterPluginManager;
     }
-    if (m_testSuiteMetricPluginManager) {
-        delete m_testSuiteMetricPluginManager;
+    if (testSuiteMetricPluginManager) {
+        delete testSuiteMetricPluginManager;
     }
-    if (m_testSuitePrioritizationPluginManager) {
-        delete m_testSuitePrioritizationPluginManager;
+    if (testSuitePrioritizationPluginManager) {
+        delete testSuitePrioritizationPluginManager;
     }
-    if (m_testSuiteReductionPluginManager) {
-        delete m_testSuiteReductionPluginManager;
+    if (testSuiteReductionPluginManager) {
+        delete testSuiteReductionPluginManager;
     }
-    if (m_faultLocalizationTechniquePluginManager) {
-       delete m_faultLocalizationTechniquePluginManager;
+    if (faultLocalizationTechniquePluginManager) {
+       delete faultLocalizationTechniquePluginManager;
+    }
+    if (mutationMetricPluginManager) {
+        delete mutationMetricPluginManager;
     }
 
     // Delete internal plugin representations. The loaded libraries will be unloaded.
-    for (PluginMap::iterator it = m_pluginMap->begin(); it != m_pluginMap->end(); it++) {
+    for (PluginMap::iterator it = pluginMap->begin(); it != pluginMap->end(); it++) {
         delete it->second;
     }
-    delete m_pluginMap;
+    delete pluginMap;
 }
 
 BugsetReaderPluginManager& CKernel::getBugsetReaderPluginManager()
 {
-    if (m_bugsetReaderPluginManager == NULL) {
-        m_bugsetReaderPluginManager = new BugsetReaderPluginManager();
+    if (bugsetReaderPluginManager == nullptr) {
+        bugsetReaderPluginManager = new BugsetReaderPluginManager();
         loadPluginsFromDirectory(m_pluginDir + "/bugset-reader");
     }
-    return *m_bugsetReaderPluginManager;
+    return *bugsetReaderPluginManager;
 }
 
 ChangesetReaderPluginManager& CKernel::getChangesetReaderPluginManager()
 {
-    if (m_changesetReaderPluginManager == NULL) {
-        m_changesetReaderPluginManager = new ChangesetReaderPluginManager();
+    if (changesetReaderPluginManager == nullptr) {
+        changesetReaderPluginManager = new ChangesetReaderPluginManager();
         loadPluginsFromDirectory(m_pluginDir + "/changeset-reader");
     }
-    return *m_changesetReaderPluginManager;
+    return *changesetReaderPluginManager;
 }
 
 CoverageReaderPluginManager& CKernel::getCoverageReaderPluginManager()
 {
-    if (m_coverageReaderPluginManager == NULL) {
-        m_coverageReaderPluginManager = new CoverageReaderPluginManager();
+    if (coverageReaderPluginManager == nullptr) {
+        coverageReaderPluginManager = new CoverageReaderPluginManager();
         loadPluginsFromDirectory(m_pluginDir + "/coverage-reader");
     }
-    return *m_coverageReaderPluginManager;
+    return *coverageReaderPluginManager;
 }
 
 ResultsReaderPluginManager& CKernel::getResultsReaderPluginManager()
 {
-    if (m_resultsReaderPluginManager == NULL) {
-        m_resultsReaderPluginManager = new ResultsReaderPluginManager();
+    if (resultsReaderPluginManager == nullptr) {
+        resultsReaderPluginManager = new ResultsReaderPluginManager();
         loadPluginsFromDirectory(m_pluginDir + "/results-reader");
     }
-    return *m_resultsReaderPluginManager;
+    return *resultsReaderPluginManager;
 }
 
 TestSuiteClusterPluginManager& CKernel::getTestSuiteClusterPluginManager()
 {
-    if (m_testSuiteClusterPluginManager == NULL) {
-        m_testSuiteClusterPluginManager = new TestSuiteClusterPluginManager();
+    if (testSuiteClusterPluginManager == nullptr) {
+        testSuiteClusterPluginManager = new TestSuiteClusterPluginManager();
         loadPluginsFromDirectory(m_pluginDir + "/test-suite-cluster");
     }
-    return *m_testSuiteClusterPluginManager;
+    return *testSuiteClusterPluginManager;
 }
 
 TestSuiteMetricPluginManager& CKernel::getTestSuiteMetricPluginManager()
 {
-    if (m_testSuiteMetricPluginManager == NULL) {
-        m_testSuiteMetricPluginManager = new TestSuiteMetricPluginManager();
+    if (testSuiteMetricPluginManager == nullptr) {
+        testSuiteMetricPluginManager = new TestSuiteMetricPluginManager();
         loadPluginsFromDirectory(m_pluginDir + "/test-suite-metric");
     }
-    return *m_testSuiteMetricPluginManager;
+    return *testSuiteMetricPluginManager;
 }
 
 TestSuitePrioritizationPluginManager& CKernel::getTestSuitePrioritizationPluginManager()
 {
-    if (m_testSuitePrioritizationPluginManager == NULL) {
-        m_testSuitePrioritizationPluginManager = new TestSuitePrioritizationPluginManager();
+    if (testSuitePrioritizationPluginManager == nullptr) {
+        testSuitePrioritizationPluginManager = new TestSuitePrioritizationPluginManager();
         loadPluginsFromDirectory(m_pluginDir + "/test-suite-prioritization");
     }
-    return *m_testSuitePrioritizationPluginManager;
+    return *testSuitePrioritizationPluginManager;
 }
 
 TestSuiteReductionPluginManager& CKernel::getTestSuiteReductionPluginManager()
 {
-    if (m_testSuiteReductionPluginManager == NULL) {
-        m_testSuiteReductionPluginManager = new TestSuiteReductionPluginManager();
+    if (testSuiteReductionPluginManager == nullptr) {
+        testSuiteReductionPluginManager = new TestSuiteReductionPluginManager();
         loadPluginsFromDirectory(m_pluginDir + "/test-suite-reduction");
     }
-    return *m_testSuiteReductionPluginManager;
+    return *testSuiteReductionPluginManager;
 }
 
 FaultLocalizationTechniquePluginManager& CKernel::getFaultLocalizationTechniquePluginManager()
 {
-    if (m_faultLocalizationTechniquePluginManager == NULL) {
-        m_faultLocalizationTechniquePluginManager = new FaultLocalizationTechniquePluginManager();
+    if (faultLocalizationTechniquePluginManager == nullptr) {
+        faultLocalizationTechniquePluginManager = new FaultLocalizationTechniquePluginManager();
         loadPluginsFromDirectory(m_pluginDir + "/fault-localization-technique");
     }
-    return *m_faultLocalizationTechniquePluginManager;
+    return *faultLocalizationTechniquePluginManager;
+}
+
+MutationMetricPluginManager& CKernel::getMutationMetricPluginManager() {
+    if (mutationMetricPluginManager == nullptr) {
+        mutationMetricPluginManager = new MutationMetricPluginManager();
+        loadPluginsFromDirectory(m_pluginDir + "/mutation-metric");
+    }
+    return *mutationMetricPluginManager;
 }
 
 void CKernel::loadPluginsFromDirectory(const std::string &pluginDir)
@@ -180,9 +191,9 @@ void CKernel::loadPluginsFromDirectory(const std::string &pluginDir)
                 continue;
             }
             std::string pluginPath = it->path().string();
-            if (m_pluginMap->find(pluginPath) == m_pluginMap->end()) {
+            if (pluginMap->find(pluginPath) == pluginMap->end()) {
                 CPlugin *plugin = new CPlugin(pluginPath);
-                (*m_pluginMap)[pluginPath] = plugin;
+                (*pluginMap)[pluginPath] = plugin;
                 plugin->registerPlugin(*this);
             }
         }

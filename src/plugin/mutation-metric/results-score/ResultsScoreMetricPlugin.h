@@ -26,7 +26,7 @@
 
 namespace soda {
 
-class ResultsScoreMetricPlugin : public ITestSuiteMetricPlugin
+class ResultsScoreMetricPlugin : public IMutationMetricPlugin
 {
 public:
     ResultsScoreMetricPlugin();
@@ -46,10 +46,9 @@ public:
     /**
      * @brief Initialize the plugin.
      * @param data The test suite data.
-     * @param clusterList [UNUSED] The clusters of test cases and code elements.
-     * @param revisionList The revisions to consider.
+     * @param args Json document with the specified input arguments.
      */
-    void init(CSelectionData *data, std::map<std::string, CClusterDefinition> *clusterList, IndexType revision);
+    void init(CSelectionData *data, const rapidjson::Document& args);
 
     /**
      * @brief Returns the list of plugins names that the plugin depens on.

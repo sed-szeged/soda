@@ -36,10 +36,10 @@ std::string ResultsScoreMetricPlugin::getName() {
 }
 
 std::string ResultsScoreMetricPlugin::getDescription() {
-    return "Calculating results score of the results matrix.";
+    return "Calculating results score of the results matrix. Compares the revisions of the results matrix to the base revision (0).";
 }
 
-void ResultsScoreMetricPlugin::init(CSelectionData *selection, std::map<std::string, CClusterDefinition> *clusters, IndexType revision) {
+void ResultsScoreMetricPlugin::init(CSelectionData *selection, const rapidjson::Document& args) {
     data = selection;
 }
 
@@ -48,12 +48,15 @@ std::vector<std::string> ResultsScoreMetricPlugin::getDependency() {
 }
 
 void ResultsScoreMetricPlugin::calculate(rapidjson::Document &results) {
+    // TODO: Unify the data structure of the json files and extract them to constant variables.
+    // used constants
+    const char* MUTATION_METRICS_TAG = "mutation-metrics";
+
     CResultsMatrix *tcResults = data->getResults();
-    if (!results.HasMember("results-metrics")) {
-        results.AddMember(rapidjson::Value("results-metrics", results.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), results.GetAllocator());
+    if (!results.HasMember(MUTATION_METRICS_TAG)) {
+        results.AddMember(rapidjson::StringRef(MUTATION_METRICS_TAG), rapidjson::Value(rapidjson::kObjectType), results.GetAllocator());
     }
 
-    IndexType nrOfTestcases = tcResults->getNumOfTestcases();
     IndexType nrOfCases = tcResults->getNumOfRevisions() - 1; // number of revisions except the base revision which is the 0 revision number
     std::set<IndexType> newFailRevs;
     std::set<IndexType> newPassRevs;
@@ -76,19 +79,19 @@ void ResultsScoreMetricPlugin::calculate(rapidjson::Document &results) {
         }
     }
 
-    rapidjson::Value::MemberIterator passIt = results["results-metrics"].FindMember("pass-results-score");
-    if (passIt == results["results-metrics"].MemberEnd()) {
+    rapidjson::Value::MemberIterator passIt = results[MUTATION_METRICS_TAG].FindMember("pass-results-score");
+    if (passIt == results[MUTATION_METRICS_TAG].MemberEnd()) {
         rapidjson::Value v;
         v.SetDouble(((double)newPassRevs.size() / nrOfCases));
-        results["results-metrics"].AddMember("pass-results-score", v, results.GetAllocator());
+        results[MUTATION_METRICS_TAG].AddMember("pass-results-score", v, results.GetAllocator());
     } else
         passIt->value.SetDouble(((double)newPassRevs.size() / nrOfCases));
 
-    rapidjson::Value::MemberIterator failIt = results["results-metrics"].FindMember("fail-results-score");
-    if (failIt == results["results-metrics"].MemberEnd()) {
+    rapidjson::Value::MemberIterator failIt = results[MUTATION_METRICS_TAG].FindMember("fail-results-score");
+    if (failIt == results[MUTATION_METRICS_TAG].MemberEnd()) {
         rapidjson::Value v;
         v.SetDouble(((double)newFailRevs.size() / nrOfCases));
-        results["results-metrics"].AddMember("fail-results-score", v, results.GetAllocator());
+        results[MUTATION_METRICS_TAG].AddMember("fail-results-score", v, results.GetAllocator());
     }
     else
         failIt->value.SetDouble(((double)newFailRevs.size() / nrOfCases));
@@ -96,7 +99,7 @@ void ResultsScoreMetricPlugin::calculate(rapidjson::Document &results) {
 
 extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
-    kernel.getTestSuiteMetricPluginManager().addPlugin(new ResultsScoreMetricPlugin());
+    kernel.getMutationMetricPluginManager().addPlugin(new ResultsScoreMetricPlugin());
 }
 
 } /* namespace soda */

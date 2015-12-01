@@ -8,4 +8,4 @@ add_subdirectory(partition-efficiency)
 add_subdirectory(coverage-efficiency)
 add_subdirectory(uniqueness)
 add_subdirectory(clustering-metrics)
-add_subdirectory(results-score)
+

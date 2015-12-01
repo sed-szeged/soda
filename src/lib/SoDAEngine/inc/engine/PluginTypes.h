@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
  *
@@ -33,6 +33,7 @@
 #include "engine/plugin/ITestSuitePrioritizationPlugin.h"
 #include "engine/plugin/ITestSuiteReductionPlugin.h"
 #include "engine/plugin/IFaultLocalizationTechniquePlugin.h"
+#include "engine/plugin/IMutationMetricPlugin.h"
 
 #ifdef WIN32
 #define MSDLL_EXPORT __declspec(dllexport)
@@ -51,6 +52,7 @@ typedef CPluginManager<ITestSuiteMetricPlugin>            TestSuiteMetricPluginM
 typedef CPluginManager<ITestSuitePrioritizationPlugin>    TestSuitePrioritizationPluginManager;
 typedef CPluginManager<ITestSuiteReductionPlugin>         TestSuiteReductionPluginManager;
 typedef CPluginManager<IFaultLocalizationTechniquePlugin> FaultLocalizationTechniquePluginManager;
+using MutationMetricPluginManager = CPluginManager<IMutationMetricPlugin>;
 
 } /* namespace soda */
 
