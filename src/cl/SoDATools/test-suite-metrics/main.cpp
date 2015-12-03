@@ -141,7 +141,7 @@ std::string getJsonString()
     "revision": 1,
     "revision-timestamp": 1348408576,
     "cluster-algorithm": "one-cluster",
-    "mutation-metrics": [ "mutation-category, results-score" ],
+    "mutation-metrics": [ "mutation-category", "results-score" ],
     "metrics": [ )template";
     bool first = true;
     for (auto &plugin : kernel.getTestSuiteMetricPluginManager().getPluginNames()) {
