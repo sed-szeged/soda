@@ -26,6 +26,9 @@ add_subdirectory(coverage)
 # test-suite-score
 add_subdirectory(test-suite-score)
 
+# test-suite-score
+add_subdirectory(mutation-prioritization)
+
 # clustering
 add_subdirectory(clustering)
 

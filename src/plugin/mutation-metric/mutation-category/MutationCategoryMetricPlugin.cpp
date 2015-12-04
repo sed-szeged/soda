@@ -28,7 +28,7 @@
 namespace soda {
 
 MutationCategoryMetricPlugin::MutationCategoryMetricPlugin() : data(nullptr),
-    mutationCoverage(nullptr) {
+    mutationCoverage(nullptr), tcidList(nullptr) {
 }
 
 MutationCategoryMetricPlugin::~MutationCategoryMetricPlugin() {
@@ -52,8 +52,9 @@ std::vector<std::string> MutationCategoryMetricPlugin::getDependency() {
     return std::vector<std::string>();
 }
 
-void MutationCategoryMetricPlugin::init(CSelectionData *selection, const rapidjson::Document& args) {
+void MutationCategoryMetricPlugin::init(CSelectionData *selection, const rapidjson::Document& args, IntVector *idList) {
     data = selection;
+    tcidList = idList;
 
     const char* MUTATION_COVERAGE_PATH = "mutation-coverage";
     if (!args.HasMember(MUTATION_COVERAGE_PATH) || !boost::filesystem::exists(args[MUTATION_COVERAGE_PATH].GetString())) {
@@ -143,7 +144,14 @@ void MutationCategoryMetricPlugin::calculate(rapidjson::Document &results) {
         }
 
         ResultsDifferenceMask diffMask = NO_DIFF;
-        for (auto &tcIdx : tcResults->getTestcases().getIDList()) {
+        IntVector idList;
+        if (tcidList == NULL) {
+            idList = tcResults->getTestcases().getIDList();
+        } else {
+            idList = *tcidList;
+        }
+
+        for (auto &tcIdx : idList) {
             auto baseResult = tcResults->getResult(0, tcIdx);
             auto currResult = tcResults->getResult(rev, tcIdx);
             if (baseResult != currResult) {

@@ -62,8 +62,9 @@ public:
      * @brief Initialize the plugin.
      * @param data The test suite data.
      * @param args Json document with the specified input arguments.
+     * @param tcidList [OPTIONAL] List of test case ids that restricts the computation.
      */
-    virtual void init(CSelectionData *data, const rapidjson::Document& args) = 0;
+    virtual void init(CSelectionData *data, const rapidjson::Document& args, IntVector *tcidList) = 0;
 
     /**
      * @brief Returns the list of plugins names that the plugin depens on.

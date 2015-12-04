@@ -578,7 +578,7 @@ void processJsonFiles(String path)
             for (rapidjson::Value::ConstValueIterator itr = reader["mutation-metrics"].Begin(); itr != reader["mutation-metrics"].End(); ++itr) {
                 (std::cout << "[INFO] Running mutation metric plugin: " << itr->GetString() << " ...").flush();
                 IMutationMetricPlugin *plugin = kernel.getMutationMetricPluginManager().getPlugin(itr->GetString());
-                plugin->init(selectionData, reader);
+                plugin->init(selectionData, reader, NULL);
                 plugin->calculate(results);
                 (std::cout << " done" << std::endl).flush();
             }

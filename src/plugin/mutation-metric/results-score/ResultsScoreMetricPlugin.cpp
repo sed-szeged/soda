@@ -25,7 +25,7 @@
 
 namespace soda {
 
-ResultsScoreMetricPlugin::ResultsScoreMetricPlugin() : data(nullptr) {
+ResultsScoreMetricPlugin::ResultsScoreMetricPlugin() : data(nullptr), tcidList(nullptr) {
 }
 
 ResultsScoreMetricPlugin::~ResultsScoreMetricPlugin() {
@@ -39,8 +39,9 @@ std::string ResultsScoreMetricPlugin::getDescription() {
     return "Calculating results score of the results matrix. Compares the revisions of the results matrix to the base revision (0).";
 }
 
-void ResultsScoreMetricPlugin::init(CSelectionData *selection, const rapidjson::Document& args) {
+void ResultsScoreMetricPlugin::init(CSelectionData *selection, const rapidjson::Document& args, IntVector *idList) {
     data = selection;
+    tcidList = idList;
 }
 
 std::vector<std::string> ResultsScoreMetricPlugin::getDependency() {
@@ -61,7 +62,14 @@ void ResultsScoreMetricPlugin::calculate(rapidjson::Document &results) {
     std::set<IndexType> newFailRevs;
     std::set<IndexType> newPassRevs;
 
-    for (auto &tcIdx : tcResults->getTestcases().getIDList()) {
+    IntVector idList;
+    if (tcidList == NULL) {
+        idList = tcResults->getTestcases().getIDList();
+    } else {
+        idList = *tcidList;
+    }
+
+    for (auto &tcIdx : idList) {
         auto baseResult = tcResults->getResult(0, tcIdx);
         for (auto &rev : tcResults->getRevisionNumbers()) {
             if (!rev) { // base results
