@@ -64,9 +64,9 @@ void ResultsScoreMetricPlugin::calculate(rapidjson::Document &results) {
 
     IntVector idList;
     if (tcidList == NULL) {
-        idList = tcResults->getTestcases().getIDList();
+        idList = IntVector(tcResults->getTestcases().getIDList());
     } else {
-        idList = *tcidList;
+        idList = IntVector(*tcidList);
     }
 
     for (auto &tcIdx : idList) {

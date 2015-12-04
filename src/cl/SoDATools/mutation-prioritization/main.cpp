@@ -114,17 +114,22 @@ int processArgs(options_description desc, int ac, char* av[])
      */
     if (!vm.count("load-coverage")) {
         ERRO("The coverage binary is missing!" << std::endl << desc);
-        return 0;
+        return 1;
     }
 
     if (!vm.count("load-mutation-results")) {
         ERRO("The mutation result binary is missing!" << std::endl << desc);
-        return 0;
+        return 1;
     }
 
     if (!vm.count("sizes")) {
         ERRO("The sizes are missing!" << std::endl << desc);
-        return 0;
+        return 1;
+    }
+
+    if (!vm.count("output")) {
+        ERRO("The output file is missing!" << std::endl << desc);
+        return 1;
     }
 
 

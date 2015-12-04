@@ -104,7 +104,7 @@ int processArgs(options_description desc, int ac, char* av[])
 
 int main(int argc, char *argv[])
 {
-    std::cout << "binaryDump (SoDA tool)" << std::endl;
+    std::cout << "coverage (SoDA tool)" << std::endl;
     desc.add_options()
         ("help,h", "produce help message")
         ("load-coverage,c", value<String>(), "input file")
