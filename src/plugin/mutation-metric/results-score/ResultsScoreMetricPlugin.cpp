@@ -63,7 +63,7 @@ void ResultsScoreMetricPlugin::calculate(rapidjson::Document &results) {
     std::set<IndexType> newPassRevs;
 
     IntVector idList;
-    if (tcidList == NULL) {
+    if (tcidList == nullptr) {
         idList = tcResults->getTestcases().getIDList();
     } else {
         idList = *tcidList;

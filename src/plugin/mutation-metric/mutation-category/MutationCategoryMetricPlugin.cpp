@@ -21,6 +21,8 @@
 
 #include <fstream>
 #include <boost/algorithm/string.hpp>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 #include "exception/CException.h"
 #include "MutationCategoryMetricPlugin.h"
@@ -89,16 +91,39 @@ void MutationCategoryMetricPlugin::pairRevisionWithCoverage(const String &path) 
     std::ifstream in(path);
     String line;
     while (std::getline(in, line)) {
-        StringVector data;
-        boost::split(data, line, boost::is_any_of(";"));
-        fs::path p(data[5]);
+        StringVector mData;
+        boost::split(mData, line, boost::is_any_of(";"));
+        fs::path p(mData[5]);
         RevNumType rev = boost::lexical_cast<RevNumType>(p.filename().string());
         for (int i = 0; i < parsedCE.size(); ++i) {
             auto &ce = *parsedCE[i];
-            if (ce["mutation"]["type"].GetString() == data[1] &&
-                ce["mutation"]["count"].GetInt() == boost::lexical_cast<RevNumType>(data[2]) &&
-                ce["file"]["relative_path"].GetString() == data[0]) {
-                rev2Coverage[rev] = mutationCoverage->isCoveredCodeElement(cEs[i]);
+            // identifies one of the csv files row with mutation coverage data
+            if (ce["mutation"]["type"].GetString() == mData[1] &&
+                ce["mutation"]["count"].GetInt() == boost::lexical_cast<RevNumType>(mData[2]) &&
+                ce["file"]["relative_path"].GetString() == mData[0]) {
+                MutationData covData;
+                covData.covered = mutationCoverage->isCoveredCodeElement(cEs[i]);
+                // coverage of the enclosing method
+                if (data->getCoverage()) {
+                    rapidjson::StringBuffer buffer;
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                    ce["preceding-method"].Accept(writer);
+                    // FIXME: Implement a new writer for rapidjson.
+                    String str = buffer.GetString();
+                    String::size_type pos = 0;
+                    while((pos = str.find("\":", pos)) != String::npos) {
+                        str.replace(pos, 2, "\": ");
+                        pos += 2;
+                    }
+                    pos = 0;
+                    while((pos = str.find(",\"", pos)) != String::npos) {
+                        str.replace(pos, 2, ", \"");
+                        pos += 2;
+                    }
+                    covData.enclosingCovered = data->getCoverage()->isCoveredCodeElement(str);
+                }
+                rev2Coverage[rev] = covData;
+                std::cout << rev << ": " << covData.covered << " " << covData.enclosingCovered << std::endl;
                 break;
             }
         }
@@ -138,14 +163,20 @@ void MutationCategoryMetricPlugin::calculate(rapidjson::Document &results) {
             continue;
         }
 
-        // category 3 and 4 requires mutation point coverage
-        if (!rev2Coverage[rev]) {
+        if (!rev2Coverage[rev].covered) {
+            if (rev2Coverage[rev].enclosingCovered) {
+                mutationCats["type-2"]++;
+            }
+            else {
+                mutationCats["type-1"]++;
+            }
             continue;
         }
 
+        // category 3 and 4 requires mutation point coverage
         ResultsDifferenceMask diffMask = NO_DIFF;
         IntVector idList;
-        if (tcidList == NULL) {
+        if (tcidList == nullptr) {
             idList = tcResults->getTestcases().getIDList();
         } else {
             idList = *tcidList;

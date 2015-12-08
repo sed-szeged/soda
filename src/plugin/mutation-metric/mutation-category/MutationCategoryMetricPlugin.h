@@ -77,7 +77,12 @@ private:
      */
     void pairRevisionWithCoverage(const String& path);
 
-    std::map<RevNumType, bool> rev2Coverage;
+    struct MutationData {
+        bool covered = false;
+        bool enclosingCovered = false;
+    };
+
+    std::map<RevNumType, MutationData> rev2Coverage;
     CCoverageMatrix *mutationCoverage;
     CSelectionData *data;
     IntVector *tcidList;
