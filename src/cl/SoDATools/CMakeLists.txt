@@ -23,6 +23,9 @@ add_subdirectory(test-suite-metrics)
 # coverage
 add_subdirectory(coverage)
 
+# mutation-score
+add_subdirectory(mutation-score)
+
 # test-suite-score
 add_subdirectory(test-suite-score)
 
