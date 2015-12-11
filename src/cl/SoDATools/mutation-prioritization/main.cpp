@@ -94,6 +94,8 @@ void calculate(String prioAlgorithm, std::vector<int> sizes)
         }
         out << std::endl;
     }
+
+    return 0;
 }
 
 /**

@@ -57,13 +57,11 @@ std::vector<std::string> MutationCategoryMetricPlugin::getDependency() {
 void MutationCategoryMetricPlugin::init(CSelectionData *selection, const rapidjson::Document& args, IntVector *idList) {
     data = selection;
     tcidList = idList;
-
     const char* MUTATION_COVERAGE_PATH = "mutation-coverage";
     if (!args.HasMember(MUTATION_COVERAGE_PATH) || !boost::filesystem::exists(args[MUTATION_COVERAGE_PATH].GetString())) {
         throw CException("MutationCategoryMetricPlugin::init", "Not existing or invalid mutation-coverage path.");
     }
     loadMutationCoverage(args[MUTATION_COVERAGE_PATH].GetString());
-
 
     const char* MUTATION_MAP_PATH = "mutation-map";
     if (!args.HasMember(MUTATION_MAP_PATH) || !boost::filesystem::exists(args[MUTATION_MAP_PATH].GetString())) {
@@ -120,10 +118,10 @@ void MutationCategoryMetricPlugin::pairRevisionWithCoverage(const String &path) 
                         str.replace(pos, 2, ", \"");
                         pos += 2;
                     }
-                    covData.enclosingCovered = data->getCoverage()->isCoveredCodeElement(str);
+                    covData.enclosingCovered = data->getCoverage()->getCodeElements().containsValue(str) && data->getCoverage()->isCoveredCodeElement(str);
                 }
                 rev2Coverage[rev] = covData;
-                std::cout << rev << ": " << covData.covered << " " << covData.enclosingCovered << std::endl;
+                //std::cout << rev << ": " << covData.covered << " " << covData.enclosingCovered << std::endl;
                 break;
             }
         }
