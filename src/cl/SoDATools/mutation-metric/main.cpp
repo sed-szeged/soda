@@ -49,8 +49,13 @@ int processArgs(options_description desc, int ac, char* av[])
         return 1;
     }
 
-    if (!vm.count("mutation-coverage")) {
-        ERRO("The mutation coverage binary is missing!" << std::endl << desc);
+    if (!vm.count("mutation-method-coverage")) {
+        ERRO("The mutation method coverage binary is missing!" << std::endl << desc);
+        return 1;
+    }
+
+    if (!vm.count("mutation-point-coverage")) {
+        ERRO("The mutation point coverage binary is missing!" << std::endl << desc);
         return 1;
     }
 
@@ -66,6 +71,8 @@ int processArgs(options_description desc, int ac, char* av[])
 
     String tmp = vm["load-mutation-results"].as<String>();
     selectionData.loadResults(tmp);
+    tmp = vm["mutation-method-coverage"].as<String>();
+    selectionData.loadCoverage(tmp);
 
     results.SetObject();
     args.SetObject();
@@ -76,7 +83,7 @@ int processArgs(options_description desc, int ac, char* av[])
     resultScoreMetricPlugin->calculate(results);
 
     rapidjson::Value v;
-    v.SetString(vm["mutation-coverage"].as<String>().c_str(), args.GetAllocator());
+    v.SetString(vm["mutation-point-coverage"].as<String>().c_str(), args.GetAllocator());
     const char* MUTATION_COVERAGE_PATH = "mutation-coverage";
     const char* MUTATION_MAP_PATH = "mutation-map";
     args.AddMember(rapidjson::StringRef(MUTATION_COVERAGE_PATH), v, args.GetAllocator());
@@ -110,7 +117,8 @@ int main(int argc, char *argv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("load-mutation-results,r", value<String>(), "input mutation test result file")
-        ("mutation-coverage,c", value<String>(), "input mutation test result file")
+        ("mutation-method-coverage,c", value<String>(), "input mutation method coverage binary file")
+        ("mutation-point-coverage,p", value<String>(), "input mutation point coverage binary file")
         ("mutation-map,m", value<String>(), "input mutation test result file")
         ("output,o", value<String>(), "output file")
         ;

@@ -23,12 +23,14 @@ options_description desc("Allowed options");
 
 CKernel kernel;
 CSelectionData selectionData;
+CSelectionData selectionDataForMutation;
 std::ofstream out;
 variables_map vm;
 
 void calculate(String prioAlgorithm, std::vector<int> sizes)
 {
-    for (auto size : sizes) {
+    for (int size = 1; size < selectionData.getCoverage()->getNumOfTestcases(); size++) {
+    //for (auto size : sizes) {
         // General coverage
         IntVector tcidList;
         rapidjson::Document results;
@@ -38,6 +40,15 @@ void calculate(String prioAlgorithm, std::vector<int> sizes)
         ITestSuitePrioritizationPlugin *prioritizationPlugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin(prioAlgorithm);
         prioritizationPlugin->init(&selectionData);
         prioritizationPlugin->fillSelection(tcidList, size);
+
+        IntVector tcidListInMutation;
+        for (auto tcid : tcidList) {
+            auto test = selectionData.getCoverage()->getTestcases().getValue(tcid);
+            if (selectionDataForMutation.getResults()->getTestcases().containsValue(test)) {
+                auto tcidInMutation = selectionDataForMutation.getResults()->getTestcases().getID(test);
+                tcidListInMutation.push_back(tcidInMutation);
+            }
+        }
 
         // Coverage metric
         std::map<std::string, CClusterDefinition> clusterList;
@@ -56,10 +67,12 @@ void calculate(String prioAlgorithm, std::vector<int> sizes)
         args.SetObject();
 
         bool hasCategories = false;
-        if (vm.count("mutation-coverage") && vm.count("mutation-map")) {
+        if (vm.count("mutation-method-coverage") && vm.count("mutation-point-coverage") && vm.count("mutation-map")) {
+            String tmp = vm["mutation-method-coverage"].as<String>();
+            selectionDataForMutation.loadCoverage(tmp);
             hasCategories = true;
             rapidjson::Value v;
-            v.SetString(vm["mutation-coverage"].as<String>().c_str(), args.GetAllocator());
+            v.SetString(vm["mutation-point-coverage"].as<String>().c_str(), args.GetAllocator());
             const char* MUTATION_COVERAGE_PATH = "mutation-coverage";
             const char* MUTATION_MAP_PATH = "mutation-map";
             args.AddMember(rapidjson::StringRef(MUTATION_COVERAGE_PATH), v, args.GetAllocator());
@@ -67,13 +80,13 @@ void calculate(String prioAlgorithm, std::vector<int> sizes)
             args.AddMember(rapidjson::StringRef(MUTATION_MAP_PATH), v, args.GetAllocator());
 
             IMutationMetricPlugin *mutationCategoryMetricPlugin = kernel.getMutationMetricPluginManager().getPlugin("mutation-category");
-            mutationCategoryMetricPlugin->init(&selectionData, args, &tcidList);
+            mutationCategoryMetricPlugin->init(&selectionDataForMutation, args, &tcidListInMutation);
             mutationCategoryMetricPlugin->calculate(results);
         }
 
         // Mutation score metric
         IMutationMetricPlugin *resultScoreMetricPlugin = kernel.getMutationMetricPluginManager().getPlugin("results-score");
-        resultScoreMetricPlugin->init(&selectionData, args, &tcidList);
+        resultScoreMetricPlugin->init(&selectionDataForMutation, args, &tcidListInMutation);
         resultScoreMetricPlugin->calculate(results);
 
         // Save output
@@ -94,8 +107,6 @@ void calculate(String prioAlgorithm, std::vector<int> sizes)
         }
         out << std::endl;
     }
-
-    return 0;
 }
 
 /**
@@ -138,7 +149,7 @@ int processArgs(options_description desc, int ac, char* av[])
     String tmp = vm["load-coverage"].as<String>();
     selectionData.loadCoverage(tmp);
     tmp = vm["load-mutation-results"].as<String>();
-    selectionData.loadResults(tmp);
+    selectionDataForMutation.loadResults(tmp);
 
     std::vector<int> sizes = vm["sizes"].as<std::vector<int> >();
 
@@ -161,7 +172,8 @@ int main(int argc, char *argv[])
         ("help,h", "produce help message")
         ("load-coverage,c", value<String>(), "input program coverage file")
         ("load-mutation-results,r", value<String>(), "input mutation test result file")
-        ("mutation-coverage", value<String>(), "input mutation test result file")
+        ("mutation-method-coverage", value<String>(), "input mutation test result file")
+        ("mutation-point-coverage", value<String>(), "input mutation test result file")
         ("mutation-map", value<String>(), "input mutation test result file")
         ("sizes,s",value<std::vector<int> >()->multitoken(), "The number of selection sizes")
         ("output,o", value<String>(), "output file")
