@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors: David Havas <havasd@inf.u-szeged.hu>
  *
@@ -32,7 +32,7 @@ using namespace soda;
 
 extern CKernel kernel;
 
-class CFaultLocalizationTechniquePluginsTest : public testing::Test
+class FaultLocalizationTechniquePluginsTest : public testing::Test
 {
 protected:
 
@@ -61,7 +61,7 @@ protected:
     }
 };
 
-TEST_F(CFaultLocalizationTechniquePluginsTest, OchiaiMetaInfo)
+TEST_F(FaultLocalizationTechniquePluginsTest, OchiaiMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("ochiai"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
@@ -70,7 +70,7 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, OchiaiMetaInfo)
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CFaultLocalizationTechniquePluginsTest, Ochiai)
+TEST_F(FaultLocalizationTechniquePluginsTest, Ochiai)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("ochiai"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
@@ -83,7 +83,7 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, Ochiai)
     EXPECT_DOUBLE_EQ(0.67171717171717171, CTestSuiteScore::flScore(clusterList["full"], results["full"]["0"]["ochiai"].GetDouble(), plugin->getDistribution()));
 }
 
-TEST_F(CFaultLocalizationTechniquePluginsTest, TarantulaMetaInfo)
+TEST_F(FaultLocalizationTechniquePluginsTest, TarantulaMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("tarantula"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
@@ -92,7 +92,7 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, TarantulaMetaInfo)
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CFaultLocalizationTechniquePluginsTest, Tarantula)
+TEST_F(FaultLocalizationTechniquePluginsTest, Tarantula)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("tarantula"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
@@ -105,7 +105,7 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, Tarantula)
     EXPECT_DOUBLE_EQ(0.78787878787878785, CTestSuiteScore::flScore(clusterList["full"], results["full"]["0"]["tarantula"].GetDouble(), plugin->getDistribution()));
 }
 
-TEST_F(CFaultLocalizationTechniquePluginsTest, CommonMetaInfo)
+TEST_F(FaultLocalizationTechniquePluginsTest, CommonMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("common"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
@@ -114,7 +114,7 @@ TEST_F(CFaultLocalizationTechniquePluginsTest, CommonMetaInfo)
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CFaultLocalizationTechniquePluginsTest, Common)
+TEST_F(FaultLocalizationTechniquePluginsTest, Common)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("common"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));

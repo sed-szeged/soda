@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors: David Havas <havasd@inf.u-szeged.hu>
  *
@@ -28,7 +28,7 @@
 
 using namespace soda;
 
-class CTestSuiteMetricPluginsTest : public testing::Test
+class TestSuiteMetricPluginsTest : public testing::Test
 {
 protected:
     std::map<std::string, CClusterDefinition> clusterList;
@@ -57,14 +57,14 @@ protected:
     }
 };
 
-TEST_F(CTestSuiteMetricPluginsTest, FaultDetectionMetaInfo)
+TEST_F(TestSuiteMetricPluginsTest, FaultDetectionMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("coverage"));
     EXPECT_EQ("coverage", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, FaultDetection)
+TEST_F(TestSuiteMetricPluginsTest, FaultDetection)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("coverage"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 1));
@@ -73,14 +73,14 @@ TEST_F(CTestSuiteMetricPluginsTest, FaultDetection)
     EXPECT_DOUBLE_EQ(0.80952380952380953, results["cluster - cluster"]["coverage"].GetDouble());
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, CoverageEfficiencyMetaInfo)
+TEST_F(TestSuiteMetricPluginsTest, CoverageEfficiencyMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("coverage-efficiency"));
     EXPECT_EQ("coverage-efficiency", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, CoverageEfficiency)
+TEST_F(TestSuiteMetricPluginsTest, CoverageEfficiency)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("coverage-efficiency"));
     StringVector dependencies = plugin->getDependency();
@@ -95,14 +95,14 @@ TEST_F(CTestSuiteMetricPluginsTest, CoverageEfficiency)
     EXPECT_DOUBLE_EQ(3.3999999999999999, results["cluster - cluster"]["coverage-efficiency"].GetDouble());
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, FaultLocalizationMetaInfo)
+TEST_F(TestSuiteMetricPluginsTest, FaultLocalizationMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("fault-localization"));
     EXPECT_EQ("fault-localization", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, FaultLocalization)
+TEST_F(TestSuiteMetricPluginsTest, FaultLocalization)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("fault-localization"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 1));
@@ -111,14 +111,14 @@ TEST_F(CTestSuiteMetricPluginsTest, FaultLocalization)
     EXPECT_DOUBLE_EQ(0.13333333333333333, results["cluster - cluster"]["fault-localization"].GetDouble());
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, FMeasureMetaInfo)
+TEST_F(TestSuiteMetricPluginsTest, FMeasureMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("f-measure"));
     EXPECT_EQ("f-measure", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, FMeasure)
+TEST_F(TestSuiteMetricPluginsTest, FMeasure)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("f-measure"));
     StringVector dep = plugin->getDependency();
@@ -139,14 +139,14 @@ TEST_F(CTestSuiteMetricPluginsTest, FMeasure)
     EXPECT_DOUBLE_EQ(0.83712121212121215, results["cluster - cluster"]["f-measure"].GetDouble());
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, TpceMetaInfo)
+TEST_F(TestSuiteMetricPluginsTest, TpceMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("tpce"));
     EXPECT_EQ("tpce", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, Tpce)
+TEST_F(TestSuiteMetricPluginsTest, Tpce)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("tpce"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 1));
@@ -155,14 +155,14 @@ TEST_F(CTestSuiteMetricPluginsTest, Tpce)
     EXPECT_DOUBLE_EQ(0.23809523809523808, results["cluster - cluster"]["tpce"].GetDouble());
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, SpecializationMetaInfo)
+TEST_F(TestSuiteMetricPluginsTest, SpecializationMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("specialization"));
     EXPECT_EQ("specialization", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, Specialization)
+TEST_F(TestSuiteMetricPluginsTest, Specialization)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("specialization"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 1));
@@ -171,14 +171,14 @@ TEST_F(CTestSuiteMetricPluginsTest, Specialization)
     EXPECT_DOUBLE_EQ(0.5, results["cluster - cluster"]["specialization"].GetDouble());
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, UniquenessMetaInfo)
+TEST_F(TestSuiteMetricPluginsTest, UniquenessMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("uniqueness"));
     EXPECT_EQ("uniqueness", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, Uniqueness)
+TEST_F(TestSuiteMetricPluginsTest, Uniqueness)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("uniqueness"));
     EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 1));
@@ -187,14 +187,14 @@ TEST_F(CTestSuiteMetricPluginsTest, Uniqueness)
     EXPECT_DOUBLE_EQ(0.58823529411764708, results["cluster - cluster"]["uniqueness"].GetDouble());
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, PartitionMetricMetaInfo)
+TEST_F(TestSuiteMetricPluginsTest, PartitionMetricMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("partition-metric"));
     EXPECT_EQ("partition-metric", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, PartitionMetric)
+TEST_F(TestSuiteMetricPluginsTest, PartitionMetric)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("partition-metric"));
     StringVector dependencies = plugin->getDependency();
@@ -209,14 +209,14 @@ TEST_F(CTestSuiteMetricPluginsTest, PartitionMetric)
     EXPECT_DOUBLE_EQ(0.8666666666666667, results["cluster - cluster"]["partition-metric"].GetDouble());
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, PartitionEfficiencyMetaInfo)
+TEST_F(TestSuiteMetricPluginsTest, PartitionEfficiencyMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("partition-efficiency"));
     EXPECT_EQ("partition-efficiency", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteMetricPluginsTest, PartitionEfficiency)
+TEST_F(TestSuiteMetricPluginsTest, PartitionEfficiency)
 {
     plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("fault-localization");
     plugin->init(&selection, &clusterList, 1);
@@ -229,22 +229,4 @@ TEST_F(CTestSuiteMetricPluginsTest, PartitionEfficiency)
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_DOUBLE_EQ(3.6399999999999997, results["cluster - cluster"]["partition-efficiency"].GetDouble());
-}
-
-TEST_F(CTestSuiteMetricPluginsTest, ResultsScoreMetaInfo)
-{
-    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("results-score"));
-    EXPECT_EQ("results-score", plugin->getName());
-    EXPECT_TRUE(plugin->getDescription().length() > 0);
-}
-
-TEST_F(CTestSuiteMetricPluginsTest, ResultsScore)
-{
-    CSelectionData data;
-    data.loadResults("sample/MetricPluginSampleDir/oryx.50.returns.res.SoDA");
-    EXPECT_NO_THROW(plugin = kernel.getTestSuiteMetricPluginManager().getPlugin("results-score"));
-    EXPECT_NO_THROW(plugin->init(&data, &clusterList, 0));
-    EXPECT_NO_THROW(plugin->calculate(results));
-    EXPECT_DOUBLE_EQ(0.83999999999999997, results["results-metrics"]["fail-results-score"].GetDouble());
-    EXPECT_DOUBLE_EQ(0, results["results-metrics"]["pass-results-score"].GetDouble());
 }

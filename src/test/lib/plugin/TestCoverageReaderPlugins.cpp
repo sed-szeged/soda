@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors:
  *
@@ -30,7 +30,7 @@ using namespace soda;
 
 CKernel kernel;
 
-class CCoverageReaderPluginsTest : public testing::Test
+class CoverageReaderPluginsTest : public testing::Test
 {
 protected:
     CCoverageMatrix* coverageMatrix;
@@ -48,14 +48,14 @@ protected:
     }
 };
 
-TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPluginMetaInfo)
+TEST_F(CoverageReaderPluginsTest, OneTestPerFileCoverageReaderPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("one-test-per-file"));
     EXPECT_EQ("one-test-per-file", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPluginUnknownPath)
+TEST_F(CoverageReaderPluginsTest, OneTestPerFileCoverageReaderPluginUnknownPath)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("one-test-per-file"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/this_dir_does_not_exists"), ""))));
@@ -64,7 +64,7 @@ TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPluginUnknownPath
     EXPECT_THROW(coverageMatrix = plugin->read(vm), CException);
 }
 
-TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPlugin)
+TEST_F(CoverageReaderPluginsTest, OneTestPerFileCoverageReaderPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("one-test-per-file"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/CoverageMatrixOneTestPerFileSampleDir"), ""))));
@@ -76,14 +76,14 @@ TEST_F(CCoverageReaderPluginsTest, OneTestPerFileCoverageReaderPlugin)
     EXPECT_EQ(824u, coverageMatrix->getNumOfCodeElements());
 }
 
-TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPluginMetaInfo)
+TEST_F(CoverageReaderPluginsTest, GcovCoverageReaderPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("gcov"));
     EXPECT_EQ("gcov", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPlugin)
+TEST_F(CoverageReaderPluginsTest, GcovCoverageReaderPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("gcov"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/CoverageMatrixGcovSampleDir"), ""))));
@@ -100,7 +100,7 @@ TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPlugin)
     EXPECT_EQ(542, coverageMatrix->getNumOfCodeElements());
 }
 
-TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPluginFilter)
+TEST_F(CoverageReaderPluginsTest, GcovCoverageReaderPluginFilter)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("gcov"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/CoverageMatrixGcovSampleDir"), ""))));
@@ -116,14 +116,14 @@ TEST_F(CCoverageReaderPluginsTest, GcovCoverageReaderPluginFilter)
     EXPECT_EQ(328, coverageMatrix->getNumOfCodeElements());
 }
 
-TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginMetaInfo)
+TEST_F(CoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
     EXPECT_EQ("emma-java", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-/*TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginUnknownPath)
+/*TEST_F(CoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginUnknownPath)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/this_dir_does_not_exists"), ""))));
@@ -132,7 +132,7 @@ TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginMetaInfo)
     EXPECT_THROW(coverageMatrix = plugin->read(vm), CException);
 }*/
 
-TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginPackage)
+TEST_F(CoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginPackage)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/EmmaCoverageSampleDir"), ""))));
@@ -147,7 +147,7 @@ TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginPackage)
     EXPECT_TRUE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources"));
 }
 
-TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginSrc)
+TEST_F(CoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginSrc)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/EmmaCoverageSampleDir"), ""))));
@@ -163,7 +163,7 @@ TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginSrc)
     EXPECT_TRUE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.compiler.java"));
 }
 
-TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginClass)
+TEST_F(CoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginClass)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/EmmaCoverageSampleDir"), ""))));
@@ -179,7 +179,7 @@ TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginClass)
     EXPECT_TRUE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.compiler"));
 }
 
-TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginMethod)
+TEST_F(CoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginMethod)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("emma-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/EmmaCoverageSampleDir"), ""))));
@@ -195,14 +195,14 @@ TEST_F(CCoverageReaderPluginsTest, EmmaJavaCoverageReaderPluginMethod)
     EXPECT_TRUE(coverageMatrix->getRelation("sample_test", "com.sun.tools.javac.v8.resources.compiler.compiler (): void"));
 }
 
-TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginMetaInfo)
+TEST_F(CoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
     EXPECT_EQ("jacoco-java", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-/*TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginUnknownPath)
+/*TEST_F(CoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginUnknownPath)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/this_dir_does_not_exists"), ""))));
@@ -211,7 +211,7 @@ TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginMetaInfo)
     EXPECT_THROW(coverageMatrix = plugin->read(vm), CException);
 }*/
 
-TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginPackage)
+TEST_F(CoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginPackage)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/JacocoCoverageSampleDir"), ""))));
@@ -227,7 +227,7 @@ TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginPackage)
     EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner"));
 }
 
-TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginSrc)
+TEST_F(CoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginSrc)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/JacocoCoverageSampleDir"), ""))));
@@ -243,7 +243,7 @@ TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginSrc)
     EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description.java"));
 }
 
-TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginClass)
+TEST_F(CoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginClass)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/JacocoCoverageSampleDir"), ""))));
@@ -259,7 +259,7 @@ TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginClass)
     EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description"));
 }
 
-TEST_F(CCoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginMethod)
+TEST_F(CoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginMethod)
 {
     EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("jacoco-java"));
     EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/JacocoCoverageSampleDir"), ""))));

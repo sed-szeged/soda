@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors:
  *
@@ -26,7 +26,7 @@
 
 using namespace soda;
 
-class CChangesetReaderPluginsTest : public testing::Test
+class ChangesetReaderPluginsTest : public testing::Test
 {
 protected:
     CChangeset* changeset;
@@ -45,20 +45,20 @@ protected:
 
 };
 
-TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPluginMetaInfo)
+TEST_F(ChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getChangesetReaderPluginManager().getPlugin("one-revision-per-file"));
     EXPECT_EQ("one-revision-per-file", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPluginUnknownPath)
+TEST_F(ChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPluginUnknownPath)
 {
     EXPECT_NO_THROW(plugin = kernel.getChangesetReaderPluginManager().getPlugin("one-revision-per-file"));
     EXPECT_THROW(changeset = plugin->read("sample/this_dir_does_not_exists"), CException);
 }
 
-TEST_F(CChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPlugin)
+TEST_F(ChangesetReaderPluginsTest, OneRevisionPerFileChangesetReaderPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getChangesetReaderPluginManager().getPlugin("one-revision-per-file"));
     EXPECT_NO_THROW(changeset = plugin->read("sample/ChangesetOneRevisionPerFileSampleDir"));

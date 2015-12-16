@@ -1,5 +1,5 @@
 /*
-* Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+* Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
 *
 * Authors: David Havas <havasd@inf.u-szeged.hu>
 *
@@ -28,7 +28,7 @@ using namespace soda;
 
 extern CKernel kernel;
 
-class CBugsetReaderPluginsTest : public testing::Test
+class BugsetReaderPluginsTest : public testing::Test
 {
 protected:
     CBugset* bugset;
@@ -45,20 +45,20 @@ protected:
     }
 };
 
-TEST_F(CBugsetReaderPluginsTest, CsvFileBugsetReaderPluginMetaInfo)
+TEST_F(BugsetReaderPluginsTest, CsvFileBugsetReaderPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getBugsetReaderPluginManager().getPlugin("csv-file"));
     EXPECT_EQ("csv-file", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CBugsetReaderPluginsTest, CsvFileBugsetReaderPluginUnknownPath)
+TEST_F(BugsetReaderPluginsTest, CsvFileBugsetReaderPluginUnknownPath)
 {
     EXPECT_NO_THROW(plugin = kernel.getBugsetReaderPluginManager().getPlugin("csv-file"));
     EXPECT_THROW(bugset = plugin->read("not_existing_path"), CException);
 }
 
-TEST_F(CBugsetReaderPluginsTest, CsvFileBugsetReaderPlugin)
+TEST_F(BugsetReaderPluginsTest, CsvFileBugsetReaderPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getBugsetReaderPluginManager().getPlugin("csv-file"));
     (bugset = plugin->read("sample/CsvFileBugsetSampleDir/"));

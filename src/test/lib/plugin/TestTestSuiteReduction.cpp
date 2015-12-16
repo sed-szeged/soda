@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors: David Havas <havasd@inf.u-szeged.hu>
  *
@@ -28,7 +28,7 @@
 
 using namespace soda;
 
-class CTestSuiteReductionPluginsTest : public testing::Test
+class TestSuiteReductionPluginsTest : public testing::Test
 {
 protected:
     rapidjson::Document results;
@@ -62,14 +62,14 @@ protected:
     }
 };
 
-TEST_F(CTestSuiteReductionPluginsTest, CoverageReductionPluginMetaInfo)
+TEST_F(TestSuiteReductionPluginsTest, CoverageReductionPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("coverage"));
     EXPECT_EQ("coverage", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteReductionPluginsTest, CoverageReductionPlugin)
+TEST_F(TestSuiteReductionPluginsTest, CoverageReductionPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("coverage"));
     EXPECT_NO_THROW(plugin->init(&data, params));
@@ -91,14 +91,14 @@ TEST_F(CTestSuiteReductionPluginsTest, CoverageReductionPlugin)
     EXPECT_EQ(7u, coverage.getNumOfTestcases());
 }
 
-TEST_F(CTestSuiteReductionPluginsTest, AdditionalCoverageReductionPluginMetaInfo)
+TEST_F(TestSuiteReductionPluginsTest, AdditionalCoverageReductionPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("additional-coverage"));
     EXPECT_EQ("additional-coverage", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteReductionPluginsTest, AdditionalCoverageReductionPlugin)
+TEST_F(TestSuiteReductionPluginsTest, AdditionalCoverageReductionPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("additional-coverage"));
     EXPECT_NO_THROW(plugin->init(&data, params));
@@ -120,14 +120,14 @@ TEST_F(CTestSuiteReductionPluginsTest, AdditionalCoverageReductionPlugin)
     EXPECT_EQ(7u, coverage.getNumOfTestcases());
 }
 
-TEST_F(CTestSuiteReductionPluginsTest, DuplationReductionPluginMetaInfo)
+TEST_F(TestSuiteReductionPluginsTest, DuplationReductionPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("duplation"));
     EXPECT_EQ("duplation", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteReductionPluginsTest, DuplationReductionPlugin)
+TEST_F(TestSuiteReductionPluginsTest, DuplationReductionPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("duplation"));
     EXPECT_NO_THROW(plugin->init(&data, params));
@@ -143,14 +143,14 @@ TEST_F(CTestSuiteReductionPluginsTest, DuplationReductionPlugin)
     EXPECT_EQ("test-11", res[3]);
 }
 
-TEST_F(CTestSuiteReductionPluginsTest, RandomReductionPluginMetaInfo)
+TEST_F(TestSuiteReductionPluginsTest, RandomReductionPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("random"));
     EXPECT_EQ("random", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteReductionPluginsTest, RandomReductionPlugin)
+TEST_F(TestSuiteReductionPluginsTest, RandomReductionPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteReductionPluginManager().getPlugin("random"));
     EXPECT_NO_THROW(plugin->init(&data, params));

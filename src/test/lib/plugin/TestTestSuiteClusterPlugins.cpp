@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors: David Havas <havasd@inf.u-szeged.hu>
  *
@@ -28,7 +28,7 @@
 
 using namespace soda;
 
-class CTestSuiteClusterPluginsTest : public testing::Test
+class TestSuiteClusterPluginsTest : public testing::Test
 {
 protected:
     CSelectionData data;
@@ -67,14 +67,14 @@ protected:
 
 
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteHammingClusterPluginMetaInfo)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteHammingClusterPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("hamming"));
     EXPECT_EQ("hamming", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteHamming01ClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteHamming01ClusterPlugin)
 {
     doc.AddMember("hamming_dist_row(%)", 50, doc.GetAllocator());
     doc.AddMember("hamming_dist_cols(%)", 50, doc.GetAllocator());
@@ -92,7 +92,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteHamming01ClusterPlugin)
 
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteHamming02ClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteHamming02ClusterPlugin)
 {
     doc.AddMember("hamming_dist_row(%)", 20, doc.GetAllocator());
     doc.AddMember("hamming_dist_cols(%)", 50, doc.GetAllocator());
@@ -109,7 +109,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteHamming02ClusterPlugin)
 }
 
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOchiaiDiceJaccardClusterPluginMetaInfo)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteOchiaiDiceJaccardClusterPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("ochiai-dice-jaccard"));
     EXPECT_EQ("ochiai-dice-jaccard", plugin->getName());
@@ -117,7 +117,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOchiaiDiceJaccardClusterPluginMeta
 }
 
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOchiaiClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteOchiaiClusterPlugin)
 {
     doc.AddMember("alg.index", 0, doc.GetAllocator());
     doc.AddMember("limit", -1.0, doc.GetAllocator());
@@ -138,7 +138,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOchiaiClusterPlugin)
 }
 
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDiceClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteDiceClusterPlugin)
 {
     doc.AddMember("alg.index", 1, doc.GetAllocator());
     doc.AddMember("limit", -1.0, doc.GetAllocator());
@@ -157,7 +157,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDiceClusterPlugin)
 }
 
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteJaccardClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteJaccardClusterPlugin)
 {
     doc.AddMember("alg.index", 2, doc.GetAllocator());
     doc.AddMember("limit", -1.0, doc.GetAllocator());
@@ -180,7 +180,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteJaccardClusterPlugin)
 
 
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPluginMetaInfo)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteOneClusterPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("one-cluster"));
     EXPECT_NO_THROW(plugin->init(doc));
@@ -190,7 +190,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPluginMetaInfo)
     EXPECT_EQ(0, plugin->getRequiredParameters().size());
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("one-cluster"));
     EXPECT_NO_THROW(plugin->init(doc));
@@ -202,7 +202,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteOneClusterPlugin)
 }
 
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPluginMetaInfo)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteCoverageClusterPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("coverage"));
     EXPECT_NO_THROW(plugin->init(doc));
@@ -212,7 +212,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPluginMetaInfo)
     EXPECT_EQ(1, plugin->getRequiredParameters().count("cluster-sizes"));
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteCoverageClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("coverage"));
     EXPECT_NO_THROW(plugin->init(doc));
@@ -224,7 +224,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteCoverageClusterPlugin)
     EXPECT_EQ(50u, clusterList["coverage-50"].getTestCases()[49]);
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPluginMetaInfo)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteDuplationClusterPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("duplation"));
     EXPECT_NO_THROW(plugin->init(doc));
@@ -234,7 +234,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPluginMetaInfo)
     EXPECT_EQ(1, plugin->getRequiredParameters().count("cluster-sizes"));
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteDuplationClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("duplation"));
     EXPECT_NO_THROW(plugin->init(doc));
@@ -246,7 +246,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteDuplationClusterPlugin)
     EXPECT_EQ(40u, clusterList["duplation-50"].getTestCases()[49]);
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPluginMetaInfo)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteRandomClusterPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("random"));
     EXPECT_NO_THROW(plugin->init(doc));
@@ -256,7 +256,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPluginMetaInfo)
     EXPECT_EQ(1, plugin->getRequiredParameters().count("cluster-sizes"));
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteRandomClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("random"));
     EXPECT_NO_THROW(plugin->init(doc));
@@ -268,7 +268,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteRandomClusterPlugin)
     EXPECT_EQ(50u, clusterList["random-50"].getTestCases().size());
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteLabelTestCodeElementClusterPluginMetaInfo)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteLabelTestCodeElementClusterPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("label-test-codeelements"));
     EXPECT_NO_THROW(plugin->init(doc));
@@ -279,7 +279,7 @@ TEST_F(CTestSuiteClusterPluginsTest, TestSuiteLabelTestCodeElementClusterPluginM
     EXPECT_EQ(1, plugin->getRequiredParameters().count("cluster-code-elements-list"));
 }
 
-TEST_F(CTestSuiteClusterPluginsTest, TestSuiteLabelTestCodeElementClusterPlugin)
+TEST_F(TestSuiteClusterPluginsTest, TestSuiteLabelTestCodeElementClusterPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuiteClusterPluginManager().getPlugin("label-test-codeelements"));
     EXPECT_NO_THROW(plugin->init(doc));

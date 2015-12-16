@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors:
  *
@@ -26,7 +26,7 @@
 
 using namespace soda;
 
-class CResultsReaderPluginsTest : public testing::Test
+class ResultsReaderPluginsTest : public testing::Test
 {
 protected:
     CResultsMatrix* resultsMatrix;
@@ -44,20 +44,20 @@ protected:
     }
 };
 
-TEST_F(CResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPluginMetaInfo)
+TEST_F(ResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getResultsReaderPluginManager().getPlugin("dejagnu-one-revision-per-file"));
     EXPECT_EQ("dejagnu-one-revision-per-file", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPluginUnknownPath)
+TEST_F(ResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPluginUnknownPath)
 {
     EXPECT_NO_THROW(plugin = kernel.getResultsReaderPluginManager().getPlugin("dejagnu-one-revision-per-file"));
     EXPECT_THROW(plugin->read("sample/this_dir_does_not_exists"), CException);
 }
 
-TEST_F(CResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPlugin)
+TEST_F(ResultsReaderPluginsTest, DejaGNUOneRevisionPerFileResultsReaderPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getResultsReaderPluginManager().getPlugin("dejagnu-one-revision-per-file"));
     EXPECT_NO_THROW(resultsMatrix = plugin->read("sample/ResultsMatrixDejaGNUOneRevisionPerFileSampleDir"));

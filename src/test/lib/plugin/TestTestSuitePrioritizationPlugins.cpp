@@ -1,5 +1,5 @@
 /*
- * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
+ * Copyright (C): 2013-2015 Department of Software Engineering, University of Szeged
  *
  * Authors:
  *
@@ -26,7 +26,7 @@
 
 using namespace soda;
 
-class CTestSuitePrioritizationPluginsTest : public testing::Test
+class TestSuitePrioritizationPluginsTest : public testing::Test
 {
 protected:
     CSelectionData *data;
@@ -48,7 +48,7 @@ protected:
     }
 };
 
-TEST_F(CTestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPluginMetaInfo)
+TEST_F(TestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("general-ignore"));
 
@@ -56,7 +56,7 @@ TEST_F(CTestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPluginMet
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPlugin)
+TEST_F(TestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("general-ignore"));
     EXPECT_NO_THROW(plugin->reset(1));
@@ -70,7 +70,7 @@ TEST_F(CTestSuitePrioritizationPluginsTest, GeneralIgnorePrioritizationPlugin)
     EXPECT_EQ(0u, result[4]);
 }
 
-TEST_F(CTestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizationPluginMetaInfo)
+TEST_F(TestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizationPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("additional-general-ignore"));
 
@@ -78,7 +78,7 @@ TEST_F(CTestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizatio
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizationPlugin)
+TEST_F(TestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizationPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("additional-general-ignore"));
     EXPECT_NO_THROW(plugin->reset(1));
@@ -92,7 +92,7 @@ TEST_F(CTestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritizatio
     EXPECT_EQ(2u, result[4]);
 }
 
-TEST_F(CTestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPluginMetaInfo)
+TEST_F(TestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("random-ignore"));
 
@@ -100,7 +100,7 @@ TEST_F(CTestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPluginMeta
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(CTestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPlugin)
+TEST_F(TestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPlugin)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("random-ignore"));
     EXPECT_NO_THROW(plugin->reset(1));
