@@ -100,6 +100,7 @@ void MutationCategoryMetricPlugin::pairRevisionWithCoverage(const String &path) 
                 ce["mutation"]["count"].GetInt() == boost::lexical_cast<RevNumType>(mData[2]) &&
                 ce["file"]["relative_path"].GetString() == mData[0]) {
                 MutationData covData;
+                covData.mutationMap = line;
                 covData.covered = mutationCoverage->isCoveredCodeElement(cEs[i]);
                 // coverage of the enclosing method
                 if (data->getCoverage()) {
@@ -215,6 +216,7 @@ void MutationCategoryMetricPlugin::calculate(rapidjson::Document &results) {
 
         switch(diffMask) {
         case NO_DIFF:
+            (std::cout << rev2Coverage[rev].mutationMap << std::endl).flush();
             mutationCats["type-3"]++;
             break;
         case NEW_FAIL:

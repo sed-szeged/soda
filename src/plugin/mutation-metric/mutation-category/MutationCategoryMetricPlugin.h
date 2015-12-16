@@ -78,6 +78,7 @@ private:
     void pairRevisionWithCoverage(const String& path);
 
     struct MutationData {
+        String mutationMap;
         bool covered = false;
         bool enclosingCovered = false;
     };
