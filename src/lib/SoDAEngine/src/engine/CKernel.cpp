@@ -44,6 +44,7 @@ CKernel::CKernel() :
     testSuitePrioritizationPluginManager(nullptr),
     testSuiteReductionPluginManager(nullptr),
     faultLocalizationTechniquePluginManager(nullptr),
+    mutationMetricPluginManager(nullptr),
     m_pluginDir(SODA_PLUGIN_DIR)
 {
 
