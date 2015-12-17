@@ -26,7 +26,7 @@
 
 using namespace soda;
 
-class TestSuiteMetricPluginsTest : public testing::Test
+class MutationMetricPluginsTest : public testing::Test
 {
 protected:
     rapidjson::Document results;
@@ -35,8 +35,11 @@ protected:
     CKernel kernel;
 
     virtual void SetUp() {
+        results.AddMember("mutation-coverage", "sample/MutationMetricPluginSample/oryx-mutation-point.cov.SoDA", results.GetAllocator());
+        results.AddMember("mutation-map", "sample/MutationMetricPluginSample/oryx-mutants-if.list.csv", results.GetAllocator());
         // Create selection data.
-        selection.loadResults("sample/MetricPluginSampleDir/oryx.50.returns.res.SoDA");
+        selection.loadCoverage("sample/MutationMetricPluginSample/oryx-mutation-method.cov.SoDA");
+        selection.loadResults("sample/MutationMetricPluginSample/oryx-mutation-if.results.SoDA");
         plugin = nullptr;
     }
 
@@ -44,30 +47,34 @@ protected:
     }
 };
 
-TEST_F(TestSuiteMetricPluginsTest, ResultsScoreMetaInfo) {
+TEST_F(MutationMetricPluginsTest, ResultsScoreMetaInfo) {
     EXPECT_NO_THROW(plugin = kernel.getMutationMetricPluginManager().getPlugin("results-score"));
     EXPECT_EQ("results-score", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(TestSuiteMetricPluginsTest, ResultsScore) {
+TEST_F(MutationMetricPluginsTest, ResultsScore) {
     EXPECT_NO_THROW(plugin = kernel.getMutationMetricPluginManager().getPlugin("results-score"));
     EXPECT_NO_THROW(plugin->init(&selection, results, nullptr));
     EXPECT_NO_THROW(plugin->calculate(results));
-    EXPECT_DOUBLE_EQ(0.83999999999999997, results["mutation-metrics"]["fail-results-score"].GetDouble());
+    EXPECT_DOUBLE_EQ(0.21568627450980393, results["mutation-metrics"]["fail-results-score"].GetDouble());
     EXPECT_DOUBLE_EQ(0, results["mutation-metrics"]["pass-results-score"].GetDouble());
 }
 
-TEST_F(TestSuiteMetricPluginsTest, MutationCategoryMetaInfO) {
+TEST_F(MutationMetricPluginsTest, MutationCategoryMetaInfo) {
     EXPECT_NO_THROW(plugin = kernel.getMutationMetricPluginManager().getPlugin("mutation-category"));
     EXPECT_EQ("mutation-category", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-/*TEST_F(TestSuiteMetricPluginsTest, MutationCategory) {
-    EXPECT_NO_THROW(plugin = kernel.getMutationMetricPluginManager().getPlugin("results-score"));
+TEST_F(MutationMetricPluginsTest, MutationCategory) {
+    EXPECT_NO_THROW(plugin = kernel.getMutationMetricPluginManager().getPlugin("mutation-category"));
     EXPECT_NO_THROW(plugin->init(&selection, results, nullptr));
     EXPECT_NO_THROW(plugin->calculate(results));
-    EXPECT_DOUBLE_EQ(0.83999999999999997, results["mutation-metrics"]["fail-results-score"].GetDouble());
-    EXPECT_DOUBLE_EQ(0, results["mutation-metrics"]["pass-results-score"].GetDouble());
-}*/
+    EXPECT_EQ(51, results["mutation-metrics"]["nrOfMutations"].GetInt());
+    EXPECT_EQ(38, results["mutation-metrics"]["type-1"].GetInt());
+    EXPECT_EQ(1, results["mutation-metrics"]["type-2"].GetInt());
+    EXPECT_EQ(1, results["mutation-metrics"]["type-3"].GetInt());
+    EXPECT_EQ(0, results["mutation-metrics"]["type-4A"].GetInt());
+    EXPECT_EQ(11, results["mutation-metrics"]["type-4B"].GetInt());
+}
