@@ -53,7 +53,9 @@ std::string SimpleInstrumentationListenerJavaCoverageReaderPlugin::getDescriptio
 CCoverageMatrix* SimpleInstrumentationListenerJavaCoverageReaderPlugin::read(const variables_map &vm)
 {
     coverage = new CCoverageMatrix();
-    codeElements = vm["list-code-elements"].as<String>();
+    if (vm.count("list-code-elements")) {
+        codeElements = vm["list-code-elements"].as<String>();
+    }
     outputPath = vm["output"].as<String>();
     outputPath.append(".mut");
     readFromFile(vm["path"].as<String>());
@@ -71,6 +73,10 @@ void SimpleInstrumentationListenerJavaCoverageReaderPlugin::readFromFile(String 
     std::ifstream in(file);
     String line;
     while (std::getline(in, line)) {
+        if (line.empty()) {
+            continue;
+        }
+
         StringVector data;
         // Input lines contains test name:code element naem pairs with a ':' separator.
         data.push_back(line.substr(0, line.find(":{")));
