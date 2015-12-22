@@ -73,8 +73,8 @@ void SimpleInstrumentationListenerJavaCoverageReaderPlugin::readFromFile(String 
     while (std::getline(in, line)) {
         StringVector data;
         // Input lines contains test name:code element naem pairs with a ':' separator.
-        data.push_back(line.substr(0, line.find_first_of(":")));
-        data.push_back(line.substr(line.find_first_of(":") + 1));
+        data.push_back(line.substr(0, line.find(":{")));
+        data.push_back(line.substr(line.find(":{") + 1));
         if (data[1].find("mutation") != String::npos) {
             mutationM->addOrSetRelation(data[0], data[1], true);
         }
