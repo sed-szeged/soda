@@ -10,28 +10,39 @@ using namespace boost::program_options;
 
 #define ERRO(X)   std::cerr << "[*ERROR*] " << X << std::endl
 
+typedef double (*diffFunc)(IdxStrMap &);
+
 CCoverageMatrix baseCov;
 CCoverageMatrix comparableCov;
 String programName { "default" };
+String mode { "code-element" };
 
 int processArgs(options_description &desc, int ac, char* av[]);
 void globalize();
 std::pair<double, IdxStrMap> avgDiffAndHamming();
+double ceDiff(IdxStrMap &);
+double tcDiff(IdxStrMap &);
 void save(double value);
 void save(IdxStrMap &values);
+
+std::map<String, diffFunc> modeMap = {
+    {"code-elment", ceDiff},
+    {"testcase", tcDiff}
+};
 
 int main(int argc, char *argv[])
 {
     options_description desc("Allowed options");
-    std::cout << "coverage (SoDA tool)" << std::endl;
+    std::cout << "coverage-difference (SoDA tool)" << std::endl;
     desc.add_options()
         ("help,h", "produce help message")
         ("load-coverage,c", value<String>(), "base coverage matrix")
-        ("load-second-cov", value<String>(), "second coverage matrix")
-        ("hamming-dist,h", value<String>(), "calculates hamming distance between the code elements vectors from the two matrices")
-        ("average-difference,a", value<String>(), "calculates the number of different elements in the B matrix compared to A and divides with the size of the A matrix")
-        ("program-name", value<String>(), "prefix of the output files")
-        ("output-dir", value<String>(), "output directory")
+        ("load-second-cov,C", value<String>(), "second coverage matrix")
+        ("hamming-dist,H", "calculates hamming distance between the code elements vectors from the two matrices")
+        ("average-difference,a", "calculates the number of different elements in the B matrix compared to A and divides with the size of the A matrix")
+        ("program-name,p", value<String>(), "prefix of the output files")
+        ("output-dir,o", value<String>(), "output directory")
+        ("mode,m", value<String>(), "the dimension of the comparison, could be either code-element (default) or testcase")
         ;
 
     if (argc < 2) {
@@ -83,17 +94,18 @@ int processArgs(options_description &desc, int ac, char* av[])
 
     if (vm.count("output-dir")) {
         boost::filesystem::create_directories(vm["output-dir"].as<String>());
-        programName = vm["output-dir"].as<String>() + programName;
+        boost::filesystem::path outdir(vm["output-dir"].as<String>());
+        programName = (outdir / programName).string();
     }
 
     enum SaveMask {
-        NONE,
+        NONE = 0,
         AVG,
         HAMM,
         ALL
     };
 
-    int saveMask = 0;
+    int saveMask = NONE;
     if (vm.count("average-difference")) {
         saveMask |= AVG;
     }
@@ -107,11 +119,15 @@ int processArgs(options_description &desc, int ac, char* av[])
     baseCov.load(basePath);
     comparableCov.load(comparePath);
     globalize();
+
+    if (vm.count("mode")) {
+        mode = vm["mode"].as<String>();
+    }
     auto res = avgDiffAndHamming();
     if (saveMask & AVG) {
         save(res.first);
     }
-    if (saveMask  & HAMM) {
+    if (saveMask & HAMM) {
         save(res.second);
     }
 }
@@ -128,10 +144,18 @@ void globalize() {
 }
 
 std::pair<double, IdxStrMap> avgDiffAndHamming() {
-    IdxStrMap methodCovDiffs;
+    IdxStrMap covDiffs;
+    auto diff = modeMap[mode](covDiffs);
+    diff /= (baseCov.getNumOfCodeElements() * baseCov.getNumOfTestcases());
+    return std::make_pair(diff, covDiffs);
+}
+
+double ceDiff(IdxStrMap &methodCovDiffs) {
     double diff = 0;
+
     for (const auto &ce : baseCov.getCodeElements().getValueList()) {
         methodCovDiffs[ce] = 0;
+
         for (const auto &test : baseCov.getTestcases().getValueList()) {
             if (baseCov.getRelation(test, ce) != comparableCov.getRelation(test, ce)) {
                 diff++;
@@ -139,8 +163,25 @@ std::pair<double, IdxStrMap> avgDiffAndHamming() {
             }
         }
     }
-    diff /= (baseCov.getNumOfCodeElements() * baseCov.getNumOfTestcases());
-    return std::make_pair(diff, methodCovDiffs);
+
+    return diff;
+}
+
+double tcDiff(IdxStrMap &testcaseCovDiffs) {
+    double diff = 0;
+
+    for (const auto &tc : baseCov.getTestcases().getValueList()) {
+        testcaseCovDiffs[tc] = 0;
+
+        for (const auto &ce : baseCov.getCodeElements().getValueList()) {
+            if (baseCov.getRelation(tc, ce) != comparableCov.getRelation(tc, ce)) {
+                diff++;
+                testcaseCovDiffs[tc]++;
+            }
+        }
+    }
+
+    return diff;
 }
 
 void save(double value) {
