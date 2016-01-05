@@ -26,7 +26,7 @@ void save(double value);
 void save(IdxStrMap &values);
 
 std::map<String, diffFunc> modeMap = {
-    {"code-elment", ceDiff},
+    {"code-element", ceDiff},
     {"testcase", tcDiff}
 };
 
@@ -158,7 +158,6 @@ std::pair<double, IdxStrMap> avgDiffAndHamming() {
 
 double ceDiff(IdxStrMap &methodCovDiffs) {
     double diff = 0;
-
     for (const auto &ce : baseCov.getCodeElements().getValueList()) {
         methodCovDiffs[ce] = 0;
 
