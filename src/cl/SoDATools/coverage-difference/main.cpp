@@ -123,12 +123,18 @@ int processArgs(options_description &desc, int ac, char* av[])
     if (vm.count("mode")) {
         mode = vm["mode"].as<String>();
     }
-    auto res = avgDiffAndHamming();
-    if (saveMask & AVG) {
-        save(res.first);
-    }
-    if (saveMask & HAMM) {
-        save(res.second);
+    try {
+        auto res = avgDiffAndHamming();
+
+        if (saveMask & AVG) {
+            save(res.first);
+        }
+        if (saveMask & HAMM) {
+            save(res.second);
+        }
+    } catch (std::out_of_range &) {
+        ERRO("Unknown mode (" << mode << ").");
+        return 1;
     }
 }
 
@@ -145,7 +151,7 @@ void globalize() {
 
 std::pair<double, IdxStrMap> avgDiffAndHamming() {
     IdxStrMap covDiffs;
-    auto diff = modeMap[mode](covDiffs);
+    auto diff = modeMap.at(mode)(covDiffs);
     diff /= (baseCov.getNumOfCodeElements() * baseCov.getNumOfTestcases());
     return std::make_pair(diff, covDiffs);
 }
@@ -191,7 +197,7 @@ void save(double value) {
 
 void save(IdxStrMap &values) {
     std::ofstream out((programName + "-hamming-dist.csv").c_str());
-    out << "Code element name;Number of different coverage values;" << std::endl;
+    out << "Name;Number of different coverage values" << std::endl;
     for (const auto &val : values) {
         out << val.first << ";" << val.second << std::endl;
     }
