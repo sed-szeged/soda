@@ -19,10 +19,10 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CDataHandler.h"
-#include "CCoverageDataManager.h"
-#include "CResultsDataManager.h"
-#include "CChangesDataManager.h"
+#include "util/CDataHandler.h"
+#include "util/CCoverageDataManager.h"
+#include "util/CResultsDataManager.h"
+#include "util/CChangesDataManager.h"
 
 namespace soda {
 

@@ -43,10 +43,7 @@ add_subdirectory(mutation-prioritization)
 add_subdirectory(clustering)
 
 # binaryDump
-aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/binarydump binaryDump_src)
-add_executable(binaryDump ${binaryDump_src})
-target_link_libraries(binaryDump SoDA ${Boost_LIBRARIES})
-install(TARGETS binaryDump RUNTIME DESTINATION bin)
+add_subdirectory(utilities/binarydump)
 
 # coverage-comparator
 aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/coverage-comparator coverageCompare_src)

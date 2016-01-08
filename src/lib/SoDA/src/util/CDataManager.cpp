@@ -19,8 +19,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CDataManager.h"
-#include "CDataHandler.h"
+#include "util/CDataManager.h"
+#include "util/CDataHandler.h"
 
 namespace soda {
 

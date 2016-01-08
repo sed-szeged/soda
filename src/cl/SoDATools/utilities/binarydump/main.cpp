@@ -26,10 +26,10 @@
   */
 
 #include <fstream>
-#include "CDataHandler.h"
-#include "CCoverageDataManager.h"
-#include "CResultsDataManager.h"
-#include "CChangesDataManager.h"
+#include "util/CDataHandler.h"
+#include "util/CCoverageDataManager.h"
+#include "util/CResultsDataManager.h"
+#include "util/CChangesDataManager.h"
 #include "boost/program_options.hpp"
 
 using namespace soda;

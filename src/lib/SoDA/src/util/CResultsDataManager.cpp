@@ -20,8 +20,8 @@
  */
 
 #include "exception/CException.h"
-#include "CResultsDataManager.h"
-#include "CDataHandler.h"
+#include "util/CResultsDataManager.h"
+#include "util/CDataHandler.h"
 #include <fstream>
 
 namespace soda {
@@ -122,7 +122,6 @@ void CResultsDataManager::dumpPassFail(const String& filepath, bool psize, char 
             O << csep << "New fail" << csep << "New pass" << rsep;
         }
 
-        
         for (auto &rev : res.getRevisionNumbers()) {
             IndexType nrOfNewFail = 0, nrOfNewPass = 0;
             if (getWithNames()) {

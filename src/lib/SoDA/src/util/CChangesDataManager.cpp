@@ -20,8 +20,8 @@
  */
 
 #include "exception/CException.h"
-#include "CChangesDataManager.h"
-#include "CDataHandler.h"
+#include "util/CChangesDataManager.h"
+#include "util/CDataHandler.h"
 #include <fstream>
 
 namespace soda {

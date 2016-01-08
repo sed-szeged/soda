@@ -20,8 +20,8 @@
  */
 
 #include "exception/CException.h"
-#include "CCoverageDataManager.h"
-#include "CDataHandler.h"
+#include "util/CCoverageDataManager.h"
+#include "util/CDataHandler.h"
 #include <fstream>
 
 
