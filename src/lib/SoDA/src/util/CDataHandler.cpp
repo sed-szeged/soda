@@ -19,10 +19,12 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "exception/CException.h"
 #include "util/CDataHandler.h"
 #include "util/CCoverageDataManager.h"
 #include "util/CResultsDataManager.h"
 #include "util/CChangesDataManager.h"
+#include <fstream>
 
 namespace soda {
 
@@ -167,6 +169,78 @@ ReadFormat CDataHandler::getReadFormat() const
 void CDataHandler::setReadFormat(ReadFormat format)
 {
     m_eReadFormat = format;
+}
+
+void CDataHandler::loadCodeElementFilter(const String &filePath)
+{
+    loadFilter(filePath, m_codeElementFilter);
+}
+
+void CDataHandler::loadTestcaseFilter(const String &filePath)
+{
+    loadFilter(filePath, m_testFilter);
+}
+
+void CDataHandler::loadFilter(const String &filePath, std::set<String> &filterContainer)
+{
+    INFO(getPrintInfo(), "CDataHandler::loadFilter(\"" << filePath << "\")");
+    path p(filePath);
+    if (CDataManager::checkPathOk(p) == 1) {
+        std::ifstream in(filePath);
+        String line;
+        while (std::getline(in, line)) {
+            filterContainer.insert(line);
+        }
+    } else
+        throw CException("CDataHandler::loadFilter", filePath + " is not a regular file");
+}
+
+CCoverageMatrix* CDataHandler::filterCoverage(CCoverageMatrix *coverage, bool dispose)
+{
+    CCoverageMatrix* filtered = new CCoverageMatrix();
+    for (const String& ce : coverage->getCodeElements().getValueList()) {
+        if (!m_codeElementFilter.count(ce)) {
+            filtered->addCodeElementName(ce);
+        }
+    }
+    for (const String& tc : coverage->getTestcases().getValueList()) {
+        if (!m_testFilter.count(tc)) {
+            filtered->addTestcaseName(tc);
+        }
+    }
+    filtered->refitMatrixSize();
+    for (const String& ce : filtered->getCodeElements().getValueList()) {
+        for (const String& tc : filtered->getTestcases().getValueList()) {
+            filtered->setRelation(tc, ce, coverage->getRelation(tc, ce));
+        }
+    }
+    if (dispose) {
+        delete coverage;
+    }
+    return filtered;
+}
+
+CResultsMatrix* CDataHandler::filterResults(CResultsMatrix *results, bool dispose)
+{
+    CResultsMatrix* filtered = new CResultsMatrix();
+    for (const String& tc : results->getTestcases().getValueList()) {
+        if (!m_testFilter.count(tc)) {
+            filtered->addTestcaseName(tc);
+        }
+    }
+    for (const IntVector::value_type rev : results->getRevisionNumbers()) {
+        filtered->addRevisionNumber(rev);
+    }
+    filtered->refitMatrixSize();
+    for (const String& tc : filtered->getTestcases().getValueList()) {
+        for (const IntVector::value_type rev : filtered->getRevisionNumbers()) {
+            filtered->setResult(rev, tc, results->getResult(rev, tc));
+        }
+    }
+    if (dispose) {
+        delete results;
+    }
+    return filtered;
 }
 
 } // namespace soda

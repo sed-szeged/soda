@@ -202,6 +202,34 @@ public:
      */
     CIDManager* getCodeElements();
 
+    /**
+     * @brief Loads the code element filter from the given file.
+     * @param filePath The path of a filter file. It should contain one code element name per line.
+     */
+    void loadCodeElementFilter(const String& filePath);
+
+    /**
+     * @brief Loads the testcase filter from the given file.
+     * @param filePath The path of a filter file. It should contain one testcase name per line.
+     */
+    void loadTestcaseFilter(const String& filePath);
+
+    /**
+     * @brief Creates a new coverage matrix based on the given coverage matrix by removing element which are contained in the filters.
+     * @param coverage The coverage matrix that should be filtered.
+     * @param dispose Whether to delete the original matrix or not.
+     * @return The filtered coverage matrix.
+     */
+    CCoverageMatrix* filterCoverage(CCoverageMatrix* coverage, bool dispose = false);
+
+    /**
+     * @brief Creates a new results matrix based on the given results matrix by removing element which are contained in the filters.
+     * @param results The results matrix that should be filtered.
+     * @param dispose Whether to delete the original matrix or not.
+     * @return The filtered results matrix.
+     */
+    CResultsMatrix* filterResults(CResultsMatrix* results, bool dispose = false);
+
 private:
 
     /**
@@ -225,10 +253,17 @@ private:
     IndexType revision = 0;
 
     time_t revisionTime;
-public:
-    std::set<String> testFilter;
-    std::set<String> ceFilter;
-private:
+
+    /**
+     * @brief Contains code elements that should be removed from the binaries.
+     */
+    std::set<String> m_codeElementFilter;
+
+    /**
+     * @brief Contains testcases that should be removed from the binaries.
+     */
+    std::set<String> m_testFilter;
+
     /**
      * @brief Stores read format type.
      */
@@ -263,6 +298,13 @@ private:
      * @brief Stores code element names.
      */
     CIDManager *m_pCodeElements;
+
+    /**
+     * @brief Populates the given filter container by reading the given file line-by-line.
+     * @param filePath The path of the filter file.
+     * @param filterContainer The container that should be used to store the filterable elements.
+     */
+    void loadFilter(const String& filePath, std::set<String>& filterContainer);
 };
 
 } // namespace soda

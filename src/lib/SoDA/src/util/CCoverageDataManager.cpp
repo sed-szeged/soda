@@ -232,39 +232,19 @@ void CCoverageDataManager::dumpTestCoverage(const String &filepath) {
         return;
     }
     auto coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
+    auto filteredCoverage = getDataHandler()->filterCoverage(coverage);
+
     ofstream O((filepath + ".csv").c_str());
-    // TODO: FIXME
-    if (!getDataHandler()->ceFilter.size() && !getDataHandler()->testFilter.size()) {
-        O << ";coverage;coverage(%)" << std::endl;
+    O << ";coverage;coverage(%)" << std::endl;
 
-        IndexType nrOfCodeElements = coverage->getNumOfCodeElements();
-        IntVector coveredTests;
-        coverage->getBitMatrix().rowCounts(coveredTests);
-        for (IndexType tcId = 0; tcId < coverage->getNumOfTestcases(); ++tcId) {
-            O << coverage->getTestcases().getValue(tcId) << ";" << coveredTests[tcId] << ";" << (double)coveredTests[tcId] / nrOfCodeElements << std::endl;
-        }
+    IndexType nrOfCodeElements = coverage->getNumOfCodeElements();
+    IntVector coveredTests;
+    coverage->getBitMatrix().rowCounts(coveredTests);
+    for (IndexType tcId = 0; tcId < coverage->getNumOfTestcases(); ++tcId) {
+        O << coverage->getTestcases().getValue(tcId) << ";" << coveredTests[tcId] << ";" << (double)coveredTests[tcId] / nrOfCodeElements << std::endl;
     }
-    else {
-        O << ";coverage" << std::endl;
-        for (auto &test : coverage->getTestcases().getValueList()) {
-            // skip contained tests
-            if (getDataHandler()->testFilter.count(test)) {
-                continue;
-            }
-            IndexType covered = 0;
-            for (auto &ce : coverage->getCodeElements().getValueList()) {
-                // skip contained ces
-                if (getDataHandler()->ceFilter.count(ce)) {
-                    continue;
-                }
-                if (coverage->getRelation(test, ce)) {
-                    ++covered;
-                }
-            }
 
-            O << test << ";" << covered << std::endl;
-        }
-    }
+    delete filteredCoverage;
 }
 
 void CCoverageDataManager::dumpTestCoverageFor(const String &test) {

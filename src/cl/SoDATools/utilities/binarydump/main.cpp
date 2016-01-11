@@ -25,7 +25,6 @@
   *       The binary dump program dumps the specified data from the specified data file.
   */
 
-#include <fstream>
 #include "util/CDataHandler.h"
 #include "util/CCoverageDataManager.h"
 #include "util/CResultsDataManager.h"
@@ -111,19 +110,13 @@ int processArgs(options_description desc, int ac, char* av[])
         * FILTER DATA
         */
         if (vm.count("filter-code-elements")) {
-            std::ifstream in(vm["filter-code-elements"].as<String>());
-            String line;
-            while (std::getline(in, line)) {
-                handler->ceFilter.insert(line);
-            }
+            String filterPath = vm["filter-code-elements"].as<String>();
+            handler->loadCodeElementFilter(filterPath);
         }
 
         if (vm.count("filter-tests")) {
-            std::ifstream in(vm["filter-tests"].as<String>());
-            String line;
-            while (std::getline(in, line)) {
-                handler->testFilter.insert(line);
-            }
+            String filterPath = vm["filter-tests"].as<String>();
+            handler->loadTestcaseFilter(filterPath);
         }
 
         /*
