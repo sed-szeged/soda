@@ -55,6 +55,9 @@ void AdditionalCoverageReductionPlugin::init(CSelectionData *data, CJsonReader &
     m_data = data;
     m_programName = reader.getStringFromProperty("program-name");
     m_dirPath = reader.getStringFromProperty("output-dir");
+    if (reader.existsProperty("covered-ce-goal")) {
+        coveredCEGoal = reader.getIntFromProperty("covered-ce-goal");
+    }
     m_nrOfCodeElements = data->getCoverage()->getNumOfCodeElements();
     m_nrOfTestCases = data->getCoverage()->getNumOfTestcases();
 }
@@ -86,11 +89,12 @@ void AdditionalCoverageReductionPlugin::additionalCoverageReduction(std::ofstrea
 
     CReductionData reducedMatrix_gen(m_data->getCoverage(), m_programName + "-ADD-GEN", m_dirPath);
     CReductionData reducedMatrix_geniter(m_data->getCoverage(), m_programName + "-ADD-GEN-ITER", m_dirPath);
+    CReductionData reducedMatrix_CE(m_data->getCoverage(), m_programName + "-ADD-CE-" + std::to_string(coveredCEGoal), m_dirPath);
 
     unsigned int iter = 1; // for the Additional General strategy for all duplation iterations
     unsigned int itersize = 1; // for the Additional General strategy for all duplation iterations
 
-    std::set<IndexType> Tgen, Tgeniter;
+    std::set<IndexType> Tgen, Tgeniter, Tce;
     IndexType previous = 0;
 
     while (!priorityQueue->empty()) {
@@ -105,6 +109,15 @@ void AdditionalCoverageReductionPlugin::additionalCoverageReduction(std::ofstrea
 
         Tgen.insert(nxt.testcaseId);
         Tgeniter.insert(nxt.testcaseId);
+
+        if (coveredCEGoal > 0) {
+            Tce.insert(nxt.testcaseId);
+            if (nxt.priorityValue > coveredCEGoal) {
+                coveredCEGoal = 0;
+            } else {
+                coveredCEGoal -= nxt.priorityValue;
+            }
+        }
 
         if (Tgeniter.size() == itersize) { // new iteration size reached
             reducedMatrix_geniter.add(Tgeniter);
@@ -143,6 +156,9 @@ void AdditionalCoverageReductionPlugin::additionalCoverageReduction(std::ofstrea
 
     reducedMatrix_gen.add(Tgen);
     reducedMatrix_gen.save(0);
+
+    reducedMatrix_CE.add(Tce);
+    reducedMatrix_CE.save(0);
 
     std::cerr << "done." << std::endl;
 

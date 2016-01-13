@@ -102,6 +102,11 @@ private:
      * @brief Number of test cases.
      */
     IndexType m_nrOfTestCases;
+
+    /**
+     * @brief Number of covered code elements in a reduction output.
+     */
+    IndexType coveredCEGoal = 0;
 };
 
 } /* namespace soda */

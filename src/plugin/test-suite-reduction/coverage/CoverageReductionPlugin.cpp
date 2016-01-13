@@ -53,6 +53,9 @@ void CoverageReductionPlugin::init(CSelectionData *data, CJsonReader &reader)
     m_data = data;
     m_programName = reader.getStringFromProperty("program-name");
     m_dirPath = reader.getStringFromProperty("output-dir");
+    if (reader.existsProperty("covered-ce-goal")) {
+        coveredCEGoal = reader.getIntFromProperty("covered-ce-goal");
+    }
     m_nrOfCodeElements = data->getCoverage()->getNumOfCodeElements();
     m_nrOfTestCases = data->getCoverage()->getNumOfTestcases();
 }
@@ -66,7 +69,7 @@ void CoverageReductionPlugin::coverageReduction(std::ofstream &outStream)
 {
     std::cerr << "[INFO] Coverage-based reduction (largest first and vector based) ... ";
 
-    std::set<IndexType> Tgen, Tgeniter, Tvec;    // actual test sets (General 'largets first' strategy for full coverage and iterations and Vector-based strategy)
+    std::set<IndexType> Tgen, Tgeniter, Tvec, Tce;    // actual test sets (General 'largets first' strategy for full coverage and iterations and Vector-based strategy)
     std::multimap<unsigned int, IndexType> To;    // stores the test cases in the order of their coverage (first:coverage, second:test case id)
     CBitList totCoverage(m_nrOfCodeElements), actCoverage(m_nrOfCodeElements);    // coverage vectors based on matrix rows
 
@@ -91,6 +94,7 @@ void CoverageReductionPlugin::coverageReduction(std::ofstream &outStream)
     CReductionData reducedMatrix_gen(m_data->getCoverage(), m_programName + "-GEN", m_dirPath);
     CReductionData reducedMatrix_geniter(m_data->getCoverage(), m_programName + "-GENITER", m_dirPath);
     CReductionData reducedMatrix_vec(m_data->getCoverage(), m_programName + "-VEC", m_dirPath);
+    CReductionData reducedMatrix_ce(m_data->getCoverage(), m_programName + "-CE-" + std::to_string(coveredCEGoal), m_dirPath);
 
     /* ----- algo start ----- */
 
@@ -118,11 +122,16 @@ void CoverageReductionPlugin::coverageReduction(std::ofstream &outStream)
         }
         lastcov = rit->first;
 
+        if (actCoverage.count() < coveredCEGoal) {
+            Tce.insert(rit->second);
+        }
+
         // General method:
         if (actCoverage.count() < totCoverage.count() || setSmaller(actCoverage, totCoverage)) {
             addCoverage(actCoverage, m_data->getCoverage()->getBitMatrix().getRow(rit->second));
             Tgen.insert(rit->second);
         }
+
 
         // General method for all duplation iterations. In iteration i, total 2^i-1 test cases are in the set:
         Tgeniter.insert(rit->second);
@@ -152,6 +161,8 @@ void CoverageReductionPlugin::coverageReduction(std::ofstream &outStream)
     reducedMatrix_gen.save(0);
     reducedMatrix_vec.add(Tvec);
     reducedMatrix_vec.save(0);
+    reducedMatrix_ce.add(Tce);
+    reducedMatrix_ce.save(0);
 
     unsigned int reducedSize_gen = Tgen.size();
     unsigned int reducedSize_vec = Tvec.size();

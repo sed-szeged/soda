@@ -111,6 +111,7 @@ std::string getJsonString()
        << "\"results-data\": \"results file path\",\n\t"
        << "\"iteration\": 15,\n\t"
        << "\"reduction-sizes\": [1000, 5000, 10000, 25000, 30000],\n\t"
+       << "\"covered-ce-goal\": 150,\n\t"
        << "\"reduction-method\": [\"reduction methods\"],\n\t"
        << "\"program-name\": \"program name\",\n\t"
        << "\"output-dir\": \"output dir\",\n"
@@ -177,7 +178,7 @@ void processJsonFiles(String path)
             printPluginNames(kernel.getTestSuiteReductionPluginManager().getPluginNames());
             return;
         } else {
-            int iteration = reader.getIntFromProperty("iteration");
+            bool iteration = reader.existsProperty("iteration");
             for (StringVector::const_iterator it = reductionList.begin(); it != reductionList.end(); ++it) {
                 if (*it == "duplation" && !iteration) {
                     std::cerr << "[ERROR] Missing iteration parameter for duplation reduction method in configuration file: "
@@ -206,17 +207,20 @@ void processJsonFiles(String path)
             covPath = jsonPath.parent_path().string() + "/" + covPath;
         }
 
-        String resPath = reader.getStringFromProperty("results-data");
+        String resPath;
+        if (reader.existsProperty("results-data")) {
+            resPath = reader.getStringFromProperty("results-data");
+        }
+
         if (resPath[0] == '.') {
             resPath = jsonPath.parent_path().string() + "/" + resPath;
         }
 
-        if (exists(covPath)
-                && exists(resPath)) {
+        if (exists(covPath)) {
             (std::cerr << "[INFO] loading coverage from " << covPath << " ...").flush();
             selectionData.loadCoverage(covPath);
-            (std::cerr << " done\n[INFO] loading results from " << resPath << " ...").flush();
-            selectionData.loadResults(resPath);
+            //(std::cerr << " done\n[INFO] loading results from " << resPath << " ...").flush();
+            //selectionData.loadResults(resPath);
             (std::cerr << " done" << std::endl).flush();
         } else {
             std::cerr << "[ERROR] Missing or invalid input files in config file " << path << "." << std::endl;
