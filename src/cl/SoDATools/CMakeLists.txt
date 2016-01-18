@@ -48,6 +48,9 @@ add_subdirectory(utilities/binarydump)
 # binaryFilter
 add_subdirectory(utilities/binaryfilter)
 
+# binaryMerge
+add_subdirectory(utilities/binarymerge)
+
 # coverage-comparator
 aux_source_directory(${SoDATools_SOURCE_DIR}/utilities/coverage-comparator coverageCompare_src)
 add_executable(coverage-comparator ${coverageCompare_src})
