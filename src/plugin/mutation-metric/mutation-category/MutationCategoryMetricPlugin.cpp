@@ -127,7 +127,6 @@ void MutationCategoryMetricPlugin::pairRevisionWithCoverage(const String &path) 
             }
         }
     }
-
     for (int i = 0; i < parsedCE.size(); ++i) {
         delete parsedCE[i];
     }
@@ -155,7 +154,6 @@ void MutationCategoryMetricPlugin::calculate(rapidjson::Document &results) {
         NEW_FAIL = 0x2,
         BOTH = 0x4
     };
-
     // we are calculating the 5 categories here
     for (auto &rev : tcResults->getRevisionNumbers()) {
         if (!rev) { // base results
@@ -200,6 +198,7 @@ void MutationCategoryMetricPlugin::calculate(rapidjson::Document &results) {
                 }
                 // new pass
                 else if (currResult == CResultsMatrix::trtPassed && baseResult == CResultsMatrix::trtFailed) {
+                    (std::cout << "New pass:" << tcResults->getTestcases().getValue(tcIdx) << std::endl).flush();
                     switch(diffMask) {
                     case NO_DIFF:
                         diffMask = NEW_PASS;
@@ -216,16 +215,18 @@ void MutationCategoryMetricPlugin::calculate(rapidjson::Document &results) {
 
         switch(diffMask) {
         case NO_DIFF:
-            (std::cout << rev2Coverage[rev].mutationMap << std::endl).flush();
+            (std::cout << "type-3:" << rev2Coverage[rev].mutationMap << std::endl).flush();
             mutationCats["type-3"]++;
             break;
         case NEW_FAIL:
             mutationCats["type-4B"]++;
             break;
         case NEW_PASS:
+            (std::cout << "type-4A:" << rev2Coverage[rev].mutationMap << std::endl).flush();
             mutationCats["type-4A"]++;
             break;
         case BOTH:
+            (std::cout << "type-4AB:" << rev2Coverage[rev].mutationMap << std::endl).flush();
             mutationCats["type-4A"]++;
             mutationCats["type-4B"]++;
             break;
