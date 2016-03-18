@@ -56,6 +56,12 @@ public:
     virtual void init(CSelectionData *) = 0;
 
     /**
+     * @brief Sets the cinitial state of the algorithm.
+     * @param ordered List of already prioritized tests. The algorithm will continue the priorotozation from this point.
+     */
+    void setState(IntVector& ordered);
+
+    /**
      * @brief Runs the prioritization on a specified revision.
      */
     virtual void reset(RevNumType) = 0;

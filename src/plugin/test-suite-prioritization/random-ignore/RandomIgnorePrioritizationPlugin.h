@@ -72,10 +72,20 @@ public:
     void fillSelection(IntVector& selected, size_t size);
 
     /**
+     * @brief Sets the cinitial state of the algorithm.
+     * @param ordered List of already prioritized tests. The algorithm will continue the priorotozation from this point.
+     */
+    void setState(IntVector& ordered);
+
+    /**
      * @brief Revision data is not used by this plugin.
      */
     void reset(RevNumType);
-
+private:
+    /**
+     * @brief Orders the code elements in a random way
+     */
+    void prioritize();
 private:
 
     /**

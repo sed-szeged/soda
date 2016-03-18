@@ -58,21 +58,19 @@ String RandomIgnorePrioritizationPlugin::getDescription()
 
 void RandomIgnorePrioritizationPlugin::init(CSelectionData *data)
 {
-    m_elementsReady->clear();
-    m_priorityQueue->clear();
-    m_nofElementsReady = 0;
     m_data = data;
+    IntVector initial;
+    setState(initial);
+}
 
-    IndexType nofTestcases = m_data->getCoverage()->getNumOfTestcases();
-    srand(time(NULL));
-    for (IndexType tcid = 0; tcid < nofTestcases; tcid++) {
-        qelement d;
-        d.testcaseId    = tcid;
-        d.priorityValue = rand();
-        m_priorityQueue->push_back(d);
-    }
-
-    sort(m_priorityQueue->begin(), m_priorityQueue->end());
+void RandomIgnorePrioritizationPlugin::setState(IntVector &ordered)
+{
+    delete m_elementsReady;
+    m_elementsReady = new IntVector(ordered);
+    m_nofElementsReady = ordered.size();
+    m_priorityQueue->clear();
+    prioritize();
+    return;
 }
 
 void RandomIgnorePrioritizationPlugin::reset(RevNumType rev)
@@ -92,6 +90,23 @@ void RandomIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_t
     for (size_t i = 0; i < size && i < m_nofElementsReady; i++) {
         selected.push_back((*m_elementsReady)[i]);
     }
+}
+
+void RandomIgnorePrioritizationPlugin::prioritize()
+{
+    IndexType nofTestcases = m_data->getCoverage()->getNumOfTestcases();
+    srand(time(NULL));
+    for (IndexType tcid = 0; tcid < nofTestcases; tcid++) {
+        if (std::find(m_elementsReady->begin(), m_elementsReady->end(), tcid) != m_elementsReady->end()) {
+            continue;
+        }
+        qelement d;
+        d.testcaseId    = tcid;
+        d.priorityValue = rand();
+        m_priorityQueue->push_back(d);
+    }
+
+    sort(m_priorityQueue->begin(), m_priorityQueue->end());
 }
 
 extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)

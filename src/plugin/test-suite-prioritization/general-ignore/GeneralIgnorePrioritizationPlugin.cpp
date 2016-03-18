@@ -31,7 +31,7 @@ bool operator<(GeneralIgnorePrioritizationPlugin::qelement d1, GeneralIgnorePrio
 GeneralIgnorePrioritizationPlugin::GeneralIgnorePrioritizationPlugin():
         m_data(NULL),
         m_nofElementsReady(0),
-        m_elementsReady(new IntVector()),
+        m_elementsReady(NULL),
         m_priorityQueue(new std::vector<qelement>())
 {}
 
@@ -55,21 +55,18 @@ String GeneralIgnorePrioritizationPlugin::getDescription()
 
 void GeneralIgnorePrioritizationPlugin::init(CSelectionData *data)
 {
-    m_elementsReady->clear();
-    m_priorityQueue->clear();
-    m_nofElementsReady = 0;
     m_data = data;
+    IntVector initial;
+    setState(initial);
+}
 
-    IndexType nofTestcases = m_data->getCoverage()->getNumOfTestcases();
-    const IBitMatrix& coverageBitMatrix = m_data->getCoverage()->getBitMatrix();
-    for(IndexType tcid = 0; tcid < nofTestcases; tcid++) {
-        qelement d;
-        d.testcaseId = tcid;
-        d.priorityValue = coverageBitMatrix[tcid].count();
-        m_priorityQueue->push_back(d);
-    }
-
-    sort(m_priorityQueue->begin(), m_priorityQueue->end());
+void GeneralIgnorePrioritizationPlugin::setState(IntVector &ordered)
+{
+    delete m_elementsReady;
+    m_elementsReady = new IntVector(ordered);
+    m_nofElementsReady = ordered.size();
+    m_priorityQueue->clear();
+    prioritize();
 }
 
 void GeneralIgnorePrioritizationPlugin::reset(RevNumType)
@@ -89,6 +86,23 @@ void GeneralIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_
     for (size_t i = 0; i < size && i < m_nofElementsReady; i++) {
         selected.push_back((*m_elementsReady)[i]);
     }
+}
+
+void GeneralIgnorePrioritizationPlugin::prioritize()
+{
+    IndexType nofTestcases = m_data->getCoverage()->getNumOfTestcases();
+    const IBitMatrix& coverageBitMatrix = m_data->getCoverage()->getBitMatrix();
+    for(IndexType tcid = 0; tcid < nofTestcases; tcid++) {
+        if (std::find(m_elementsReady->begin(), m_elementsReady->end(), tcid) != m_elementsReady->end()) {
+            continue;
+        }
+        qelement d;
+        d.testcaseId = tcid;
+        d.priorityValue = coverageBitMatrix[tcid].count();
+        m_priorityQueue->push_back(d);
+    }
+
+    sort(m_priorityQueue->begin(), m_priorityQueue->end());
 }
 
 extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)

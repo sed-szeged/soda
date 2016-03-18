@@ -32,7 +32,7 @@ bool operator<(AdditionalGeneralIgnorePrioritizationPlugin::qelement d1, Additio
 AdditionalGeneralIgnorePrioritizationPlugin::AdditionalGeneralIgnorePrioritizationPlugin():
         m_data(NULL),
         m_nofElementsReady(0),
-        m_elementsReady(new IntVector()),
+        m_elementsReady(NULL),
         m_priorityQueue(new std::vector<qelement>()),
         m_notCoveredCEIDs(new std::list<IndexType>())
 {}
@@ -58,25 +58,46 @@ String AdditionalGeneralIgnorePrioritizationPlugin::getDescription()
 
 void AdditionalGeneralIgnorePrioritizationPlugin::init(CSelectionData *data)
 {
-    m_elementsReady->clear();
-    m_priorityQueue->clear();
-    m_notCoveredCEIDs->clear();
-    m_nofElementsReady = 0;
     m_data = data;
+    IntVector initial;
+    setState(initial);
+}
+
+void AdditionalGeneralIgnorePrioritizationPlugin::setState(IntVector &ordered)
+{
+    delete m_elementsReady;
+    m_elementsReady = new IntVector(ordered);
+    m_priorityQueue->clear();
+    m_nofElementsReady = ordered.size();
+    m_notCoveredCEIDs->clear();
+
 
     IndexType nofTestcases = m_data->getCoverage()->getNumOfTestcases();
     IndexType nofCodeElements = m_data->getCoverage()->getNumOfCodeElements();
     const IBitMatrix& coverageBitMatrix = m_data->getCoverage()->getBitMatrix();
+
+    // Initialize the not covered code element list
+    for (IndexType ceid = 0; ceid < nofCodeElements; ceid++) {
+        m_notCoveredCEIDs->push_back(ceid);
+    }
+
+    // Fill the priority queue with the remaining tests
     for (IndexType tcid = 0; tcid < nofTestcases; tcid++) {
+        if (std::find(m_elementsReady->begin(), m_elementsReady->end(), tcid) != m_elementsReady->end()) {
+            continue;
+        }
         qelement d;
         d.testcaseId    = tcid;
         d.priorityValue = coverageBitMatrix.getRow(tcid).count();
         m_priorityQueue->push_back(d);
     }
 
-    for (IndexType ceid = 0; ceid < nofCodeElements; ceid++) {
-        m_notCoveredCEIDs->push_back(ceid);
+    // Update the prioritization values based on the received test list
+    for (IntVector::iterator it = ordered.begin(); it != ordered.end(); it++) {
+        updateData(*it);
     }
+
+    return;
 }
 
 void AdditionalGeneralIgnorePrioritizationPlugin::reset(RevNumType rev)
@@ -96,26 +117,30 @@ void AdditionalGeneralIgnorePrioritizationPlugin::fillSelection(IntVector& selec
             continue;
         }
 
-        //UPDATEDATA
-        const IBitMatrix& coverageBitMatrix = m_data->getCoverage()->getBitMatrix();
-        for (std::list<IndexType>::iterator ceit = m_notCoveredCEIDs->begin(); ceit != m_notCoveredCEIDs->end();) {
-            if (coverageBitMatrix[nxt.testcaseId][*ceit]) {
-                register IndexType ceid = *ceit;
-                m_notCoveredCEIDs->erase(ceit++);
-                for (std::vector<qelement>::iterator qi = m_priorityQueue->begin(); qi != m_priorityQueue->end(); ++qi) {
-                    if (coverageBitMatrix[qi->testcaseId][ceid]) {
-                        qi->priorityValue--;
-                    }
-                }
-            } else {
-                ++ceit;
-            }
-        }
+        updateData(nxt.testcaseId);
     }
 
     selected.clear();
     for (size_t i = 0; i < size && i < m_nofElementsReady; i++) {
         selected.push_back((*m_elementsReady)[i]);
+    }
+}
+
+void AdditionalGeneralIgnorePrioritizationPlugin::updateData(IndexType tcid)
+{
+    const IBitMatrix& coverageBitMatrix = m_data->getCoverage()->getBitMatrix();
+    for (std::list<IndexType>::iterator ceit = m_notCoveredCEIDs->begin(); ceit != m_notCoveredCEIDs->end();) {
+        if (coverageBitMatrix[tcid][*ceit]) {
+            register IndexType ceid = *ceit;
+            m_notCoveredCEIDs->erase(ceit++);
+            for (std::vector<qelement>::iterator qi = m_priorityQueue->begin(); qi != m_priorityQueue->end(); ++qi) {
+                if (coverageBitMatrix[qi->testcaseId][ceid]) {
+                    qi->priorityValue--;
+                }
+            }
+        } else {
+            ++ceit;
+        }
     }
 }
 
