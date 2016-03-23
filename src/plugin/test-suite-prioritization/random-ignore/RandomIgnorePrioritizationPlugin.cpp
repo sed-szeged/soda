@@ -56,7 +56,7 @@ String RandomIgnorePrioritizationPlugin::getDescription()
     return "RandomIgnorePrioritizationPlugin generates random priority values.";
 }
 
-void RandomIgnorePrioritizationPlugin::init(CSelectionData *data)
+void RandomIgnorePrioritizationPlugin::init(CSelectionData *data, CKernel *kernel)
 {
     m_data = data;
     IntVector initial;

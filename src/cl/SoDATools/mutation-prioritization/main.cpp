@@ -38,7 +38,7 @@ void calculate(String prioAlgorithm, std::vector<int> sizes)
 
         // Prio algorithm
         ITestSuitePrioritizationPlugin *prioritizationPlugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin(prioAlgorithm);
-        prioritizationPlugin->init(&selectionData);
+        prioritizationPlugin->init(&selectionData, &kernel);
         prioritizationPlugin->fillSelection(tcidList, size);
 
         IntVector tcidListInMutation;

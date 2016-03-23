@@ -56,7 +56,7 @@ String AdditionalGeneralIgnorePrioritizationPlugin::getDescription()
     return "GeneralIgnorePrioritization plugin is based on coverage information.";
 }
 
-void AdditionalGeneralIgnorePrioritizationPlugin::init(CSelectionData *data)
+void AdditionalGeneralIgnorePrioritizationPlugin::init(CSelectionData *data, CKernel *kernel)
 {
     m_data = data;
     IntVector initial;

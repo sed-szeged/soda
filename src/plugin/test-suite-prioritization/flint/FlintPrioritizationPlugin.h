@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2014 Department of Software Engineering, University of Szeged
  *
- * Authors:
+ * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
  *
  * This file is part of SoDA.
  *
@@ -19,8 +19,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ADDITIONALGENERALIGNOREPRIORITIZATIONPLUGIN_H
-#define ADDITIONALGENERALIGNOREPRIORITIZATIONPLUGIN_H
+#ifndef GENERALIGNOREPRIORITIZATIONPLUGIN_H
+#define GENERALIGNOREPRIORITIZATIONPLUGIN_H
 
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
@@ -28,10 +28,11 @@
 namespace soda {
 
 /**
- *  @brief Prioritization is based on coverage information. Testcase covering more not yet covered
- *         functions has higher coverage.
+ * @brief Prioritization plugin that is based on coverage information.
+ *          - testcase covering more functions has higher coverage
  */
-class AdditionalGeneralIgnorePrioritizationPlugin : public ITestSuitePrioritizationPlugin {
+class FlintPrioritizationPlugin : public ITestSuitePrioritizationPlugin
+{
 private:
     typedef struct {
         IndexType testcaseId;
@@ -44,8 +45,8 @@ public:
     /**
      * @brief Creates a new instance.
      */
-    AdditionalGeneralIgnorePrioritizationPlugin();
-    virtual ~AdditionalGeneralIgnorePrioritizationPlugin();
+    FlintPrioritizationPlugin();
+    virtual ~FlintPrioritizationPlugin();
 
     /**
      * @brief Returns the name of the plugin.
@@ -90,11 +91,18 @@ public:
 
 private:
     /**
-     * @brief Updates the internal state based on the coverage of the given test
-     * @param tcid The id of the test
+     * @brief Orders the code elements by their coverage
      */
-    void updateData(IndexType tcid);
+    void prioritize();
+
+    double tarantula(IndexType tp, IndexType tf, IndexType cp, IndexType cf);
+
+    void calculateCounters();
+    void updateCounters(IndexType tcid);
+    double entropyLookahead(IndexType tcid);
 private:
+
+    CKernel *m_kernel;
 
     /**
      * @brief Selection data.
@@ -112,16 +120,35 @@ private:
     IntVector* m_elementsReady;
 
     /**
+     * @brief Vector of remaining elements.
+     */
+    IntVector* m_elementsRemaining;
+
+    /**
      * @brief Priority queue.
      */
     std::vector<qelement>* m_priorityQueue;
 
     /**
-     * @brief List of not covered code element ids.
+     * @brief Revision
      */
-    std::list<IndexType>* m_notCoveredCEIDs;
+    RevNumType m_revision;
+
+    /**
+     * @brief Indicates the state of the algorithm.
+     */
+    bool m_firstPhase;
+
+    ITestSuitePrioritizationPlugin *m_greedyAlgorithm;
+
+    IntVector m_cpi;
+    IntVector m_cfi;
+
+    IndexType m_tpi;
+    IndexType m_tfi;
+
 };
 
 } /* namespace soda */
 
-#endif /* ADDITIONALGENERALIGNOREPRIORITIZATIONPLUGIN_H */
+#endif /* GENERALIGNOREPRIORITIZATIONPLUGIN_H */

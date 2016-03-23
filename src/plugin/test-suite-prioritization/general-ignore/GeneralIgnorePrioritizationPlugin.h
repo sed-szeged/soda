@@ -63,7 +63,7 @@ public:
     /**
      * @brief Fills the plugin with data.
      */
-    void init(CSelectionData *);
+    void init(CSelectionData *, CKernel *);
 
     /**
      * @brief Gets the first n prioritized testcases.

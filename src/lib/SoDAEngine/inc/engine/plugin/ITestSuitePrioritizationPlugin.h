@@ -23,6 +23,7 @@
 #define IPRIORITIZATIONALGORITHMPLUGIN_H
 
 #include "data/CSelectionData.h"
+#include "engine/CKernel.h"
 
 namespace soda {
 
@@ -53,7 +54,7 @@ public:
     /**
      * @brief Fills the prioritization plugin with data
      */
-    virtual void init(CSelectionData *) = 0;
+    virtual void init(CSelectionData *, CKernel *) = 0;
 
     /**
      * @brief Sets the cinitial state of the algorithm.

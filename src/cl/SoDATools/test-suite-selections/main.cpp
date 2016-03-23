@@ -270,7 +270,7 @@ void processJsonFiles(String path)
             ITestSuitePrioritizationPlugin *plugin = NULL;
             try {
                 plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin(t);
-                plugin->init(&selectionData);
+                plugin->init(&selectionData, &kernel);
             } catch (std::out_of_range &) {
                 std::cerr << "[ERROR] Unknown algorithm mode. " << std::endl;
                 printPluginNames("prioritization", kernel.getTestSuitePrioritizationPluginManager().getPluginNames());
