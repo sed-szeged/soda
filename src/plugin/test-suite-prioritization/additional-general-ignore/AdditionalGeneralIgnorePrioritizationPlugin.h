@@ -82,6 +82,12 @@ public:
      */
     void reset(RevNumType);
 
+    /**
+     * @brief Returns the next testcase id in the prioritized order.
+     * @return
+     */
+    IndexType next();
+
 private:
     /**
      * @brief Updates the internal state based on the coverage of the given test

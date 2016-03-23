@@ -72,6 +72,12 @@ public:
      * @param size The number of testcases we want to select.
      */
     virtual void fillSelection(IntVector&, size_t) = 0;
+
+    /**
+     * @brief Returns the next testcase id in the prioritized order.
+     * @return
+     */
+    virtual IndexType next() = 0;
 };
 
 } /* namespace soda */

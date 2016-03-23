@@ -108,7 +108,7 @@ void AdditionalGeneralIgnorePrioritizationPlugin::reset(RevNumType rev)
 
 void AdditionalGeneralIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
 {
-    for (; m_nofElementsReady < size && !(m_priorityQueue->empty()); m_nofElementsReady++) {
+    /*for (; m_nofElementsReady < size && !(m_priorityQueue->empty()); m_nofElementsReady++) {
         sort(m_priorityQueue->begin(), m_priorityQueue->end());
         qelement nxt = m_priorityQueue->back();
         m_priorityQueue->pop_back();
@@ -118,12 +118,34 @@ void AdditionalGeneralIgnorePrioritizationPlugin::fillSelection(IntVector& selec
         }
 
         updateData(nxt.testcaseId);
+    }*/
+
+    while(m_nofElementsReady < size && !(m_priorityQueue->empty())) {
+        next();
     }
 
     selected.clear();
     for (size_t i = 0; i < size && i < m_nofElementsReady; i++) {
         selected.push_back((*m_elementsReady)[i]);
     }
+}
+
+IndexType AdditionalGeneralIgnorePrioritizationPlugin::next()
+{
+    if (m_priorityQueue->empty()) {
+        throw std::out_of_range("There are not any testcases left.");
+    }
+    sort(m_priorityQueue->begin(), m_priorityQueue->end());
+    qelement nxt = m_priorityQueue->back();
+    m_priorityQueue->pop_back();
+    m_elementsReady->push_back(nxt.testcaseId);
+    m_nofElementsReady++;
+    if (nxt.priorityValue != 0) {
+        updateData(nxt.testcaseId);
+    }
+
+    return nxt.testcaseId;
+
 }
 
 void AdditionalGeneralIgnorePrioritizationPlugin::updateData(IndexType tcid)

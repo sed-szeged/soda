@@ -20,6 +20,7 @@
  */
 
 #include <algorithm>
+#include <stdexcept>
 #include "GeneralIgnorePrioritizationPlugin.h"
 
 namespace soda {
@@ -77,15 +78,30 @@ void GeneralIgnorePrioritizationPlugin::reset(RevNumType)
 
 void GeneralIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
 {
-    for (; m_nofElementsReady < size && !(m_priorityQueue->empty()); m_nofElementsReady++) {
+    /*for (; m_nofElementsReady < size && !(m_priorityQueue->empty()); m_nofElementsReady++) {
         m_elementsReady->push_back((m_priorityQueue->back()).testcaseId);
         m_priorityQueue->pop_back();
+    }*/
+    while (m_nofElementsReady < size && !(m_priorityQueue->empty())) {
+        next();
     }
 
     selected.clear();
     for (size_t i = 0; i < size && i < m_nofElementsReady; i++) {
         selected.push_back((*m_elementsReady)[i]);
     }
+}
+
+IndexType GeneralIgnorePrioritizationPlugin::next()
+{
+    if (m_priorityQueue->empty()) {
+        throw std::out_of_range("There are not any testcases left.");
+    }
+    IndexType tcid = (m_priorityQueue->back()).testcaseId;
+    m_elementsReady->push_back(tcid);
+    m_nofElementsReady++;
+    m_priorityQueue->pop_back();
+    return tcid;
 }
 
 void GeneralIgnorePrioritizationPlugin::prioritize()

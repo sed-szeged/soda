@@ -81,6 +81,12 @@ public:
      * @brief Revision data is not used by this plugin.
      */
     void reset(RevNumType);
+
+    /**
+     * @brief Returns the next testcase id in the prioritized order.
+     * @return
+     */
+    IndexType next();
 private:
     /**
      * @brief Orders the code elements in a random way

@@ -92,6 +92,12 @@ void RandomIgnorePrioritizationPlugin::fillSelection(IntVector& selected, size_t
     }
 }
 
+IndexType RandomIgnorePrioritizationPlugin::next()
+{
+    // TODO
+    return 0;
+}
+
 void RandomIgnorePrioritizationPlugin::prioritize()
 {
     IndexType nofTestcases = m_data->getCoverage()->getNumOfTestcases();
