@@ -22,11 +22,13 @@
 #include <cmath>
 
 #include "OchiaiFaultLocalizationTechniquePlugin.h"
+#include "util/CTestSuiteScore.h"
 
 namespace soda {
 
 OchiaiFaultLocalizationTechniquePlugin::OchiaiFaultLocalizationTechniquePlugin() :
     m_distribution(new FLDistribution()),
+    m_flScore(new FLScore()),
     m_data(NULL),
     clusterList(NULL),
     m_revision(0)
@@ -53,11 +55,12 @@ StringVector OchiaiFaultLocalizationTechniquePlugin::getDependency()
     return { "common" };
 }
 
-void OchiaiFaultLocalizationTechniquePlugin::init(CSelectionData *data, ClusterMap *clusters, IndexType revision)
+void OchiaiFaultLocalizationTechniquePlugin::init(CSelectionData *data, ClusterMap *clusters, IndexType revision, IntVector failedCodeElements)
 {
     m_data = data;
     clusterList = clusters;
     m_revision = revision;
+    m_failedCodeElements = failedCodeElements;
 }
 
 OchiaiFaultLocalizationTechniquePlugin::FLDistribution& OchiaiFaultLocalizationTechniquePlugin::getDistribution()
@@ -65,14 +68,19 @@ OchiaiFaultLocalizationTechniquePlugin::FLDistribution& OchiaiFaultLocalizationT
     return *m_distribution;
 }
 
+OchiaiFaultLocalizationTechniquePlugin::FLScore& OchiaiFaultLocalizationTechniquePlugin::getFlScore()
+{
+    return *m_flScore;
+}
+
 void OchiaiFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
 {
-    m_distribution->clear();
-
     CCoverageMatrix *coverageMatrix = m_data->getCoverage();
 
     ClusterMap::iterator it;
     for (it = clusterList->begin(); it != clusterList->end(); it++) {
+        m_distribution->clear();
+
         IntVector codeElementIds = (*it).second.getCodeElements();
 
         // group for cluster data
@@ -107,6 +115,15 @@ void OchiaiFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
 
             ceMetrics.AddMember("ochiai", ochiai, res.GetAllocator());
             (*m_distribution)[ochiai]++;
+        }
+
+        for (IndexType i = 0; i < m_failedCodeElements.size(); i++) {
+            IndexType cid = m_failedCodeElements[i];
+            String ceIdStr = std::to_string(cid);
+            double ochiai = res[it->first.c_str()][ceIdStr.c_str()]["ochiai"].GetDouble();
+
+            (*m_flScore)[it->first][cid] = CTestSuiteScore::flScore(it->second, ochiai, *m_distribution);
+
         }
     }
 }

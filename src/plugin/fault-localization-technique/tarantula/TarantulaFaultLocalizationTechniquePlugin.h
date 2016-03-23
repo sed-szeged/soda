@@ -55,7 +55,7 @@ public:
      * @param clusters List of clusters.
      * @param revisionList The revisions to consider.
      */
-    void init(CSelectionData *data, ClusterMap *clusters, IndexType revision);
+    void init(CSelectionData *data, ClusterMap *clusters, IndexType revision, IntVector failedCodeElements);
 
     /**
      * @brief Calculates the score values for each code element in clusters.
@@ -70,11 +70,19 @@ public:
      */
     FLDistribution& getDistribution();
 
+    /**
+     * @brief Returns the fl score of all the elements.
+     * @return
+     */
+    FLScore& getFlScore();
+
 private:
     FLDistribution *m_distribution;
     CSelectionData *m_data;
     ClusterMap *clusterList;
     IndexType       m_revision;
+    FLScore *m_flScore;
+    IntVector m_failedCodeElements;
 };
 
 } /* namespace soda */

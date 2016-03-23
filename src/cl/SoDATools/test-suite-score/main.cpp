@@ -206,7 +206,7 @@ void calculateFlTechnique(CSelectionData &selectionData, const String &name, rap
     }
 
     (std::cerr << "[INFO] Calculating fault localization values: " << flTechnique->getName() << " ...").flush();
-    flTechnique->init(&selectionData, &clusterList, revision);
+    flTechnique->init(&selectionData, &clusterList, revision, IntVector());
     flTechnique->calculate(results);
     flTechniquesCalculated.insert(name);
     (std::cerr << " done." << std::endl).flush();

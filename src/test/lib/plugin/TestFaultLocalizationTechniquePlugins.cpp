@@ -52,7 +52,7 @@ protected:
         clusterAlg->execute(selection, clusterList);
 
         plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("common");
-        plugin->init(&selection, &clusterList, 12345);
+        plugin->init(&selection, &clusterList, 12345, IntVector());
         plugin->calculate(results);
         plugin = NULL;
     }
@@ -64,7 +64,7 @@ protected:
 TEST_F(FaultLocalizationTechniquePluginsTest, OchiaiMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("ochiai"));
-    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345, IntVector()));
 
     EXPECT_EQ("ochiai", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
@@ -73,7 +73,7 @@ TEST_F(FaultLocalizationTechniquePluginsTest, OchiaiMetaInfo)
 TEST_F(FaultLocalizationTechniquePluginsTest, Ochiai)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("ochiai"));
-    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345, IntVector()));
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_EQ(100u, results["full"].MemberCount());
@@ -86,7 +86,7 @@ TEST_F(FaultLocalizationTechniquePluginsTest, Ochiai)
 TEST_F(FaultLocalizationTechniquePluginsTest, TarantulaMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("tarantula"));
-    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345, IntVector()));
 
     EXPECT_EQ("tarantula", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
@@ -95,7 +95,7 @@ TEST_F(FaultLocalizationTechniquePluginsTest, TarantulaMetaInfo)
 TEST_F(FaultLocalizationTechniquePluginsTest, Tarantula)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("tarantula"));
-    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345, IntVector()));
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_EQ(100u, results["full"].MemberCount());
@@ -108,7 +108,7 @@ TEST_F(FaultLocalizationTechniquePluginsTest, Tarantula)
 TEST_F(FaultLocalizationTechniquePluginsTest, CommonMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("common"));
-    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345, IntVector()));
 
     EXPECT_EQ("common", plugin->getName());
     EXPECT_TRUE(plugin->getDescription().length() > 0);
@@ -117,7 +117,7 @@ TEST_F(FaultLocalizationTechniquePluginsTest, CommonMetaInfo)
 TEST_F(FaultLocalizationTechniquePluginsTest, Common)
 {
     EXPECT_NO_THROW(plugin = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("common"));
-    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345));
+    EXPECT_NO_THROW(plugin->init(&selection, &clusterList, 12345, IntVector()));
     EXPECT_NO_THROW(plugin->calculate(results));
 
     EXPECT_EQ(100u, results["full"].MemberCount());

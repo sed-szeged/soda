@@ -36,6 +36,9 @@ add_subdirectory(mutation-metric)
 # test-suite-score
 add_subdirectory(test-suite-score)
 
+# fl-score
+add_subdirectory(fl-score)
+
 # test-suite-score
 add_subdirectory(mutation-prioritization)
 

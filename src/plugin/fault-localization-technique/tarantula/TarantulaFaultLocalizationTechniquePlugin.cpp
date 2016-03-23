@@ -19,11 +19,13 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "TarantulaFaultLocalizationTechniquePlugin.h"
+#include "util/CTestSuiteScore.h"
 
 namespace soda {
 
 TarantulaFaultLocalizationTechniquePlugin::TarantulaFaultLocalizationTechniquePlugin() :
     m_distribution(new FLDistribution()),
+    m_flScore(new FLScore()),
     m_data(NULL),
     clusterList(NULL),
     m_revision(0)
@@ -50,11 +52,12 @@ StringVector TarantulaFaultLocalizationTechniquePlugin::getDependency()
     return { "common" };
 }
 
-void TarantulaFaultLocalizationTechniquePlugin::init(CSelectionData *data, ClusterMap *clusters, IndexType revision)
+void TarantulaFaultLocalizationTechniquePlugin::init(CSelectionData *data, ClusterMap *clusters, IndexType revision, IntVector failedCodeElements)
 {
     m_data = data;
     clusterList = clusters;
     m_revision = revision;
+    m_failedCodeElements = failedCodeElements;
 }
 
 TarantulaFaultLocalizationTechniquePlugin::FLDistribution& TarantulaFaultLocalizationTechniquePlugin::getDistribution()
@@ -62,14 +65,20 @@ TarantulaFaultLocalizationTechniquePlugin::FLDistribution& TarantulaFaultLocaliz
     return *m_distribution;
 }
 
+TarantulaFaultLocalizationTechniquePlugin::FLScore& TarantulaFaultLocalizationTechniquePlugin::getFlScore()
+{
+    return *m_flScore;
+}
+
 void TarantulaFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
 {
-    m_distribution->clear();
-
     CCoverageMatrix *coverageMatrix = m_data->getCoverage();
 
     std::map<String, CClusterDefinition>::iterator it;
     for (it = clusterList->begin(); it != clusterList->end(); it++) {
+
+        m_distribution->clear();
+
         IntVector codeElementIds = it->second.getCodeElements();
 
         // group for cluster data
@@ -106,6 +115,16 @@ void TarantulaFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &r
 
             (*m_distribution)[tarantula]++;
         }
+
+        for (IndexType i = 0; i < m_failedCodeElements.size(); i++) {
+            IndexType cid = m_failedCodeElements[i];
+            String ceIdStr = std::to_string(cid);
+            double tarantula = res[it->first.c_str()][ceIdStr.c_str()]["tarantula"].GetDouble();
+
+            (*m_flScore)[it->first][cid] = CTestSuiteScore::flScore(it->second, tarantula, *m_distribution);
+
+        }
+
     }
 }
 

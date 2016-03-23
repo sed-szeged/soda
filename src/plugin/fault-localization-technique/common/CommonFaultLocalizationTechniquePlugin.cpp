@@ -26,6 +26,7 @@ namespace soda {
 CommonFaultLocalizationTechniquePlugin::CommonFaultLocalizationTechniquePlugin() :
     m_data(NULL),
     clusterList(NULL),
+    m_flScore(NULL),
     m_revision(0)
 {
 }
@@ -49,7 +50,7 @@ StringVector CommonFaultLocalizationTechniquePlugin::getDependency()
     return StringVector();
 }
 
-void CommonFaultLocalizationTechniquePlugin::init(CSelectionData *data, ClusterMap *clusters, IndexType revision)
+void CommonFaultLocalizationTechniquePlugin::init(CSelectionData *data, ClusterMap *clusters, IndexType revision, IntVector failedCodeElements)
 {
     m_data = data;
     clusterList = clusters;
@@ -59,6 +60,11 @@ void CommonFaultLocalizationTechniquePlugin::init(CSelectionData *data, ClusterM
 CommonFaultLocalizationTechniquePlugin::FLDistribution& CommonFaultLocalizationTechniquePlugin::getDistribution()
 {
     return distribution;
+}
+
+CommonFaultLocalizationTechniquePlugin::FLScore& CommonFaultLocalizationTechniquePlugin::getFlScore()
+{
+    return *m_flScore;
 }
 
 void CommonFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)

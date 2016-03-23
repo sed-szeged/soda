@@ -46,6 +46,9 @@ public:
      */
     typedef std::map<double, IndexType> FLDistribution;
 
+    // cluster_id->cid->score
+    typedef std::map<String, std::map<IndexType, double> > FLScore;
+
 public:
 
     /**
@@ -74,9 +77,11 @@ public:
     /**
      * @brief Initialize the plugin.
      * @param data The test suite data.
-     * @param revisionList The revisions to consider.
+     * @param clusters The cluster to process
+     * @param revision The revision to process
+     * @param failedCodeElements The id of the code elements in the coverage matrix that contains bug.
      */
-    virtual void init(CSelectionData *data, ClusterMap *clusters, IndexType revision) = 0;
+    virtual void init(CSelectionData *data, ClusterMap *clusters, IndexType revision, IntVector failedCodeElements) = 0;
 
     /**
      * @brief Returns the distributiuon of fault lcoalization technique values.
@@ -89,6 +94,12 @@ public:
      * @param res Rapidjson document which contains the calculated values.
      */
     virtual void calculate(rapidjson::Document &res) = 0;
+
+    /**
+     * @brief Returns the fl score of all the elements.
+     * @return
+     */
+    virtual FLScore& getFlScore() = 0;
 };
 
 } /* namespace soda */

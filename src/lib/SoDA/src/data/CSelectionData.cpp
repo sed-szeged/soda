@@ -150,7 +150,7 @@ void CSelectionData::filterToCoverage()
         String tcname = (*m_coverageTestcases)[i];
 
         if (!m_resultsTestcases->containsValue(tcname)) {
-            std::cout << "[WARNING] Not existing test case: " << tcname << std::endl;
+            std::cerr << "[WARNING] Not existing test case: " << tcname << std::endl;
             continue;
         }
         for (size_t r = 0; r < revs.size(); ++r) {
@@ -165,6 +165,10 @@ void CSelectionData::filterToCoverage()
         if (m_changeset->exists(revs[r])) {
             const StringVector& chng = m_changeset->getCodeElementNames(revs[r]);
             for (size_t s = 0; s < chng.size(); ++s) {
+                if (!l_changesetCodeElements->containsValue(chng[s])) {
+                    std::cerr << "[WARNING] Not existing code element: " << chng[s] << std::endl;
+                    continue;
+                }
                 if (l_changesetCodeElements->getID(chng[s])) {
                     l_changeset->setChange(revs[r], chng[s]);
                 }
