@@ -19,8 +19,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GENERALIGNOREPRIORITIZATIONPLUGIN_H
-#define GENERALIGNOREPRIORITIZATIONPLUGIN_H
+#ifndef FLINTPRIORITIZATIONPLUGIN_H
+#define FLINTPRIORITIZATIONPLUGIN_H
 
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
@@ -151,4 +151,4 @@ private:
 
 } /* namespace soda */
 
-#endif /* GENERALIGNOREPRIORITIZATIONPLUGIN_H */
+#endif /* FLINTPRIORITIZATIONPLUGIN_H */

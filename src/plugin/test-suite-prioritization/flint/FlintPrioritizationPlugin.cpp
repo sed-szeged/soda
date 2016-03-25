@@ -98,7 +98,7 @@ void FlintPrioritizationPlugin::reset(RevNumType revision)
 
 void FlintPrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
 {
-    while (m_nofElementsReady < size && !(m_priorityQueue->empty())) {
+    while (m_nofElementsReady < size && !(m_elementsRemaining->empty())) {
         next();
     }
 
