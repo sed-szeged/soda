@@ -22,7 +22,7 @@
 #include <iostream>
 #include <map>
 
-#include "CPartitionAlgorithm.h"
+#include "algorithm/CPartitionAlgorithm.h"
 
 namespace soda {
 

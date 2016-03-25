@@ -9,6 +9,7 @@ include_directories(${SoDALib_SOURCE_DIR}/inc
 file(GLOB_RECURSE headers ./inc/*.h)
 
 #Sources
+aux_source_directory(${SoDALib_SOURCE_DIR}/src/algorithm algorithm_src)
 aux_source_directory(${SoDALib_SOURCE_DIR}/src/data data_src)
 aux_source_directory(${SoDALib_SOURCE_DIR}/src/exception exception_src)
 aux_source_directory(${SoDALib_SOURCE_DIR}/src/interface interface_src)
@@ -16,7 +17,7 @@ aux_source_directory(${SoDALib_SOURCE_DIR}/src/io io_src)
 aux_source_directory(${SoDALib_SOURCE_DIR}/src/util util_src)
 aux_source_directory(${SoDALib_SOURCE_DIR}/src src)
 
-add_library(SoDA ${LINKING_METHOD} ${headers} ${data_src} ${exception_src} ${interface_src} ${io_src} ${util_src} ${src})
+add_library(SoDA ${LINKING_METHOD} ${headers} ${algorithm_src} ${data_src} ${exception_src} ${interface_src} ${io_src} ${util_src} ${src})
 add_dependencies(SoDA rapidjson)
 target_link_libraries(SoDA ${Boost_LIBRARIES})
 install(TARGETS SoDA

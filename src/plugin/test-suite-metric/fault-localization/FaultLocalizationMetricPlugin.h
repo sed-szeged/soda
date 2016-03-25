@@ -21,7 +21,7 @@
 #ifndef FAULTLOCALIZATIONMETRICPLUGIN_H
 #define FAULTLOCALIZATIONMETRICPLUGIN_H
 
-#include "CPartitionAlgorithm.h"
+#include "algorithm/CPartitionAlgorithm.h"
 #include "engine/CKernel.h"
 
 namespace soda {
