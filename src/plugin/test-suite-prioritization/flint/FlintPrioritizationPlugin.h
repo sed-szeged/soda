@@ -36,7 +36,7 @@ class FlintPrioritizationPlugin : public ITestSuitePrioritizationPlugin
 private:
     typedef struct {
         IndexType testcaseId;
-        IndexType priorityValue;
+        double priorityValue;
     } qelement;
     friend bool operator<(qelement d1, qelement d2);
 
