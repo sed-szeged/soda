@@ -40,16 +40,16 @@ CPartitionAlgorithm::~CPartitionAlgorithm()
 
 void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &cluster, IndexType revision)
 {
-    std::cerr << "[INFO] Partitioning started" << std::endl;
+    // std::cerr << "[INFO] Partitioning started for " << cluster.getTestCases().size() << " tests." << std::endl;
     CCoverageMatrix *coverage = data.getCoverage();
-    std::map<IndexType, IndexType> tcMap;
+    //std::map<IndexType, IndexType> tcMap;
 
     IntVector testCaseIds = cluster.getTestCases();
     IntVector codeElementIds = cluster.getCodeElements();
 
-    for (IndexType i = 0; i < testCaseIds.size(); i++) {
+    /*for (IndexType i = 0; i < testCaseIds.size(); i++) {
         tcMap[testCaseIds[i]] = data.translateTestcaseIdFromCoverageToResults(testCaseIds[i]);
-    }
+    }*/
 
     std::map<IndexType, std::vector<bool> > coverageMap;
 
@@ -75,15 +75,15 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         // summarize these test case ids.
         for (IndexType j = 0; j < testCaseIds.size(); j++) {
             IndexType tcid = testCaseIds[j];
-            if (data.getResults()->getExecutionBitList(revision).at(tcMap[tcid])) {
+            //if (data.getResults()->getExecutionBitList(revision).at(tcMap[tcid])) {
                 if (coverage->getBitMatrix().get(tcid, cid)) {
                     sum++;
-                    indexSum += tcid;
+                    indexSum += (tcid + 1);
                 }
                 coverageMap[cid].push_back(coverage->getBitMatrix().get(tcid, cid));
-            }
+            //}
         }
-
+        //std::cerr << "[Partition] " << " Sum of cid(" << cid << "):" << sum << std::endl;
         S[cid] = sum;
 
         SI.insert(std::pair<IndexType, IndexType>(indexSum, cid));
@@ -91,14 +91,16 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         cnt++;
     }
 
-    std::cerr << std::endl << "[INFO] Preprocessing finished." << std::endl;
-    std::cerr << std::endl << "[INFO] Started the partitioning..." << std::endl;
+    //std::cerr << std::endl << "[INFO] Preprocessing finished." << std::endl;
+    //std::cerr << std::endl << "[INFO] Started the partitioning..." << std::endl;
 
 
     partition_info pInfo;
     IndexType partitionId = 1;
 
     cnt = 0;
+
+    // std::cerr << "[Partition] " << " SI.size(): " << SI.size() << std::endl;
 
     while (!SI.empty()) {
         cnt++;
@@ -120,6 +122,7 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         pInfo.partitionId = partitionId;
         m_partitionInfo->push_back(pInfo);
         (*m_partitions)[partitionId].insert(cid);
+        // std::cerr << "[Partition]" << " cid(" << cid << "): " << partitionId << std::endl;
 
         std::vector<IndexType> tmp;
 
@@ -138,11 +141,13 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
                 pInfo.cid = iCid;
                 m_partitionInfo->push_back(pInfo);
                 (*m_partitions)[partitionId].insert(iCid);
+                // std::cerr << "cid(" << iCid << "): " << partitionId << std::endl;
             } else if (S[iCid] == S[cid]) {
                 if (coverageMap[cid] == coverageMap[iCid]) {
                     pInfo.cid = iCid;
                     m_partitionInfo->push_back(pInfo);
                     (*m_partitions)[partitionId].insert(iCid);
+                    // std::cerr << "cid(" << iCid << "): " << partitionId << std::endl;
                 } else {
                     tmp.push_back(iCid);
                 }
@@ -159,7 +164,7 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         partitionId++;
     }
 
-    std::cerr << std::endl << "[INFO] Partitioning FINISHED." << std::endl;
+    //std::cerr << std::endl << "[INFO] Partitioning FINISHED." << std::endl;
 }
 
 } /* namespace soda */

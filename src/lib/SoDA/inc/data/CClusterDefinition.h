@@ -40,6 +40,8 @@ public:
 
     void addTestCase(IndexType tcid);
     void addTestCases(const std::vector<IndexType> &testCases);
+    void clearTestCases();
+    void removeTestCase(IndexType tcid);
     void addCodeElement(IndexType cid);
     void addCodeElements(const std::vector<IndexType> &codeElements);
 

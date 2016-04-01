@@ -19,6 +19,7 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
 #include "data/CClusterDefinition.h"
 
 namespace soda {
@@ -61,6 +62,19 @@ void CClusterDefinition::addTestCase(IndexType tcid)
 void CClusterDefinition::addTestCases(const std::vector<IndexType> &testCases)
 {
     m_testCases->insert(m_testCases->end(), testCases.begin(), testCases.end());
+}
+
+void CClusterDefinition::clearTestCases()
+{
+    m_testCases->clear();
+}
+
+void CClusterDefinition::removeTestCase(IndexType tcid)
+{
+    IntVector::iterator pos = std::find(m_testCases->begin(), m_testCases->end(), tcid);
+    if (pos != m_testCases->end()) {
+        m_testCases->erase(pos);
+    }
 }
 
 void CClusterDefinition::addCodeElement(IndexType cid)

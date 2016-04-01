@@ -108,3 +108,50 @@ TEST_F(TestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPlugin)
     EXPECT_NO_THROW(plugin->fillSelection(result, 100));
     EXPECT_EQ(5u, result.size());
 }
+
+TEST_F(TestSuitePrioritizationPluginsTest, RaptorPrioritizationPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("raptor"));
+
+    EXPECT_EQ("raptor", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+TEST_F(TestSuitePrioritizationPluginsTest, RaptorPrioritizationPluginNext)
+{
+    CSelectionData selectionData;
+    selectionData.loadCoverage("sample/raptor.cov.SoDA");
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("raptor"));
+    EXPECT_NO_THROW(plugin->init(&selectionData, &kernel));
+    EXPECT_EQ(plugin->next(), 4);
+    EXPECT_EQ(plugin->next(), 7);
+    EXPECT_EQ(plugin->next(), 5);
+    EXPECT_EQ(plugin->next(), 1);
+    EXPECT_EQ(plugin->next(), 6);
+    EXPECT_EQ(plugin->next(), 3);
+    EXPECT_EQ(plugin->next(), 2);
+    EXPECT_EQ(plugin->next(), 0);
+
+}
+
+TEST_F(TestSuitePrioritizationPluginsTest, RaptorPrioritizationPluginFillSelection)
+{
+    CSelectionData selectionData;
+    selectionData.loadCoverage("sample/raptor.cov.SoDA");
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("raptor"));
+    EXPECT_NO_THROW(plugin->init(&selectionData, &kernel));
+    EXPECT_NO_THROW(plugin->fillSelection(result, 100));
+    EXPECT_EQ(8u, result.size());
+    EXPECT_EQ(4u, result[0]);
+    EXPECT_EQ(7u, result[1]);
+    EXPECT_EQ(5u, result[2]);
+    EXPECT_EQ(1u, result[3]);
+    EXPECT_EQ(6u, result[4]);
+    EXPECT_EQ(3u, result[5]);
+    EXPECT_EQ(2u, result[6]);
+    EXPECT_EQ(0u, result[7]);
+}
+
+
