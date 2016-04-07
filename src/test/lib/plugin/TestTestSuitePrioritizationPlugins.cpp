@@ -92,6 +92,23 @@ TEST_F(TestSuitePrioritizationPluginsTest, AdditionalGeneralIgnorePrioritization
     EXPECT_EQ(2u, result[4]);
 }
 
+TEST_F(TestSuitePrioritizationPluginsTest, AdditionalWithResetsPrioritizationPlugin)
+{
+    CSelectionData csdata;
+    csdata.loadCoverage("sample/prioritization.reset.cov.SoDA");
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("additional-with-resets"));
+    EXPECT_NO_THROW(plugin->init(&csdata, &kernel));
+    EXPECT_NO_THROW(plugin->fillSelection(result, csdata.getCoverage()->getNumOfTestcases()));
+
+    EXPECT_EQ(0u, result[0]);
+    EXPECT_EQ(1u, result[1]);
+    EXPECT_EQ(4u, result[2]);
+    EXPECT_EQ(2u, result[3]);
+    EXPECT_EQ(3u, result[4]);
+    EXPECT_EQ(5u, result[5]);
+}
+
 TEST_F(TestSuitePrioritizationPluginsTest, RandomIgnorePrioritizationPluginMetaInfo)
 {
     EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("random-ignore"));

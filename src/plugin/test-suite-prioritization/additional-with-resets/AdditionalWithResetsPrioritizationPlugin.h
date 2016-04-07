@@ -19,8 +19,8 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ADDITIONALGENERALIGNOREPRIORITIZATIONPLUGIN_H
-#define ADDITIONALGENERALIGNOREPRIORITIZATIONPLUGIN_H
+#ifndef ADDITIONALWITHRESETSPRIORITIZATIONPLUGIN_H
+#define ADDITIONALWITHRESETSPRIORITIZATIONPLUGIN_H
 
 #include "data/CSelectionData.h"
 #include "engine/CKernel.h"
@@ -29,9 +29,10 @@ namespace soda {
 
 /**
  *  @brief Prioritization is based on coverage information. Testcase covering more not yet covered
- *         functions has higher coverage.
+ *         functions has higher coverage. The priority information gets reinitalized every time the
+ *         algorithm cannot decide the next testcase (i.e. highest priority is zero).
  */
-class AdditionalGeneralIgnorePrioritizationPlugin : public ITestSuitePrioritizationPlugin {
+class AdditionalWithResetsPrioritizationPlugin : public ITestSuitePrioritizationPlugin {
 private:
     typedef struct {
         IndexType testcaseId;
@@ -44,12 +45,16 @@ public:
     /**
      * @brief Creates a new instance.
      */
-    AdditionalGeneralIgnorePrioritizationPlugin();
-    virtual ~AdditionalGeneralIgnorePrioritizationPlugin();
+    AdditionalWithResetsPrioritizationPlugin();
+
+    /**
+     * @brief Deinitializes an instance.
+     */
+    virtual ~AdditionalWithResetsPrioritizationPlugin();
 
     /**
      * @brief Returns the name of the plugin.
-     * @return
+     * @return "additional-with-resets"
      */
     String getName();
 
@@ -66,7 +71,7 @@ public:
 
     /**
      * @brief Gets the first n prioritized testcases.
-     * @param selected The result vector.
+     * @param selected A vector that will be used to store the ids of prioritized testcases.
      * @param size The number of testcases we want to select.
      */
     void fillSelection(IntVector& selected, size_t size);
@@ -76,6 +81,14 @@ public:
      * @param ordered List of already prioritized tests. The algorithm will continue the prioritization from this point.
      */
     void setState(IntVector& ordered);
+
+    /**
+     * @brief Sets the initial state of the algorithm.
+     * @param ordered List of already prioritized tests. The algorithm will continue the prioritization from this point.
+     * @param update This variable tells the algorithm whether to update the priority queue based on the coverage of already prioritized tests.
+     */
+    void setState(IntVector& ordered, bool update);
+
 
     /**
      * @brief Revision data is not used by this plugin.
@@ -90,7 +103,7 @@ public:
 
 private:
     /**
-     * @brief Updates the internal state based on the coverage of the given test
+     * @brief Updates the internal state based on the coverage of the given test.
      * @param tcid The id of the test
      */
     void updateData(IndexType tcid);
@@ -120,8 +133,13 @@ private:
      * @brief List of not covered code element ids.
      */
     std::list<IndexType>* m_notCoveredCEIDs;
+
+    /**
+     * @brief Indicates whether a reinitialization should be performed.
+     */
+    bool m_performReset;
 };
 
 } /* namespace soda */
 
-#endif /* ADDITIONALGENERALIGNOREPRIORITIZATIONPLUGIN_H */
+#endif /* ADDITIONALWITHRESETSPRIORITIZATIONPLUGIN_H */
