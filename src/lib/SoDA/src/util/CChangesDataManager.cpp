@@ -50,7 +50,7 @@ void CChangesDataManager::dumpCodeElements(const String &filepath)
 {
     INFO(getPrintInfo(), "CChangesDataManager::dumpCodeElements(\"" << filepath << "\")");
     if (getDataHandler()->getChanges() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
         const IIDManager& idm = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getChangeset() : getDataHandler()->getChanges())->getCodeElements();
 
         for (IndexType idx = 0; idx < idm.size(); ++idx) {
@@ -66,7 +66,7 @@ void CChangesDataManager::dumpChanges(const String &filepath)
 {
     INFO(getPrintInfo(), "CChangesDataManager::dumpChanges(\"" << filepath << "\")");
     if (getDataHandler()->getChanges() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
 
         CChangeset* changeset = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getChangeset() : getDataHandler()->getChanges();
         if (getWithNames()) {
