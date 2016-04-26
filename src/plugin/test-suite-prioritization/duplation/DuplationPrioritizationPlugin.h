@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2016 Department of Software Engineering, University of Szeged
  *
- * Authors: David Tengeri <dtengeri@inf.u-szeged>
+ * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
  *
  * This file is part of SoDA.
  *
@@ -19,36 +19,26 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RAPTORPRIORITIZATIONPLUGIN_H
-#define RAPTORPRIORITIZATIONPLUGIN_H
 
-#include "algorithm/CPartitionAlgorithm.h"
+#ifndef DUPLATIONPRIORITIZATIONPLUGIN_H
+#define DUPLATIONPRIORITIZATIONPLUGIN_H
+
 #include "data/CSelectionData.h"
-#include "data/CClusterDefinition.h"
 #include "engine/CKernel.h"
 
 namespace soda {
 
 /**
- * @brief Prioritization plugin that is based on coverage information.
- *          - testcase covering more functions has higher coverage
+ * @brief Prioritization plugin which optimize for fault localization.
  */
-class RaptorPrioritizationPlugin : public ITestSuitePrioritizationPlugin
-{
-private:
-    typedef struct {
-        IndexType testcaseId;
-        double priorityValue;
-    } qelement;
-    friend bool operator<(qelement d1, qelement d2);
-
+class DuplationPrioritizationPlugin : public ITestSuitePrioritizationPlugin {
 public:
 
     /**
      * @brief Creates a new instance.
      */
-    RaptorPrioritizationPlugin();
-    virtual ~RaptorPrioritizationPlugin();
+    DuplationPrioritizationPlugin();
+    virtual ~DuplationPrioritizationPlugin();
 
     /**
      * @brief Returns the name of the plugin.
@@ -90,32 +80,25 @@ public:
      * @return
      */
     IndexType next();
-
 private:
-    /**
-     * @brief Orders the code elements by their coverage
-     */
-    void prioritize();
 
-    double ambiguityReduction(IndexType tcid);
-
-    double ambiguity(CPartitionAlgorithm &partition);
+    void updatePartitions(std::map<IndexType, IndexType> &selectedTestcases);
 private:
 
     /**
      * @brief Selection data.
      */
-    CSelectionData* m_data;
+    CSelectionData*        m_data;
 
     /**
      * @brief Number of ready elements.
      */
-    size_t m_nofElementsReady;
+    size_t                 m_nofElementsReady;
 
     /**
      * @brief Vector of ready elements.
      */
-    IntVector* m_elementsReady;
+    IntVector*             m_elementsReady;
 
     /**
      * @brief Vector of remaining elements.
@@ -123,19 +106,14 @@ private:
     IntVector* m_elementsRemaining;
 
     /**
-     * @brief Stores the selected test cases
+     * @brief The current partition id of code elements
      */
-    CClusterDefinition* m_currentCluster;
+    std::vector<IndexType> *m_partitions;
+    std::map<IndexType, IndexType> *m_partitionSizes;
 
-    double m_currentAmbiguity;
-
-    /**
-     * @brief Priority queue.
-     */
-    std::vector<qelement>* m_priorityQueue;
 
 };
 
 } /* namespace soda */
 
-#endif /* RAPTORPRIORITIZATIONPLUGIN_H */
+#endif /* DUPLATIONPRIORITIZATIONPLUGIN_H */

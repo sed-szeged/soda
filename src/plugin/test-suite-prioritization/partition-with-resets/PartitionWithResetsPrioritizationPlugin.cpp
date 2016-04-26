@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2016 Department of Software Engineering, University of Szeged
  *
- * Authors: David Tengeri <dtengeri@inf.u-szeged>
+ * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
  *
  * This file is part of SoDA.
  *
@@ -20,47 +20,47 @@
  */
 
 #include <algorithm>
-#include <stdexcept>
-#include "RaptorPrioritizationPlugin.h"
+
+#include "algorithm/CPartitionAlgorithm.h"
+#include "PartitionWithResetsPrioritizationPlugin.h"
 
 namespace soda {
 
-bool operator<(RaptorPrioritizationPlugin::qelement d1, RaptorPrioritizationPlugin::qelement d2) {
-    if (d1.priorityValue == d2.priorityValue) {
-        return d1.testcaseId > d2.testcaseId;
-    }
+bool operator<(PartitionWithResetsPrioritizationPlugin::qelement d1, PartitionWithResetsPrioritizationPlugin::qelement d2) {
     return d1.priorityValue < d2.priorityValue;
 }
 
-RaptorPrioritizationPlugin::RaptorPrioritizationPlugin():
+PartitionWithResetsPrioritizationPlugin::PartitionWithResetsPrioritizationPlugin():
         m_data(NULL),
         m_nofElementsReady(0),
         m_elementsReady(NULL),
         m_elementsRemaining(NULL),
+        m_priorityQueue(new std::vector<qelement>()),
         m_currentCluster(new CClusterDefinition()),
-        m_currentAmbiguity(0.0),
-        m_priorityQueue(new std::vector<qelement>())
+        m_currentPartitionMetric(0.0)
 {}
 
-RaptorPrioritizationPlugin::~RaptorPrioritizationPlugin()
+PartitionWithResetsPrioritizationPlugin::~PartitionWithResetsPrioritizationPlugin()
 {
     delete m_priorityQueue;
     delete m_elementsReady;
+    delete m_elementsRemaining;
+    delete m_currentCluster;
     m_elementsReady = NULL;
     m_nofElementsReady = 0;
 }
 
-String RaptorPrioritizationPlugin::getName()
+String PartitionWithResetsPrioritizationPlugin::getName()
 {
-    return "raptor";
+    return "partition-metric";
 }
 
-String RaptorPrioritizationPlugin::getDescription()
+String PartitionWithResetsPrioritizationPlugin::getDescription()
 {
-    return "RAPTOR algorithm by Gonzalez-Sanchez, Abreu, Gross and Gemund.";
+    return "Prioritize the tests based on the best partition metric value";
 }
 
-void RaptorPrioritizationPlugin::init(CSelectionData *data, CKernel *kernel)
+void PartitionWithResetsPrioritizationPlugin::init(CSelectionData *data, CKernel *kernel)
 {
     m_data = data;
     m_currentCluster->addCodeElements(m_data->getCodeElements()->getIDList());
@@ -68,7 +68,7 @@ void RaptorPrioritizationPlugin::init(CSelectionData *data, CKernel *kernel)
     setState(initial);
 }
 
-void RaptorPrioritizationPlugin::setState(IntVector &ordered)
+void PartitionWithResetsPrioritizationPlugin::setState(IntVector &ordered)
 {
     if (m_elementsReady != NULL) {
         delete m_elementsReady;
@@ -92,19 +92,18 @@ void RaptorPrioritizationPlugin::setState(IntVector &ordered)
     m_nofElementsReady = ordered.size();
     m_priorityQueue->clear();
 
-    IndexType nofCodeElements = m_data->getCoverage()->getNumOfCodeElements();
-    m_currentAmbiguity = (double) (nofCodeElements - 1) / 2.0;
+    m_currentPartitionMetric = 0.0;
 }
 
-void RaptorPrioritizationPlugin::reset(RevNumType revision)
+void PartitionWithResetsPrioritizationPlugin::reset(RevNumType rev)
 {
-    // revision information are not taken into account
+    //revision information are not taken into account
     return;
 }
 
-void RaptorPrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
+void PartitionWithResetsPrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
 {
-    while (m_nofElementsReady < size && !(m_elementsRemaining->empty())) {
+    while(m_nofElementsReady < size && !(m_elementsRemaining->empty())) {
         next();
     }
 
@@ -114,7 +113,7 @@ void RaptorPrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
     }
 }
 
-IndexType RaptorPrioritizationPlugin::next()
+IndexType PartitionWithResetsPrioritizationPlugin::next()
 {
     if (m_elementsRemaining->empty()) {
         throw std::out_of_range("There are not any testcases left.");
@@ -124,18 +123,17 @@ IndexType RaptorPrioritizationPlugin::next()
 
     prioritize();
     qelement d = m_priorityQueue->back();
-    if (d.priorityValue > 0) {
+    if (d.priorityValue - m_currentPartitionMetric > 0) {
         m_priorityQueue->pop_back();
         m_currentCluster->addTestCase(d.testcaseId);
-        m_currentAmbiguity = d.priorityValue;
+        m_currentPartitionMetric = d.priorityValue;
         tcid = d.testcaseId;
     } else {
         // Reset the internal state and prioritize again
         m_currentCluster->clearTestCases();
-        IndexType nofCodeElements = m_data->getCoverage()->getNumOfCodeElements();
-        m_currentAmbiguity = (double) (nofCodeElements - 1) / 2.0;
+        m_currentPartitionMetric = 0.0;
         // Call recursively
-        // std::cerr << "[RAPTOR] Recursive call" << std::endl;
+        // std::cerr << "[PartitionWithResets] Recursive call" << std::endl;
         tcid = next();
     }
 
@@ -150,48 +148,55 @@ IndexType RaptorPrioritizationPlugin::next()
     return tcid;
 }
 
-void RaptorPrioritizationPlugin::prioritize()
+void PartitionWithResetsPrioritizationPlugin::prioritize()
 {
     m_priorityQueue->clear();
 
     for (IndexType i = 0; i < m_elementsRemaining->size(); i++) {
         qelement d;
         d.testcaseId = m_elementsRemaining->at(i);
-        d.priorityValue = ambiguityReduction(m_elementsRemaining->at(i));
+        d.priorityValue = partitionMetric(m_elementsRemaining->at(i));
         m_priorityQueue->push_back(d);
     }
 
     sort(m_priorityQueue->begin(), m_priorityQueue->end());
 }
 
-double RaptorPrioritizationPlugin::ambiguityReduction(IndexType tcid)
+double PartitionWithResetsPrioritizationPlugin::partitionMetric(IndexType tcid)
 {
     m_currentCluster->addTestCase(tcid);
+
     CPartitionAlgorithm algorithm;
     algorithm.compute(*m_data, *m_currentCluster);
-    double extended = ambiguity(algorithm);
-    m_currentCluster->removeTestCase(tcid);
-    // std::cerr << "[RAPTOR] " << "Ambiguity reduction for: tcid(" << tcid << ") = " << m_currentAmbiguity << " - " << extended << std::endl;
-    return m_currentAmbiguity - extended;
-}
 
-double RaptorPrioritizationPlugin::ambiguity(CPartitionAlgorithm &partition)
-{
-    IndexType nofCodeElements = m_data->getCoverage()->getNumOfCodeElements();
-    double ambiguity = 0.0;
-    CPartitionAlgorithm::PartitionData &partitionData = partition.getPartitions();
-    for (CPartitionAlgorithm::PartitionData::iterator partIt = partitionData.begin(); partIt != partitionData.end(); partIt++) {
+    CPartitionAlgorithm::PartitionInfo &partitionInfo = algorithm.getPartitionInfo();
+    CPartitionAlgorithm::PartitionData &partitions = algorithm.getPartitions();
+
+    IndexType nrOfCodeElementsInPartition = partitionInfo.size();
+    double flMetric = 0.0;
+
+    for (CPartitionAlgorithm::PartitionData::iterator partIt = partitions.begin(); partIt != partitions.end(); partIt++) {
         IndexType size = partIt->second.size();
-        //std::cerr << "[Raptor] " << "Size partition(" << partIt->first << "): " << size << std::endl;
-        ambiguity += ((double)size / nofCodeElements) * (((double)size - 1.0) / 2.0);
-    }
-    return ambiguity;
 
+        flMetric += size * (size - 1);
+    }
+
+    if(nrOfCodeElementsInPartition == 0){
+        flMetric = 0;
+    } else if(nrOfCodeElementsInPartition == 1){
+        flMetric /= nrOfCodeElementsInPartition * (nrOfCodeElementsInPartition);
+    } else {
+        flMetric /= nrOfCodeElementsInPartition * (nrOfCodeElementsInPartition - 1);
+    }
+
+    m_currentCluster->removeTestCase(tcid);
+
+    return 1.0 - flMetric;
 }
 
 extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
 {
-    kernel.getTestSuitePrioritizationPluginManager().addPlugin(new RaptorPrioritizationPlugin());
+    kernel.getTestSuitePrioritizationPluginManager().addPlugin(new PartitionWithResetsPrioritizationPlugin());
 }
 
 } /* namespace soda */

@@ -75,7 +75,7 @@ void FaultLocalizationMetricPlugin::calculate(rapidjson::Document &results)
         }
 
         CPartitionAlgorithm algorithm;
-        algorithm.compute(*m_data, it->second, m_revision);
+        algorithm.compute(*m_data, it->second);
 
         // Prepare directory for the output.
         //std::stringstream ss;

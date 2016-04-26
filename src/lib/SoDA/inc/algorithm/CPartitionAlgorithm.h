@@ -55,9 +55,8 @@ public:
      * @brief Create the partitions of the test suite for one revision.
      * @param [IN] data The input data.
      * @param [IN] cluster The clusters of test cases and code elements.
-     * @param [IN] revision The revision to consider.
      */
-    void compute(CSelectionData &data, CClusterDefinition &cluster, IndexType revision);
+    void compute(CSelectionData &data, CClusterDefinition &cluster);
 
     /**
      * @brief Returns the info for every code element.

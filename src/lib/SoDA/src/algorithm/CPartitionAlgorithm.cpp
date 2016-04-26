@@ -38,7 +38,7 @@ CPartitionAlgorithm::~CPartitionAlgorithm()
     delete m_partitions;
 }
 
-void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &cluster, IndexType revision)
+void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &cluster)
 {
     // std::cerr << "[INFO] Partitioning started for " << cluster.getTestCases().size() << " tests." << std::endl;
     CCoverageMatrix *coverage = data.getCoverage();
@@ -75,13 +75,11 @@ void CPartitionAlgorithm::compute(CSelectionData &data, CClusterDefinition &clus
         // summarize these test case ids.
         for (IndexType j = 0; j < testCaseIds.size(); j++) {
             IndexType tcid = testCaseIds[j];
-            //if (data.getResults()->getExecutionBitList(revision).at(tcMap[tcid])) {
-                if (coverage->getBitMatrix().get(tcid, cid)) {
-                    sum++;
-                    indexSum += (tcid + 1);
-                }
-                coverageMap[cid].push_back(coverage->getBitMatrix().get(tcid, cid));
-            //}
+            if (coverage->getBitMatrix().get(tcid, cid)) {
+                sum++;
+                indexSum += (tcid + 1);
+            }
+            coverageMap[cid].push_back(coverage->getBitMatrix().get(tcid, cid));
         }
         //std::cerr << "[Partition] " << " Sum of cid(" << cid << "):" << sum << std::endl;
         S[cid] = sum;

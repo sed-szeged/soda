@@ -1,7 +1,7 @@
 /*
  * Copyright (C): 2013-2016 Department of Software Engineering, University of Szeged
  *
- * Authors: David Tengeri <dtengeri@inf.u-szeged>
+ * Authors: David Tengeri <dtengeri@inf.u-szeged.hu>
  *
  * This file is part of SoDA.
  *
@@ -19,10 +19,9 @@
  *  along with SoDA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RAPTORPRIORITIZATIONPLUGIN_H
-#define RAPTORPRIORITIZATIONPLUGIN_H
+#ifndef PARTITIONWITHRESETSPRIORITIZATIONPLUGIN_H
+#define PARTITIONWITHRESETSPRIORITIZATIONPLUGIN_H
 
-#include "algorithm/CPartitionAlgorithm.h"
 #include "data/CSelectionData.h"
 #include "data/CClusterDefinition.h"
 #include "engine/CKernel.h"
@@ -30,11 +29,10 @@
 namespace soda {
 
 /**
- * @brief Prioritization plugin that is based on coverage information.
- *          - testcase covering more functions has higher coverage
+ *  @brief Prioritization is based on coverage information. Testcase covering more not yet covered
+ *         functions has higher coverage.
  */
-class RaptorPrioritizationPlugin : public ITestSuitePrioritizationPlugin
-{
+class PartitionWithResetsPrioritizationPlugin : public ITestSuitePrioritizationPlugin {
 private:
     typedef struct {
         IndexType testcaseId;
@@ -47,8 +45,8 @@ public:
     /**
      * @brief Creates a new instance.
      */
-    RaptorPrioritizationPlugin();
-    virtual ~RaptorPrioritizationPlugin();
+    PartitionWithResetsPrioritizationPlugin();
+    virtual ~PartitionWithResetsPrioritizationPlugin();
 
     /**
      * @brief Returns the name of the plugin.
@@ -75,8 +73,8 @@ public:
     void fillSelection(IntVector& selected, size_t size);
 
     /**
-     * @brief Sets the cinitial state of the algorithm.
-     * @param ordered List of already prioritized tests. The algorithm will continue the priorotozation from this point.
+     * @brief Sets the initial state of the algorithm.
+     * @param ordered List of already prioritized tests. The algorithm will continue the prioritization from this point.
      */
     void setState(IntVector& ordered);
 
@@ -92,14 +90,9 @@ public:
     IndexType next();
 
 private:
-    /**
-     * @brief Orders the code elements by their coverage
-     */
+
     void prioritize();
-
-    double ambiguityReduction(IndexType tcid);
-
-    double ambiguity(CPartitionAlgorithm &partition);
+    double partitionMetric(IndexType tcid);
 private:
 
     /**
@@ -118,24 +111,20 @@ private:
     IntVector* m_elementsReady;
 
     /**
-     * @brief Vector of remaining elements.
-     */
-    IntVector* m_elementsRemaining;
-
-    /**
-     * @brief Stores the selected test cases
-     */
-    CClusterDefinition* m_currentCluster;
-
-    double m_currentAmbiguity;
-
-    /**
      * @brief Priority queue.
      */
     std::vector<qelement>* m_priorityQueue;
 
+    CClusterDefinition* m_currentCluster;
+
+    /**
+     * @brief Vector of remaining elements.
+     */
+    IntVector* m_elementsRemaining;
+
+    double m_currentPartitionMetric;
 };
 
 } /* namespace soda */
 
-#endif /* RAPTORPRIORITIZATIONPLUGIN_H */
+#endif /* PARTITIONWITHRESETSPRIORITIZATIONPLUGIN_H */
