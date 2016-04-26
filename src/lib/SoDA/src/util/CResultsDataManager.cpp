@@ -50,7 +50,7 @@ void CResultsDataManager::dumpTestcases(const String &filepath)
 {
     INFO(getPrintInfo(), "CResultsDataManager::dumpTestcases(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
         const IIDManager& idm = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults())->getTestcases();
 
         for (IndexType idx = 0; idx < idm.size(); ++idx) {
@@ -65,7 +65,7 @@ void CResultsDataManager::dumpRevisions(const String& filepath)
 {
     INFO(getPrintInfo(), "CResultsDataManager::dumpRevisions(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
         IntVector revList = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults())->getRevisionNumbers();
 
         for (IndexType idx = 0; idx < revList.size(); ++idx) {
@@ -81,7 +81,7 @@ void CResultsDataManager::dumpExecution(const String& filepath, bool psize, char
 {
     INFO(getPrintInfo(), "CResultsDataManager::dumpExecution(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
         const IBitMatrix& m = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults())->getExecutionBitMatrix();
 
         if (psize) {
@@ -105,7 +105,7 @@ void CResultsDataManager::dumpPassFail(const String& filepath, bool psize, char 
 {
     INFO(getPrintInfo(), "CResultsDataManager::dumpPassFail(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
         CResultsMatrix const& res = *(getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults());
         IBitMatrix const &m = res.getPassedBitMatrix();
 
@@ -163,7 +163,7 @@ void CResultsDataManager::dumpTimeline(const String& filepath, char csep, char r
 {
     INFO(getPrintInfo(), "CResultsDataManager::dumpTimeline(\"" << filepath << "\")");
     if (getDataHandler()->getResults() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
         CResultsMatrix* results = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults();
         IntVector revList = results->getRevisionNumbers();
         const IIDManager& idm = results->getTestcases();

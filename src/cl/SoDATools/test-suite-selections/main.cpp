@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
 void createJsonFile()
 {
-    ofstream of("sample.json");
+    std::ofstream of("sample.json");
     of << getJsonString();
     of.close();
 }

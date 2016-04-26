@@ -51,7 +51,7 @@ void CCoverageDataManager::dumpData(const String &filepath, bool psize, char cse
 {
     INFO(getPrintInfo(), "CCoverageDataManager::dumpData(\"" << filepath << "\")");
     if (getDataHandler()->getCoverage() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
         CCoverageMatrix* coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
         const IBitMatrix& m = coverage->getBitMatrix();
 
@@ -129,7 +129,7 @@ void CCoverageDataManager::dumpTestcases(const String &filepath)
 {
     INFO(getPrintInfo(), "CCoverageDataManager::dumpTestcases(\"" << filepath << "\")");
     if (getDataHandler()->getCoverage() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
         const IIDManager& idm = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage())->getTestcases();
 
         for (IndexType idx = 0; idx < idm.size(); ++idx) {
@@ -143,7 +143,7 @@ void CCoverageDataManager::dumpTestcases(const String &filepath)
 
 void CCoverageDataManager::dumpImage(const String &filepath, int scale)
 {
-    ofstream pgm((filepath + ".pgm").c_str());
+    std::ofstream pgm((filepath + ".pgm").c_str());
     IndexType R = getDataHandler()->getCoverage()->getNumOfTestcases();
     IndexType C = getDataHandler()->getCoverage()->getNumOfCodeElements();
     int granularity = int(C) / scale;
@@ -182,7 +182,7 @@ void CCoverageDataManager::dumpCodeElements(const String &filepath)
 {
     INFO(getPrintInfo(), "CCoverageDataManager::dumpCodeElements(\"" << filepath << "\")");
     if (getDataHandler()->getCoverage() || getDataHandler()->getSelection()) {
-        ofstream O((filepath + ".csv").c_str());
+        std::ofstream O((filepath + ".csv").c_str());
         const IIDManager& idm = (getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage())->getCodeElements();
 
         for (IndexType idx = 0; idx < idm.size(); ++idx) {
@@ -200,7 +200,7 @@ void CCoverageDataManager::dumpCodeElementCoverage(const String &filepath) {
         return;
     }
     auto coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
-    ofstream O((filepath + ".csv").c_str());
+    std::ofstream O((filepath + ".csv").c_str());
     O << ";coverage;coverage(%)" << std::endl;
 
     IndexType nrOfTests = coverage->getNumOfTestcases();
@@ -234,7 +234,7 @@ void CCoverageDataManager::dumpTestCoverage(const String &filepath) {
     auto coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
     auto filteredCoverage = getDataHandler()->filterCoverage(coverage);
 
-    ofstream O((filepath + ".csv").c_str());
+    std::ofstream O((filepath + ".csv").c_str());
     O << ";coverage;coverage(%)" << std::endl;
 
     IndexType nrOfCodeElements = coverage->getNumOfCodeElements();
