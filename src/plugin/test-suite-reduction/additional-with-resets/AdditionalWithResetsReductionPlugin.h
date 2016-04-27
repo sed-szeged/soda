@@ -133,6 +133,11 @@ private:
      * @brief List of not covered code element ids.
      */
     std::list<IndexType>* m_notCoveredCEIDs;
+
+    /**
+     * @brief Set of all covered code element ids.
+     */
+    std::set<IndexType>* m_allCoveredCEIDs;
 };
 
 } /* namespace soda */
