@@ -52,7 +52,7 @@ PartitionWithResetsPrioritizationPlugin::~PartitionWithResetsPrioritizationPlugi
 
 String PartitionWithResetsPrioritizationPlugin::getName()
 {
-    return "partition-metric";
+    return "partition-with-resets";
 }
 
 String PartitionWithResetsPrioritizationPlugin::getDescription()
@@ -128,6 +128,7 @@ IndexType PartitionWithResetsPrioritizationPlugin::next()
         m_currentCluster->addTestCase(d.testcaseId);
         m_currentPartitionMetric = d.priorityValue;
         tcid = d.testcaseId;
+        // std::cout << "[SELECTED] tcid(" << d.testcaseId << ") metric: " << d.priorityValue << std::endl;
     } else {
         // Reset the internal state and prioritize again
         m_currentCluster->clearTestCases();

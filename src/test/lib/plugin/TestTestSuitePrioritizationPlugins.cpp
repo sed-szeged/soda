@@ -419,6 +419,56 @@ TEST_F(TestSuitePrioritizationPluginsTest, DuplationPrimePrioritizationPluginNex
     EXPECT_EQ(plugin->next(), 3);
 }
 
+TEST_F(TestSuitePrioritizationPluginsTest, PartitionMetricPrioritizationPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("partition-metric"));
+
+    EXPECT_EQ("partition-metric", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+TEST_F(TestSuitePrioritizationPluginsTest, PartitionMetricPrioritizationPluginNext)
+{
+    CSelectionData selectionData;
+    // Create selection data.
+    for (int i = 0; i < 100; ++i) {
+        for (int j = 0; j < 100; ++j) {
+            selectionData.getCoverage()->addOrSetRelation("test-" + boost::lexical_cast<String>(i), "ce-" + boost::lexical_cast<String>(j), (j <= i && j % 2 == 0) ? true : false);
+        }
+    }
+    selectionData.getCoverage()->setRelation(98,99,true);
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("partition-metric"));
+    EXPECT_NO_THROW(plugin->init(&selectionData, &kernel));
+
+    EXPECT_EQ(plugin->next(), 99);
+    EXPECT_EQ(plugin->next(), 49);
+    EXPECT_EQ(plugin->next(), 75);
+    EXPECT_EQ(plugin->next(), 22);
+}
+
+TEST_F(TestSuitePrioritizationPluginsTest, PartitionWithResetsPrioritizationPluginNext)
+{
+    CSelectionData selectionData;
+    // Create selection data.
+    for (int i = 0; i < 100; ++i) {
+        for (int j = 0; j < 100; ++j) {
+            selectionData.getCoverage()->addOrSetRelation("test-" + boost::lexical_cast<String>(i), "ce-" + boost::lexical_cast<String>(j), (j <= i && j % 2 == 0) ? true : false);
+        }
+    }
+    selectionData.getCoverage()->setRelation(98,99,true);
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("partition-with-resets"));
+    EXPECT_NO_THROW(plugin->init(&selectionData, &kernel));
+
+    EXPECT_EQ(plugin->next(), 99);
+    EXPECT_EQ(plugin->next(), 49);
+    EXPECT_EQ(plugin->next(), 75);
+    EXPECT_EQ(plugin->next(), 22);
+    plugin->fillSelection(result, 60);
+    EXPECT_EQ(plugin->next(), 29);
+}
+
 /*TEST_F(TestSuitePrioritizationPluginsTest, DuplationPrioritizationPluginFillSelection)
 {
     CSelectionData selectionData;

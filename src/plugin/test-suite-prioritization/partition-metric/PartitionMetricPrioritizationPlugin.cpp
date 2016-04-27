@@ -100,7 +100,7 @@ void PartitionMetricPrioritizationPlugin::reset(RevNumType rev)
 
 void PartitionMetricPrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
 {
-    while(m_nofElementsReady < size && !(m_priorityQueue->empty())) {
+    while(m_nofElementsReady < size && !(m_elementsRemaining->empty())) {
         next();
     }
 
@@ -120,6 +120,7 @@ IndexType PartitionMetricPrioritizationPlugin::next()
     qelement d = m_priorityQueue->back();
     m_priorityQueue->pop_back();
     m_currentCluster->addTestCase(d.testcaseId);
+    // std::cout << "[SELECTED] tcid(" << d.testcaseId << ") metric: " << d.priorityValue << std::endl;
 
     // Remove the test from the remaining list
     IntVector::iterator pos = std::find(m_elementsRemaining->begin(), m_elementsRemaining->end(), d.testcaseId);
