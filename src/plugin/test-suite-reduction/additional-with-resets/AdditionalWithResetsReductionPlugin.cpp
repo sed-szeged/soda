@@ -37,12 +37,14 @@ bool operator<(AdditionalWithResetsReductionPlugin::qelement d1, AdditionalWithR
 
 AdditionalWithResetsReductionPlugin::AdditionalWithResetsReductionPlugin() :
     m_data(NULL),
+    m_allCoveredCEIDs(new std::set<IndexType>()),
     m_notCoveredCEIDs(new std::list<IndexType>()),
     m_priorityQueue(new std::vector<qelement>())
 {}
 
 AdditionalWithResetsReductionPlugin::~AdditionalWithResetsReductionPlugin()
 {
+    delete m_allCoveredCEIDs;
     delete m_notCoveredCEIDs;
     delete m_priorityQueue;
 }
@@ -84,6 +86,7 @@ void AdditionalWithResetsReductionPlugin::update(IndexType testcaseId)
         if (coverageBitMatrix[testcaseId][*ceit]) {
             register IndexType ceid = *ceit;
             m_notCoveredCEIDs->erase(ceit++);
+            m_allCoveredCEIDs->insert(ceid);
 
             for (std::vector<qelement>::iterator qi = m_priorityQueue->begin(); qi != m_priorityQueue->end(); ++qi) {
                 if (coverageBitMatrix[qi->testcaseId][ceid]) {
@@ -94,6 +97,10 @@ void AdditionalWithResetsReductionPlugin::update(IndexType testcaseId)
         } else {
             ++ceit;
         }
+    }
+
+    if (isSortNeeded) {
+        std::sort(m_priorityQueue->begin(), m_priorityQueue->end());
     }
 }
 
@@ -155,14 +162,8 @@ void AdditionalWithResetsReductionPlugin::additionalWithResetsReduction(std::ofs
         T.insert(top.testcaseId);
         Titer.insert(top.testcaseId);
 
-        if (coveredCEGoal > 0) {
+        if (m_allCoveredCEIDs->size() < coveredCEGoal) {
             Tce.insert(top.testcaseId);
-
-            if (top.priorityValue > coveredCEGoal) {
-                coveredCEGoal = 0;
-            } else {
-                coveredCEGoal -= top.priorityValue;
-            }
         }
 
         if (Titer.size() == itersize) { // new iteration size reached
