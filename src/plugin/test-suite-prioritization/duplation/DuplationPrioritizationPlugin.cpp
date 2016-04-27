@@ -33,7 +33,8 @@ DuplationPrioritizationPlugin::DuplationPrioritizationPlugin():
         m_elementsReady(new IntVector()),
         m_elementsRemaining(new IntVector()),
         m_partitions(new std::vector<IndexType>()),
-        m_partitionSizes(new std::map<IndexType, IndexType>())
+        m_partitionSizes(new std::map<IndexType, IndexType>()),
+        m_nextTcid(0)
 {}
 
 DuplationPrioritizationPlugin::~DuplationPrioritizationPlugin()
@@ -81,6 +82,10 @@ void DuplationPrioritizationPlugin::setState(IntVector &ordered)
     }
 
     m_nofElementsReady = ordered.size();
+    if (m_nofElementsReady > 0) {
+        m_nextTcid = m_nofElementsReady - 1;
+    }
+
 
 
     // Put each code element into the same partition
@@ -110,12 +115,15 @@ void DuplationPrioritizationPlugin::fillSelection(IntVector& selected, size_t si
 
 IndexType DuplationPrioritizationPlugin::next()
 {
+    // We do not need to calculate anyithing
+    if (m_nextTcid < m_nofElementsReady) {
+        return (*m_elementsReady)[m_nextTcid++];
+    }
+
     // Collect the coverage information of the remaining test cases for each partition
     IndexType nOfCodeElements = m_data->getCoverage()->getNumOfCodeElements();
     std::map<IndexType, std::map<IndexType, IndexType> > partitionCoverage;
-    //for (std::vector<IndexType>::iterator it = m_elementsRemaining->begin(); it != m_elementsRemaining->end(); it++) {
     for (IndexType const &tcid : *m_elementsRemaining) {
-        //IndexType tcid = *it;
         for (IndexType cid = 0; cid < nOfCodeElements ; cid++) {
             if (m_data->getCoverage()->getBitMatrix().get(tcid, cid)) {
                 partitionCoverage[tcid][((*m_partitions)[cid])]++;
@@ -125,7 +133,6 @@ IndexType DuplationPrioritizationPlugin::next()
     // Select the test that separates best the partitions
     std::set<IndexType> testOccupied;
     std::map<IndexType, IndexType> selectedTestcases;
-    //std::vector<unsigned int> coverBestVec(m_partitionSizes->size(), nOfCodeElements * 2 + 1); // sufficiently large init value
     for (auto const &partitionInfo : *m_partitionSizes) {
         IndexType partitionId = partitionInfo.first;
         IndexType bestCoverage = nOfCodeElements * 2 + 1;
@@ -145,7 +152,6 @@ IndexType DuplationPrioritizationPlugin::next()
     }
 
     // Mark the selected test cases as ready
-    bool first = true;
     IndexType result;
     for (auto const &selectionInfo : selectedTestcases) {
         IndexType tcid = selectionInfo.second;
@@ -153,24 +159,20 @@ IndexType DuplationPrioritizationPlugin::next()
         m_elementsRemaining->erase(pos);
         m_elementsReady->push_back(tcid);
         m_nofElementsReady++;
-
-        if (first) {
-            result = tcid;
-            first = false;
-        }
     }
     updatePartitions(selectedTestcases);
-    return result;
+    return (*m_elementsReady)[m_nextTcid++];
 }
 
 void DuplationPrioritizationPlugin::updatePartitions(std::map<IndexType, IndexType> &selectedTestcases)
 {
+    if (selectedTestcases.size() < m_partitionSizes->size()) {
+        return;
+    }
     m_partitionSizes->clear();
     IndexType nOfCodeElements = m_data->getCoverage()->getNumOfCodeElements();
     for (IndexType cid = 0; cid < nOfCodeElements ; cid++) {
         IndexType partitionId = (*m_partitions)[cid];
-
-        assert(selectedTestcases.find(partitionId) == selectedTestcases.end());
 
         if (m_data->getCoverage()->getBitMatrix().get(selectedTestcases[partitionId], cid)) {
             (*m_partitions)[cid] = (*m_partitions)[cid] * 2;

@@ -110,6 +110,7 @@ private:
      */
     std::vector<IndexType> *m_partitions;
     std::map<IndexType, IndexType> *m_partitionSizes;
+    IndexType m_nextTcid;
 
 
 };
