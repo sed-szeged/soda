@@ -47,7 +47,7 @@ DuplationPrimePrioritizationPlugin::~DuplationPrimePrioritizationPlugin()
 
 String DuplationPrimePrioritizationPlugin::getName()
 {
-    return "duplation";
+    return "duplation-prime";
 }
 
 String DuplationPrimePrioritizationPlugin::getDescription()

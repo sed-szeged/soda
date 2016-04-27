@@ -238,6 +238,187 @@ TEST_F(TestSuitePrioritizationPluginsTest, DuplationPrioritizationPluginNext2)
     EXPECT_EQ(plugin->next(), 3);
 }
 
+TEST_F(TestSuitePrioritizationPluginsTest, DuplationPrioritizationPluginNext3)
+{
+    CSelectionData selectionData;
+    selectionData.getCoverage()->addTestcaseName("t1");
+    selectionData.getCoverage()->addTestcaseName("t2");
+    selectionData.getCoverage()->addTestcaseName("t3");
+    selectionData.getCoverage()->addTestcaseName("t4");
+
+    selectionData.getCoverage()->addCodeElementName("c1");
+    selectionData.getCoverage()->addCodeElementName("c2");
+    selectionData.getCoverage()->addCodeElementName("c3");
+    selectionData.getCoverage()->addCodeElementName("c4");
+    selectionData.getCoverage()->addCodeElementName("c5");
+    selectionData.getCoverage()->addCodeElementName("c6");
+    selectionData.getCoverage()->addCodeElementName("c7");
+    selectionData.getCoverage()->addCodeElementName("c8");
+
+    selectionData.getCoverage()->refitMatrixSize();
+
+    selectionData.getCoverage()->addOrSetRelation("t1", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c2", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c5", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c6", true);
+
+    selectionData.getCoverage()->addOrSetRelation("t2", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c2", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c7", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c8", true);
+
+    selectionData.getCoverage()->addOrSetRelation("t3", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c2", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c8", true);
+
+    selectionData.getCoverage()->addOrSetRelation("t4", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c2", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c5", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c6", true);
+
+
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("duplation"));
+    EXPECT_NO_THROW(plugin->init(&selectionData, &kernel));
+
+    EXPECT_EQ(plugin->next(), 2);
+    EXPECT_EQ(plugin->next(), 0);
+    EXPECT_EQ(plugin->next(), 3);
+    EXPECT_EQ(plugin->next(), 1);
+}
+
+TEST_F(TestSuitePrioritizationPluginsTest, DuplationPrimePrioritizationPluginMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("duplation-prime"));
+
+    EXPECT_EQ("duplation-prime", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
+
+TEST_F(TestSuitePrioritizationPluginsTest, DuplationPrimePrioritizationPluginNext)
+{
+    CSelectionData selectionData;
+    // Create selection data.
+    for (int i = 0; i < 100; ++i) {
+        for (int j = 0; j < 100; ++j) {
+            selectionData.getCoverage()->addOrSetRelation("test-" + boost::lexical_cast<String>(i), "ce-" + boost::lexical_cast<String>(j), (j <= i) ? true : false);
+        }
+    }
+    selectionData.getCoverage()->setRelation(98,99,true);
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("duplation-prime"));
+    EXPECT_NO_THROW(plugin->init(&selectionData, &kernel));
+
+    EXPECT_EQ(plugin->next(), 49);
+    EXPECT_EQ(plugin->next(), 74);
+    EXPECT_EQ(plugin->next(), 24);
+    EXPECT_EQ(plugin->next(), 86);
+}
+
+TEST_F(TestSuitePrioritizationPluginsTest, DuplationPrimePrioritizationPluginNext2)
+{
+    CSelectionData selectionData;
+    selectionData.getCoverage()->addTestcaseName("t1");
+    selectionData.getCoverage()->addTestcaseName("t2");
+    selectionData.getCoverage()->addTestcaseName("t3");
+    selectionData.getCoverage()->addTestcaseName("t4");
+
+    selectionData.getCoverage()->addCodeElementName("c1");
+    selectionData.getCoverage()->addCodeElementName("c2");
+    selectionData.getCoverage()->addCodeElementName("c3");
+    selectionData.getCoverage()->addCodeElementName("c4");
+    selectionData.getCoverage()->addCodeElementName("c5");
+
+    selectionData.getCoverage()->refitMatrixSize();
+
+    selectionData.getCoverage()->addOrSetRelation("t1", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c5", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c2", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c5", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c5", true);
+
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("duplation-prime"));
+    EXPECT_NO_THROW(plugin->init(&selectionData, &kernel));
+
+    EXPECT_EQ(plugin->next(), 1);
+    EXPECT_EQ(plugin->next(), 2);
+    EXPECT_EQ(plugin->next(), 0);
+    EXPECT_EQ(plugin->next(), 3);
+}
+
+TEST_F(TestSuitePrioritizationPluginsTest, DuplationPrimePrioritizationPluginNext3)
+{
+    CSelectionData selectionData;
+    selectionData.getCoverage()->addTestcaseName("t1");
+    selectionData.getCoverage()->addTestcaseName("t2");
+    selectionData.getCoverage()->addTestcaseName("t3");
+    selectionData.getCoverage()->addTestcaseName("t4");
+
+    selectionData.getCoverage()->addCodeElementName("c1");
+    selectionData.getCoverage()->addCodeElementName("c2");
+    selectionData.getCoverage()->addCodeElementName("c3");
+    selectionData.getCoverage()->addCodeElementName("c4");
+    selectionData.getCoverage()->addCodeElementName("c5");
+    selectionData.getCoverage()->addCodeElementName("c6");
+    selectionData.getCoverage()->addCodeElementName("c7");
+    selectionData.getCoverage()->addCodeElementName("c8");
+
+    selectionData.getCoverage()->refitMatrixSize();
+
+    selectionData.getCoverage()->addOrSetRelation("t1", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c2", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c5", true);
+    selectionData.getCoverage()->addOrSetRelation("t1", "c6", true);
+
+    selectionData.getCoverage()->addOrSetRelation("t2", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c2", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c7", true);
+    selectionData.getCoverage()->addOrSetRelation("t2", "c8", true);
+
+    selectionData.getCoverage()->addOrSetRelation("t3", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c2", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t3", "c8", true);
+
+    selectionData.getCoverage()->addOrSetRelation("t4", "c1", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c2", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c3", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c4", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c5", true);
+    selectionData.getCoverage()->addOrSetRelation("t4", "c6", true);
+
+
+
+    EXPECT_NO_THROW(plugin = kernel.getTestSuitePrioritizationPluginManager().getPlugin("duplation-prime"));
+    EXPECT_NO_THROW(plugin->init(&selectionData, &kernel));
+
+    EXPECT_EQ(plugin->next(), 2);
+    EXPECT_EQ(plugin->next(), 0);
+    EXPECT_EQ(plugin->next(), 1);
+    EXPECT_EQ(plugin->next(), 3);
+}
+
 /*TEST_F(TestSuitePrioritizationPluginsTest, DuplationPrioritizationPluginFillSelection)
 {
     CSelectionData selectionData;
