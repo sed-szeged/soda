@@ -91,8 +91,9 @@ private:
     /**
      * @brief (Re)sets the state of the algorithm based on the given testcases.
      * @param testcases A set of the identifiers of the already available testcases.
+     * @param clearAll Whether to clear the set of all covered code elements.
      */
-    void setState(const std::set<IndexType>& testcases);
+    void setState(const std::set<IndexType>& testcases, bool clearAll = false);
 
     /**
      * @brief Selection data.

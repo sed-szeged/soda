@@ -104,12 +104,15 @@ void AdditionalWithResetsReductionPlugin::update(IndexType testcaseId)
     }
 }
 
-void AdditionalWithResetsReductionPlugin::setState(const std::set<IndexType> &testcases)
+void AdditionalWithResetsReductionPlugin::setState(const std::set<IndexType> &testcases, bool clearAll)
 {
     const IBitMatrix& coverageBitMatrix = m_data->getCoverage()->getBitMatrix();
 
     m_priorityQueue->clear();
     m_notCoveredCEIDs->clear();
+    if (clearAll) {
+        m_allCoveredCEIDs->clear();
+    }
 
     // Iterating through the testcases and setting the initial priority values.
     for (IndexType tcid = 0; tcid < m_nrOfTestCases; tcid++) {
@@ -136,7 +139,7 @@ void AdditionalWithResetsReductionPlugin::additionalWithResetsReduction(std::ofs
     std::set<IndexType> T, Titer, Tce;
 
     // Initialization
-    setState(T);
+    setState(T, true);
 
     CReductionData reducedMatrix(m_data->getCoverage(), m_programName + "-ADD-RES", m_dirPath);
     CReductionData reducedMatrix_iter(m_data->getCoverage(), m_programName + "-ADD-RES-ITER", m_dirPath);
