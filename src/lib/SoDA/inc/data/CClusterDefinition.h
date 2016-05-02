@@ -47,6 +47,8 @@ public:
 
     const std::vector<IndexType>& getTestCases();
     const std::vector<IndexType>& getCodeElements();
+
+    inline IndexType getNumOfTestCases() { return m_testCases->size(); }
 private:
     std::vector<IndexType> *m_testCases;
     std::vector<IndexType> *m_codeElements;

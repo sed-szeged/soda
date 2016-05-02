@@ -17,6 +17,9 @@ add_subdirectory(test-selection-statistics)
 # test-selections
 add_subdirectory(test-suite-selections)
 
+# test-suite-prioritization
+add_subdirectory(test-suite-prioritization)
+
 # test-suite-metrics
 add_subdirectory(test-suite-metrics)
 
