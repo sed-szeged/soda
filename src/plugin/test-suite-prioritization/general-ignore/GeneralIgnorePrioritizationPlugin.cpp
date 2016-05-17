@@ -26,6 +26,9 @@
 namespace soda {
 
 bool operator<(GeneralIgnorePrioritizationPlugin::qelement d1, GeneralIgnorePrioritizationPlugin::qelement d2) {
+    if (d1.priorityValue == d2.priorityValue) {
+        return d1.testcaseId > d2.testcaseId;
+    }
     return d1.priorityValue < d2.priorityValue;
 }
 

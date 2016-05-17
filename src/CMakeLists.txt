@@ -98,6 +98,7 @@ if(test)
                    -Dgtest_force_shared_crt=ON
         # Disable install step
         INSTALL_COMMAND ""
+        UPDATE_COMMAND ""
         # Wrap download, configure and build steps in a script to log output
         LOG_DOWNLOAD ON
         LOG_CONFIGURE ON

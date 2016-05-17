@@ -27,6 +27,9 @@
 namespace soda {
 
 bool operator<(PartitionMetricPrioritizationPlugin::qelement d1, PartitionMetricPrioritizationPlugin::qelement d2) {
+    if (d1.priorityValue == d2.priorityValue) {
+        return d1.testcaseId > d2.testcaseId;
+    }
     return d1.priorityValue < d2.priorityValue;
 }
 
