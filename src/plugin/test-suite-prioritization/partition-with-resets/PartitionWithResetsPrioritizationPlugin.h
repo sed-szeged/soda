@@ -123,6 +123,8 @@ private:
     IntVector* m_elementsRemaining;
 
     double m_currentPartitionMetric;
+
+    IndexType m_recursionLevel;
 };
 
 } /* namespace soda */

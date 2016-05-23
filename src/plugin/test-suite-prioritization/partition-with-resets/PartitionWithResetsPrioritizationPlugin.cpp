@@ -40,7 +40,8 @@ PartitionWithResetsPrioritizationPlugin::PartitionWithResetsPrioritizationPlugin
         m_elementsRemaining(NULL),
         m_priorityQueue(new std::vector<qelement>()),
         m_currentCluster(new CClusterDefinition()),
-        m_currentPartitionMetric(0.0)
+        m_currentPartitionMetric(0.0),
+        m_recursionLevel(0)
 {}
 
 PartitionWithResetsPrioritizationPlugin::~PartitionWithResetsPrioritizationPlugin()
@@ -96,6 +97,7 @@ void PartitionWithResetsPrioritizationPlugin::setState(IntVector &ordered)
     m_priorityQueue->clear();
 
     m_currentPartitionMetric = 0.0;
+    m_recursionLevel = 0;
 }
 
 void PartitionWithResetsPrioritizationPlugin::reset(RevNumType rev)
@@ -131,14 +133,18 @@ IndexType PartitionWithResetsPrioritizationPlugin::next()
         m_currentCluster->addTestCase(d.testcaseId);
         m_currentPartitionMetric = d.priorityValue;
         tcid = d.testcaseId;
+        m_recursionLevel = 0;
         // std::cout << "[SELECTED] tcid(" << d.testcaseId << ") metric: " << d.priorityValue << std::endl;
-    } else {
+    } else if (m_recursionLevel == 0) {
         // Reset the internal state and prioritize again
         m_currentCluster->clearTestCases();
         m_currentPartitionMetric = 0.0;
         // Call recursively
         // std::cerr << "[PartitionWithResets] Recursive call" << std::endl;
+        m_recursionLevel++;
         tcid = next();
+    } else {
+        tcid = d.testcaseId;
     }
 
     // Remove the test from the remaining list

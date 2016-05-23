@@ -39,7 +39,8 @@ RaptorPrioritizationPlugin::RaptorPrioritizationPlugin():
         m_elementsRemaining(NULL),
         m_currentCluster(new CClusterDefinition()),
         m_currentAmbiguity(0.0),
-        m_priorityQueue(new std::vector<qelement>())
+        m_priorityQueue(new std::vector<qelement>()),
+        m_recursionLevel(0)
 {}
 
 RaptorPrioritizationPlugin::~RaptorPrioritizationPlugin()
@@ -94,6 +95,7 @@ void RaptorPrioritizationPlugin::setState(IntVector &ordered)
 
     IndexType nofCodeElements = m_data->getCoverage()->getNumOfCodeElements();
     m_currentAmbiguity = (double) (nofCodeElements - 1) / 2.0;
+    m_recursionLevel = 0;
 }
 
 void RaptorPrioritizationPlugin::reset(RevNumType revision)
@@ -129,14 +131,18 @@ IndexType RaptorPrioritizationPlugin::next()
         m_currentCluster->addTestCase(d.testcaseId);
         m_currentAmbiguity = d.priorityValue;
         tcid = d.testcaseId;
-    } else {
+        m_recursionLevel = 0;
+    } else if (m_recursionLevel == 0) {
         // Reset the internal state and prioritize again
         m_currentCluster->clearTestCases();
         IndexType nofCodeElements = m_data->getCoverage()->getNumOfCodeElements();
         m_currentAmbiguity = (double) (nofCodeElements - 1) / 2.0;
         // Call recursively
         // std::cerr << "[RAPTOR] Recursive call" << std::endl;
+        m_recursionLevel++;
         tcid = next();
+    } else {
+        tcid = d.testcaseId;
     }
 
     // Remove the test from the remaining list

@@ -134,6 +134,8 @@ private:
      */
     std::vector<qelement>* m_priorityQueue;
 
+    IndexType m_recursionLevel;
+
 };
 
 } /* namespace soda */
