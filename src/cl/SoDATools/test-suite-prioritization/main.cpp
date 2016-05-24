@@ -170,11 +170,11 @@ int processArgs(options_description desc, int ac, char* av[])
             fileName << "test-prioritization-" << pluginName << "-" << size << ".csv";
             std::ofstream out;
             out.open(fileName.str().c_str());
-            out << "tcid;test name" << std::endl;
+            (out << "tcid;test name" << std::endl).flush();
             IntVector result;
             plugin->fillSelection(result, size);
             for (IndexType tcid : result) {
-                out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl;
+                (out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl).flush();
             }
             out.close();
         }
@@ -183,7 +183,7 @@ int processArgs(options_description desc, int ac, char* av[])
         fileName << "test-prioritization-" << pluginName << "-max-coverage" << ".csv";
         std::ofstream out;
         out.open(fileName.str().c_str());
-        out << "tcid;test name" << std::endl;
+        (out << "tcid;test name" << std::endl).flush();
 
         IntVector allTests = selectionData.getCoverage()->getTestcases().getIDList();
         double maxCoverage = coverage(allTests);
@@ -196,7 +196,7 @@ int processArgs(options_description desc, int ac, char* av[])
         }
 
         for (IndexType tcid : result) {
-            out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl;
+            (out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl).flush();
         }
         out.close();
     } else if (mode == "max-partition") {
@@ -204,7 +204,7 @@ int processArgs(options_description desc, int ac, char* av[])
         fileName << "test-prioritization-" << pluginName << "-max-partition" << ".csv";
         std::ofstream out;
         out.open(fileName.str().c_str());
-        out << "tcid;test name" << std::endl;
+        (out << "tcid;test name" << std::endl).flush();
 
         CClusterDefinition cluster;
         cluster.addTestCases(selectionData.getCoverage()->getTestcases().getIDList());
@@ -222,7 +222,7 @@ int processArgs(options_description desc, int ac, char* av[])
         }
 
         for (IndexType tcid : cluster.getTestCases()) {
-            out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl;
+            (out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl).flush();
         }
         out.close();
     } else {

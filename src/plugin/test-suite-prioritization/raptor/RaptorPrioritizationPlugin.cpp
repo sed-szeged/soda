@@ -20,6 +20,7 @@
  */
 
 #include <algorithm>
+#include <chrono>
 #include <stdexcept>
 #include "RaptorPrioritizationPlugin.h"
 
@@ -107,7 +108,14 @@ void RaptorPrioritizationPlugin::reset(RevNumType revision)
 void RaptorPrioritizationPlugin::fillSelection(IntVector& selected, size_t size)
 {
     while (m_nofElementsReady < size && !(m_elementsRemaining->empty())) {
+        std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
         next();
+        std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count();
+        std::cerr << "[INFO][Raptor] Selected " << m_nofElementsReady << "/"
+                  << ((size > m_data->getCoverage()->getNumOfTestcases()) ? m_data->getCoverage()->getNumOfTestcases() : size)
+                  << " in " << duration << " microseconds."
+                  << std::endl;
     }
 
     selected.clear();
