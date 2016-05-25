@@ -173,7 +173,8 @@ int processArgs(options_description desc, int ac, char* av[])
             (out << "tcid;test name" << std::endl).flush();
             IntVector result;
             plugin->fillSelection(result, size);
-            for (IndexType tcid : result) {
+            for (IndexType i = 0; i < size && i < selectionData.getCoverage()->getNumOfTestcases(); i++) {
+                IndexType tcid = plugin->next();
                 (out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl).flush();
             }
             out.close();
@@ -192,11 +193,8 @@ int processArgs(options_description desc, int ac, char* av[])
         while (selectedCoverage < maxCoverage && result.size() < selectionData.getCoverage()->getNumOfTestcases()) {
             IndexType tcid = plugin->next();
             result.push_back(tcid);
-            selectedCoverage = coverage(result);
-        }
-
-        for (IndexType tcid : result) {
             (out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl).flush();
+            selectedCoverage = coverage(result);
         }
         out.close();
     } else if (mode == "max-partition") {
@@ -218,11 +216,8 @@ int processArgs(options_description desc, int ac, char* av[])
         while (selectedPartitionMetric < maxPartitionMetric && cluster.getNumOfTestCases() < selectionData.getCoverage()->getNumOfTestcases()) {
             IndexType tcid = plugin->next();
             cluster.addTestCase(tcid);
-            selectedPartitionMetric = partitionMetric(cluster);
-        }
-
-        for (IndexType tcid : cluster.getTestCases()) {
             (out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl).flush();
+            selectedPartitionMetric = partitionMetric(cluster);
         }
         out.close();
     } else {
