@@ -20,6 +20,7 @@
  */
 
 #include <boost/program_options.hpp>
+#include <chrono>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -171,10 +172,16 @@ int processArgs(options_description desc, int ac, char* av[])
             std::ofstream out;
             out.open(fileName.str().c_str());
             (out << "tcid;test name" << std::endl).flush();
-            IntVector result;
-            plugin->fillSelection(result, size);
             for (IndexType i = 0; i < size && i < selectionData.getCoverage()->getNumOfTestcases(); i++) {
+                std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
                 IndexType tcid = plugin->next();
+                std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count();
+                std::cerr << "[INFO][" << plugin->getName() << "] Selected " << i << "/"
+                          << ((size > selectionData.getCoverage()->getNumOfTestcases()) ? selectionData.getCoverage()->getNumOfTestcases() : size)
+                          << " in " << duration << " microseconds."
+                          << std::endl;
+
                 (out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl).flush();
             }
             out.close();
@@ -191,10 +198,18 @@ int processArgs(options_description desc, int ac, char* av[])
         double selectedCoverage = 0.0;
         IntVector result;
         while (selectedCoverage < maxCoverage && result.size() < selectionData.getCoverage()->getNumOfTestcases()) {
+            std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
             IndexType tcid = plugin->next();
+            std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count();
             result.push_back(tcid);
             (out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl).flush();
             selectedCoverage = coverage(result);
+            std::cerr << "[INFO][" << plugin->getName() << "] Selected " << result.size() << " / "
+                      << selectionData.getCoverage()->getNumOfTestcases()
+                      << " in " << duration << " microseconds."
+                      << " Coverage: " << selectedCoverage << " / " << maxCoverage
+                      << std::endl;
         }
         out.close();
     } else if (mode == "max-partition") {
@@ -214,10 +229,18 @@ int processArgs(options_description desc, int ac, char* av[])
         cluster.clearTestCases();
 
         while (selectedPartitionMetric < maxPartitionMetric && cluster.getNumOfTestCases() < selectionData.getCoverage()->getNumOfTestcases()) {
+            std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
             IndexType tcid = plugin->next();
+            std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count();
             cluster.addTestCase(tcid);
             (out << tcid << ";" << selectionData.getCoverage()->getTestcases().getValue(tcid) << std::endl).flush();
             selectedPartitionMetric = partitionMetric(cluster);
+            std::cerr << "[INFO][" << plugin->getName() << "] Selected " << cluster.getNumOfTestCases() << " / "
+                      << selectionData.getCoverage()->getNumOfTestcases()
+                      << " in " << duration << " microseconds."
+                      << " Parition metric: " << selectedPartitionMetric << " / " << maxPartitionMetric
+                      << std::endl;
         }
         out.close();
     } else {
