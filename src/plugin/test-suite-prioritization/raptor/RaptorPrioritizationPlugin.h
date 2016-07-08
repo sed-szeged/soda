@@ -38,7 +38,8 @@ class RaptorPrioritizationPlugin : public ITestSuitePrioritizationPlugin
 private:
     typedef struct {
         IndexType testcaseId;
-        double priorityValue;
+        double ambiguityReduction;
+        double diagnosticAmbiguity;
     } qelement;
     friend bool operator<(qelement d1, qelement d2);
 
@@ -97,9 +98,11 @@ private:
      */
     void prioritize();
 
-    double ambiguityReduction(IndexType tcid);
+    double diagnosticAmbiguity(IndexType tcid);
 
     double ambiguity(CPartitionAlgorithm &partition);
+
+    double raptorMetric(CClusterDefinition &cluster);
 private:
 
     /**

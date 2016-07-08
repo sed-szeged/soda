@@ -27,11 +27,13 @@
 namespace soda {
 
 bool operator<(RaptorPrioritizationPlugin::qelement d1, RaptorPrioritizationPlugin::qelement d2) {
-    if (d1.priorityValue == d2.priorityValue) {
+    if (d1.ambiguityReduction == d2.ambiguityReduction) {
         return d1.testcaseId > d2.testcaseId;
     }
-    return d1.priorityValue < d2.priorityValue;
+    return d1.ambiguityReduction < d2.ambiguityReduction;
 }
+
+
 
 RaptorPrioritizationPlugin::RaptorPrioritizationPlugin():
         m_data(NULL),
@@ -133,11 +135,12 @@ IndexType RaptorPrioritizationPlugin::next()
     IndexType tcid;
 
     prioritize();
+
     qelement d = m_priorityQueue->back();
-    if (d.priorityValue > 0) {
+    if (d.ambiguityReduction > 0) {
         m_priorityQueue->pop_back();
         m_currentCluster->addTestCase(d.testcaseId);
-        m_currentAmbiguity = d.priorityValue;
+        m_currentAmbiguity = d.diagnosticAmbiguity;
         tcid = d.testcaseId;
         m_recursionLevel = 0;
     } else if (m_recursionLevel == 0) {
@@ -148,6 +151,7 @@ IndexType RaptorPrioritizationPlugin::next()
         // Call recursively
         // std::cerr << "[RAPTOR] Recursive call" << std::endl;
         m_recursionLevel++;
+
         tcid = next();
     } else {
         tcid = d.testcaseId;
@@ -160,6 +164,9 @@ IndexType RaptorPrioritizationPlugin::next()
         m_elementsReady->push_back(tcid);
         m_nofElementsReady++;
     }
+    CClusterDefinition globalCluster;
+    globalCluster.addCodeElements(m_data->getCoverage()->getCodeElements().getIDList());
+    globalCluster.addTestCases(*m_elementsReady);
 
     return tcid;
 }
@@ -169,24 +176,25 @@ void RaptorPrioritizationPlugin::prioritize()
     m_priorityQueue->clear();
 
     for (IndexType i = 0; i < m_elementsRemaining->size(); i++) {
+        double extended = diagnosticAmbiguity(m_elementsRemaining->at(i));
+
         qelement d;
         d.testcaseId = m_elementsRemaining->at(i);
-        d.priorityValue = ambiguityReduction(m_elementsRemaining->at(i));
+        d.ambiguityReduction = m_currentAmbiguity - extended;
+        d.diagnosticAmbiguity = extended;
         m_priorityQueue->push_back(d);
     }
 
     sort(m_priorityQueue->begin(), m_priorityQueue->end());
 }
 
-double RaptorPrioritizationPlugin::ambiguityReduction(IndexType tcid)
+double RaptorPrioritizationPlugin::diagnosticAmbiguity(IndexType tcid)
 {
     m_currentCluster->addTestCase(tcid);
     CPartitionAlgorithm algorithm;
     algorithm.compute(*m_data, *m_currentCluster);
-    double extended = ambiguity(algorithm);
     m_currentCluster->removeTestCase(tcid);
-    // std::cerr << "[RAPTOR] " << "Ambiguity reduction for: tcid(" << tcid << ") = " << m_currentAmbiguity << " - " << extended << std::endl;
-    return m_currentAmbiguity - extended;
+    return ambiguity(algorithm);
 }
 
 double RaptorPrioritizationPlugin::ambiguity(CPartitionAlgorithm &partition)
@@ -201,6 +209,21 @@ double RaptorPrioritizationPlugin::ambiguity(CPartitionAlgorithm &partition)
     }
     return ambiguity;
 
+}
+
+double RaptorPrioritizationPlugin::raptorMetric(CClusterDefinition &cluster)
+{
+    CPartitionAlgorithm partition;
+    partition.compute(*m_data, cluster);
+    IndexType nofCodeElements = m_data->getCoverage()->getNumOfCodeElements();
+    double ambiguity = 0.0;
+    CPartitionAlgorithm::PartitionData &partitionData = partition.getPartitions();
+    for (CPartitionAlgorithm::PartitionData::iterator partIt = partitionData.begin(); partIt != partitionData.end(); partIt++) {
+        IndexType size = partIt->second.size();
+        //std::cerr << "[Raptor] " << "Size partition(" << partIt->first << "): " << size << std::endl;
+        ambiguity += ((double)size / nofCodeElements) * (((double)size - 1.0) / 2.0);
+    }
+    return ambiguity;
 }
 
 extern "C" MSDLL_EXPORT void registerPlugin(CKernel &kernel)
