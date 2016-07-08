@@ -87,8 +87,9 @@ if(test)
     # Add gtest
     ExternalProject_Add(
         googletest
-        SVN_REPOSITORY http://googletest.googlecode.com/svn/trunk/
-        SVN_REVISION -r 671
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        # TODO: SVN revision was r671
+        GIT_TAG release-1.7.0
         TIMEOUT 10
         # Force separate output paths for debug and release builds to allow easy
         # identification of correct lib in subsequent TARGET_LINK_LIBRARIES commands
