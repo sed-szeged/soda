@@ -125,6 +125,40 @@ void CCoverageDataManager::dumpData(const String &filepath, bool psize, char cse
         WARN("There is no coverage data to be dumped.");
 }
 
+void CCoverageDataManager::dumpGraph(const String &filepath, char csep, char rsep)
+{
+    INFO(getPrintInfo(), "CCoverageDataManager::dumpGraph(\"" << filepath << "\")");
+    if (getDataHandler()->getCoverage() || getDataHandler()->getSelection()) {
+        std::ofstream oNodes((filepath + ".nodes.csv").c_str());
+        std::ofstream oEdges((filepath + ".edges.txt").c_str());
+        CCoverageMatrix* coverage = getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getCoverage() : getDataHandler()->getCoverage();
+        const IBitMatrix& m = coverage->getBitMatrix();
+        const IndexType rows = m.getNumOfRows(), cols = m.getNumOfCols();
+        IndexType i, j;
+
+        const IIDManager& idmtc = coverage->getTestcases();
+        for (i = 0; i < rows; ++i) {
+            oNodes << i << csep << "test" << csep << idmtc[i] << rsep;
+        }
+
+        const IIDManager& idmce = coverage->getCodeElements();
+        for (j = 0; j < cols; ++j) {
+            oNodes << (j + rows) << csep << "code" << csep << idmce[j] << rsep;
+        }
+        oNodes.close();
+
+        for (i = 0; i < rows; ++i) {
+            for (j = 0; j < cols; ++j) {
+                if (m[i][j]) {
+                    oEdges << i << ' ' << j + rows << rsep;
+                }
+            }
+        }
+        oEdges.close();
+    } else
+        WARN("There is no coverage data to be dumped.");
+}
+
 void CCoverageDataManager::dumpTestcases(const String &filepath)
 {
     INFO(getPrintInfo(), "CCoverageDataManager::dumpTestcases(\"" << filepath << "\")");

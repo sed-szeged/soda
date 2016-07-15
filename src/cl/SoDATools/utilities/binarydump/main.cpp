@@ -144,6 +144,11 @@ int processArgs(options_description desc, int ac, char* av[])
             handler->getCoverageDataMgr().dumpImage(tmp, scale);
         }
 
+        if (vm.count("dump-coverage-graph")) {
+            String tmp = vm["dump-coverage-graph"].as<String>();
+            handler->getCoverageDataMgr().dumpGraph(tmp);
+        }
+
         if (vm.count("dump-code-element-coverage")) {
             String tmp = vm["dump-code-element-coverage"].as<String>();
             handler->getCoverageDataMgr().dumpCodeElementCoverage(tmp);
@@ -223,6 +228,7 @@ int main(int argc, char *argv[])
         ("dump-test-coverage", value<String>(), "output file")
         ("dump-test-coverage-for", value<String>(), "test name")
         ("dump-coverage-image", value<String>(), "output file")
+        ("dump-coverage-graph", value<String>(), "output file")
         ("image-scale,i", value<int>(), "image scale")
         ("load-results,r", value<String>(), "input file")
         ("dump-results-testcases", value<String>(), "output file")

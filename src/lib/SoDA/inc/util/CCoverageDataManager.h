@@ -75,6 +75,25 @@ public:
     void dumpImage(const String &filepath, int granularity);
 
     /**
+     * @brief Creates an edge list and a node list using the specified filepath as a template.
+     *
+     *        Node list will contain <id><csep><type><csep><name><rsep> formatted lines, where
+     *        <id> is the identifier of an element (unsigned integer), <type> is the type of an
+     *        element (test or code), <name> is the name of the test or the code element and
+     *        <csep>, <rsep> are the specified column and row separators respectively.
+     *
+     *        Edge list will contain <src> <dst> formatted lines, where <src> and <dst> are the
+     *        ids of test or code elements.
+     *
+     * @param filepath A template for the file names.
+     *        The node and edge lists will be stored in <filepath>.nodes.csv and <filepath>.edges.txt respectively.
+     *
+     * @param csep A column separator character.
+     * @param rsep A row separator character.
+     */
+    void dumpGraph(const String &filepath, char csep=':', char rsep='\n');
+
+    /**
     * @brief Dumps code element names with test coverage information.
     * @param filepath  File path.
     */
