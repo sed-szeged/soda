@@ -108,18 +108,31 @@ void CResultsDataManager::dumpPassFail(const String& filepath, bool psize, char 
         std::ofstream O((filepath + ".csv").c_str());
         CResultsMatrix const& res = *(getDataHandler()->getSelection() ? getDataHandler()->getSelection()->getResults() : getDataHandler()->getResults());
         IBitMatrix const &m = res.getPassedBitMatrix();
+        const RevNumType baseRevision = 0;
+        bool calculateNewPassAndFail = true;
 
         if (psize) {
             O << res.getNumOfRevisions() << csep << res.getNumOfTestcases() << rsep;
         }
 
+        if (!res.getRevisions().revisionExists(baseRevision)) {
+            calculateNewPassAndFail = false;
+            WARN("The results data does not contain the 0th revision, hence the num of newly passed/failed tests will not be calculated.");
+        }
+
         auto tcIdList = res.getTestcases().getIDList();
         if (getWithNames()) {
+            O << "Revision";
+
             for (auto &tcidx : tcIdList) {
                 O << csep << res.getTestcases().getValue(tcidx);
             }
 
-            O << csep << "New fail" << csep << "New pass" << rsep;
+            if (calculateNewPassAndFail) {
+                O << csep << "New fail" << csep << "New pass";
+            }
+
+            O << rsep;
         }
 
         for (auto &rev : res.getRevisionNumbers()) {
@@ -132,13 +145,13 @@ void CResultsDataManager::dumpPassFail(const String& filepath, bool psize, char 
                 switch(res.getResult(rev, tcidx)) {
                     case CResultsMatrix::trtPassed:
                         O << '1';
-                        if (res.getResult(0, tcidx) == CResultsMatrix::trtFailed) {
+                        if (calculateNewPassAndFail && res.getResult(baseRevision, tcidx) == CResultsMatrix::trtFailed) {
                             ++nrOfNewPass;
                         }
                         break;
                     case CResultsMatrix::trtFailed:
                         O << '0';
-                        if (res.getResult(0, tcidx) == CResultsMatrix::trtPassed) {
+                        if (calculateNewPassAndFail && res.getResult(baseRevision, tcidx) == CResultsMatrix::trtPassed) {
                             ++nrOfNewFail;
                         }
                         break;
@@ -149,7 +162,7 @@ void CResultsDataManager::dumpPassFail(const String& filepath, bool psize, char 
                 O << csep;
             }
 
-            if (getWithNames()) {
+            if (calculateNewPassAndFail) {
                 O << nrOfNewFail << csep << nrOfNewPass;
             }
             O << rsep;
