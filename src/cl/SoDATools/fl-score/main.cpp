@@ -27,12 +27,12 @@
 #include <set>
 
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
 #include <rapidjson/document.h>
-#include <rapidjson/filereadstream.h>
 #include <rapidjson/prettywriter.h>
-#include <rapidjson/filewritestream.h>
+#include <rapidjson/ostreamwrapper.h>
 
 #include "data/CClusterDefinition.h"
 #include "data/CSelectionData.h"
@@ -42,8 +42,9 @@
 
 using namespace soda;
 using namespace soda::io;
-using namespace boost::filesystem;
 using namespace boost::program_options;
+
+namespace fs = boost::filesystem;
 
 void processJsonFiles(variables_map &vm);
 int  loadJsonFiles(String path);
@@ -55,26 +56,21 @@ void createJsonFile();
 CKernel kernel;
 
 IndexType revision;
-String projectName;
-String outputDir;
+fs::path outputDir;
 ClusterMap clusterList;
-std::set<String> flTechniquesCalculated;
-
-// Code element -> technique -> value
-typedef std::map<IndexType, std::map<String, double> > FLScoreValues;
 
 int main(int argc, char* argv[]) {
-    std::cout << "fl-score (SoDA tool)" << std::endl;
+    std::cerr << "fl-score (SoDA tool)" << std::endl;
 
     options_description desc("Options");
     desc.add_options()
             ("help,h", "Prints help message")
             ("list-cluster-algorithms", "Lists the cluster algorithms")
             ("list-fault-localization-techniques", "Lists the fault localization technique plugins")
-            ("coverage-matrix,c", value<String>(), "Coverage binary")
-            ("results-matrix,r", value<String>(), "Results matrix")
+            ("coverage-matrix,c", value<String>(), "Coverage matrix binary")
+            ("results-matrix,r", value<String>(), "Results matrix binary")
             ("changeset,d", value<String>(), "Changeset binary")
-            ("output-dir,o", value<String>(), "Output dir")
+            ("output-dir,o", value<String>(), "Output directory")
             ("globalize,g", "Globalize")
             ("filter-to-coverage,f", "Filter to coverage");
 
@@ -85,7 +81,7 @@ int main(int argc, char* argv[]) {
 
     if (argc < 2) {
         std::cout << desc << std::endl;
-        std::cerr << "[ERROR] There are no arguments!" << std::endl;
+        std::cerr << "[ERROR] There are no arguments." << std::endl;
         return 1;
     }
 
@@ -103,24 +99,41 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    outputDir = vm["output-dir"].as<String>();
+    if (!vm.count("output-dir")) {
+        std::cerr << "[ERROR] Path to output directory is missing." << std::endl << desc << std::endl;
+        return 1;
+    }
+    outputDir = fs::path(vm["output-dir"].as<String>());
 
-    flTechniquesCalculated.clear();
+    if (!fs::exists(outputDir)) {
+        fs::create_directories(outputDir);
+    }
+
+    if (!vm.count("coverage-matrix")) {
+        std::cerr << "[ERROR] Path to coverage matrix binary is missing." << std::endl << desc << std::endl;
+        return 1;
+    }
+    String covPath = vm["coverage-matrix"].as<String>();
+
+    if (!vm.count("results-matrix")) {
+        std::cerr << "[ERROR] Path to results matrix binary is missing." << std::endl << desc << std::endl;
+        return 1;
+    }
+    String resPath = vm["results-matrix"].as<String>();
+
+    if (!vm.count("changeset")) {
+        std::cerr << "[ERROR] Path to changeset binary is missing." << std::endl << desc << std::endl;
+        return 1;
+    }
+    String chPath = vm["changeset"].as<String>();
+
     clusterList.clear();
 
     CSelectionData selectionData;
-
     rapidjson::Document reader;
+
     ITestSuiteClusterPlugin *clusterAlgorithm = kernel.getTestSuiteClusterPluginManager().getPlugin("one-cluster");
     clusterAlgorithm->init(reader);
-
-
-    if (!exists(outputDir))
-        boost::filesystem::create_directories(boost::filesystem::path(outputDir));
-
-    String covPath = vm["coverage-matrix"].as<String>();
-    String resPath = vm["results-matrix"].as<String>();
-    String chPath = vm["changeset"].as<String>();
 
     (std::cerr << "[INFO] loading coverage from " << covPath << " ...").flush();
     selectionData.loadCoverage(covPath);
@@ -151,6 +164,7 @@ int main(int argc, char* argv[]) {
     for (IntVector::iterator revIt = revisions.begin(); revIt != revisions.end(); revIt++) {
         RevNumType revision = *revIt;
         if (!selectionData.getChangeset()->exists(revision)) {
+            std::cerr << "[WARNING] Revision '" << revision << " is missing from changeset." << std::endl;
             continue;
         }
         rapidjson::Document result;
@@ -190,6 +204,19 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
+
+        fs::path file((boost::format{"result-%s.json"} % revision).str());
+        std::ofstream outputFileStream((outputDir / file).string(), std::ofstream::out);
+
+        if (!outputFileStream.is_open()) {
+            std::cerr << "[ERROR] Cannot open output file '" << file << "'." << std::endl;
+            return 1;
+        }
+
+        rapidjson::OStreamWrapper os(outputFileStream);
+        rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(os);
+
+        result.Accept(writer);
     }
 
     return 0;

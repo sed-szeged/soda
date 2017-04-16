@@ -99,7 +99,7 @@ void OneRevisionPerFileChangesetReaderPlugin::readFromDirectory1stPass(fs::path 
             std::cout.flush();
             std::ifstream in(it->string().c_str());
             std::string line;
-            boost::char_separator<char> sep(",");
+            boost::char_separator<char> sep(";");
             StringVector data;
             while (std::getline(in, line)) {
                 boost::tokenizer<boost::char_separator<char> > tokens(line, sep);
@@ -144,7 +144,7 @@ void OneRevisionPerFileChangesetReaderPlugin::readFromDirectory(fs::path p)
 
             std::ifstream in(it->string().c_str());
             std::string line;
-            boost::char_separator<char> sep(",");
+            boost::char_separator<char> sep(";");
             StringVector data;
             while (std::getline(in, line)) {
                 boost::tokenizer<boost::char_separator<char> > tokens(line, sep);
