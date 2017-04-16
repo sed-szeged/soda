@@ -22,9 +22,12 @@
 
 #ifndef CPLUGINMANAGER_H
 #define CPLUGINMANAGER_H
+
 #include <string>
 #include <vector>
 #include <map>
+
+#include "exception/CException.h"
 
 namespace soda {
 
@@ -61,6 +64,9 @@ public:
      */
     TPluginInterface* getPlugin(const std::string &name)
     {
+        if (!m_plugins->count(name)) {
+            throw CException("soda::CPluginManager::getPlugin", "Cannot find plugin '" + name + "'.");
+        }
         return m_plugins->at(name);
     }
 
