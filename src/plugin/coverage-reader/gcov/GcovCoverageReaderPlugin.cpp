@@ -157,16 +157,21 @@ void GcovCoverageReaderPlugin::readCoverageDataFromFile(fs::path p)
         if (rowData.size() < 3)
             continue;
 
-        boost::algorithm::trim(rowData[2]);
+        StringVector codeTokens;
+        for (StringVector::iterator it = rowData.begin() + 2; it != rowData.end(); ++it) {
+            codeTokens.push_back(*it);
+        }
+        String code = boost::algorithm::join(codeTokens, ":");
+        boost::algorithm::trim(code);
         boost::regex reg("((^(\\{)$)|(^(\\})$)|(^//)|(^#))"); // regex for {, }, # and // chars
         boost::regex openComment("^(\\/\\*)"); // regex for /*
         boost::regex closeComment("(\\*\\/)$"); // regex for */
-        if (boost::regex_search(rowData[2], reg)) // skips lines starting with //, #, {, }
+        if (boost::regex_search(code, reg)) // skips lines starting with //, #, {, }
             continue;
-        if (!skip && boost::regex_search(rowData[2], openComment)) // skips multi line comments
+        if (!skip && boost::regex_search(code, openComment)) // skips multi line comments
             skip = true;
         if (skip) {
-            if (boost::regex_search(rowData[2], closeComment))
+            if (boost::regex_search(code, closeComment))
                 skip = false;
             continue;
         }
