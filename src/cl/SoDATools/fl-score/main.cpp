@@ -156,6 +156,7 @@ int main(int argc, char* argv[]) {
     (std::cerr << " done." << std::endl).flush();
 
     StringVector faultLocalizationTechniques;
+    faultLocalizationTechniques.push_back("dstar");
     faultLocalizationTechniques.push_back("tarantula");
     faultLocalizationTechniques.push_back("ochiai");
 
