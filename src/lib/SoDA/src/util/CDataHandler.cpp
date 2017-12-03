@@ -195,6 +195,16 @@ void CDataHandler::loadFilter(const String &filePath, std::set<String> &filterCo
         throw CException("CDataHandler::loadFilter", filePath + " is not a regular file");
 }
 
+void CDataHandler::collectUncoveredCodeElements()
+{
+    for (auto cid : m_pCoverage->getCodeElements().getIDList()) {
+        if (!m_pCoverage->isCoveredCodeElement(cid)) {
+            std::cerr << "Filtering " << m_pCoverage->getCodeElements().getValue(cid) << std::endl;
+            m_codeElementFilter.insert(m_pCoverage->getCodeElements().getValue(cid));
+        }
+    }
+}
+
 CCoverageMatrix* CDataHandler::filterCoverage(CCoverageMatrix *coverage, bool dispose)
 {
     CCoverageMatrix* filtered = new CCoverageMatrix();

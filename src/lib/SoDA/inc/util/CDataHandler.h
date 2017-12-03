@@ -214,6 +214,12 @@ public:
      */
     void loadTestcaseFilter(const String& filePath);
 
+
+    /**
+     * @brief Collects code elements that are not covered at all and adds them to filter. 
+     */
+    void collectUncoveredCodeElements();
+
     /**
      * @brief Creates a new coverage matrix based on the given coverage matrix by removing element which are contained in the filters.
      * @param coverage The coverage matrix that should be filtered.

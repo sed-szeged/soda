@@ -14,3 +14,4 @@
 
 # IDE Specific files
 CMakeLists.txt.user*
+.vscode

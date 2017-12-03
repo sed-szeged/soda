@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
         ("save-results", value<String>(), "The path where the filtered results binary file will be stored")
         ("filter-code-elements", value<String>(), "Path to a file which contains the name of code elements which should be removed from the binary")
         ("filter-tests", value<String>(), "Path to a file which contains the name of testcases which should be removed from the binary")
+        ("keep-covered-only", value<bool>(), "Keep covered elements only")
         ;
 
     if (argc < 2) {
@@ -108,6 +109,10 @@ int processArgs(options_description desc, int ac, char* av[])
         if (vm.count("filter-tests")) {
             String testFilterPath = vm["filter-tests"].as<String>();
             handler->loadTestcaseFilter(testFilterPath);
+        }
+
+        if (vm.count("keep-covered-only")) {
+            handler->collectUncoveredCodeElements();
         }
 
         /*
