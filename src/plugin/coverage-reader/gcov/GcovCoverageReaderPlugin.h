@@ -102,6 +102,11 @@ private:
      * @brief Multiple regular expressions for filtering input files.
      */
     std::vector<boost::regex> m_fileFilter;
+
+    /**
+     * @brief Indicates whether the reader should add code element names or set relations.
+     */
+    bool m_codeElementNameReading;
 };
 
 }

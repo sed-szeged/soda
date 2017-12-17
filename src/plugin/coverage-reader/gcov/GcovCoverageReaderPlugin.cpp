@@ -33,7 +33,8 @@
 namespace soda {
 
 GcovCoverageReaderPlugin::GcovCoverageReaderPlugin() :
-    m_coverage(NULL)
+    m_coverage(NULL),
+    m_codeElementNameReading(true)
 {}
 
 GcovCoverageReaderPlugin::~GcovCoverageReaderPlugin()
@@ -80,10 +81,18 @@ void GcovCoverageReaderPlugin::readFromDirectoryStructure(const char * dirname)
     }
 
     readTestcaseNames(coverage_path);
-    m_coverage->refitMatrixSize();
     std::vector<fs::path> pathVector;
     std::copy(fs::directory_iterator(coverage_path), fs::directory_iterator(), back_inserter(pathVector));
     std::sort(pathVector.begin(), pathVector.end());
+    for (std::vector<fs::path>::iterator it = pathVector.begin(); it != pathVector.end(); ++it) {
+        if (is_directory((*it))) {
+            m_currentTestcase = (*it).leaf().string();
+            std::cout << "[INFO] Reading coverage data from directory (1st pass): " << *it << std::endl;
+            readCoverage((*it));
+        }
+    }
+    m_coverage->refitMatrixSize();
+    m_codeElementNameReading = false;
     for (std::vector<fs::path>::iterator it = pathVector.begin(); it != pathVector.end(); ++it) {
         if (is_directory((*it))) {
             m_currentTestcase = (*it).leaf().string();
@@ -99,20 +108,29 @@ void GcovCoverageReaderPlugin::readTestcaseNames(fs::path p)
     std::copy(fs::directory_iterator(p), fs::directory_iterator(), back_inserter(pathVector));
     std::sort(pathVector.begin(), pathVector.end());
     for (std::vector<fs::path>::iterator it = pathVector.begin(); it != pathVector.end(); ++it) {
-        if (is_directory((*it)))
+        if (is_directory((*it))) {
             m_coverage->addTestcaseName((*it).leaf().string());
+        }
     }
 }
 
 void GcovCoverageReaderPlugin::readCoverage(fs::path p)
 {
+    int info_cnt = 0; //INFO
+    int info_max;
+
     std::vector<fs::path> pathVector;
     std::copy(fs::directory_iterator(p), fs::directory_iterator(), back_inserter(pathVector));
     std::sort(pathVector.begin(), pathVector.end());
+    info_max = pathVector.size();
+
     for (std::vector<fs::path>::iterator it = pathVector.begin(); it != pathVector.end(); ++it) {
         if (is_directory((*it)))
             readCoverage((*it));
         else if (is_regular_file((*it)) && (*it).extension() == ".gcov")
+            std::cout << info_cnt++ << "/" << info_max << '\r';
+            std::cout.flush();
+
             readCoverageDataFromFile((*it));
     }
 }
@@ -178,7 +196,12 @@ void GcovCoverageReaderPlugin::readCoverageDataFromFile(fs::path p)
 
         std::stringstream codeElementName;
         codeElementName << sourcePath << ":" << lineNumber;
-        m_coverage->addOrSetRelation(m_currentTestcase, codeElementName.str(), isdigit(rowData[0][0]) != 0);
+
+        if (m_codeElementNameReading) {
+            m_coverage->addCodeElementName(codeElementName.str());
+        } else {
+            m_coverage->setRelation(m_currentTestcase, codeElementName.str(), isdigit(rowData[0][0]) != 0);
+        }
     }
     in.close();
 }
