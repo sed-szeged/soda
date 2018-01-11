@@ -84,6 +84,7 @@ void GcovCoverageReaderPlugin::readFromDirectoryStructure(const char * dirname)
     std::vector<fs::path> pathVector;
     std::copy(fs::directory_iterator(coverage_path), fs::directory_iterator(), back_inserter(pathVector));
     std::sort(pathVector.begin(), pathVector.end());
+    m_codeElementNameReading = true;
     for (std::vector<fs::path>::iterator it = pathVector.begin(); it != pathVector.end(); ++it) {
         if (is_directory((*it))) {
             m_currentTestcase = (*it).leaf().string();
