@@ -275,4 +275,27 @@ TEST_F(CoverageReaderPluginsTest, JacocoJavaCoverageReaderPluginMethod)
     EXPECT_TRUE(coverageMatrix->getRelation("testWasRun(junit.tests.framework.TestCaseTest).testWasRun on testWasRun(junit.tests.framework.TestCaseTest)", "org/junit/runner/Description/createTestDescription(Ljava/lang/Class,Ljava/lang/String,)Lorg/junit/runner/Description,"));
 }
 
+TEST_F(CoverageReaderPluginsTest, IstanbulJsCoverageReaderMetaInfo)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("istanbul-js"));
+    EXPECT_EQ("istanbul-js", plugin->getName());
+    EXPECT_TRUE(plugin->getDescription().length() > 0);
+}
 
+TEST_F(CoverageReaderPluginsTest, IstanbulJsCoverageReaderPluginMethod)
+{
+    EXPECT_NO_THROW(plugin = kernel.getCoverageReaderPluginManager().getPlugin("istanbul-js"));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("path", variable_value(String("sample/IstanbulJsCoverageSampleDir"), ""))));
+    EXPECT_NO_THROW(vm.insert(std::make_pair("granularity", variable_value(String("method"), ""))));
+    EXPECT_NO_THROW(notify(vm));
+
+    EXPECT_NO_THROW(coverageMatrix = plugin->read(vm));
+
+    EXPECT_EQ(1u, coverageMatrix->getNumOfTestcases());
+    EXPECT_EQ(4u, coverageMatrix->getNumOfCodeElements());
+
+    EXPECT_TRUE(coverageMatrix->getRelation("test-1", "a"));
+    EXPECT_FALSE(coverageMatrix->getRelation("test-1", "b"));
+    EXPECT_FALSE(coverageMatrix->getRelation("test-1", "c"));
+    EXPECT_TRUE(coverageMatrix->getRelation("test-1", "d"));
+}
