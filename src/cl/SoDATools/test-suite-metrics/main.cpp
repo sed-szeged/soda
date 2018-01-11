@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         ("create-json-file,j", "Creates a sample json file")
         ("list-cluster-algorithms,c", "Lists the cluster algorithms")
         ("list-metric-plugins,m", "Lists the metric plugins")
-        ("list-mutation-plugins,", "Lists the metric plugins");
+        ("list-mutation-plugins", "Lists the mutation plugins");
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
