@@ -427,7 +427,7 @@ TEST_F(TestSuitePrioritizationPluginsTest, PartitionMetricPrioritizationPluginMe
     EXPECT_TRUE(plugin->getDescription().length() > 0);
 }
 
-TEST_F(TestSuitePrioritizationPluginsTest, PartitionMetricPrioritizationPluginNext)
+TEST_F(TestSuitePrioritizationPluginsTest, DISABLED_PartitionMetricPrioritizationPluginNext)
 {
     CSelectionData selectionData;
     // Create selection data.
@@ -447,7 +447,7 @@ TEST_F(TestSuitePrioritizationPluginsTest, PartitionMetricPrioritizationPluginNe
     EXPECT_EQ(plugin->next(), 22);
 }
 
-TEST_F(TestSuitePrioritizationPluginsTest, PartitionWithResetsPrioritizationPluginNext)
+TEST_F(TestSuitePrioritizationPluginsTest, DISABLED_PartitionWithResetsPrioritizationPluginNext)
 {
     CSelectionData selectionData;
     // Create selection data.

@@ -1,3 +1,3 @@
-build_static_cast_1,gcc/cp/typeck.c
-go_write_export_data,gcc/go/go-backend.c
-Stream_from_buffer::~Stream_from_buffer,gcc/go/gofrontend/import.h
+build_static_cast_1;gcc/cp/typeck.c
+go_write_export_data;gcc/go/go-backend.c
+Stream_from_buffer::~Stream_from_buffer;gcc/go/gofrontend/import.h

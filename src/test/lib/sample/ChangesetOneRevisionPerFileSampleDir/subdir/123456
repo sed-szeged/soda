@@ -1,8 +1,8 @@
-avr_encode_section_info,gcc/config/avr/avr.c
-push_reload,gcc/reload.c
-push_replacement,gcc/reload.c
-subst_reloads,gcc/reload.c
-copy_replacements,gcc/reload.c
-copy_replacements_1,gcc/reload.c
-move_replacements,gcc/reload.c
-find_replacement,gcc/reload.c
+avr_encode_section_info;gcc/config/avr/avr.c
+push_reload;gcc/reload.c
+push_replacement;gcc/reload.c
+subst_reloads;gcc/reload.c
+copy_replacements;gcc/reload.c
+copy_replacements_1;gcc/reload.c
+move_replacements;gcc/reload.c
+find_replacement;gcc/reload.c

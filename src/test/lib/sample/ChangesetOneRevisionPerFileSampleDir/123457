@@ -1,4 +1,4 @@
-gimple_boolify,gcc/gimplify.c
-gimplify_expr,gcc/gimplify.c
-vect_vfa_segment_size,gcc/tree-vect-loop-manip.c
-vect_create_cond_for_alias_checks,gcc/tree-vect-loop-manip.c
+gimple_boolify;gcc/gimplify.c
+gimplify_expr;gcc/gimplify.c
+vect_vfa_segment_size;gcc/tree-vect-loop-manip.c
+vect_create_cond_for_alias_checks;gcc/tree-vect-loop-manip.c
