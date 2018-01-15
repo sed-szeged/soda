@@ -148,7 +148,7 @@ bool CCoverageMatrix::isCoveredTest(const IndexType tcId) const {
 bool CCoverageMatrix::getRelation(const String& testcaseName, const String& codeElementName) const
 {
     if (!m_testcases->containsValue(testcaseName) || !m_codeElements->containsValue(codeElementName)) {
-        throw CException("CCoverageMatrix::setRelation()", "Coverage matrix does not contain item!");
+        throw CException("CCoverageMatrix::getRelation()", "Coverage matrix does not contain item!");
     }
 
     return m_data->get((*m_testcases)[testcaseName], (*m_codeElements)[codeElementName]);
