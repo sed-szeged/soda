@@ -71,7 +71,8 @@ public:
         CHANGESET,
         CODEELEMENT_TRACE,
         REVLIST,
-        BUGSET
+        BUGSET,
+        CHAIN
     };
 
     /**
