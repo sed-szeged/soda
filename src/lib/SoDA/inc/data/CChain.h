@@ -29,8 +29,6 @@ namespace soda
             String getValue(const IndexType n);
             vector<String>::const_iterator first();
             vector<String>::const_iterator end();
-            // vector<String>::const_iterator next(const String& n);
-            // vector<String>::const_iterator prev(const String& n);
             void save(io::CBinaryIO *out) const;
             void load(io::CSoDAio *in);
             void save(const char * filename) const;

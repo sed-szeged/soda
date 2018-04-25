@@ -28,7 +28,6 @@ namespace soda
         return m_codeElements->size();
     }
 
-
     void CChain::clear()
     {
         m_codeElements->clear();
@@ -69,20 +68,6 @@ namespace soda
     {
         return m_codeElements->getValue(n);
     }
-
-    // vector<String>::const_iterator CChain::next(const String& n)
-    // {
-    //     auto b = std::find(m_order->begin(), m_order->end(), n);
-        
-    //     return ++b;
-    // }
-
-    // vector<String>::const_iterator CChain::prev(const String& n)
-    // {
-    //     auto b = std::find(m_order->begin(), m_order->end(), n);
-        
-    //     return --b;
-    // }
 
     vector<String>::const_iterator CChain::first()
     {
