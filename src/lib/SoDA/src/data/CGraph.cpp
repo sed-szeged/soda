@@ -2,17 +2,53 @@
 #include <string>
 #include <algorithm> 
 #include <iostream>
-#include "data/CIDManager.h"
-#include "data/CBitMatrix.h"
+// #include "data/CIDManager.h"
+// #include "data/CBitMatrix.h"
 #include "data/CGraph.h"
-#include "data/CBitMatrix.h"
-#include "interface/IBitList.h"
 #include "interface/IIterators.h"
 
 using namespace std;
 
 namespace soda
 {
+    class GraphDFSIterator :
+            public iterator<input_iterator_tag, bool> {
+    private:
+        IndexType c;
+        vector<IndexType>* visited;
+
+    public:
+        GraphDFSIterator() :
+            c(0),
+            visited(new vector<IndexType>())
+        {}
+
+        GraphDFSIterator& operator++()
+        {
+            return *this;
+        }
+
+        GraphDFSIterator& operator++(int)
+        {
+            return *this;
+        }
+
+        bool operator==(GraphDFSIterator& rhs)
+        {
+            return true;
+        }
+
+        bool operator!=(GraphDFSIterator& rhs)
+        {
+            return true;
+        }
+
+        bool operator*()
+        {
+            return true;
+        }
+    };
+
     CGraph::CGraph(IndexType initialNodeCount):
         m_codeElements(new CIDManager()),
         m_edges(new CBitMatrix(initialNodeCount, initialNodeCount))
