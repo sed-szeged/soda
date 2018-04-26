@@ -2,6 +2,7 @@
 #include <string>
 #include "data/CIDManager.h"
 #include "interface/IIterators.h"
+#include "interface/IChain.h"
 
 #ifndef CCHAIN_H
 #define CCHAIN_H
@@ -10,8 +11,8 @@ using namespace std;
 
 namespace soda
 {
-    class CChain{
-
+    class CChain : public IChain 
+    {
         private:
             IIDManager* m_codeElements;
             vector<String>* m_order;
@@ -19,20 +20,19 @@ namespace soda
             CChain();
             ~CChain();
             IndexType count();
-            void clear();
-            void add(const String& n);
-            void add(const StringVector& codeElements);
-            void add(const CChain& codeElements);
-            void remove(const String& n);
-            bool contains(const String& n);
-            IndexType getId(const String& n);
-            String getValue(const IndexType n);
-            vector<String>::const_iterator first();
-            vector<String>::const_iterator end();
-            void save(io::CBinaryIO *out) const;
-            void load(io::CSoDAio *in);
-            void save(const char * filename) const;
-            void load(const char * filename);
+            virtual void clear();
+            virtual void add(const String& n);
+            virtual void add(const StringVector& codeElements);
+            virtual void remove(const String& n);
+            virtual bool contains(const String& n);
+            virtual IndexType getId(const String& n);
+            virtual String getValue(const IndexType n);
+            virtual vector<String>::const_iterator first();
+            virtual vector<String>::const_iterator end();
+            virtual void save(io::CBinaryIO *out) const;
+            virtual void load(io::CSoDAio *in);
+            virtual void save(const char * filename) const;
+            virtual void load(const char * filename);
     };
 }
 

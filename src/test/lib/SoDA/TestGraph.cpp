@@ -17,4 +17,10 @@ TEST(Graph, BasicOperations) {
     g.addEdge("a", "c");
 
     ASSERT_TRUE(g.edgeCount() == 2);
+
+    g.removeEdge("a", "c");
+    ASSERT_TRUE(g.edgeCount() == 1);
+
+    g.removeEdge("b", "c");
+    ASSERT_TRUE(g.edgeCount() == 1);
 }

@@ -58,15 +58,15 @@ namespace soda
 
     void CGraph::addEdge(const IndexType i, const IndexType j)
     {
-        if(m_edges->getNumOfCols() > i && m_edges->getNumOfRows() > j)
-        {
-            m_edges->set(i, j, true);
-        }
-        else
+        IndexType size = m_edges->getNumOfCols();
+
+        if(max(i,j) >= size)
         {
             IndexType newSize = max(i, j);
             m_edges->resize(newSize, newSize);
         }
+     
+        m_edges->set(min(i,j), max(i,j), true);    
     }
 
     void CGraph::addEdge(const String& n1, const String& n2)
@@ -74,6 +74,31 @@ namespace soda
         IndexType i = m_codeElements->getID(n1);
         IndexType j = m_codeElements->getID(n2);
 
-        this->addEdge(i, j);
+        this->addEdge(min(i,j), max(i,j));
+    }
+
+    IBitList& CGraph::getEdges(const String& n)
+    {
+        IndexType row = m_codeElements->getID(n);
+
+        return m_edges->getRow(row);
+    }
+
+    IBitList& CGraph::getEdges(const IndexType& i)
+    {
+        return m_edges->getRow(i);
+    }
+
+    void CGraph::removeEdge(const IndexType i, IndexType j)
+    {
+        m_edges->set(min(i,j), max(i,j), false);
+    }
+
+    void CGraph::removeEdge(const String& n1, const String& n2)
+    {
+        IndexType i = m_codeElements->getID(n1);
+        IndexType j = m_codeElements->getID(n2);
+
+        this->removeEdge(i, j);
     }
 }
