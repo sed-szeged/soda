@@ -1,57 +1,14 @@
-#include <vector>
-#include <string>
-#include <algorithm> 
-#include <iostream>
-// #include "data/CIDManager.h"
-// #include "data/CBitMatrix.h"
 #include "data/CGraph.h"
-#include "interface/IIterators.h"
+#include "algorithm/CDFS.h"
+#include "algorithm/CBFS.h"
 
 using namespace std;
 
 namespace soda
 {
-    class GraphDFSIterator :
-            public iterator<input_iterator_tag, bool> {
-    private:
-        IndexType c;
-        vector<IndexType>* visited;
-
-    public:
-        GraphDFSIterator() :
-            c(0),
-            visited(new vector<IndexType>())
-        {}
-
-        GraphDFSIterator& operator++()
-        {
-            return *this;
-        }
-
-        GraphDFSIterator& operator++(int)
-        {
-            return *this;
-        }
-
-        bool operator==(GraphDFSIterator& rhs)
-        {
-            return true;
-        }
-
-        bool operator!=(GraphDFSIterator& rhs)
-        {
-            return true;
-        }
-
-        bool operator*()
-        {
-            return true;
-        }
-    };
-
     CGraph::CGraph(IndexType initialNodeCount):
         m_codeElements(new CIDManager()),
-        m_edges(new CBitMatrix(initialNodeCount, initialNodeCount))
+        m_edges(new vector<vector<IndexType>>())
     {}
 
     CGraph::~CGraph()
@@ -71,10 +28,9 @@ namespace soda
     {
         IndexType count = 0;
 
-        for(IBitMatrixIterator& it = m_edges->begin(); it != m_edges->end(); it++) {
-            if(*it)
+        for(vector<vector<IndexType>>::iterator it = m_edges->begin(); it != m_edges->end(); it++) {
             {
-                count++;
+                count+= it->size();
             }
         }
 
@@ -87,54 +43,37 @@ namespace soda
         m_edges->clear();
     }            
     
-    void CGraph::addNode(const String& n)
+    IndexType CGraph::addNode(const String& n)
     {
+        if(m_codeElements->containsValue(n))
+            return m_codeElements->getID(n);
+
         m_codeElements->add(n);
+        IndexType i = m_codeElements->getID(n);
+
+        m_edges->push_back(vector<IndexType>());
+
+        return i;
     }
 
     void CGraph::addEdge(const IndexType i, const IndexType j)
     {
-        IndexType size = m_edges->getNumOfCols();
-
-        if(max(i,j) >= size)
-        {
-            IndexType newSize = max(i, j);
-            m_edges->resize(newSize, newSize);
-        }
-     
-        m_edges->set(min(i,j), max(i,j), true);    
+        m_edges->at(i).push_back(j);
+        m_edges->at(j).push_back(i);
     }
 
-    void CGraph::addEdge(const String& n1, const String& n2)
+    vector<IndexType>& CGraph::getEdges(const IndexType& i)
     {
-        IndexType i = m_codeElements->getID(n1);
-        IndexType j = m_codeElements->getID(n2);
-
-        this->addEdge(min(i,j), max(i,j));
+        return m_edges->at(i);
     }
 
-    IBitList& CGraph::getEdges(const String& n)
+    vector<IndexType>& CGraph::getDFS(const IndexType& i)
     {
-        IndexType row = m_codeElements->getID(n);
-
-        return m_edges->getRow(row);
+        return CDFS(*m_edges).getDFS(i);
     }
 
-    IBitList& CGraph::getEdges(const IndexType& i)
-    {
-        return m_edges->getRow(i);
-    }
-
-    void CGraph::removeEdge(const IndexType i, IndexType j)
-    {
-        m_edges->set(min(i,j), max(i,j), false);
-    }
-
-    void CGraph::removeEdge(const String& n1, const String& n2)
-    {
-        IndexType i = m_codeElements->getID(n1);
-        IndexType j = m_codeElements->getID(n2);
-
-        this->removeEdge(i, j);
-    }
+    vector<IndexType>& CGraph::getBFS(const IndexType& i)
+     {
+        return CBFS(*m_edges).getBFS(i);
+     }
 }
