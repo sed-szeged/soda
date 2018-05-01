@@ -72,7 +72,8 @@ public:
         CODEELEMENT_TRACE,
         REVLIST,
         BUGSET,
-        CHAIN
+        CHAIN,
+        GRAPH
     };
 
     /**

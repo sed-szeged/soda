@@ -81,7 +81,7 @@ namespace soda
 
     void CChain::save(io::CBinaryIO *out) const
     {
-        m_codeElements->save(out, io::CSoDAio::PRLIST);
+        m_codeElements->save(out, io::CSoDAio::IDMANAGER);
         
         unsigned long long int length = sizeof(IndexType);
         for(vector<String>::const_iterator it = m_order->begin() ; it != m_order->end(); ++it ) {
@@ -112,7 +112,7 @@ namespace soda
         while(in->nextChunkID()) {
             auto chunkId = in->getChunkID();
 
-            if(chunkId == io::CSoDAio::PRLIST) {
+            if(chunkId == io::CSoDAio::IDMANAGER) {
                 m_codeElements->load(in);
             } 
             if(chunkId == io::CSoDAio::CHAIN){

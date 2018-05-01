@@ -5,7 +5,7 @@
 using namespace soda;
  
 TEST(Graph, BasicOperations) {    
-    CGraph g = CGraph(10);
+    CGraph g = CGraph();
     IndexType a = g.addNode("a");
     IndexType b = g.addNode("b");
     IndexType c = g.addNode("c");
@@ -21,7 +21,7 @@ TEST(Graph, BasicOperations) {
 
 TEST(Graph, DFS)
 {
-    CGraph graph = CGraph(10);
+    CGraph graph = CGraph();
 
     IndexType a = graph.addNode("a");
     IndexType b = graph.addNode("b");
@@ -52,7 +52,7 @@ TEST(Graph, DFS)
 
 TEST(Graph, BFS)
 {
-    CGraph graph = CGraph(10);
+    CGraph graph = CGraph();
 
     IndexType a = graph.addNode("a");
     IndexType b = graph.addNode("b");
@@ -79,4 +79,31 @@ TEST(Graph, BFS)
     
     vector<IndexType> bfs3 = graph.getBFS(3);
     ASSERT_TRUE(bfs3.size() == 7);
+}
+
+TEST(Graph, SaveLoad)
+{
+    CGraph graph = CGraph();
+
+    IndexType a = graph.addNode("a");
+    IndexType b = graph.addNode("b");
+    IndexType c = graph.addNode("c");
+    IndexType d = graph.addNode("d");
+    IndexType e = graph.addNode("e");
+    IndexType f = graph.addNode("f");
+    IndexType g = graph.addNode("g");
+    graph.addEdge(a, b);
+    graph.addEdge(a, c);
+    graph.addEdge(a, d);
+    graph.addEdge(c, e);
+    graph.addEdge(c, f);
+    graph.addEdge(d, g);
+    
+    graph.save("graphFile");
+    
+    CGraph loadedGraph = CGraph();
+    loadedGraph.load("graphFile");
+
+    ASSERT_EQ(loadedGraph.nodeCount(), 7);
+    ASSERT_EQ(loadedGraph.edgeCount(), 12);
 }

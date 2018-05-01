@@ -6,7 +6,7 @@ using namespace std;
 
 namespace soda
 {
-    CGraph::CGraph(IndexType initialNodeCount):
+    CGraph::CGraph():
         m_codeElements(new CIDManager()),
         m_edges(new vector<vector<IndexType>>())
     {}
@@ -73,7 +73,91 @@ namespace soda
     }
 
     vector<IndexType>& CGraph::getBFS(const IndexType& i)
-     {
+    {
         return CBFS(*m_edges).getBFS(i);
-     }
+    }
+
+    void CGraph::save(io::CBinaryIO *out) const
+    {
+        //IDManager
+        m_codeElements->save(out, io::CSoDAio::IDMANAGER);
+        
+        //Graph
+        out->writeUInt4(io::CSoDAio::GRAPH);
+        
+        IndexType length = sizeof(IndexType);
+
+        for(vector<vector<IndexType>>::const_iterator rit = m_edges->begin() ; rit != m_edges->end(); ++rit ) 
+        {
+            length += sizeof(IndexType);
+
+            for(vector<IndexType>::const_iterator it = rit->begin() ; it != rit->end(); ++it ) 
+            {
+                length += sizeof(IndexType);
+            }
+        }
+        out->writeULongLong8(length);
+
+        //Count of nodes
+        IndexType size = m_edges->size();
+        out->writeULongLong8(size);
+
+        for(vector<vector<IndexType>>::const_iterator rit = m_edges->begin() ; rit != m_edges->end(); ++rit ) 
+        {
+            IndexType edgeCount = rit->size();
+            out->writeULongLong8(edgeCount);
+
+            for(vector<IndexType>::const_iterator it = rit->begin() ; it != rit->end(); ++it ) 
+            {
+                out->writeULongLong8(*it);
+            }
+        }
+    }
+
+    void CGraph::load(io::CSoDAio *in)
+    {
+        m_codeElements->clear();
+        m_edges->clear();
+        
+        while(in->nextChunkID()) {
+            auto chunkId = in->getChunkID();
+
+            if(chunkId == io::CSoDAio::IDMANAGER) {
+                m_codeElements->load(in);
+            } 
+
+            if(chunkId == io::CSoDAio::GRAPH){
+                IndexType nodeCount = in->readULongLong8();
+
+                vector<vector<IndexType>> nodes;
+
+                for (IndexType e = 0; e < nodeCount; ++e) {
+                    IndexType edgeCount = in->readULongLong8();
+
+                    vector<IndexType> edges;
+
+                    for (IndexType i = 0; i < edgeCount; ++i) {
+                        IndexType edge = in->readULongLong8();
+                        edges.push_back(edge);
+                    }
+
+                    m_edges->push_back(edges);
+                }
+            }
+        }
+    }
+
+    void CGraph::save(const char * filename) const
+    {
+        io::CSoDAio *out = new io::CSoDAio(filename, io::CBinaryIO::omWrite);
+        save(out);
+        delete out;
+    }
+
+    void CGraph::load(const char * filename)
+    {
+        io::CSoDAio *in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
+        load(in);
+        delete in;
+    }
 }

@@ -21,6 +21,10 @@ namespace soda
             virtual vector<IndexType>& getEdges(const IndexType& i) = 0;
             virtual vector<IndexType>& getDFS(const IndexType& i) = 0;
             virtual vector<IndexType>& getBFS(const IndexType& i) = 0;
+            virtual void save(io::CBinaryIO *out) const = 0;
+            virtual void load(io::CSoDAio *in) = 0;
+            virtual void save(const char * filename) const = 0;
+            virtual void load(const char * filename) = 0;
     };
 }
 

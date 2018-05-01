@@ -18,7 +18,7 @@ namespace soda
             
         public:
         
-            CGraph(IndexType initialNodeCount);
+            CGraph();
             ~CGraph();
             
             virtual IndexType nodeCount();
@@ -29,6 +29,10 @@ namespace soda
             virtual vector<IndexType>& getEdges(const IndexType& i);
             virtual vector<IndexType>& getDFS(const IndexType& i);
             virtual vector<IndexType>& getBFS(const IndexType& i);
+            virtual void save(io::CBinaryIO *out) const;
+            virtual void load(io::CSoDAio *in);
+            virtual void save(const char * filename) const;
+            virtual void load(const char * filename);
     };
 }
 
