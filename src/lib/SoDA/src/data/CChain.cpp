@@ -1,6 +1,6 @@
 #include <vector>
 #include <string>
-#include <algorithm> 
+#include <algorithm>
 #include <iostream>
 #include "data/CIDManager.h"
 #include "data/CChain.h"
@@ -33,7 +33,7 @@ namespace soda
         m_codeElements->clear();
         m_order->clear();
     }
-    
+
     void CChain::add(const String& n)
     {
         m_codeElements->add(n);
@@ -63,7 +63,7 @@ namespace soda
     {
         return m_codeElements->getID(n);
     }
-    
+
     String CChain::getValue(const IndexType n)
     {
         return m_codeElements->getValue(n);
@@ -82,15 +82,12 @@ namespace soda
     void CChain::save(io::CBinaryIO *out) const
     {
         m_codeElements->save(out, io::CSoDAio::IDMANAGER);
-        
-        unsigned long long int length = sizeof(IndexType);
-        for(vector<String>::const_iterator it = m_order->begin() ; it != m_order->end(); ++it ) {
-            length += sizeof(IndexType);
-        }
-      
+
+        unsigned long long int length = (1 + m_order->size()) * sizeof(IndexType);
+
         //write ChunkID
         out->writeUInt4(io::CSoDAio::CHAIN);
-        
+
         //write length
         out->writeULongLong8(length);
 
@@ -108,13 +105,13 @@ namespace soda
     {
         m_codeElements->clear();
         m_order->clear();
-        
+
         while(in->nextChunkID()) {
             auto chunkId = in->getChunkID();
 
             if(chunkId == io::CSoDAio::IDMANAGER) {
                 m_codeElements->load(in);
-            } 
+            }
             if(chunkId == io::CSoDAio::CHAIN){
                 IndexType size = in->readLongLong8();
 

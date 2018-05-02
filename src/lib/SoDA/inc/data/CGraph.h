@@ -10,17 +10,17 @@ using namespace std;
 
 namespace soda
 {
-    class CGraph : public IGraph 
+    class CGraph : public IGraph
     {
         private:
             IIDManager* m_codeElements;
             vector<vector<IndexType>>* m_edges;
-            
+
         public:
-        
+
             CGraph();
             ~CGraph();
-            
+
             virtual IndexType nodeCount();
             virtual IndexType edgeCount();
             virtual void clear();

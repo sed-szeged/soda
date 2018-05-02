@@ -3,13 +3,13 @@
 #include "data/CChain.h"
 
 using namespace soda;
- 
-TEST(Chain, BasicOperations) {    
+
+TEST(Chain, BasicOperations) {
     CChain s = CChain();
     vector<string> sVector = vector<string>();
     sVector.push_back("_0");
     sVector.push_back("_1");
-    
+
     ASSERT_EQ(s.count(), 0);
 
     s.add("_0");
@@ -39,7 +39,7 @@ TEST(Chain, BasicOperations) {
     ASSERT_EQ(s.count(), 0);
 
     s.add(sVector);
-    
+
     ASSERT_EQ(s.count(), 2);
 }
 
@@ -61,7 +61,7 @@ TEST(Chain, SaveLoad)
     s.add("_1");
     s.add("_2");
     s.save("chainFile");
-    
+
     CChain a = CChain();
     a.load("chainFile");
 

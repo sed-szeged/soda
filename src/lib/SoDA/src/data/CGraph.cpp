@@ -41,8 +41,8 @@ namespace soda
     {
         m_codeElements->clear();
         m_edges->clear();
-    }            
-    
+    }
+
     IndexType CGraph::addNode(const String& n)
     {
         if(m_codeElements->containsValue(n))
@@ -81,17 +81,17 @@ namespace soda
     {
         //IDManager
         m_codeElements->save(out, io::CSoDAio::IDMANAGER);
-        
+
         //Graph
         out->writeUInt4(io::CSoDAio::GRAPH);
-        
+
         IndexType length = sizeof(IndexType);
 
-        for(vector<vector<IndexType>>::const_iterator rit = m_edges->begin() ; rit != m_edges->end(); ++rit ) 
+        for(vector<vector<IndexType>>::const_iterator rit = m_edges->begin() ; rit != m_edges->end(); ++rit )
         {
             length += sizeof(IndexType);
 
-            for(vector<IndexType>::const_iterator it = rit->begin() ; it != rit->end(); ++it ) 
+            for(vector<IndexType>::const_iterator it = rit->begin() ; it != rit->end(); ++it )
             {
                 length += sizeof(IndexType);
             }
@@ -102,12 +102,12 @@ namespace soda
         IndexType size = m_edges->size();
         out->writeULongLong8(size);
 
-        for(vector<vector<IndexType>>::const_iterator rit = m_edges->begin() ; rit != m_edges->end(); ++rit ) 
+        for(vector<vector<IndexType>>::const_iterator rit = m_edges->begin() ; rit != m_edges->end(); ++rit )
         {
             IndexType edgeCount = rit->size();
             out->writeULongLong8(edgeCount);
 
-            for(vector<IndexType>::const_iterator it = rit->begin() ; it != rit->end(); ++it ) 
+            for(vector<IndexType>::const_iterator it = rit->begin() ; it != rit->end(); ++it )
             {
                 out->writeULongLong8(*it);
             }
@@ -118,13 +118,13 @@ namespace soda
     {
         m_codeElements->clear();
         m_edges->clear();
-        
+
         while(in->nextChunkID()) {
             auto chunkId = in->getChunkID();
 
             if(chunkId == io::CSoDAio::IDMANAGER) {
                 m_codeElements->load(in);
-            } 
+            }
 
             if(chunkId == io::CSoDAio::GRAPH){
                 IndexType nodeCount = in->readULongLong8();

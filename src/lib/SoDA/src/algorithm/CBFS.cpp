@@ -1,8 +1,8 @@
 #include "algorithm/CBFS.h"
 
-namespace soda 
+namespace soda
 {
-    CBFS::CBFS(vector<vector<IndexType>>& edges) : 
+    CBFS::CBFS(vector<vector<IndexType>>& edges) :
         m_edges(&edges),
         m_bfsOrder(new vector<IndexType>()) { };
 
@@ -16,16 +16,16 @@ namespace soda
 
         for(int i = 0; i < edgeCount; i++)
             visited[i] = false;
-    
+
         visited[root] = true;
         queue.push_back(root);
-            
+
         while(!queue.empty())
         {
             IndexType s = queue.front();
             m_bfsOrder->push_back(s);
             queue.pop_front();
-    
+
             for (std::vector<IndexType>::iterator i = m_edges->at(s).begin(); i != m_edges->at(s).end(); ++i)
             {
                 if (!visited[*i])
@@ -37,7 +37,7 @@ namespace soda
         }
 
         delete visited;
-        
+
         return *m_bfsOrder;
     }
 }

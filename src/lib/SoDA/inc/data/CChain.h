@@ -11,7 +11,7 @@ using namespace std;
 
 namespace soda
 {
-    class CChain : public IChain 
+    class CChain : public IChain
     {
         private:
             IIDManager* m_codeElements;

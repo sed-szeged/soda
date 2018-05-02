@@ -16,7 +16,7 @@ namespace soda
 
         public:
             vector<IndexType>& getDFS(const IndexType& root);
-        
+
             CDFS(vector<vector<IndexType>>& m_edges);
             ~CDFS();
     };
