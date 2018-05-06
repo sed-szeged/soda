@@ -22,6 +22,7 @@ namespace soda
             CGraph();
             ~CGraph();
 
+            virtual io::CSoDAio::ChunkID getChunkId();
             virtual IndexType nodeCount();
             virtual IndexType edgeCount();
             virtual void clear();

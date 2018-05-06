@@ -73,7 +73,8 @@ public:
         REVLIST,
         BUGSET,
         CHAIN,
-        GRAPH
+        GRAPH,
+        TREE
     };
 
     /**

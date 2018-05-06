@@ -20,6 +20,11 @@ namespace soda
         m_edges = NULL;
     }
 
+    io::CSoDAio::ChunkID CGraph::getChunkId()
+    {
+        return io::CSoDAio::GRAPH;
+    }
+
     IndexType CGraph::nodeCount()
     {
         return m_codeElements->size();
@@ -169,12 +174,6 @@ namespace soda
 
     void CGraph::loadJson(const String& path)
     {
-        bool a = access( path.c_str(), F_OK ) != -1;
-        char result[ PATH_MAX ];
-        ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
-        String p =  std::string( result, (count > 0) ? count : 0 );
-        std::cerr << " -- " << a << " -- " << p;
-
         CJsonReader *reader  = new CJsonReader(path);
 
         //Read IDManager elements
