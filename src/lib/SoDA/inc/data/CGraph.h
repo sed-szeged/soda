@@ -2,6 +2,7 @@
 #include <string>
 #include "data/CIDManager.h"
 #include "interface/IGraph.h"
+#include "io/CJsonReader.h"
 
 #ifndef CGRAPH_H
 #define CGRAPH_H
@@ -33,6 +34,7 @@ namespace soda
             virtual void load(io::CSoDAio *in);
             virtual void save(const char * filename) const;
             virtual void load(const char * filename);
+            virtual void loadJson(const String& path);
     };
 }
 

@@ -25,6 +25,7 @@ namespace soda
             virtual void load(io::CSoDAio *in) = 0;
             virtual void save(const char * filename) const = 0;
             virtual void load(const char * filename) = 0;
+            virtual void loadJson(const String& path) = 0;
     };
 }
 

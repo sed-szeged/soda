@@ -3,6 +3,7 @@
 #include "data/CIDManager.h"
 #include "interface/IIterators.h"
 #include "interface/IChain.h"
+#include "io/CJsonReader.h"
 
 #ifndef CCHAIN_H
 #define CCHAIN_H
@@ -33,6 +34,7 @@ namespace soda
             virtual void load(io::CSoDAio *in);
             virtual void save(const char * filename) const;
             virtual void load(const char * filename);
+            virtual void loadJson(const String& path);
     };
 }
 

@@ -3,6 +3,7 @@
 #include "algorithm/CBFS.h"
 
 using namespace std;
+using namespace soda::io;
 
 namespace soda
 {
@@ -58,8 +59,13 @@ namespace soda
 
     void CGraph::addEdge(const IndexType i, const IndexType j)
     {
-        m_edges->at(i).push_back(j);
-        m_edges->at(j).push_back(i);
+        auto edges = m_edges->at(i);
+
+        if(std::find(edges.begin(), edges.end(), j) == edges.end())
+        {
+            m_edges->at(i).push_back(j);
+            m_edges->at(j).push_back(i);
+        }
     }
 
     vector<IndexType>& CGraph::getEdges(const IndexType& i)
@@ -159,5 +165,36 @@ namespace soda
         io::CSoDAio *in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
         load(in);
         delete in;
+    }
+
+    void CGraph::loadJson(const String& path)
+    {
+        bool a = access( path.c_str(), F_OK ) != -1;
+        char result[ PATH_MAX ];
+        ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+        String p =  std::string( result, (count > 0) ? count : 0 );
+        std::cerr << " -- " << a << " -- " << p;
+
+        CJsonReader *reader  = new CJsonReader(path);
+
+        //Read IDManager elements
+        vector<CJsonReader> properties = reader->getPropertyVectorFromProperty("graph");
+        for(IndexType i = 0; i <  properties.size(); i++)
+        {
+            String nodeName = properties[i].getStringFromProperty("node");
+            vector<String> edges = properties[i].getStringVectorFromProperty("edges");
+            
+            IndexType base = this->addNode(nodeName);
+
+            for(StringVector::iterator i = edges.begin(); i< edges.end(); i++)
+            {
+                IndexType to = this->addNode(*i);
+                
+                this->addEdge(base, to);
+            }
+        }
+
+        delete reader;
+        reader = 0;
     }
 }

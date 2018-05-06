@@ -71,3 +71,13 @@ TEST(Chain, SaveLoad)
     ASSERT_EQ(a.getValue(1), "_1");
     ASSERT_EQ(a.getValue(2), "_2");
 }
+
+TEST(Chain, JsonLoad)
+{
+    CChain s = CChain();
+    s.loadJson("sample/cchain.json");
+
+    ASSERT_EQ(s.count(), 4);
+    ASSERT_EQ(*(s.first()), "Element1");
+    ASSERT_EQ(*(s.end()-1), "Debug");
+}

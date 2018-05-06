@@ -7,6 +7,7 @@
 #include "interface/IIterators.h"
 
 using namespace std;
+using namespace soda::io;
 
 namespace soda
 {
@@ -81,20 +82,17 @@ namespace soda
 
     void CChain::save(io::CBinaryIO *out) const
     {
+        IndexType size = m_order->size();
+        unsigned long long int length = (1 + size) * sizeof(IndexType);
+
+        //write IDManager
         m_codeElements->save(out, io::CSoDAio::IDMANAGER);
-
-        unsigned long long int length = (1 + m_order->size()) * sizeof(IndexType);
-
         //write ChunkID
         out->writeUInt4(io::CSoDAio::CHAIN);
-
         //write length
         out->writeULongLong8(length);
-
         //write the number of elements
-        IndexType size = m_order->size();
         out->writeLongLong8(size);
-
         //write elements
         for(vector<string>::const_iterator it = m_order->begin() ; it != m_order->end(); ++it ) {
             out->writeString(*it);
@@ -136,5 +134,22 @@ namespace soda
         io::CSoDAio *in = new io::CSoDAio(filename, io::CBinaryIO::omRead);
         load(in);
         delete in;
+    }
+
+    void CChain::loadJson(const String& path)
+    {
+        CJsonReader *reader  = new CJsonReader(path);
+
+        //Read IDManager elements
+        StringVector strings = reader->getStringVectorFromProperty("chain");
+        for(IndexType i = 0; i <  strings.size(); i++)
+        {
+            String value = strings[i];
+            m_codeElements->add(value);
+            m_order->push_back(value);
+        }
+
+        delete reader;
+        reader = 0;
     }
 }
