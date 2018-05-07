@@ -18,19 +18,17 @@ namespace soda
             vector<vector<IndexType>>* m_edges;
 
         public:
-
             CGraph();
             ~CGraph();
 
-            virtual io::CSoDAio::ChunkID getChunkId();
             virtual IndexType nodeCount();
             virtual IndexType edgeCount();
             virtual void clear();
             virtual IndexType addNode(const String& n);
             virtual void addEdge(const IndexType i, IndexType j);
             virtual vector<IndexType>& getEdges(const IndexType& i);
-            virtual vector<IndexType>& getDFS(const IndexType& i);
-            virtual vector<IndexType>& getBFS(const IndexType& i);
+            virtual vector<IndexType>* getDFS(const IndexType& i);
+            virtual vector<IndexType>* getBFS(const IndexType& i);
             virtual void save(io::CBinaryIO *out) const;
             virtual void load(io::CSoDAio *in);
             virtual void save(const char * filename) const;

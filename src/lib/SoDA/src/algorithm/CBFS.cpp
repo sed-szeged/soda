@@ -8,7 +8,7 @@ namespace soda
 
     CBFS::~CBFS(){ }
 
-    vector<IndexType>& CBFS::getBFS(const IndexType& root)
+    vector<IndexType> *CBFS::getBFS(const IndexType& root)
     {
         IndexType edgeCount = m_edges->size();
         list<IndexType> queue;
@@ -38,6 +38,6 @@ namespace soda
 
         delete visited;
 
-        return *m_bfsOrder;
+        return m_bfsOrder;
     }
 }

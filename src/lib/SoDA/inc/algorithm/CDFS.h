@@ -15,7 +15,7 @@ namespace soda
             void DFS(int v, bool visited[]);
 
         public:
-            vector<IndexType>& getDFS(const IndexType& root);
+            vector<IndexType> *getDFS(const IndexType& root);
 
             CDFS(vector<vector<IndexType>>& m_edges);
             ~CDFS();

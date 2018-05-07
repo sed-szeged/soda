@@ -19,7 +19,7 @@ namespace soda {
                 DFS(*i, visited);
     }
 
-    vector<IndexType>& CDFS::getDFS(const IndexType& root)
+    vector<IndexType> *CDFS::getDFS(const IndexType& root)
     {
         IndexType edgeCount = m_edges->size();
         bool *visited = new bool[edgeCount];
@@ -33,6 +33,6 @@ namespace soda {
 
         delete visited;
 
-        return *m_dfsOrder;
+        return m_dfsOrder;
     }
 }

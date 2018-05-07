@@ -20,11 +20,6 @@ namespace soda
         m_edges = NULL;
     }
 
-    io::CSoDAio::ChunkID CGraph::getChunkId()
-    {
-        return io::CSoDAio::GRAPH;
-    }
-
     IndexType CGraph::nodeCount()
     {
         return m_codeElements->size();
@@ -78,12 +73,12 @@ namespace soda
         return m_edges->at(i);
     }
 
-    vector<IndexType>& CGraph::getDFS(const IndexType& i)
+    vector<IndexType> *CGraph::getDFS(const IndexType& i)
     {
         return CDFS(*m_edges).getDFS(i);
     }
 
-    vector<IndexType>& CGraph::getBFS(const IndexType& i)
+    vector<IndexType> *CGraph::getBFS(const IndexType& i)
     {
         return CBFS(*m_edges).getBFS(i);
     }
@@ -182,13 +177,13 @@ namespace soda
         {
             String nodeName = properties[i].getStringFromProperty("node");
             vector<String> edges = properties[i].getStringVectorFromProperty("edges");
-            
+
             IndexType base = this->addNode(nodeName);
 
             for(StringVector::iterator i = edges.begin(); i< edges.end(); i++)
             {
                 IndexType to = this->addNode(*i);
-                
+
                 this->addEdge(base, to);
             }
         }

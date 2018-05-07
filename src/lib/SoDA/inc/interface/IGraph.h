@@ -1,7 +1,6 @@
 #include <vector>
 #include <string>
 #include "data/CIDManager.h"
-#include "data/CBitMatrix.h"
 
 #ifndef IGRAPH_H
 #define IGRAPH_H
@@ -20,9 +19,8 @@ namespace soda
             virtual IndexType addNode(const String& n) = 0;
             virtual void addEdge(const IndexType i, IndexType j) = 0;
             virtual vector<IndexType>& getEdges(const IndexType& i) = 0;
-            virtual vector<IndexType>& getDFS(const IndexType& i) = 0;
-            virtual vector<IndexType>& getBFS(const IndexType& i) = 0;
-            virtual io::CSoDAio::ChunkID getChunkId() = 0;
+            virtual vector<IndexType>* getDFS(const IndexType& i) = 0;
+            virtual vector<IndexType>* getBFS(const IndexType& i) = 0;
             virtual void save(io::CBinaryIO *out) const = 0;
             virtual void load(io::CSoDAio *in) = 0;
             virtual void save(const char * filename) const = 0;

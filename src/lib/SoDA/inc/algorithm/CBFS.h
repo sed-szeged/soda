@@ -15,7 +15,7 @@ namespace soda
             void BFS(int v, bool visited[]);
 
         public:
-            vector<IndexType>& getBFS(const IndexType& root);
+            vector<IndexType>* getBFS(const IndexType& root);
 
             CBFS(vector<vector<IndexType>>& m_edges);
             ~CBFS();
