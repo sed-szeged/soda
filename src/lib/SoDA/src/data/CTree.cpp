@@ -1,6 +1,7 @@
 #include "data/CTree.h"
 #include "algorithm/CDFS.h"
 #include "algorithm/CBFS.h"
+#include "data/Node.h"
 
 using namespace std;
 using namespace soda::io;
@@ -9,37 +10,37 @@ namespace soda
 {
     CTree::CTree():
         m_codeElements(new CIDManager()),
-        m_edges(new vector<vector<IndexType>>()),
-        m_mapping(new vector<IndexType>())
+        m_structure(new vector<vector<IndexType>>()),
+        m_nodes(new vector<Node*>())
     {}
 
     CTree::~CTree()
     {
         delete m_codeElements;
         m_codeElements = NULL;
-        delete m_edges;
-        m_edges = NULL;
-        delete m_mapping;
-        m_mapping = NULL;
+        delete m_structure;
+        m_structure = NULL;
+        delete m_nodes;
+        m_nodes = NULL;
     }
 
     void CTree::clear()
     {
         m_codeElements->clear();
-        m_edges->clear();
-        m_mapping->clear();
+        m_structure->clear();
+        m_nodes->clear(); //for each element
     }
 
     IndexType CTree::nodeCount()
     {
-        return m_mapping->size();
+        return m_nodes->size();
     }
 
     IndexType CTree::edgeCount()
     {
         IndexType count = 0;
 
-        for(vector<vector<IndexType>>::iterator it = m_edges->begin(); it != m_edges->end(); it++) {
+        for(vector<vector<IndexType>>::iterator it = m_structure->begin(); it != m_structure->end(); it++) {
             {
                 count+= it->size();
             }
@@ -50,42 +51,46 @@ namespace soda
 
     vector<IndexType>& CTree::getEdges(const IndexType& i)
     {
-        return m_edges->at(i);
+        return m_structure->at(i);
     }
 
-    IndexType CTree::addNode(const IndexType i)
+    void CTree::addEdge(Node* parent, Node* child)
     {
-        m_mapping->push_back(i);
-        m_edges->push_back(vector<IndexType>());
-
-        return m_mapping->size()-1;
+        addEdge(parent->m_id, child->m_id);
     }
 
-    IndexType CTree::addNode(const String& n)
+    Node* CTree::addNode(const IndexType i)
+    {
+        IndexType newIndex =  m_nodes->size() == 0 ? 0 : m_nodes->back()->m_id+1;
+        Node* n = new Node(newIndex, i);
+
+        m_nodes->push_back(n);
+        m_structure->push_back(vector<IndexType>());
+
+        return n;
+    }
+
+    Node* CTree::addNode(const String& n)
     {
         m_codeElements->add(n);
 
         IndexType i = m_codeElements->getID(n);
-        m_mapping->push_back(i);
-        m_edges->push_back(vector<IndexType>());
 
-        return m_mapping->size()-1;
+        return addNode(i);
     }
 
-    IndexType CTree::addChild(const IndexType parentId, const String& n)
+    Node* CTree::addChild(const IndexType parentId, const String& n)
     {
-        IndexType newNodeId = addNode(n);
-        m_edges->at(parentId).push_back(newNodeId);
-        m_edges->at(newNodeId).push_back(parentId);
+        Node* newNode = addNode(n);
+        m_structure->at(parentId).push_back(newNode->m_id);
+        m_structure->at(newNode->m_id).push_back(parentId);
 
-        return newNodeId;
+        return newNode;
     }
 
-    String CTree::getNodeValue(const IndexType nodeIndex)
+    String CTree::getNodeValue(Node* node)
     {
-        IndexType codeElementId = m_mapping->at(nodeIndex);
-
-        return m_codeElements->getValue(codeElementId);
+        return m_codeElements->getValue(node->m_elementId);
     }
 
     bool hasCommonNode(soda::IntVector* treeA, soda::IntVector* treeB)
@@ -106,13 +111,17 @@ namespace soda
 
     void CTree::addEdge(const IndexType parentId, const IndexType childId)
     {
-        bool standaloneChild = m_edges->at(childId).size() == 0;
+        bool standaloneChild = m_structure->at(childId).size() == 0;
         bool independentTrees = false;
 
         if(!standaloneChild)
         {
-            auto parentTreeNodes = CBFS(*m_edges).getBFS(parentId);
-            auto childTreeNodes = CBFS(*m_edges).getBFS(childId);
+            bool exsistingEdge = std::find(m_structure->at(childId).begin(), m_structure->at(childId).end(), parentId) != m_structure->at(childId).end();
+            if(exsistingEdge)
+                return;
+
+            auto parentTreeNodes = CBFS(*m_structure).getBFS(parentId);
+            auto childTreeNodes = CBFS(*m_structure).getBFS(childId);
 
             independentTrees = !hasCommonNode(parentTreeNodes, childTreeNodes);
 
@@ -122,12 +131,12 @@ namespace soda
 
         if(standaloneChild || independentTrees)
         {
-            auto edges = m_edges->at(parentId);
+            auto edges = m_structure->at(parentId);
 
             if(std::find(edges.begin(), edges.end(), childId) == edges.end())
             {
-                m_edges->at(parentId).push_back(childId);
-                m_edges->at(childId).push_back(parentId);
+                m_structure->at(parentId).push_back(childId);
+                m_structure->at(childId).push_back(parentId);
             }
         }
         else
@@ -138,12 +147,12 @@ namespace soda
 
     vector<IndexType>* CTree::getDFS(IndexType i)
     {
-        return CDFS(*m_edges).getDFS(i);
+        return CDFS(*m_structure).getDFS(i);
     }
 
     vector<IndexType>* CTree::getBFS(IndexType i)
     {
-        return CBFS(*m_edges).getBFS(i);
+        return CBFS(*m_structure).getBFS(i);
     }
 
     void CTree::save(io::CBinaryIO *out) const
@@ -156,7 +165,7 @@ namespace soda
 
         IndexType length = sizeof(IndexType);
 
-        for(vector<vector<IndexType>>::const_iterator rit = m_edges->begin() ; rit != m_edges->end(); ++rit )
+        for(vector<vector<IndexType>>::const_iterator rit = m_structure->begin() ; rit != m_structure->end(); ++rit )
         {
             length += sizeof(IndexType);
 
@@ -165,13 +174,24 @@ namespace soda
                 length += sizeof(IndexType);
             }
         }
+
+        length += m_nodes->size() * sizeof(Node);
+
         out->writeULongLong8(length);
 
         //Count of nodes
-        IndexType size = m_edges->size();
-        out->writeULongLong8(size);
+        IndexType nodesCount = m_nodes->size();
+        out->writeULongLong8(nodesCount);
 
-        for(vector<vector<IndexType>>::const_iterator rit = m_edges->begin() ; rit != m_edges->end(); ++rit )
+        //Nodes
+        for(vector<Node*>::const_iterator it = m_nodes->begin() ; it != m_nodes->end(); ++it )
+        {
+            out->writeULongLong8((*it)->m_id);
+            out->writeULongLong8((*it)->m_elementId);
+        }
+
+        //Edges
+        for(vector<vector<IndexType>>::const_iterator rit = m_structure->begin() ; rit != m_structure->end(); ++rit )
         {
             IndexType edgeCount = rit->size();
             out->writeULongLong8(edgeCount);
@@ -186,7 +206,8 @@ namespace soda
     void CTree::load(io::CSoDAio *in)
     {
         m_codeElements->clear();
-        m_edges->clear();
+        m_structure->clear();
+        m_nodes->clear();
 
         while(in->nextChunkID()) {
             auto chunkId = in->getChunkID();
@@ -198,19 +219,26 @@ namespace soda
             if(chunkId == io::CSoDAio::TREE){
                 IndexType nodeCount = in->readULongLong8();
 
-                vector<vector<IndexType>> nodes;
+                for(IndexType i = 0; i < nodeCount; ++i)
+                {
+                    IndexType mId = in->readULongLong8();
+                    IndexType mElementId = in->readULongLong8();
+
+                    m_nodes->push_back(new Node(mId, mElementId));
+                }
 
                 for (IndexType e = 0; e < nodeCount; ++e) {
                     IndexType edgeCount = in->readULongLong8();
 
                     vector<IndexType> edges;
-
+                    
                     for (IndexType i = 0; i < edgeCount; ++i) {
                         IndexType edge = in->readULongLong8();
+                        
                         edges.push_back(edge);
                     }
 
-                    m_edges->push_back(edges);
+                    m_structure->push_back(edges);
                 }
             }
         }
@@ -235,24 +263,29 @@ namespace soda
         CJsonReader *reader  = new CJsonReader(path);
 
         //Read IDManager elements
-        vector<CJsonReader> properties = reader->getPropertyVectorFromProperty("tree");
-        for(IndexType i = 0; i <  properties.size(); i++)
-        {
-            String nodeName = properties[i].getStringFromProperty("node");
-            vector<String> edges = properties[i].getStringVectorFromProperty("edges");
-            
-            IndexType base = this->addNode(nodeName);
+        vector<CJsonReader> nodes = reader->getPropertyVectorFromProperty("nodes"); 
+        vector<CJsonReader> edges = reader->getPropertyVectorFromProperty("edges"); 
 
-            for(StringVector::iterator i = edges.begin(); i< edges.end(); i++)
+        for(IndexType i = 0; i <  nodes.size(); i++)
+        {
+            IndexType nodeId = nodes[i].getIntFromProperty("id");
+            String value = nodes[i].getStringFromProperty("value");
+
+            this->addNode(value);
+        }
+
+        for(IndexType i = 0; i <  edges.size(); i++)
+        {
+            IndexType nodeId = edges[i].getIntFromProperty("nodeId");
+            vector<IndexType> values = edges[i].getIntVectorFromProperty("values");
+
+            for(vector<IndexType>::iterator v = values.begin(); v < values.end(); v++)
             {
-                IndexType to = this->addNode(*i);
-                
-                this->addEdge(base, to);
+                this->addEdge(nodeId, *v);
             }
         }
 
         delete reader;
         reader = 0;
     }
-
 }

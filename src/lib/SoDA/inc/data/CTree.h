@@ -11,13 +11,13 @@ using namespace std;
 
 namespace soda
 {
+
     class CTree : public ITree
     {
         private:
-            IIDManager* m_codeElements;         // Id <-> string : mapping
-            vector<vector<IndexType>>* m_edges; // index=nodeId <-> [nodeId] : enumeration
-            vector<IndexType>* m_mapping;       // index=nodeId <-> codeElement.ID : mapping
-            IndexType* m_root;
+            IIDManager* m_codeElements;
+            vector<vector<IndexType>>* m_structure;
+            vector<Node*>* m_nodes;
 
         public:
             CTree();
@@ -26,11 +26,12 @@ namespace soda
             virtual IndexType nodeCount();
             virtual IndexType edgeCount();
             virtual void clear();
-            virtual IndexType addNode(const String& n);
-            virtual IndexType addNode(const IndexType i);
-            virtual IndexType addChild(const IndexType parentId, const String& n);
+            virtual Node* addNode(const String& n);
+            virtual Node* addNode(const IndexType i);
+            virtual Node* addChild(const IndexType parentId, const String& n);
             virtual void addEdge(const IndexType parentId, const IndexType childId);
-            virtual String getNodeValue(const IndexType nodeIndex);
+            virtual void addEdge(Node* parent, Node* child);
+            virtual String getNodeValue(Node* node);
             virtual vector<IndexType>& getEdges(const IndexType& i);
             virtual vector<IndexType> *getDFS(IndexType i);
             virtual vector<IndexType> *getBFS(IndexType i);

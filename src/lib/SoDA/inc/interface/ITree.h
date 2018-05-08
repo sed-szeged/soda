@@ -2,6 +2,7 @@
 #include <string>
 #include "data/CIDManager.h"
 #include "interface/IGraph.h"
+#include "data/Node.h"
 
 #ifndef ITREE_H
 #define ITREE_H
@@ -16,11 +17,12 @@ namespace soda
             virtual IndexType nodeCount() = 0;
             virtual IndexType edgeCount() = 0;
             virtual void clear() = 0;
-            virtual IndexType addNode(const String& n) = 0;
-            virtual IndexType addNode(const IndexType i) = 0;
-            virtual IndexType addChild(const IndexType parentId, const String& n) = 0;
+            virtual Node* addNode(const String& n) = 0;
+            virtual Node* addNode(const IndexType i) = 0;
+            virtual Node* addChild(const IndexType parentId, const String& n) = 0;
             virtual void addEdge(const IndexType parentId, const IndexType childId) = 0;
-            virtual String getNodeValue(const IndexType nodeIndex) = 0;
+            virtual void addEdge(Node* parent, Node* child) = 0;
+            virtual String getNodeValue(Node* node) = 0;
             virtual vector<IndexType>& getEdges(const IndexType& i) = 0;
             virtual vector<IndexType> *getDFS(IndexType i) = 0;
             virtual vector<IndexType> *getBFS(IndexType i) = 0;

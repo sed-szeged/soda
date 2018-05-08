@@ -135,8 +135,6 @@ namespace soda
             if(chunkId == io::CSoDAio::GRAPH){
                 IndexType nodeCount = in->readULongLong8();
 
-                vector<vector<IndexType>> nodes;
-
                 for (IndexType e = 0; e < nodeCount; ++e) {
                     IndexType edgeCount = in->readULongLong8();
 
