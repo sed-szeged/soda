@@ -11,10 +11,9 @@ using namespace std;
 
 namespace soda
 {
-
     class CTree : public ITree
     {
-        private:
+        protected:
             IIDManager* m_codeElements;
             vector<vector<IndexType>>* m_structure;
             vector<Node*>* m_nodes;
@@ -23,12 +22,15 @@ namespace soda
             CTree();
             ~CTree();
 
+            io::CSoDAio::ChunkID m_chunkId = io::CSoDAio::ChunkID::TREE;
+
             virtual IndexType nodeCount();
             virtual IndexType edgeCount();
             virtual void clear();
             virtual Node* addNode(const String& n);
             virtual Node* addNode(const IndexType i);
             virtual Node* addChild(const IndexType parentId, const String& n);
+            virtual bool isValid();
             virtual void addEdge(const IndexType parentId, const IndexType childId);
             virtual void addEdge(Node* parent, Node* child);
             virtual String getNodeValue(Node* node);

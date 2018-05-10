@@ -22,6 +22,7 @@ namespace soda
             virtual Node* addChild(const IndexType parentId, const String& n) = 0;
             virtual void addEdge(const IndexType parentId, const IndexType childId) = 0;
             virtual void addEdge(Node* parent, Node* child) = 0;
+            virtual bool isValid() = 0;
             virtual String getNodeValue(Node* node) = 0;
             virtual vector<IndexType>& getEdges(const IndexType& i) = 0;
             virtual vector<IndexType> *getDFS(IndexType i) = 0;

@@ -13,12 +13,12 @@
   ],
   "edges": [
     {"nodeId":"0", "values":["1","2","3"]},
-    {"nodeId":"1", "values":["4","5"]},
+    {"nodeId":"1", "values":["2","4","5"]},
     {"nodeId":"2", "values":["6"]},
     {"nodeId":"3", "values":["7"]},
     {"nodeId":"4", "values":[]},
-    {"nodeId":"5", "values":[]},
-    {"nodeId":"6", "values":[]},
+    {"nodeId":"5", "values":["6"]},
+    {"nodeId":"6", "values":["8"]},
     {"nodeId":"7", "values":["8","9"]},
     {"nodeId":"8", "values":[]},
     {"nodeId":"9", "values":[]}

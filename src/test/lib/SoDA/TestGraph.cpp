@@ -81,7 +81,7 @@ TEST(Graph, BFS)
     ASSERT_TRUE(bfs3->size() == 7);
 }
 
-TEST(Graph, SaveLoad)
+TEST(Graph, BinarySaveLoad)
 {
     CGraph graph = CGraph();
 

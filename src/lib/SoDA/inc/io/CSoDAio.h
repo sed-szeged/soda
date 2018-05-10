@@ -74,7 +74,8 @@ public:
         BUGSET,
         CHAIN,
         GRAPH,
-        TREE
+        TREE,
+        DAG
     };
 
     /**

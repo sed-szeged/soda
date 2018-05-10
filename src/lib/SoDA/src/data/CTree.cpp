@@ -40,10 +40,9 @@ namespace soda
     {
         IndexType count = 0;
 
-        for(vector<vector<IndexType>>::iterator it = m_structure->begin(); it != m_structure->end(); it++) {
-            {
-                count+= it->size();
-            }
+        for(vector<vector<IndexType>>::iterator it = m_structure->begin(); it != m_structure->end(); it++) 
+        {
+            count+= it->size();
         }
 
         return count;
@@ -83,7 +82,6 @@ namespace soda
     {
         Node* newNode = addNode(n);
         m_structure->at(parentId).push_back(newNode->m_id);
-        m_structure->at(newNode->m_id).push_back(parentId);
 
         return newNode;
     }
@@ -93,55 +91,27 @@ namespace soda
         return m_codeElements->getValue(node->m_elementId);
     }
 
-    bool hasCommonNode(soda::IntVector* treeA, soda::IntVector* treeB)
+    bool CTree::isValid()
     {
-        for(soda::IntVector::iterator pi = treeA->begin(); pi != treeA->end(); pi++)
-        {
-            for(soda::IntVector::iterator ci = treeB->begin(); ci != treeB->end(); ci++)
-            {
-                if(*ci == *pi)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return CBFS(*m_structure).isValid(0);
     }
 
     void CTree::addEdge(const IndexType parentId, const IndexType childId)
     {
-        bool standaloneChild = m_structure->at(childId).size() == 0;
-        bool independentTrees = false;
-
-        if(!standaloneChild)
+        bool exsistingEdge = std::find(m_structure->at(childId).begin(), m_structure->at(childId).end(), parentId) != m_structure->at(childId).end();
+        if(exsistingEdge)
         {
-            bool exsistingEdge = std::find(m_structure->at(childId).begin(), m_structure->at(childId).end(), parentId) != m_structure->at(childId).end();
-            if(exsistingEdge)
-                return;
-
-            auto parentTreeNodes = CBFS(*m_structure).getBFS(parentId);
-            auto childTreeNodes = CBFS(*m_structure).getBFS(childId);
-
-            independentTrees = !hasCommonNode(parentTreeNodes, childTreeNodes);
-
-            delete parentTreeNodes;
-            delete childTreeNodes;
+            return;
         }
 
-        if(standaloneChild || independentTrees)
-        {
-            auto edges = m_structure->at(parentId);
+        m_structure->at(parentId).push_back(childId);
 
-            if(std::find(edges.begin(), edges.end(), childId) == edges.end())
-            {
-                m_structure->at(parentId).push_back(childId);
-                m_structure->at(childId).push_back(parentId);
-            }
-        }
-        else
+        bool isValid = this->isValid();
+
+        if (!isValid)
         {
-            throw logic_error("These points can not be linked because they form a circle.");
+            m_structure->at(parentId).pop_back();
+            throw logic_error("This edge cannot be applied. It creates a circle.");
         }
     }
 
@@ -161,7 +131,7 @@ namespace soda
         m_codeElements->save(out, io::CSoDAio::IDMANAGER);
 
         //Tree
-        out->writeUInt4(io::CSoDAio::TREE);
+        out->writeUInt4(m_chunkId);
 
         IndexType length = sizeof(IndexType);
 
@@ -212,11 +182,12 @@ namespace soda
         while(in->nextChunkID()) {
             auto chunkId = in->getChunkID();
 
-            if(chunkId == io::CSoDAio::IDMANAGER) {
+            if(chunkId == io::CSoDAio::IDMANAGER) 
+            {
                 m_codeElements->load(in);
             }
 
-            if(chunkId == io::CSoDAio::TREE){
+            if(m_chunkId == chunkId){
                 IndexType nodeCount = in->readULongLong8();
 
                 for(IndexType i = 0; i < nodeCount; ++i)
@@ -227,12 +198,14 @@ namespace soda
                     m_nodes->push_back(new Node(mId, mElementId));
                 }
 
-                for (IndexType e = 0; e < nodeCount; ++e) {
+                for (IndexType e = 0; e < nodeCount; ++e) 
+                {
                     IndexType edgeCount = in->readULongLong8();
 
                     vector<IndexType> edges;
                     
-                    for (IndexType i = 0; i < edgeCount; ++i) {
+                    for (IndexType i = 0; i < edgeCount; ++i) 
+                    {
                         IndexType edge = in->readULongLong8();
                         
                         edges.push_back(edge);

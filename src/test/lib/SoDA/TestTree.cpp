@@ -41,7 +41,7 @@ TEST(Tree, BuildTreeByLinkingNodes) {
     tree.addEdge(n7, n8);
     tree.addEdge(n7, n9);
 
-    ASSERT_TRUE(tree.edgeCount() == 18);
+    ASSERT_TRUE(tree.edgeCount() == 9);
 }
 
 TEST(Tree, BuildTreeByLinkingSubTrees) {
@@ -71,7 +71,7 @@ TEST(Tree, BuildTreeByLinkingSubTrees) {
     tree.addEdge(n0, n2);
     tree.addEdge(n0, n3);
 
-    ASSERT_TRUE(tree.edgeCount() == 18);
+    ASSERT_TRUE(tree.edgeCount() == 9);
     ASSERT_TRUE(tree.nodeCount() == 10);
 }
 
@@ -89,7 +89,7 @@ TEST(Tree, BuildTreeByLeaves) {
     auto n9 = tree.addChild(n7->m_id, "J");
 
     ASSERT_TRUE(tree.nodeCount() == 10);
-    ASSERT_TRUE(tree.edgeCount() == 18);
+    ASSERT_TRUE(tree.edgeCount() == 9);
 }
 
 TEST(Tree, FormingCircleBySubTrees) {
@@ -139,13 +139,13 @@ TEST(Tree, DFS)
     ASSERT_TRUE(dfs0->size() == 10);
 
     vector<IndexType>* dfs1 = tree.getDFS(n1->m_id);
-    ASSERT_TRUE(dfs1->size() == 10);
+    ASSERT_TRUE(dfs1->size() == 3);
 
-    vector<IndexType>* dfs2 = tree.getDFS(n6->m_id);
-    ASSERT_TRUE(dfs2->size() == 10);
+    vector<IndexType>* dfs2 = tree.getDFS(n3->m_id);
+    ASSERT_TRUE(dfs2->size() == 4);
 
     vector<IndexType>* dfs3 = tree.getDFS(n9->m_id);
-    ASSERT_TRUE(dfs3->size() == 10);
+    ASSERT_TRUE(dfs3->size() == 1);
 }
 
 TEST(Tree, BFS)
@@ -166,16 +166,16 @@ TEST(Tree, BFS)
     ASSERT_TRUE(dfs0->size() == 10);
 
     vector<IndexType>* dfs1 = tree.getBFS(n1->m_id);
-    ASSERT_TRUE(dfs1->size() == 10);
+    ASSERT_TRUE(dfs1->size() == 3);
 
-    vector<IndexType>* dfs2 = tree.getBFS(n6->m_id);
-    ASSERT_TRUE(dfs2->size() == 10);
+    vector<IndexType>* dfs2 = tree.getBFS(n2->m_id);
+    ASSERT_TRUE(dfs2->size() == 2);
 
     vector<IndexType>* dfs3 = tree.getBFS(n9->m_id);
-    ASSERT_TRUE(dfs3->size() == 10);
+    ASSERT_TRUE(dfs3->size() == 1);
 }
 
-TEST(Tree, SaveLoad)
+TEST(Tree, BinarySaveLoad)
 {
     CTree tree = CTree();
 
@@ -199,7 +199,7 @@ TEST(Tree, SaveLoad)
     loadedCTree.load("treeFile");
 
     ASSERT_EQ(loadedCTree.nodeCount(), 7);
-    ASSERT_EQ(loadedCTree.edgeCount(), 12);
+    ASSERT_EQ(loadedCTree.edgeCount(), 6);
 }
 
 TEST(Tree, JsonLoad)
@@ -207,49 +207,47 @@ TEST(Tree, JsonLoad)
     CTree tree = CTree();
     tree.loadJson("sample/ctree.json");
 
-    //alias = index
-    //a = 0
-    //b = 1
-    //c = 2
-    //d = 3
-    //e = 4
-    //f = 5
-    //g = 6
-
-    ASSERT_EQ(tree.nodeCount(), 7);  // a,b,c,d,e,f,g
-    ASSERT_EQ(tree.edgeCount(), 12); // ab,ac,ad,ce,cf,dg (6*2)
+    ASSERT_EQ(tree.nodeCount(), 10);  // 0,1,2,3,4,5,6,7,8,9
+    ASSERT_EQ(tree.edgeCount(), 9); // 0>1,0>2,0>3,1>4,1>5,2>6,3>7,7>8,7>9
 
     auto aEdges = tree.getEdges(0);
-    ASSERT_EQ(aEdges.size(), 3); // 1(b), 2(c), 3(d)
+    ASSERT_EQ(aEdges.size(), 3);
     ASSERT_TRUE(std::find(aEdges.begin(), aEdges.end(), 1) != aEdges.end());
     ASSERT_TRUE(std::find(aEdges.begin(), aEdges.end(), 2) != aEdges.end());
     ASSERT_TRUE(std::find(aEdges.begin(), aEdges.end(), 3) != aEdges.end());
     ASSERT_TRUE(std::find(aEdges.begin(), aEdges.end(), 10) == aEdges.end()); //control case
 
     auto bEdges = tree.getEdges(1);
-    ASSERT_EQ(bEdges.size(), 1); //0(a)
-    ASSERT_TRUE(std::find(bEdges.begin(), bEdges.end(), 0) != bEdges.end());
+    ASSERT_EQ(bEdges.size(), 2);
+    ASSERT_TRUE(std::find(bEdges.begin(), bEdges.end(), 4) != bEdges.end());
+    ASSERT_TRUE(std::find(bEdges.begin(), bEdges.end(), 5) != bEdges.end());
 
     auto cEdges = tree.getEdges(2);
-    ASSERT_EQ(cEdges.size(), 3); //0(a), 4(e), 5(f)
-    ASSERT_TRUE(std::find(cEdges.begin(), cEdges.end(), 0) != cEdges.end());
-    ASSERT_TRUE(std::find(cEdges.begin(), cEdges.end(), 4) != cEdges.end());
-    ASSERT_TRUE(std::find(cEdges.begin(), cEdges.end(), 5) != cEdges.end());
-
+    ASSERT_EQ(cEdges.size(), 1);
+    ASSERT_TRUE(std::find(cEdges.begin(), cEdges.end(), 6) != cEdges.end());
+    
     auto dEdges = tree.getEdges(3);
-    ASSERT_EQ(dEdges.size(), 2); //0(a), 6(g)
-    ASSERT_TRUE(std::find(dEdges.begin(), dEdges.end(), 0) != dEdges.end());
-    ASSERT_TRUE(std::find(dEdges.begin(), dEdges.end(), 6) != dEdges.end());
-
+    ASSERT_EQ(dEdges.size(), 1);
+    ASSERT_TRUE(std::find(dEdges.begin(), dEdges.end(), 7) != dEdges.end());
+    
     auto eEdges = tree.getEdges(4);
-    ASSERT_EQ(eEdges.size(), 1); //2(c)
-    ASSERT_TRUE(std::find(eEdges.begin(), eEdges.end(), 2) != eEdges.end());
-
+    ASSERT_EQ(eEdges.size(), 0);
+    
     auto fEdges = tree.getEdges(5);
-    ASSERT_EQ(fEdges.size(), 1); //2(c)
-    ASSERT_TRUE(std::find(fEdges.begin(), fEdges.end(), 2) != fEdges.end());
-
+    ASSERT_EQ(fEdges.size(), 0);
+    
     auto gEdges = tree.getEdges(6);
-    ASSERT_EQ(gEdges.size(), 1); //3(d)
-    ASSERT_TRUE(std::find(gEdges.begin(), gEdges.end(), 3) != gEdges.end());
+    ASSERT_EQ(gEdges.size(), 0);
+    
+    auto hEdges = tree.getEdges(7);
+    ASSERT_EQ(hEdges.size(), 2);
+    ASSERT_TRUE(std::find(hEdges.begin(), hEdges.end(), 8) != hEdges.end());
+    ASSERT_TRUE(std::find(hEdges.begin(), hEdges.end(), 9) != hEdges.end());
+
+    auto iEdges = tree.getEdges(8);
+    ASSERT_EQ(iEdges.size(), 0);
+
+    auto jEdges = tree.getEdges(9);
+    ASSERT_EQ(jEdges.size(), 0);
+
 }

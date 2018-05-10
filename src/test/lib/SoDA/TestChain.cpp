@@ -54,7 +54,7 @@ TEST(Chain, Iterators)
     ASSERT_EQ(*--s.end(), "_2");
 }
 
-TEST(Chain, SaveLoad)
+TEST(Chain, BinarySaveLoad)
 {
     CChain s = CChain();
     s.add("_0");

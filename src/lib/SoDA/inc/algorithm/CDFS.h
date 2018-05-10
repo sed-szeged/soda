@@ -1,4 +1,5 @@
 #include "data/SoDALibDefs.h"
+#include "data/CBitMatrix.h"
 
 #ifndef CDFS_H
 #define CDFS_H
@@ -12,13 +13,15 @@ namespace soda
         private:
             vector<vector<IndexType>>* m_edges;
             vector<IndexType>* m_dfsOrder;
-            void DFS(int v, bool visited[]);
+            void recursiveHelper(IndexType current, bool *visited);
+            bool hasCycleHelper(IndexType current, bool visited[], bool *recorded);
 
         public:
-            vector<IndexType> *getDFS(const IndexType& root);
-
-            CDFS(vector<vector<IndexType>>& m_edges);
+            CDFS(vector<vector<IndexType>> &m_edges);
             ~CDFS();
+
+            vector<IndexType> *getDFS(IndexType root);
+            bool hasCycle();
     };
 }
 
