@@ -80,4 +80,63 @@ namespace soda
 
         return true;
     }
+
+    list<IndexType>* CBFS::scrollBackSingleChain(vector<Node*>* chainElements, Node* endNode, IndexType root)
+    {
+        list<IndexType>* chain = new list<IndexType>();
+
+        chain->push_front(endNode->m_elementId);
+        Node* n = chainElements->at(endNode->m_id);
+
+        while(n->m_elementId != root)
+        {
+            chain->push_front(n->m_elementId);
+            n = chainElements->at(n->m_id);
+        }
+
+        chain->push_front(n->m_elementId);
+
+        return chain;
+    }
+
+    vector<list<IndexType>*>* CBFS::getPaths(IndexType root)
+    {
+        auto chains = new vector<list<IndexType>*>();
+
+        vector<Node*>* chainElements = new vector<Node*>();
+        list<IndexType> currentLevel;
+        IndexType index = 0;
+
+        Node* rootNode = new Node(index,root);
+
+        chainElements->push_back(rootNode);
+        currentLevel.push_back(0);
+
+        while(!currentLevel.empty())
+        {
+            IndexType parentIndex = currentLevel.front();
+            currentLevel.pop_front();
+
+            for (std::vector<IndexType>::iterator i = m_edges->at(chainElements->at(parentIndex)->m_elementId).begin(); i != m_edges->at(chainElements->at(parentIndex)->m_elementId).end(); ++i)
+            {
+                Node* c = new Node(parentIndex, *i);
+                chainElements->push_back(c);
+                if(m_edges->at(*i).size() == 0)
+                {
+                    chains->push_back(scrollBackSingleChain(chainElements, c, root));
+                }
+
+                currentLevel.push_back(++index);
+            }
+        }
+
+        for(IndexType i = 0; i < chainElements->size(); i++)
+        {
+            delete chainElements->at(i);
+        }
+        
+        delete chainElements;
+
+        return chains;
+    }
 }

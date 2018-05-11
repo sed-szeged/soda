@@ -24,14 +24,15 @@ namespace soda
             virtual void addEdge(Node* parent, Node* child) = 0;
             virtual bool isValid() = 0;
             virtual String getNodeValue(Node* node) = 0;
+            virtual String getValue(IndexType elementId) = 0;
             virtual vector<IndexType>& getEdges(const IndexType& i) = 0;
-            virtual vector<IndexType> *getDFS(IndexType i) = 0;
-            virtual vector<IndexType> *getBFS(IndexType i) = 0;
-            // virtual vector<vector<IndexType>*> *convertToChains() = 0;
-            virtual void save(io::CBinaryIO *out) const = 0;
-            virtual void load(io::CSoDAio *in) = 0;
-            virtual void save(const char * filename) const = 0;
-            virtual void load(const char * filename) = 0;
+            virtual vector<IndexType>* getDFS(IndexType i) = 0;
+            virtual vector<IndexType>* getBFS(IndexType i) = 0;
+            virtual vector<list<IndexType>*>* convertToChains() = 0;
+            virtual void save(io::CBinaryIO* out) const = 0;
+            virtual void load(io::CSoDAio* in) = 0;
+            virtual void save(const char* filename) const = 0;
+            virtual void load(const char* filename) = 0;
             virtual void loadJson(const String& path) = 0;
     };
 }

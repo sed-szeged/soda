@@ -251,3 +251,55 @@ TEST(Tree, JsonLoad)
     ASSERT_EQ(jEdges.size(), 0);
 
 }
+
+TEST(Tree, ConvertToChains)
+{
+    CTree tree = CTree();
+    tree.loadJson("sample/ctree.json");
+
+    vector<list<IndexType>*>* chains = tree.convertToChains();
+
+    //Chains:
+    //abe (014)
+    //abf (015)
+    //acg (027)
+    //adhi (0378)
+    //adhj (0379)
+    
+    ASSERT_EQ(chains->size(), 5);
+
+    String chain0;
+    for(list<IndexType>::iterator c = chains->at(0)->begin(); c != chains->at(0)->end(); c++)
+    {
+        chain0.append(tree.getValue(*c));
+    }
+    ASSERT_EQ(chain0, "abe");
+
+    String chain1;
+    for(list<IndexType>::iterator c = chains->at(1)->begin(); c != chains->at(1)->end(); c++)
+    {
+        chain1.append(tree.getValue(*c));
+    }
+    ASSERT_EQ(chain1, "abf");
+
+    String chain2;
+    for(list<IndexType>::iterator c = chains->at(2)->begin(); c != chains->at(2)->end(); c++)
+    {
+        chain2.append(tree.getValue(*c));
+    }
+    ASSERT_EQ(chain2, "acg");
+
+    String chain3;
+    for(list<IndexType>::iterator c = chains->at(3)->begin(); c != chains->at(3)->end(); c++)
+    {
+        chain3.append(tree.getValue(*c));
+    }
+    ASSERT_EQ(chain3, "adhi");
+
+    String chain4;
+    for(list<IndexType>::iterator c = chains->at(4)->begin(); c != chains->at(4)->end(); c++)
+    {
+        chain4.append(tree.getValue(*c));
+    }
+    ASSERT_EQ(chain4, "adhj");
+}

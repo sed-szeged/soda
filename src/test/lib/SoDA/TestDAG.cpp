@@ -249,3 +249,63 @@ TEST(DAG, JsonLoad)
     auto jEdges = dag.getEdges(9);
     ASSERT_EQ(jEdges.size(), 0);
 }
+
+TEST(DAG, ConvertToChains)
+{
+    CDAG dag = CDAG();
+    dag.loadJson("sample/cdagChains.json");
+
+    vector<list<IndexType>*>* chains = dag.convertToChains();
+
+    //Chains:
+    //abe (014)
+    //acgi (0268)
+    //adhi (0378)
+    //adhj (0379)
+    //abcgi (01268)
+    //abfcgi (015368)
+
+    ASSERT_EQ(chains->size(), 6);
+
+    String chain0;
+    for(list<IndexType>::iterator c = chains->at(0)->begin(); c != chains->at(0)->end(); c++)
+    {
+        chain0.append(dag.getValue(*c));
+    }
+    ASSERT_EQ(chain0, "abe");
+
+    String chain1;
+    for(list<IndexType>::iterator c = chains->at(1)->begin(); c != chains->at(1)->end(); c++)
+    {
+        chain1.append(dag.getValue(*c));
+    }
+    ASSERT_EQ(chain1, "acgi");
+
+    String chain2;
+    for(list<IndexType>::iterator c = chains->at(2)->begin(); c != chains->at(2)->end(); c++)
+    {
+        chain2.append(dag.getValue(*c));
+    }
+    ASSERT_EQ(chain2, "adhi");
+
+    String chain3;
+    for(list<IndexType>::iterator c = chains->at(3)->begin(); c != chains->at(3)->end(); c++)
+    {
+        chain3.append(dag.getValue(*c));
+    }
+    ASSERT_EQ(chain3, "adhj");
+
+    String chain4;
+    for(list<IndexType>::iterator c = chains->at(4)->begin(); c != chains->at(4)->end(); c++)
+    {
+        chain4.append(dag.getValue(*c));
+    }
+    ASSERT_EQ(chain4, "abcgi");
+
+    String chain5;
+    for(list<IndexType>::iterator c = chains->at(5)->begin(); c != chains->at(5)->end(); c++)
+    {
+        chain5.append(dag.getValue(*c));
+    }
+    ASSERT_EQ(chain5, "abfcgi");
+}

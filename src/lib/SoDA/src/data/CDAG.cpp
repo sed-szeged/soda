@@ -28,7 +28,13 @@ namespace soda
     {
         m_codeElements->clear();
         m_structure->clear();
-        m_nodes->clear(); //for each element
+        
+        for(IndexType i = 0; i < m_nodes->size(); i++)
+        {
+            delete m_nodes->at(i);
+        }
+        
+        m_nodes->clear();
     }
 
     IndexType CDAG::nodeCount()
@@ -91,6 +97,11 @@ namespace soda
         return m_codeElements->getValue(node->m_elementId);
     }
 
+    String CDAG::getValue(IndexType elementId)
+    {
+        return m_codeElements->getValue(elementId);
+    }
+
     bool CDAG::isValid()
     {
         return !CDFS(*m_structure).hasCycle();
@@ -125,14 +136,10 @@ namespace soda
         return CBFS(*m_structure).getBFS(i);
     }
 
-    // vector<vector<IndexType>*> *convertToChains()
-    // {
-    //     auto chains = new vector<vector<IndexType>*>();
-
-    //     //TODO
-
-    //     return chains;
-    // }
+    vector<list<IndexType>*> *CDAG::convertToChains()
+    {
+        return CBFS(*m_structure).getPaths(0);
+    }
 
     void CDAG::save(io::CBinaryIO *out) const
     {

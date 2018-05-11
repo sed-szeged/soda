@@ -20,7 +20,6 @@ namespace soda
             virtual Node* addChild(const IndexType parentId, const String& n) override;
             virtual bool isValid() override;
             virtual void addEdge(Node* parent, Node* child);
-            // virtual vector<vector<IndexType>*> *convertToChains() override;
     };
 }
 

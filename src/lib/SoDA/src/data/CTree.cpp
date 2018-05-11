@@ -14,7 +14,15 @@ namespace soda
 
     CTree::~CTree()
     {
+        m_codeElements->clear();
+        m_structure->clear();
 
+        for(IndexType i = 0; i < m_nodes->size(); i++)
+        {
+            delete m_nodes->at(i);
+        }
+
+        m_nodes->clear();
     }
 
     Node* CTree::addChild(const IndexType parentId, const String& n)
@@ -24,13 +32,6 @@ namespace soda
 
         return newNode;
     }
-
-    // vector<vector<IndexType>*> *convertToChains()
-    // {
-    //     auto chains = new vector<vector<IndexType>*>();
-    //     //TODO
-    //     return chains;
-    // }
 
     bool CTree::isValid()
     {
