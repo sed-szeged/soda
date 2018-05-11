@@ -4,14 +4,14 @@
 #include "interface/IGraph.h"
 #include "data/Node.h"
 
-#ifndef ITREE_H
-#define ITREE_H
+#ifndef IDAG_H
+#define IDAG_H
 
 using namespace std;
 
 namespace soda
 {
-    class ITree
+    class IDAG
     {
         public:
             virtual IndexType nodeCount() = 0;
@@ -27,6 +27,7 @@ namespace soda
             virtual vector<IndexType>& getEdges(const IndexType& i) = 0;
             virtual vector<IndexType> *getDFS(IndexType i) = 0;
             virtual vector<IndexType> *getBFS(IndexType i) = 0;
+            // virtual vector<vector<IndexType>*> *convertToChains() = 0;
             virtual void save(io::CBinaryIO *out) const = 0;
             virtual void load(io::CSoDAio *in) = 0;
             virtual void save(const char * filename) const = 0;
