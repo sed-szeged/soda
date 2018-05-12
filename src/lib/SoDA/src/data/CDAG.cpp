@@ -62,9 +62,9 @@ namespace soda
         return count;
     }
 
-    vector<IndexType>& CDAG::getEdges(const IndexType& i)
+    vector<IndexType>& CDAG::getEdges(const IndexType& nodeId)
     {
-        return m_structure->at(i);
+        return m_structure->at(nodeId);
     }
 
     void CDAG::addEdge(Node* parent, Node* child)
@@ -72,10 +72,10 @@ namespace soda
         addEdge(parent->m_id, child->m_id);
     }
 
-    Node* CDAG::addNode(const IndexType i)
+    Node* CDAG::addNode(const IndexType elementId)
     {
         IndexType newIndex =  m_nodes->size() == 0 ? 0 : m_nodes->back()->m_id+1;
-        Node* n = new Node(newIndex, i);
+        Node* n = new Node(newIndex, elementId);
 
         m_nodes->push_back(n);
         m_structure->push_back(vector<IndexType>());
@@ -92,10 +92,10 @@ namespace soda
         return addNode(i);
     }
 
-    Node* CDAG::addChild(const IndexType parentId, const String& n)
+    Node* CDAG::addChild(const IndexType parentNodeId, const String& n)
     {
         Node* newNode = addNode(n);
-        m_structure->at(parentId).push_back(newNode->m_id);
+        m_structure->at(parentNodeId).push_back(newNode->m_id);
 
         return newNode;
     }
@@ -105,31 +105,36 @@ namespace soda
         return m_codeElements->getValue(node->m_elementId);
     }
 
+    String CDAG::getNodeValue(IndexType nodeId)
+    {
+        return m_codeElements->getValue(m_nodes->at(nodeId)->m_elementId);
+    }
+
     String CDAG::getValue(IndexType elementId)
     {
         return m_codeElements->getValue(elementId);
     }
 
-    bool CDAG::isValid()
+    bool CDAG::isValid(IndexType root)
     {
         return !CDFS(*m_structure).hasCycle();
     }
 
-    void CDAG::addEdge(const IndexType parentId, const IndexType childId)
+    void CDAG::addEdge(const IndexType parentNodeId, const IndexType childNodeId)
     {
-        bool exsistingEdge = std::find(m_structure->at(childId).begin(), m_structure->at(childId).end(), parentId) != m_structure->at(childId).end();
-        if(exsistingEdge)
+        bool exsistingEdge = std::find(m_structure->at(parentNodeId).begin(), m_structure->at(parentNodeId).end(), childNodeId) != m_structure->at(parentNodeId).end();
+        if(exsistingEdge || parentNodeId == childNodeId)
         {
             return;
         }
 
-        m_structure->at(parentId).push_back(childId);
+        m_structure->at(parentNodeId).push_back(childNodeId);
 
-        bool isValid = this->isValid();
+        bool isValid = this->isValid(0);
 
         if (!isValid)
         {
-            m_structure->at(parentId).pop_back();
+            m_structure->at(parentNodeId).pop_back();
             throw logic_error("This edge cannot be applied. It creates a circle.");
         }
     }
@@ -144,7 +149,7 @@ namespace soda
         return CBFS(*m_structure).getBFS(i);
     }
 
-    vector<list<IndexType>*> *CDAG::convertToChains()
+    vector<list<IndexType>*> *CDAG::convertToNodeIdChains()
     {
         return CBFS(*m_structure).getPaths(0);
     }
@@ -308,5 +313,47 @@ namespace soda
         }
 
         return graph;
+    }
+
+    CDAG* CDAG::getContractedDAG()
+    {
+        auto paths = this->convertToNodeIdChains();
+        
+        CDAG* newDAG = new CDAG();
+
+        for(IndexType chainId = 0; chainId < paths->size(); chainId++)
+        {
+            IndexType parentNodeId = 0;
+            IndexType currentNodeId = 0;
+
+            for(list<IndexType>::iterator i = paths->at(chainId)->begin(); i != paths->at(chainId)->end(); i++)
+            {
+                String elementValue = m_codeElements->getValue(m_nodes->at(*i)->m_elementId);
+                
+                if(!newDAG->m_codeElements->containsValue(elementValue))
+                {
+                    //New node
+                    if(i == paths->at(chainId)->begin())
+                    {
+                        //Root
+                        parentNodeId = newDAG->addNode(elementValue)->m_id;
+                    }
+                    else
+                    {
+                        //Leaf
+                        parentNodeId = newDAG->addChild(m_nodes->at(parentNodeId)->m_id, elementValue)->m_id;
+                    }
+                }
+                else if(i != paths->at(chainId)->begin())
+                {
+                    //New edge
+                    currentNodeId = newDAG->m_codeElements->getID(elementValue);
+                    newDAG->addEdge(parentNodeId, currentNodeId);
+                    parentNodeId = currentNodeId;
+                }
+            }
+        }
+
+        return newDAG;
     }
 }

@@ -250,12 +250,12 @@ TEST(DAG, JsonLoad)
     ASSERT_EQ(jEdges.size(), 0);
 }
 
-TEST(DAG, ConvertToChains)
+TEST(DAG, convertToNodeIdChains)
 {
     CDAG dag;
     dag.loadJson("sample/cdagChains.json");
 
-    vector<list<IndexType>*>* chains = dag.convertToChains();
+    vector<list<IndexType>*>* chains = dag.convertToNodeIdChains();
 
     //Chains:
     //abe (014)

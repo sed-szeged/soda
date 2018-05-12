@@ -17,8 +17,8 @@ namespace soda
 
             const io::CSoDAio::ChunkID m_chunkId = io::CSoDAio::ChunkID::TREE;
 
-            virtual Node* addChild(const IndexType parentId, const String& n) override;
-            virtual bool isValid() override;
+            virtual Node* addChild(const IndexType parentNodeId, const String& n) override;
+            virtual bool isValid(IndexType root) override;
             virtual void addEdge(Node* parent, Node* child);
             virtual CDAG* toDAG();
     };

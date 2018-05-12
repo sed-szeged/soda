@@ -252,54 +252,113 @@ TEST(Tree, JsonLoad)
 
 }
 
-TEST(Tree, ConvertToChains)
+TEST(Tree, convertToNodeIdChains)
 {
     CTree tree = CTree();
-    tree.loadJson("sample/ctree.json");
+    auto n0 = tree.addNode("A"); //Root
+    auto n1 = tree.addChild(n0->m_id, "B");
+    auto n2 = tree.addChild(n0->m_id, "C");
+    auto n3 = tree.addChild(n0->m_id, "D");
+        
+    auto n4 = tree.addChild(n1->m_id, "C");
+    auto n5 = tree.addChild(n1->m_id, "E");
+    auto n6 = tree.addChild(n1->m_id, "F");
 
-    vector<list<IndexType>*>* chains = tree.convertToChains();
+    auto n7 = tree.addChild(n4->m_id, "F");
+    auto n8 = tree.addChild(n7->m_id, "I");
 
-    //Chains:
-    //abe (014)
-    //abf (015)
-    //acg (027)
-    //adhi (0378)
-    //adhj (0379)
-    
-    ASSERT_EQ(chains->size(), 5);
+    auto n9 = tree.addChild(n6->m_id, "C");
+    auto n10 = tree.addChild(n9->m_id, "G");
+    auto n11 = tree.addChild(n10->m_id, "I");
+
+    auto n12 = tree.addChild(n2->m_id, "G");
+    auto n13 = tree.addChild(n12->m_id, "I");
+
+    auto n14 = tree.addChild(n3->m_id, "H");
+    auto n15 = tree.addChild(n14->m_id, "I");
+    auto n16 = tree.addChild(n14->m_id, "J");
+
+
+    vector<list<IndexType>*>* nodeIdChains = tree.convertToNodeIdChains();
+
+    ASSERT_EQ(nodeIdChains->size(), 6);
 
     String chain0;
-    for(list<IndexType>::iterator c = chains->at(0)->begin(); c != chains->at(0)->end(); c++)
+    for(list<IndexType>::iterator c = nodeIdChains->at(0)->begin(); c != nodeIdChains->at(0)->end(); c++)
     {
-        chain0.append(tree.getValue(*c));
+        chain0.append(tree.getNodeValue(*c));
     }
-    ASSERT_EQ(chain0, "abe");
+    ASSERT_EQ(chain0, "ABE");
 
     String chain1;
-    for(list<IndexType>::iterator c = chains->at(1)->begin(); c != chains->at(1)->end(); c++)
+    for(list<IndexType>::iterator c = nodeIdChains->at(1)->begin(); c != nodeIdChains->at(1)->end(); c++)
     {
-        chain1.append(tree.getValue(*c));
+        chain1.append(tree.getNodeValue(*c));
     }
-    ASSERT_EQ(chain1, "abf");
+    ASSERT_EQ(chain1, "ACGI");
 
     String chain2;
-    for(list<IndexType>::iterator c = chains->at(2)->begin(); c != chains->at(2)->end(); c++)
+    for(list<IndexType>::iterator c = nodeIdChains->at(2)->begin(); c != nodeIdChains->at(2)->end(); c++)
     {
-        chain2.append(tree.getValue(*c));
+        chain2.append(tree.getNodeValue(*c));
     }
-    ASSERT_EQ(chain2, "acg");
+    ASSERT_EQ(chain2, "ADHI");
 
     String chain3;
-    for(list<IndexType>::iterator c = chains->at(3)->begin(); c != chains->at(3)->end(); c++)
+    for(list<IndexType>::iterator c = nodeIdChains->at(3)->begin(); c != nodeIdChains->at(3)->end(); c++)
     {
-        chain3.append(tree.getValue(*c));
+        chain3.append(tree.getNodeValue(*c));
     }
-    ASSERT_EQ(chain3, "adhi");
+    ASSERT_EQ(chain3, "ADHJ");
 
     String chain4;
-    for(list<IndexType>::iterator c = chains->at(4)->begin(); c != chains->at(4)->end(); c++)
+    for(list<IndexType>::iterator c = nodeIdChains->at(4)->begin(); c != nodeIdChains->at(4)->end(); c++)
     {
-        chain4.append(tree.getValue(*c));
+        chain4.append(tree.getNodeValue(*c));
     }
-    ASSERT_EQ(chain4, "adhj");
+    ASSERT_EQ(chain4, "ABCFI");
+
+    String chain5;
+    for(list<IndexType>::iterator c = nodeIdChains->at(5)->begin(); c != nodeIdChains->at(5)->end(); c++)
+    {
+        chain5.append(tree.getNodeValue(*c));
+    }
+    ASSERT_EQ(chain5, "ABFCGI");
+}
+
+TEST(Tree, toDAG)
+{
+    CTree tree = CTree();
+    auto n0 = tree.addNode("A"); //Root
+    auto n1 = tree.addChild(n0->m_id, "B");
+    auto n2 = tree.addChild(n0->m_id, "C");
+    auto n3 = tree.addChild(n0->m_id, "D");
+        
+    auto n4 = tree.addChild(n1->m_id, "C");
+    auto n5 = tree.addChild(n1->m_id, "E");
+    auto n6 = tree.addChild(n1->m_id, "F");
+
+    auto n7 = tree.addChild(n4->m_id, "G");
+    auto n8 = tree.addChild(n7->m_id, "I");
+
+    auto n9 = tree.addChild(n6->m_id, "C");
+    auto n10 = tree.addChild(n9->m_id, "G");
+    auto n11 = tree.addChild(n10->m_id, "I");
+
+    auto n12 = tree.addChild(n2->m_id, "G");
+    auto n13 = tree.addChild(n12->m_id, "I");
+
+    auto n14 = tree.addChild(n3->m_id, "H");
+    auto n15 = tree.addChild(n14->m_id, "I");
+    auto n16 = tree.addChild(n14->m_id, "J");
+
+    CDAG* dag = tree.toDAG();
+
+    ASSERT_EQ(dag->nodeCount(), 17);
+    ASSERT_EQ(dag->edgeCount(), 16);
+
+    auto contractedDAG = dag->getContractedDAG();
+
+    ASSERT_EQ(contractedDAG->nodeCount(), 10);
+    ASSERT_EQ(contractedDAG->edgeCount(), 12);
 }

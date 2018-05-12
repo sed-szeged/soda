@@ -41,7 +41,7 @@ namespace soda
         return m_bfsOrder;
     }
 
-    bool CBFS::isValid(IndexType root)
+    bool CBFS::isDegreeGTOne(IndexType root)
     {
         //Is it possible to touch all of the nodes one-time only
         IndexType nodeCount = m_edges->size();
@@ -72,13 +72,12 @@ namespace soda
                 }
                 else
                 {
-                    //If the node is already visited meens that has two parents.
-                    return false;
+                    return true;
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
     list<IndexType>* CBFS::scrollBackSingleChain(vector<Node*>* chainElements, Node* endNode, IndexType root)
@@ -99,7 +98,7 @@ namespace soda
         return chain;
     }
 
-    vector<list<IndexType>*>* CBFS::getPaths(IndexType root)
+    vector<list<IndexType>*>* CBFS::getPaths(IndexType rootElementId)
     {
         auto chains = new vector<list<IndexType>*>();
 
@@ -107,7 +106,7 @@ namespace soda
         list<IndexType> currentLevel;
         IndexType index = 0;
 
-        Node* rootNode = new Node(index,root);
+        Node* rootNode = new Node(index,rootElementId);
 
         chainElements->push_back(rootNode);
         currentLevel.push_back(0);
@@ -123,7 +122,7 @@ namespace soda
                 chainElements->push_back(c);
                 if(m_edges->at(*i).size() == 0)
                 {
-                    chains->push_back(scrollBackSingleChain(chainElements, c, root));
+                    chains->push_back(scrollBackSingleChain(chainElements, c, rootElementId));
                 }
 
                 currentLevel.push_back(++index);

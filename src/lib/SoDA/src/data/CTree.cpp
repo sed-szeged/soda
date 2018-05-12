@@ -26,17 +26,17 @@ namespace soda
         m_nodes->clear();
     }
 
-    Node* CTree::addChild(const IndexType parentId, const String& n)
+    Node* CTree::addChild(const IndexType parentNodeId, const String& n)
     {
         Node* newNode = addNode(n);
-        m_structure->at(parentId).push_back(newNode->m_id);
+        m_structure->at(parentNodeId).push_back(newNode->m_id);
 
         return newNode;
     }
 
-    bool CTree::isValid()
+    bool CTree::isValid(IndexType root)
     {
-        return CBFS(*m_structure).isValid(0);
+        return !CBFS(*m_structure).isDegreeGTOne(root);
     }
 
     void CTree::addEdge(Node* parent, Node* child)

@@ -21,8 +21,8 @@ namespace soda
             ~CBFS();
 
             vector<IndexType>* getBFS(IndexType root);
-            bool isValid(IndexType root);
-            vector<list<IndexType>*>* getPaths(IndexType root);
+            vector<list<IndexType>*>* getPaths(IndexType rootElementId);
+            bool isDegreeGTOne(IndexType root);
     };
 }
 
