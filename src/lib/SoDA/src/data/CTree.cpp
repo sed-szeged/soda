@@ -20,6 +20,7 @@ namespace soda
         for(IndexType i = 0; i < m_nodes->size(); i++)
         {
             delete m_nodes->at(i);
+            m_nodes->at(i) = NULL;
         }
 
         m_nodes->clear();
@@ -41,5 +42,10 @@ namespace soda
     void CTree::addEdge(Node* parent, Node* child)
     {
         CDAG::addEdge(parent->m_id, child->m_id);
+    }
+
+    CDAG* CTree::toDAG()
+    {
+        return (CDAG*)this;
     }
 }

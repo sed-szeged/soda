@@ -5,7 +5,7 @@
 using namespace soda;
 
 TEST(DAG, BuildDAGByLinkingNodes) {
-    CDAG dag = CDAG();
+    CDAG dag;
     auto n0 = dag.addNode("A");
     auto n1 = dag.addNode("B");
     auto n2 = dag.addNode("C");
@@ -46,7 +46,7 @@ TEST(DAG, BuildDAGByLinkingNodes) {
 
 TEST(DAG, BuildDAGByLinkingSubDAGs)
 {
-    CDAG dag = CDAG();
+    CDAG dag;
     auto n0 = dag.addNode("A");
     auto n1 = dag.addNode("B");
     auto n2 = dag.addNode("C");
@@ -78,7 +78,7 @@ TEST(DAG, BuildDAGByLinkingSubDAGs)
 
 TEST(DAG, BuildDAGByLeaves)
 {
-    CDAG dag = CDAG();
+    CDAG dag;
     auto n0 = dag.addNode("A"); //Root
     auto n1 = dag.addChild(n0->m_id, "B");
     auto n2 = dag.addChild(n0->m_id, "C");
@@ -96,7 +96,7 @@ TEST(DAG, BuildDAGByLeaves)
 
 TEST(DAG, FormingCircleBySubDAGs)
 {
-    CDAG dag = CDAG();
+    CDAG dag;
     auto n0 = dag.addNode("A");
     auto n1 = dag.addNode("B");
     auto n2 = dag.addNode("C");
@@ -114,7 +114,7 @@ TEST(DAG, FormingCircleBySubDAGs)
 
 TEST(DAG, DFS)
 {
-    CDAG dag = CDAG();
+    CDAG dag;
     auto n0 = dag.addNode("A"); //Root
     auto n1 = dag.addChild(n0->m_id, "B");
     auto n2 = dag.addChild(n0->m_id, "C");
@@ -146,7 +146,7 @@ TEST(DAG, DFS)
 
 TEST(DAG, BFS)
 {
-    CDAG dag = CDAG();
+    CDAG dag;
     auto n0 = dag.addNode("A"); //Root
     auto n1 = dag.addChild(n0->m_id, "A");
     auto n2 = dag.addChild(n0->m_id, "A");
@@ -173,7 +173,7 @@ TEST(DAG, BFS)
 
 TEST(DAG, BinarySaveLoad)
 {
-    CDAG dag = CDAG();
+    CDAG dag;
 
     auto a = dag.addNode("a");
     auto b = dag.addNode("b");
@@ -200,7 +200,7 @@ TEST(DAG, BinarySaveLoad)
 
 TEST(DAG, JsonLoad)
 {
-    CDAG dag = CDAG();
+    CDAG dag;
     dag.loadJson("sample/cdag.json");
 
     ASSERT_EQ(dag.nodeCount(), 10); // 0,1,2,3,4,5,6,7,8,9
@@ -252,7 +252,7 @@ TEST(DAG, JsonLoad)
 
 TEST(DAG, ConvertToChains)
 {
-    CDAG dag = CDAG();
+    CDAG dag;
     dag.loadJson("sample/cdagChains.json");
 
     vector<list<IndexType>*>* chains = dag.convertToChains();
@@ -308,4 +308,69 @@ TEST(DAG, ConvertToChains)
         chain5.append(dag.getValue(*c));
     }
     ASSERT_EQ(chain5, "abfcgi");
+}
+
+TEST(DAG, toGraph)
+{
+    CDAG dag;
+    auto n0 = dag.addNode("A"); //Root
+    auto n1 = dag.addChild(n0->m_id, "B");
+    auto n2 = dag.addChild(n0->m_id, "C");
+    auto n3 = dag.addChild(n0->m_id, "D");
+    auto n4 = dag.addChild(n1->m_id, "A");
+    auto n5 = dag.addChild(n1->m_id, "E");
+    auto n6 = dag.addChild(n2->m_id, "F");
+    auto n7 = dag.addChild(n3->m_id, "B");
+    auto n8 = dag.addChild(n7->m_id, "C");
+    auto n9 = dag.addChild(n7->m_id, "A");
+
+    //DAG edges:
+    //  A0-B0,A0-C0,A0-D (01,02,03)
+    //  B0-A0,B0-F       (14,15)
+    //  C0-G             (26)
+    //  D-B1             (37)
+    //  B1-C1            (78)
+    //  B1-A1            (79)
+
+    //Graph edges:
+    //  AB,AC,AD    (01,02,03)
+    //  BA,BC,BD,BE (10,12,13,14)
+    //  CA,CB,CF    (20,21,25)
+    //  DA,DB       (30,31)
+    //  EB          (41)
+    //  FC          (52)
+
+    auto graph = dag.toGraph();
+
+    auto aEdges = graph->getEdges(0);
+    ASSERT_EQ(aEdges.size(), 3);
+    ASSERT_EQ(aEdges.at(0), 1);
+    ASSERT_EQ(aEdges.at(1), 2);
+    ASSERT_EQ(aEdges.at(2), 3);
+
+    auto bEdges = graph->getEdges(1);
+    ASSERT_EQ(bEdges.size(), 4);
+    ASSERT_EQ(bEdges.at(0), 0);
+    ASSERT_EQ(bEdges.at(1), 4);
+    ASSERT_EQ(bEdges.at(2), 3);
+    ASSERT_EQ(bEdges.at(3), 2);
+    
+    auto cEdges = graph->getEdges(2);
+    ASSERT_EQ(cEdges.size(), 3);
+    ASSERT_EQ(cEdges.at(0), 0);
+    ASSERT_EQ(cEdges.at(1), 5);
+    ASSERT_EQ(cEdges.at(2), 1);
+
+    auto dEdges = graph->getEdges(3);
+    ASSERT_EQ(dEdges.size(), 2);
+    ASSERT_EQ(dEdges.at(0), 0);
+    ASSERT_EQ(dEdges.at(1), 1);
+    
+    auto eEdges = graph->getEdges(4);
+    ASSERT_EQ(eEdges.size(), 1);
+    ASSERT_EQ(eEdges.at(0), 1);
+
+    auto fEdges = graph->getEdges(5);
+    ASSERT_EQ(fEdges.size(), 1);
+    ASSERT_EQ(fEdges.at(0), 2);
 }

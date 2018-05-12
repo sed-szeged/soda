@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include "data/CIDManager.h"
+#include "data/CGraph.h"
 #include "io/CJsonReader.h"
 #include "interface/IDAG.h"
 
@@ -44,6 +45,7 @@ namespace soda
             virtual void save(const char * filename) const;
             virtual void load(const char * filename);
             virtual void loadJson(const String& path);
+            virtual CGraph* toGraph();
     };
 }
 

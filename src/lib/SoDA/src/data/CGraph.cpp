@@ -46,8 +46,11 @@ namespace soda
 
     IndexType CGraph::addNode(const String& n)
     {
+        //Check exsisting element
         if(m_codeElements->containsValue(n))
+        {
             return m_codeElements->getID(n);
+        }
 
         m_codeElements->add(n);
         IndexType i = m_codeElements->getID(n);
@@ -59,9 +62,18 @@ namespace soda
 
     void CGraph::addEdge(const IndexType i, const IndexType j)
     {
-        auto edges = m_edges->at(i);
+        IndexType ma = max(i,j);
 
-        if(std::find(edges.begin(), edges.end(), j) == edges.end())
+        //Index check
+        if(ma >= m_codeElements->size())
+        {
+            throw range_error("Invalid element index.");
+        }
+
+        auto edges = m_edges->at(min(i,j));
+
+        //Checking exsistance
+        if(std::find(edges.begin(), edges.end(), ma) == edges.end())
         {
             m_edges->at(i).push_back(j);
             m_edges->at(j).push_back(i);

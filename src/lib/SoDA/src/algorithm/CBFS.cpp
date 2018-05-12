@@ -133,6 +133,7 @@ namespace soda
         for(IndexType i = 0; i < chainElements->size(); i++)
         {
             delete chainElements->at(i);
+            chainElements->at(i) == NULL;
         }
         
         delete chainElements;

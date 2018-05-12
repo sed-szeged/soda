@@ -1,7 +1,7 @@
 #include "data/CDAG.h"
+#include "data/Node.h"
 #include "algorithm/CDFS.h"
 #include "algorithm/CBFS.h"
-#include "data/Node.h"
 
 using namespace std;
 using namespace soda::io;
@@ -20,6 +20,13 @@ namespace soda
         m_codeElements = NULL;
         delete m_structure;
         m_structure = NULL;
+
+        for(IndexType i = 0; i < m_nodes->size(); i++)
+        {
+            delete m_nodes->at(i);
+            m_nodes->at(i) = NULL;
+        }
+
         delete m_nodes;
         m_nodes = NULL;
     }
@@ -32,6 +39,7 @@ namespace soda
         for(IndexType i = 0; i < m_nodes->size(); i++)
         {
             delete m_nodes->at(i);
+            m_nodes->at(i) = NULL;
         }
         
         m_nodes->clear();
@@ -276,5 +284,29 @@ namespace soda
 
         delete reader;
         reader = 0;
+    }
+
+    CGraph* CDAG::toGraph()
+    {
+        CGraph* graph = new CGraph();
+
+        for(IndexType c = 0; c < m_codeElements->size(); c++)
+        {
+            graph->addNode(m_codeElements->getValue(c));
+        }
+
+        for(IndexType i = 0; i < m_nodes->size();  i++)
+        {
+            IndexType nodeElement = m_nodes->at(i)->m_elementId;
+            vector<IndexType>* neighbours = &(m_structure->at(i));
+
+            for(IndexType j = 0; j < neighbours->size();  j++)
+            {
+                IndexType neighbourElement = m_nodes->at(neighbours->at(j))->m_elementId;
+                graph->addEdge(nodeElement, neighbourElement);
+            }
+        }
+
+        return graph;
     }
 }
