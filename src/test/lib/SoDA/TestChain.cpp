@@ -35,12 +35,16 @@ TEST(Chain, BasicOperations) {
     ASSERT_EQ(s.getValue(2), "_2");
 
     s.clear();
+    s.add("A");
 
-    ASSERT_EQ(s.count(), 0);
+    ASSERT_EQ(s.count(), 1);
 
     s.add(sVector);
+    ASSERT_EQ(s.count(), 3);
 
-    ASSERT_EQ(s.count(), 2);
+    ASSERT_EQ(s.getValue(0), "A");
+    ASSERT_EQ(s.getValue(1), "_0");
+    ASSERT_EQ(s.getValue(2), "_1");
 }
 
 TEST(Chain, Iterators)

@@ -122,7 +122,9 @@ namespace soda
 
     void CDAG::addEdge(const IndexType parentNodeId, const IndexType childNodeId)
     {
-        bool exsistingEdge = std::find(m_structure->at(parentNodeId).begin(), m_structure->at(parentNodeId).end(), childNodeId) != m_structure->at(parentNodeId).end();
+        auto edges = m_structure->at(parentNodeId);
+
+        bool exsistingEdge = std::find(edges.begin(), edges.end(), childNodeId) != edges.end();
         if(exsistingEdge || parentNodeId == childNodeId)
         {
             return;

@@ -19,7 +19,6 @@ namespace soda
 
             virtual Node* addChild(const IndexType parentNodeId, const String& n) override;
             virtual bool isValid(IndexType root) override;
-            virtual void addEdge(Node* parent, Node* child);
             virtual CDAG* toDAG();
     };
 }

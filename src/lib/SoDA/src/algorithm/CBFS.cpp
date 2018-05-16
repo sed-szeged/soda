@@ -129,10 +129,10 @@ namespace soda
             }
         }
 
-        for(IndexType i = 0; i < chainElements->size(); i++)
+        for(vector<Node*>::iterator i = chainElements->begin(); i < chainElements->end(); i++)
         {
-            delete chainElements->at(i);
-            chainElements->at(i) == NULL;
+            delete *i;
+            *i = NULL;
         }
         
         delete chainElements;

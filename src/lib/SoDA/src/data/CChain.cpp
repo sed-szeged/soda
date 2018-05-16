@@ -43,14 +43,15 @@ namespace soda
 
     void CChain::add(const StringVector& codeElements)
     {
+        std::copy ( codeElements.begin(), codeElements.end(), m_order->end() );
+        
         for(StringVector::const_iterator it = codeElements.begin(); it != codeElements.end(); ++it) {
-            add(*it);
+            m_codeElements->add(*it);
         }
     }
 
     void CChain::remove(const String& n)
     {
-        IndexType i = m_codeElements->getID(n);
         m_codeElements->remove(n);
         m_order->erase(std::remove(m_order->begin(), m_order->end(), n), m_order->end());
     }

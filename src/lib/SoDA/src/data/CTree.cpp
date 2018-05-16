@@ -39,11 +39,6 @@ namespace soda
         return !CBFS(*m_structure).isDegreeGTOne(root);
     }
 
-    void CTree::addEdge(Node* parent, Node* child)
-    {
-        CDAG::addEdge(parent->m_id, child->m_id);
-    }
-
     CDAG* CTree::toDAG()
     {
         return (CDAG*)this;
