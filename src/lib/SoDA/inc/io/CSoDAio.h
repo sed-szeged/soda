@@ -3,6 +3,7 @@
  *
  * Authors: László Langó <>
  *          Tamás Gergely <gertom@inf.u-szeged.hu>
+ *          Dávid Imre Ádám <adam.david.imre@gmail.com>
  *
  * This file is part of SoDA.
  *
