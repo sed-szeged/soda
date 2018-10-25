@@ -56,12 +56,15 @@ std::string IstanbulJsCoverageReaderPlugin::getDescription()
 
 CCoverageMatrix* IstanbulJsCoverageReaderPlugin::read(const variables_map &vm)
 {
+    m_codeElementNameFilter.assign(vm["cut-source-path"].as<String>());
     // Set the required granularity level
-    String granularity = vm["granularity"].as<String>();
-    if (granularity == "branch") {
-        m_granularity = BRANCH;
-    } else if (granularity == "statement") {
-        m_granularity = STATEMENT;
+    if (vm.count("granularity")) {
+        String granularity = vm["granularity"].as<String>();
+        if (granularity == "branch") {
+            m_granularity = BRANCH;
+        } else if (granularity == "statement") {
+            m_granularity = STATEMENT;
+        }
     } else {
         m_granularity = METHOD;
     }
@@ -96,9 +99,10 @@ void IstanbulJsCoverageReaderPlugin::readFromDirectoryStructure(const std::strin
     readFromDirectoryStructure(dirname.c_str());
 }
 
-static void readFunctionCoverage(std::string &tcname, rapidjson::Document &json, CCoverageMatrix *cmx) {
+static void readFunctionCoverage(std::string &tcname, rapidjson::Document &json, CCoverageMatrix *cmx, boost::regex& path_filter) {
     for (rapidjson::Value::ConstMemberIterator itr = json.MemberBegin(); itr != json.MemberEnd(); ++itr) {
-        //String srcname = itr->name.GetString();
+        String srcname = itr->name.GetString();
+        srcname = boost::regex_replace(srcname, path_filter, "");
 
         rapidjson::Value::ConstMemberIterator map_val_it = itr->value.FindMember("fnMap");
         std::map<int, std::string> item_mapping;
@@ -114,7 +118,7 @@ static void readFunctionCoverage(std::string &tcname, rapidjson::Document &json,
         for (rapidjson::Value::ConstMemberIterator covit = cov_val_it->value.MemberBegin(); covit != cov_val_it->value.MemberEnd(); ++covit) {
             int ser = std::stoi(covit->name.GetString());
             int cov = covit->value.GetInt();
-            cmx->addOrSetRelation(tcname, item_mapping[ser], cov > 0);
+            cmx->addOrSetRelation(tcname, srcname + ':' + item_mapping[ser], cov > 0);
         }
     }
 
@@ -158,7 +162,7 @@ void IstanbulJsCoverageReaderPlugin::readFromDirectory(fs::path p, size_t cut)
             String tcname = basename(*it);
             boost::algorithm::trim(tcname);
             switch (m_granularity) {
-                case METHOD: readFunctionCoverage(tcname, json, m_coverage); break;
+                case METHOD: readFunctionCoverage(tcname, json, m_coverage, m_codeElementNameFilter); break;
                 default: break;
             }
         }

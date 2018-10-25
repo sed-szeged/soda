@@ -72,6 +72,11 @@ private:
     void readFromDirectory(fs::path, size_t);
 
     /**
+     * @brief Regular expression for cut parts from the code element names.
+     */
+    boost::regex m_codeElementNameFilter;
+
+    /**
      * @brief Stores coverage data.
      */
     CCoverageMatrix *m_coverage;
