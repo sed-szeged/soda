@@ -25,6 +25,8 @@
 #include <iostream>
 #include <sstream>
 #include <set>
+#include <chrono>
+#include <ratio>
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
@@ -156,9 +158,9 @@ int main(int argc, char* argv[]) {
     (std::cerr << " done." << std::endl).flush();
 
     StringVector faultLocalizationTechniques;
-    faultLocalizationTechniques.push_back("dstar");
-    faultLocalizationTechniques.push_back("tarantula");
-    faultLocalizationTechniques.push_back("ochiai");
+    //faultLocalizationTechniques.push_back("dstar");
+    //faultLocalizationTechniques.push_back("tarantula");
+    //faultLocalizationTechniques.push_back("ochiai");
 
     IntVector revisions = selectionData.getResults()->getRevisionNumbers();
 
@@ -185,14 +187,26 @@ int main(int argc, char* argv[]) {
         IFaultLocalizationTechniquePlugin *commonTechnique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin("common");
 
         commonTechnique->init(&selectionData, &clusterList, revision, failedCodeElements);
+
+        (std::cerr << "[INFO] Calculating 'common' ...").flush();
+        auto t1 = std::chrono::high_resolution_clock::now();
         commonTechnique->calculate(result);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration<double, std::ratio<1,1>>(t2 - t1).count();
+        (std::cerr << " done (" << duration << "s)." << std::endl).flush();
 
         for (IndexType i = 0; i < faultLocalizationTechniques.size(); i++) {
             std::string flTechniqueName = faultLocalizationTechniques[i];
             IFaultLocalizationTechniquePlugin *technique = kernel.getFaultLocalizationTechniquePluginManager().getPlugin(flTechniqueName);
 
             technique->init(&selectionData, &clusterList, revision, failedCodeElements);
+
+            (std::cerr << "[INFO] Calculating '" << flTechniqueName << "' ...").flush();
+            auto t1 = std::chrono::high_resolution_clock::now();
             technique->calculate(result);
+            auto t2 = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration<double, std::ratio<1,1>>(t2 - t1).count();
+            (std::cerr << " done (" << duration << "s)." << std::endl).flush();
 
             IFaultLocalizationTechniquePlugin::FLScore flScores = technique->getFlScore();
             std::map<String, CClusterDefinition>::iterator it;
@@ -210,9 +224,11 @@ int main(int argc, char* argv[]) {
         std::ofstream outputFileStream((outputDir / file).string(), std::ofstream::out);
 
         if (!outputFileStream.is_open()) {
-            std::cerr << "[ERROR] Cannot open output file '" << file << "'." << std::endl;
+            std::cerr << "[ERROR] Cannot open output file " << file << "." << std::endl;
             return 1;
         }
+
+        std::cerr << "[INFO] Saving result to " << file << std::endl;
 
         rapidjson::OStreamWrapper os(outputFileStream);
         rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(os);

@@ -23,6 +23,8 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost REQUIRED COMPONENTS system filesystem regex program_options thread)
 link_directories(${Boost_LIBRARY_DIRS})
 
+find_package(OpenMP)
+
 ExternalProject_Add(
     rapidjson
     SVN_REPOSITORY "https://github.com/miloyip/rapidjson"

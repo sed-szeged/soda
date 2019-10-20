@@ -75,28 +75,44 @@ OchiaiFaultLocalizationTechniquePlugin::FLScore& OchiaiFaultLocalizationTechniqu
 
 void OchiaiFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
 {
-    CCoverageMatrix *coverageMatrix = m_data->getCoverage();
-
-    ClusterMap::iterator it;
-    for (it = clusterList->begin(); it != clusterList->end(); it++) {
+    for (auto it = clusterList->begin(); it != clusterList->end(); it++) {
         m_distribution->clear();
 
-        IntVector codeElementIds = (*it).second.getCodeElements();
+        auto cluster_name = it->first.c_str();
+        auto& cluster_def = it->second;
+
+        auto& codeElementIds = cluster_def.getCodeElements();
 
         // group for cluster data
-        if (!res.HasMember(it->first.c_str())) {
-            res.AddMember(rapidjson::Value(it->first.c_str(), res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+        if (!res.HasMember(cluster_name)) {
+            res.AddMember(rapidjson::Value(cluster_name, res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
         }
 
+        auto& cluster_res = res[cluster_name];
+
+        /*for (IndexType i = 0; i < codeElementIds.size(); i++) {
+            IndexType cid = codeElementIds[i];
+            auto ceIdStr = std::to_string(cid).c_str();
+
+            if (!cluster_res.HasMember(ceIdStr)) {
+                cluster_res.AddMember(rapidjson::Value(ceIdStr, res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+            }
+        }*/
+
+        #pragma omp parallel for schedule(dynamic)
         for (IndexType i = 0; i < codeElementIds.size(); i++) {
             IndexType cid = codeElementIds[i];
-            String ceIdStr = std::to_string(cid);
+            auto ceIdStr = std::to_string(cid).c_str();
 
             // holds the metric values for one code element
-            if (!res[it->first.c_str()].HasMember(ceIdStr.c_str())) {
-                res[it->first.c_str()].AddMember(rapidjson::Value(ceIdStr.c_str(), res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+            if (!cluster_res.HasMember(ceIdStr)) {
+                #pragma omp critical(json)
+                {
+                    cluster_res.AddMember(rapidjson::Value(ceIdStr, res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+                }
             }
-            rapidjson::Value &ceMetrics = res[it->first.c_str()][ceIdStr.c_str()];
+
+            auto& ceMetrics = cluster_res[ceIdStr];
 
             IndexType failedCovered = ceMetrics["ef"].GetUint64();
             IndexType passedCovered = ceMetrics["ep"].GetUint64();
@@ -114,17 +130,17 @@ void OchiaiFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
             }
 
             ceMetrics.AddMember("ochiai", ochiai, res.GetAllocator());
-            (*m_distribution)[ochiai]++;
+            //(*m_distribution)[ochiai]++;
         }
 
-        for (IndexType i = 0; i < m_failedCodeElements.size(); i++) {
+        /*for (IndexType i = 0; i < m_failedCodeElements.size(); i++) {
             IndexType cid = m_failedCodeElements[i];
             String ceIdStr = std::to_string(cid);
             double ochiai = res[it->first.c_str()][ceIdStr.c_str()]["ochiai"].GetDouble();
 
             (*m_flScore)[it->first][cid] = CTestSuiteScore::flScore(it->second, ochiai, *m_distribution);
 
-        }
+        }*/
     }
 }
 

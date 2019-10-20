@@ -69,32 +69,44 @@ CommonFaultLocalizationTechniquePlugin::FLScore& CommonFaultLocalizationTechniqu
 
 void CommonFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
 {
-    CCoverageMatrix *coverageMatrix = m_data->getCoverage();
+    auto& coverage = m_data->getCoverage()->getBitMatrix();
+    auto results = m_data->getResults();
+    auto& exec = results->getExecutionBitList(m_revision);
+    auto& pass = results->getPassedBitList(m_revision);
 
-    ClusterMap::iterator it;
-    for (it = clusterList->begin(); it != clusterList->end(); it++) {
-        std::map<IndexType, IndexType> tcMap;
-        IntVector testCaseIds = it->second.getTestCases();
-        IntVector codeElementIds = it->second.getCodeElements();
+    for (auto it = clusterList->begin(); it != clusterList->end(); it++) {
+        auto cluster_name = it->first.c_str();
+        auto& cluster_def = it->second;
+
+        auto& testCaseIds = cluster_def.getTestCases();
+        auto& codeElementIds = cluster_def.getCodeElements();
 
         // group for cluster data
-        if (!res.HasMember(it->first.c_str())) {
-            res.AddMember(rapidjson::Value(it->first.c_str(), res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+        if (!res.HasMember(cluster_name)) {
+            res.AddMember(rapidjson::Value(cluster_name, res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
         }
+
+        auto& cluster_res = res[cluster_name];
+
+        std::map<IndexType, IndexType> tcMap;
 
         for (IndexType i = 0; i < testCaseIds.size(); i++) {
             tcMap[testCaseIds[i]] = m_data->translateTestcaseIdFromCoverageToResults(testCaseIds[i]);
         }
 
+        /*for (IndexType i = 0; i < codeElementIds.size(); i++) {
+            IndexType cid = codeElementIds[i];
+            auto ceIdStr = std::to_string(cid).c_str();
+
+            if (!cluster_res.HasMember(ceIdStr)) {
+                cluster_res.AddMember(rapidjson::Value(ceIdStr, res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+            }
+        }*/
+
+        #pragma omp parallel for schedule(dynamic)
         for (IndexType i = 0; i < codeElementIds.size(); i++) {
             IndexType cid = codeElementIds[i];
-            String ceIdStr = std::to_string(cid);
-
-            // holds the metric values for one code element
-            if (!res[it->first.c_str()].HasMember(ceIdStr.c_str())) {
-                res[it->first.c_str()].AddMember(rapidjson::Value(ceIdStr.c_str(), res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
-            }
-            rapidjson::Value &ceMetrics = res[it->first.c_str()][ceIdStr.c_str()];
+            auto ceIdStr = std::to_string(cid).c_str();
 
             IndexType failedCovered = 0;
             IndexType passedCovered = 0;
@@ -104,9 +116,9 @@ void CommonFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
                 IndexType tcid = testCaseIds[j];
                 IndexType tcidInResults = tcMap[tcid];
 
-                if (m_data->getResults()->getExecutionBitList(m_revision).at(tcidInResults)) {
-                    bool isPassed = m_data->getResults()->getPassedBitList(m_revision).at(tcidInResults);
-                    bool isCovered = coverageMatrix->getBitMatrix().get(tcid, cid);
+                if (exec.at(tcidInResults)) {
+                    bool isPassed = pass.at(tcidInResults);
+                    bool isCovered = coverage[tcid][cid];
                     if (isCovered) {
                         if (isPassed) {
                             passedCovered++;
@@ -134,6 +146,46 @@ void CommonFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
             if ((failedNotCovered + passedNotCovered) > 0) {
                 nfpernfnp = (double)failedNotCovered / (failedNotCovered + passedNotCovered);
             }
+            double dstar = 0;
+            {
+                IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
+                IndexType denominator = passedCovered + (nrOfFailedTestcases - failedCovered);
+                if (denominator > 0) {
+                    dstar = std::pow((double)failedCovered, 2) / denominator;
+                }
+            }
+            double ochiai = 0;
+            {
+                IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
+                IndexType covered = failedCovered + passedCovered;
+                if (nrOfFailedTestcases > 0 && covered > 0) {
+                    double denominator = std::sqrt(nrOfFailedTestcases * covered);
+                    if (denominator > 0) {
+                        ochiai = (double)failedCovered / denominator;
+                    }
+                }
+            }
+            double tarantula = 0;
+            {
+                IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
+                IndexType nrOfPassedTestcases = passedCovered + passedNotCovered;
+                if (nrOfFailedTestcases > 0 && nrOfPassedTestcases > 0) {
+                    double denominator = (((double)failedCovered / nrOfFailedTestcases) + ((double)passedCovered / nrOfPassedTestcases));
+                    if (denominator > 0) {
+                        tarantula = ((double)failedCovered / nrOfFailedTestcases) / denominator;
+                    }
+                }
+            }
+
+            // holds the metric values for one code element
+            if (!cluster_res.HasMember(ceIdStr)) {
+                #pragma omp critical(json)
+                {
+                    cluster_res.AddMember(rapidjson::Value(ceIdStr, res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
+                }
+            }
+
+            auto& ceMetrics = cluster_res[ceIdStr];
 
             // ef; ep; nf; np; ef/(ef+ep); nf/(nf+np);
             ceMetrics.AddMember("ef", failedCovered, res.GetAllocator());
@@ -142,6 +194,10 @@ void CommonFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
             ceMetrics.AddMember("np", passedNotCovered, res.GetAllocator());
             ceMetrics.AddMember("ef/(ef+ep)", efperefep, res.GetAllocator());
             ceMetrics.AddMember("nf/(nf+np)", nfpernfnp, res.GetAllocator());
+
+            ceMetrics.AddMember("dstar", dstar, res.GetAllocator());
+            ceMetrics.AddMember("ochiai", ochiai, res.GetAllocator());
+            ceMetrics.AddMember("tarantula", tarantula, res.GetAllocator());
         }
     }
 }
