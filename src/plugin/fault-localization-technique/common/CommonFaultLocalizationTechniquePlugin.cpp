@@ -89,9 +89,9 @@ void CommonFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
         auto& cluster_res = res[cluster_name];
 
         std::map<IndexType, IndexType> tcMap;
-
         for (IndexType i = 0; i < testCaseIds.size(); i++) {
-            tcMap[testCaseIds[i]] = m_data->translateTestcaseIdFromCoverageToResults(testCaseIds[i]);
+            auto tcid = testCaseIds[i];
+            tcMap[tcid] = m_data->translateTestcaseIdFromCoverageToResults(tcid);
         }
 
         /*for (IndexType i = 0; i < codeElementIds.size(); i++) {
@@ -103,21 +103,22 @@ void CommonFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
             }
         }*/
 
-        #pragma omp parallel for schedule(dynamic)
+        //#pragma omp parallel for schedule(dynamic)
         for (IndexType i = 0; i < codeElementIds.size(); i++) {
-            IndexType cid = codeElementIds[i];
+            auto cid = codeElementIds[i];
             auto ceIdStr = std::to_string(cid).c_str();
 
             IndexType failedCovered = 0;
             IndexType passedCovered = 0;
             IndexType failedNotCovered = 0;
             IndexType passedNotCovered = 0;
+            #pragma omp parallel for reduction(+:failedCovered,passedCovered,failedNotCovered,passedNotCovered)
             for (IndexType j = 0; j < testCaseIds.size(); j++) {
-                IndexType tcid = testCaseIds[j];
-                IndexType tcidInResults = tcMap[tcid];
+                auto tcid = testCaseIds[j];
+                auto tcidInResults = tcMap[tcid];
 
-                if (exec.at(tcidInResults)) {
-                    bool isPassed = pass.at(tcidInResults);
+                if (exec[tcidInResults]) {
+                    bool isPassed = pass[tcidInResults];
                     bool isCovered = coverage[tcid][cid];
                     if (isCovered) {
                         if (isPassed) {
@@ -138,28 +139,30 @@ void CommonFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
                 }
             }
 
+            IndexType failed = failedCovered + failedNotCovered;
+            IndexType passed = passedCovered + passedNotCovered;
+            IndexType covered = failedCovered + passedCovered;
+            IndexType notCovered = failedNotCovered + passedNotCovered;
+
             double efperefep = 0;
-            if ((failedCovered + passedCovered) > 0) {
-                efperefep = (double)failedCovered / (failedCovered + passedCovered);
+            if (covered > 0) {
+                efperefep = (double)failedCovered / covered;
             }
             double nfpernfnp = 0;
-            if ((failedNotCovered + passedNotCovered) > 0) {
-                nfpernfnp = (double)failedNotCovered / (failedNotCovered + passedNotCovered);
+            if (notCovered > 0) {
+                nfpernfnp = (double)failedNotCovered / notCovered;
             }
             double dstar = 0;
             {
-                IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
-                IndexType denominator = passedCovered + (nrOfFailedTestcases - failedCovered);
+                IndexType denominator = passedCovered + failedNotCovered;
                 if (denominator > 0) {
                     dstar = std::pow((double)failedCovered, 2) / denominator;
                 }
             }
             double ochiai = 0;
             {
-                IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
-                IndexType covered = failedCovered + passedCovered;
-                if (nrOfFailedTestcases > 0 && covered > 0) {
-                    double denominator = std::sqrt(nrOfFailedTestcases * covered);
+                if (failed > 0 && covered > 0) {
+                    double denominator = std::sqrt(failed * covered);
                     if (denominator > 0) {
                         ochiai = (double)failedCovered / denominator;
                     }
@@ -167,19 +170,18 @@ void CommonFaultLocalizationTechniquePlugin::calculate(rapidjson::Document &res)
             }
             double tarantula = 0;
             {
-                IndexType nrOfFailedTestcases = failedCovered + failedNotCovered;
-                IndexType nrOfPassedTestcases = passedCovered + passedNotCovered;
-                if (nrOfFailedTestcases > 0 && nrOfPassedTestcases > 0) {
-                    double denominator = (((double)failedCovered / nrOfFailedTestcases) + ((double)passedCovered / nrOfPassedTestcases));
+                if (failed > 0 && passed > 0) {
+                    double efperefnf = (double)failedCovered / failed;
+                    double denominator = efperefnf + ((double)passedCovered / passed);
                     if (denominator > 0) {
-                        tarantula = ((double)failedCovered / nrOfFailedTestcases) / denominator;
+                        tarantula = efperefnf / denominator;
                     }
                 }
             }
 
             // holds the metric values for one code element
             if (!cluster_res.HasMember(ceIdStr)) {
-                #pragma omp critical(json)
+                //#pragma omp critical(json)
                 {
                     cluster_res.AddMember(rapidjson::Value(ceIdStr, res.GetAllocator()), rapidjson::Value(rapidjson::kObjectType), res.GetAllocator());
                 }
